@@ -9,7 +9,23 @@
 </head>
 <body>
 
-    <!-- formulario de reoaraciones -->
+    <!-- header -->
+    <header>
+        <nav>
+            <div class="nav-brand">DuotechBros</div>
+            <div class="nav-menu">
+                <!-- En cada página, cambiar la clase active al enlace correspondiente -->
+                <a class="nav-link" href="inicio.html">Inicio</a>
+                <a class="nav-link" href="portafolio.html">Portafolio</a>
+                <a class="nav-link" href="tienda.html">Tienda</a>
+                <a class="nav-link active" href="pedidos.html">Contacto / Reparación</a>
+                <a class="nav-link" href="#">Admin</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- formulario de reoaraciones -->
     <h1>Solicitar reparación</h1>
     <form id="form-pedido">
         <label for="nombre_cliente">Nombre completo:</label>
@@ -31,7 +47,19 @@
     </form>
 
     <div id="mensaje" class="mensaje" style="display: none;"></div>
+    </main>
+    
+    <!-- footer -->
+    <footer>
+        <p>© 2024 DuotechBros. Todos los derechos reservados.</p>
+        <div class="footer-social">
+            <a href="#">📱</a>
+            <a href="#">📧</a>
+            <a href="#">🐦</a>
+        </div>
+    </footer>
 
     <script src="../js/Script_Pedidos.js"></script>
+    
 </body>
 </html>

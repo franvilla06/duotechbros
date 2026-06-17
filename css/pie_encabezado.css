@@ -1,0 +1,102 @@
+/*header (navegación)*/
+header {
+    text-align: center;
+    padding: 20px 20px 10px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #EFFBFD 0%, #CDEFF4 100%);
+    border: 1px solid #D0E6EA;
+    border-radius: 20px;
+    padding: 14px 30px;
+    margin: 18px auto 0;
+    max-width: 1080px;
+    box-shadow: 0 10px 30px rgba(11, 74, 98, 0.08);
+    flex-wrap: wrap; /* para que en móvil se acomode */
+}
+
+.nav-brand {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0b4a62;
+    letter-spacing: 0.04em;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+a.nav-link {
+    color: #0b4a62;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+a.nav-link:hover {
+    color: #005b9f;
+    background: rgba(0, 123, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+nav a.nav-link.active {
+    color: #ffffff;
+    background: #007BFF;
+    box-shadow: 0 8px 18px rgba(0, 123, 255, 0.18);
+}
+
+/* Responsive: en móviles, el menú se centra y los enlaces se vuelven más pequeños */
+@media (max-width: 600px) {
+    nav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .nav-menu {
+        justify-content: center;
+    }
+    a.nav-link {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+    }
+}
+
+/*footer*/
+footer {
+    text-align: center;
+    padding: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+    margin-top: 40px;
+    color: #0b4a62;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+.footer-social {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.footer-social a {
+    color: #0b4a62;
+    font-size: 1.2rem;
+}
