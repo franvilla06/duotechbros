@@ -6,58 +6,6 @@ body {
     padding: 0;
 }
 
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(90deg, #EFFBFD 0%, #CDEFF4 100%);
-    border: 1px solid #D0E6EA;
-    border-radius: 20px;
-    padding: 14px 30px;
-    margin: 18px auto 0;
-    max-width: 1080px;
-    box-shadow: 0 10px 30px rgba(11, 74, 98, 0.08);
-}
-
-.nav-brand {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #0b4a62;
-    letter-spacing: 0.04em;
-}
-
-.nav-menu {
-    display: flex;
-    gap: 18px;
-}
-
-a.nav-link {
-    color: #0b4a62;
-    text-decoration: none;
-    font-weight: 700;
-    padding: 10px 16px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.9);
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-a.nav-link:hover {
-    color: #005b9f;
-    background: rgba(0, 123, 255, 0.12);
-    transform: translateY(-1px);
-}
-
-nav a.nav-link.active {
-    color: #ffffff;
-    background: #007BFF;
-    box-shadow: 0 8px 18px rgba(0, 123, 255, 0.18);
-}
-
-header {
-    text-align: center;
-    padding: 40px 20px 20px;
-}
-
 .hero {
     max-width: 900px;
     margin: 0 auto;
@@ -67,11 +15,6 @@ header {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-.hero-note {
-    margin: 0 0 18px;
-    color: #555;
-    font-style: italic;
-}
 
 main.container {
     max-width: 1024px;
@@ -87,30 +30,6 @@ main.container {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
-.project-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
-    margin: 18px 0;
-}
-
-.project-card {
-    background-color: #f7feff;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid #dceff2;
-}
-
-.project-card a {
-    color: #0b4a62;
-    text-decoration: none;
-    font-weight: 700;
-}
-
-.project-card a:hover {
-    color: #007BFF;
-}
-
 ul{
     list-style-type: none;
     padding: 0;
@@ -122,12 +41,4 @@ ul li {
     padding: 15px;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-footer {
-    text-align: center;
-    padding: 24px;
-    background-color: #fff;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
-    margin-top: 20px;
 }
