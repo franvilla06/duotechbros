@@ -35,5 +35,5 @@ form.addEventListener('submit', async (e) => {
     }
 
     mensajeDiv.style.display = 'block';
-    setTimeout(() => mensajeDiv.style.display = 'none', 5000);
+    setTimeout(() => mensajeDiv.style.display = 'none', 500000);
 });
