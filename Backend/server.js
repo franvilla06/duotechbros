@@ -28,5 +28,17 @@ app.get('/api/pedidos', (req, res) => {
     res.json(pedidos); //devuelve los pedidos como una respuesta JSON
 });
 
+// Ruta para obtener el portafolio
+app.get('/api/portafolio', (req, res) => {
+    const portafolio = db.prepare('SELECT * FROM portafolio ORDER BY fecha DESC').all();
+    res.json(portafolio);
+});
+
+// Ruta para obtener los productos
+app.get('/api/productos', (req, res) => {
+    const productos = db.prepare('SELECT * FROM productos ORDER BY nombre').all();
+    res.json(productos);
+});
+
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`)); //inicia el servidor en el puerto 3000 y muestra un mensaje en la consola indicando que el servidor está corriendo

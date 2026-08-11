@@ -16,6 +16,31 @@ db.exec(`
     );
 `);
 
+// Tabla de portafolio
+db.exec(`
+    CREATE TABLE IF NOT EXISTS portafolio (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    descripcion TEXT NOT NULL,
+    imagen_url TEXT,
+    tipo_reparacion TEXT,
+    fecha DATE DEFAULT CURRENT_DATE
+    );
+`);
+
+// Tabla de productos (para la tienda)
+db.exec(`
+    CREATE TABLE IF NOT EXISTS productos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    descripcion TEXT,
+    precio REAL NOT NULL,
+    imagen_url TEXT,
+    categoria TEXT,
+    stock INTEGER DEFAULT 0
+    );
+`);
+
 console.log('Base de datos lista (tabla pedidos creada/verificada)');
 
 module.exports = db;
