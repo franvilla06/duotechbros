@@ -8,10 +8,10 @@ La aplicación combina un sitio institucional estático con un backend ligero pa
 
 ### Arquitectura general
 
-El proyecto sigue una arquitectura simple de tres capas:
+El proyecto sigue una arquitectura modular de tres capas:
 
 - Frontend: páginas HTML, estilos CSS y JavaScript vanilla para la interfaz del usuario.
-- Backend: servidor Node.js con Express para exponer APIs y servir archivos estáticos.
+- Backend: servidor Node.js con Express, organizado en aplicación, rutas y controladores.
 - Base de datos: SQLite gestionada mediante better-sqlite3 para almacenar los pedidos recibidos.
 
 En términos prácticos, el usuario accede a las páginas del sitio, completa un formulario de reparación y el sistema envía esos datos al backend, que los persiste en la base de datos.
@@ -83,26 +83,32 @@ La estructura del repositorio es la siguiente:
 
 ```text
 Proyecto_DuotechBros/
-├── Backend/
-│   ├── database.js
-│   └── server.js
-├── css/
-│   ├── inicio.css
-│   ├── normalize.css
-│   ├── pedidos.css
-│   ├── pie_encabezado.css
-│   ├── portafolio.css
-│   └── tienda.css
-├── html/
+├── public/
+│   ├── css/
+│   │   ├── inicio.css
+│   │   ├── normalize.css
+│   │   ├── pedidos.css
+│   │   ├── pie_encabezado.css
+│   │   ├── portafolio.css
+│   │   └── tienda.css
+│   ├── img/
+│   │   ├── Bienvenida.svg
+│   │   └── Equipo duotechbros.jpg
+│   ├── js/
+│   │   └── Script_Pedidos.js
 │   ├── inicio.html
 │   ├── pedidos.html
 │   ├── portafolio.html
 │   └── tienda.html
-├── img/
-│   ├── Bienvenida.svg
-│   └── Equipo duotechbros.jpg
-├── js/
-│   └── Script_Pedidos.js
+├── src/
+│   ├── controllers/
+│   │   └── pedidos.controller.js
+│   ├── database/
+│   │   └── database.js
+│   ├── routes/
+│   │   └── pedidos.routes.js
+│   ├── app.js
+│   └── server.js
 ├── duotechbros.db
 ├── package.json
 ├── package-lock.json
@@ -111,12 +117,26 @@ Proyecto_DuotechBros/
 
 ### Explicación de los componentes principales
 
-#### Backend/
+#### public/
 
-- database.js: inicializa la conexión a SQLite y crea la tabla pedidos si no existe.
-- server.js: levanta el servidor Express, habilita CORS, sirve archivos estáticos y expone los endpoints de pedidos.
+Contiene todos los recursos públicos que Express sirve como archivos estáticos:
 
-#### css/
+- `*.html`: páginas del sitio.
+- `css/`: estilos de cada sección y estilos compartidos.
+- `js/`: lógica del formulario de pedidos.
+- `img/`: imágenes utilizadas por la interfaz.
+
+#### src/
+
+Contiene el código fuente del backend:
+
+- `app.js`: configura Express, CORS, JSON, archivos estáticos y rutas API.
+- `server.js`: punto de entrada que inicia el servidor en el puerto 3000.
+- `database/database.js`: conecta con `duotechbros.db` y crea las tablas iniciales.
+- `routes/pedidos.routes.js`: registra las rutas bajo el prefijo `/api`.
+- `controllers/pedidos.controller.js`: implementa la lógica de pedidos, productos, portafolio y login.
+
+#### public/css/
 
 Contiene los estilos de cada sección del sitio:
 
@@ -127,7 +147,7 @@ Contiene los estilos de cada sección del sitio:
 - pie_encabezado.css: estilos compartidos del encabezado y el pie de página.
 - normalize.css: reset de estilos para compatibilidad entre navegadores.
 
-#### html/
+#### public/\*.html
 
 Contiene las páginas del sitio:
 
@@ -136,11 +156,11 @@ Contiene las páginas del sitio:
 - portafolio.html: presentación de proyectos destacados.
 - tienda.html: estructura de la sección de tienda.
 
-#### js/
+#### public/js/
 
 - Script_Pedidos.js: gestiona el formulario de pedidos, valida los campos y envía los datos al backend.
 
-#### img/
+#### public/img/
 
 Incluye imágenes visuales para la identidad del negocio, como la foto del equipo y una imagen de bienvenida.
 
@@ -176,7 +196,7 @@ npm run dev
 O de forma equivalente:
 
 ```bash
-node Backend/server.js
+node src/server.js
 ```
 
 El servidor quedará disponible en:
@@ -185,9 +205,15 @@ El servidor quedará disponible en:
 
 ### Abrir la aplicación en el navegador
 
-Debido a que el proyecto sirve archivos estáticos desde la raíz, puedes abrir la página principal con:
+El proyecto sirve los archivos estáticos desde `public/`. Puedes abrir la página principal con:
 
-- http://localhost:3000/html/inicio.html
+- http://localhost:3000/inicio.html
+
+Las demás páginas están disponibles en:
+
+- http://localhost:3000/pedidos.html
+- http://localhost:3000/portafolio.html
+- http://localhost:3000/tienda.html
 
 ### Probar el formulario de pedidos
 
@@ -214,13 +240,33 @@ curl -X POST http://localhost:3000/api/pedidos \
 curl http://localhost:3000/api/pedidos
 ```
 
+#### Obtener productos
+
+```bash
+curl http://localhost:3000/api/productos
+```
+
+#### Obtener trabajos del portafolio
+
+```bash
+curl http://localhost:3000/api/portafolio
+```
+
+#### Iniciar sesión de administrador
+
+```bash
+curl -X POST http://localhost:3000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"usuario":"admin","password":"admin123"}'
+```
+
 ### Base de datos
 
 La base de datos se crea automáticamente en el archivo:
 
 - duotechbros.db
 
-Y al iniciar el servidor se verifica o crea la tabla pedidos.
+Al iniciar el servidor se verifica o crea la base de datos y las tablas `pedidos`, `productos`, `portafolio` y `admin`. Si no existe el usuario administrador inicial, se crea con las credenciales de desarrollo `admin` / `admin123`.
 
 ---
 
@@ -230,7 +276,7 @@ Para continuar el desarrollo del proyecto, se recomienda avanzar en las siguient
 
 - Implementar un panel de administración para visualizar y actualizar pedidos.
 - Crear una tienda dinámica con productos cargados desde base de datos o JSON.
-- Añadir autenticación para usuarios administrativos.
+- Reemplazar las credenciales de desarrollo y completar la autenticación para usuarios administrativos.
 - Mejorar la experiencia visual con componentes más modernos.
 - Agregar manejo de imágenes y catálogo de servicios.
 
