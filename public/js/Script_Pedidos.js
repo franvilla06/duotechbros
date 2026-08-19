@@ -6,7 +6,7 @@ function mostrarMensaje(texto, tipo) {
     mensajeDiv.textContent = texto;
     mensajeDiv.className = `mensaje ${tipo}`;
     mensajeDiv.style.display = 'block';
-    
+
     // Ocultar después de 5 segundos
     setTimeout(() => {
         mensajeDiv.style.display = 'none';
@@ -87,7 +87,7 @@ form.addEventListener('submit', async (e) => {
     boton.textContent = 'Enviando...';
 
     try {
-        const respuesta = await fetch('http://localhost:3000/api/pedidos', {
+        const respuesta = await fetch('/api/pedidos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
@@ -102,7 +102,7 @@ form.addEventListener('submit', async (e) => {
             mostrarMensaje(`❌ Error: ${resultado.error}`, 'error');
         }
     } catch (error) {
-        mostrarMensaje('❌ No se pudo conectar con el servidor. Asegurate de que esté corriendo (node Backend/server.js)', 'error');
+        mostrarMensaje('❌ No se pudo conectar con el servidor. Asegurate de que esté corriendo (npm run dev)', 'error');
         console.error('Error de conexión:', error);
     } finally {
         // Rehabilitar el botón
@@ -114,7 +114,7 @@ form.addEventListener('submit', async (e) => {
 // Validaciones en tiempo real (mientras el usuario escribe)
 // Opcional: cambiar el borde del campo si es inválido
 
-document.getElementById('nombre_cliente').addEventListener('blur', function() {
+document.getElementById('nombre_cliente').addEventListener('blur', function () {
     if (this.value.trim().length < 3) {
         this.style.borderColor = '#dc3545';
     } else {
@@ -122,7 +122,7 @@ document.getElementById('nombre_cliente').addEventListener('blur', function() {
     }
 });
 
-document.getElementById('email').addEventListener('blur', function() {
+document.getElementById('email').addEventListener('blur', function () {
     if (!esEmailValido(this.value.trim())) {
         this.style.borderColor = '#dc3545';
     } else {
@@ -130,7 +130,7 @@ document.getElementById('email').addEventListener('blur', function() {
     }
 });
 
-document.getElementById('telefono').addEventListener('blur', function() {
+document.getElementById('telefono').addEventListener('blur', function () {
     const valor = this.value.trim();
     if (valor && !esTelefonoValido(valor)) {
         this.style.borderColor = '#dc3545';
@@ -139,7 +139,7 @@ document.getElementById('telefono').addEventListener('blur', function() {
     }
 });
 
-document.getElementById('modelo_celular').addEventListener('blur', function() {
+document.getElementById('modelo_celular').addEventListener('blur', function () {
     if (this.value.trim().length < 2) {
         this.style.borderColor = '#dc3545';
     } else {
@@ -147,7 +147,7 @@ document.getElementById('modelo_celular').addEventListener('blur', function() {
     }
 });
 
-document.getElementById('descripcion_problema').addEventListener('blur', function() {
+document.getElementById('descripcion_problema').addEventListener('blur', function () {
     if (this.value.trim().length < 10) {
         this.style.borderColor = '#dc3545';
     } else {
