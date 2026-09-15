@@ -170,8 +170,7 @@ Proyecto_DuotechBros/
 │   │   ├── dashboard.html
 │   │   ├── productos.html
 │   │   ├── portafolio.html
-│   │   ├── pedidos.html
-│   │   └── admin.js
+│   │   └── pedidos.html
 │   ├── css/
 │   │   ├── inicio.css
 │   │   ├── normalize.css
@@ -184,8 +183,10 @@ Proyecto_DuotechBros/
 │   │   ├── Bienvenida.svg
 │   │   └── Equipo duotechbros.jpg
 │   ├── js/
-│   │   └── Script_Pedidos.js
-│   ├── inicio.html
+│   │   ├── Script_Pedidos.js
+│   │   ├── admin.js
+│   │   └── admin-pedidos.js
+│   ├── index.html
 │   ├── pedidos.html
 │   ├── portafolio.html
 │   └── tienda.html
@@ -194,6 +195,8 @@ Proyecto_DuotechBros/
 │   │   └── pedidos.controller.js
 │   ├── database/
 │   │   └── database.js
+│   ├── importaciones/
+│   │   └── .gitkeep
 │   ├── routes/
 │   │   └── pedidos.routes.js
 │   ├── app.js
@@ -225,7 +228,7 @@ Contiene las páginas y lógica del panel de administración:
 - `productos.html`: gestión de productos del catálogo.
 - `portafolio.html`: gestión de trabajos del portafolio.
 - `pedidos.html`: visualización y gestión de pedidos recibidos.
-- `admin.js`: lógica del lado del cliente para el panel administrativo.
+- `admin.js` y `admin-pedidos.js`: lógica del lado del cliente para el panel administrativo.
 
 #### public/css/
 
@@ -243,7 +246,7 @@ Contiene los estilos de cada sección del sitio:
 
 Contiene las páginas del sitio:
 
-- inicio.html: landing page institucional.
+- index.html: landing page institucional y punto de entrada del frontend.
 - pedidos.html: formulario para solicitar reparación o contacto.
 - portafolio.html: presentación de proyectos destacados.
 - tienda.html: estructura de la sección de tienda.
@@ -381,7 +384,7 @@ El frontend de DuotechBros está construido con HTML5, CSS3 y JavaScript vanilla
 
 ### Estructura de páginas públicas
 
-#### inicio.html
+#### index.html
 
 - **Propósito**: Landing page institucional que presenta a DuotechBros
 - **Secciones**: Encabezado, hero, servicios destacados, equipo, llamadas a acción
@@ -506,7 +509,7 @@ El frontend de DuotechBros está construido con HTML5, CSS3 y JavaScript vanilla
 
 #### admin.js
 
-**Ubicación**: `public/admin/admin.js`
+**Ubicación**: `public/js/admin.js`
 
 **Responsabilidades**:
 
@@ -547,11 +550,11 @@ El frontend de DuotechBros está construido con HTML5, CSS3 y JavaScript vanilla
 - Estilos compartidos del encabezado (header) de todas las páginas públicas
 - Contiene: Logo, menú de navegación, estilos de enlace
 - Estilos del pie de página (footer): Enlaces, información de contacto
-- Reutilizado en: inicio.html, pedidos.html, portafolio.html, tienda.html
+- Reutilizado en: index.html, pedidos.html, portafolio.html, tienda.html
 
 #### inicio.css
 
-- Estilos específicos de inicio.html
+- Estilos específicos de index.html
 - Secciones hero, servicios, testimonios, galería
 - Animaciones y efectos visuales
 
@@ -779,7 +782,7 @@ El servidor quedará disponible en:
 
 El proyecto sirve los archivos estáticos desde `public/`. Puedes abrir la página principal con:
 
-- http://localhost:3000/inicio.html
+- http://localhost:3000/
 
 Las demás páginas están disponibles en:
 
@@ -864,7 +867,7 @@ Al iniciar el servidor se verifica o crea la base de datos y las tablas `pedidos
 
 ### Flujo de usuario regular (público)
 
-1. Accede a http://localhost:3000/inicio.html
+1. Accede a http://localhost:3000/
 2. Navega por las secciones: Inicio, Portafolio, Tienda, Pedidos
 3. En la sección de Pedidos, completa el formulario con tus datos
 4. El sistema valida los datos y los envía al servidor
@@ -1138,7 +1141,7 @@ git push origin Franco
 ### Cómo agregar una nueva página administrativa
 
 1. Crea `public/admin/nueva-seccion.html`
-2. Implementa funciones en `public/admin/admin.js`
+2. Implementa funciones en `public/js/admin.js` o crea un archivo específico en `public/js/`
 3. Agrega menu en `dashboard.html`
 4. Crea o usa endpoints en `/api`
 5. Prueba autenticación y permisos

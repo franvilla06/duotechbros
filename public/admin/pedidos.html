@@ -13,7 +13,6 @@
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
-
       <!-- ========== SIDEBAR ========== -->
       <aside class="admin-sidebar">
         <div class="admin-sidebar-brand">
@@ -59,7 +58,10 @@
         <header class="admin-header">
           <div>
             <h1>Solicitudes de Reparación</h1>
-            <p>Todos los pedidos enviados por los clientes desde el formulario público.</p>
+            <p>
+              Todos los pedidos enviados por los clientes desde el formulario
+              público.
+            </p>
           </div>
           <button class="btn-refresh" id="btn-refresh">
             <i class="fas fa-sync-alt"></i>
@@ -95,7 +97,9 @@
           <div class="table-empty" id="estado-vacio" style="display: none">
             <i class="fas fa-inbox"></i>
             <p>No hay pedidos registrados</p>
-            <small>Cuando un cliente envíe una solicitud, aparecerá aquí.</small>
+            <small
+              >Cuando un cliente envíe una solicitud, aparecerá aquí.</small
+            >
           </div>
 
           <div class="table-empty" id="estado-cargando">
@@ -106,7 +110,7 @@
       </main>
     </div>
 
-    <script src="../admin/admin.js"></script>
-    <script src="../admin/pedidos.js"></script>
+    <script src="../js/admin.js"></script>
+    <script src="../js/admin-pedidos.js"></script>
   </body>
 </html>

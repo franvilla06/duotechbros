@@ -1,9 +1,9 @@
-// Ligica comun del panel del administrador
+// Lógica común del panel del administrador.
 
 
 const API_BASE = '/api';
 
-// utilidades de secion
+// Utilidades de sesión.
 
 function guardarSesion(usuario) {
     sessionStorage.setItem('adminLogueado', 'true');
@@ -50,7 +50,7 @@ function protegerPagina() {
     }
 }
 
-// Logica del login
+// Lógica del login.
 
 const formLogin = document.getElementById('form-login');
 
@@ -116,7 +116,7 @@ if (formLogin) {
     }
 }
 
-// Proteccion automatica de paginas internas
+// Protección automática de páginas internas.
 
 // Si el body tiene el atributo data-admin-protected="true",
 // protegemos la página automáticamente al cargar.
