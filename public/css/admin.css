@@ -461,3 +461,213 @@ a {
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
+
+/* TABLAS DEL PANEL ADMIN */
+
+.table-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(11, 74, 98, 0.06);
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eef3f6;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.table-header h2 {
+    color: #0b4a62;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.table-counter {
+    background-color: #e8f4ff;
+    color: #007BFF;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+table.admin-table thead {
+    background-color: #f7fafc;
+    border-bottom: 2px solid #e0eaf0;
+}
+
+table.admin-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #5a6b73;
+    white-space: nowrap;
+}
+
+table.admin-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f4f8;
+    color: #333;
+    vertical-align: middle;
+}
+
+table.admin-table tbody tr {
+    transition: background-color 0.15s;
+}
+
+table.admin-table tbody tr:hover {
+    background-color: #f9fcff;
+}
+
+table.admin-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.cell-nombre {
+    font-weight: 600;
+    color: #0b4a62;
+}
+
+.cell-email {
+    color: #007BFF;
+    font-size: 0.85rem;
+}
+
+.cell-telefono {
+    color: #555;
+    font-size: 0.85rem;
+}
+
+.cell-descripcion {
+    max-width: 250px;
+    color: #555;
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cell-fecha {
+    color: #777;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* Badges de estado */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+.badge-pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-en-proceso {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.badge-completado {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-cancelado {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* Estado vacío / cargando */
+.table-empty {
+    padding: 50px 20px;
+    text-align: center;
+    color: #888;
+}
+
+.table-empty i {
+    font-size: 3rem;
+    color: #c0c7cd;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.table-empty p {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.table-empty small {
+    color: #aaa;
+    font-size: 0.85rem;
+}
+
+/* Botón de refrescar */
+.btn-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    color: #0b4a62;
+    border: 1px solid #c0c7cd;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    background-color: #f0f4f8;
+    border-color: #007BFF;
+    color: #007BFF;
+}
+
+.btn-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-refresh i.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
