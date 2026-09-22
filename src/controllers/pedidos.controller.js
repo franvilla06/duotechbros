@@ -1,4 +1,18 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+
+// Clave secreta para firmar tokens (en producción iría en .env)
+const SECRET = 'duotech-secret-2024';
+
+function generarToken(usuario) {
+    const timestamp = Date.now();
+    const hash = crypto
+        .createHash('sha256')
+        .update(`${usuario}-${timestamp}-${SECRET}`)
+        .digest('hex')
+        .substring(0, 16);
+    return `${usuario}.${timestamp}.${hash}`;
+}
 
 function crearPedido(req, res) {
     const { nombre_cliente, telefono, email, modelo_celular, descripcion_problema } = req.body;
@@ -50,7 +64,13 @@ function iniciarSesion(req, res) {
         if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
             return res.status(401).json({ success: false, error: 'Usuario o contraseña incorrectos' });
         }
-        return res.json({ success: true, message: 'Login exitoso', usuario: admin.usuario });
+        const token = generarToken(admin.usuario);
+        return res.json({
+            success: true,
+            message: 'Login exitoso',
+            usuario: admin.usuario,
+            token: token,
+        });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }

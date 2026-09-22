@@ -1,3 +1,6 @@
+/* ESTILOS DE LA PÁGINA DE PORTAFOLIO */
+
+/* Base */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #CCEBED;
@@ -6,40 +9,293 @@ body {
     padding: 0;
 }
 
-.project-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
-    margin: 18px 0;
+/* HERO del portafolio */
+.portafolio-hero {
+    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    padding: 70px 20px;
+    text-align: center;
+    color: white;
+    border-radius: 0 0 40px 40px;
+    margin-bottom: 40px;
 }
 
-.project-card {
-    background-color: #f7feff;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid #dceff2;
+.portafolio-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
-.project-card a {
+.portafolio-hero h1 {
+    font-size: 2.8rem;
+    margin: 0 0 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.portafolio-hero p {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    opacity: 0.95;
+    margin: 0;
+}
+
+/* Contenedor general */
+main.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+}
+
+.portafolio-section {
+    margin-bottom: 40px;
+}
+
+/* Cabecera de sección */
+.portafolio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.portafolio-header h2 {
     color: #0b4a62;
-    text-decoration: none;
+    font-size: 2rem;
+    margin: 0;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.portafolio-header h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background-color: #0a9396;
+    border-radius: 999px;
+}
+
+.portafolio-counter {
+    background-color: rgba(11, 74, 98, 0.1);
+    color: #0b4a62;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
     font-weight: 700;
 }
 
-.project-card a:hover {
-    color: #007BFF;
+/* Grilla de trabajos */
+.project-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
 }
 
-main.container {
-    max-width: 1024px;
-    margin: 30px auto;
-    padding: 0 20px 30px;
-}
-
-.content-section {
-    margin-bottom: 28px;
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 24px;
+/* ----- Tarjeta de trabajo ----- */
+.project-card {
+    background-color: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(11, 74, 98, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 35px rgba(11, 74, 98, 0.15);
+}
+
+/* ----- Imagen ----- */
+.project-imagen-wrapper {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    background-color: #f0f4f8;
+}
+
+.project-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    display: block;
+}
+
+.project-card:hover .project-imagen {
+    transform: scale(1.06);
+}
+
+.project-imagen-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c0c7cd;
+    font-size: 3rem;
+    background: linear-gradient(135deg, #e8f4ff 0%, #d0e6ea 100%);
+}
+
+/* Badge de tipo de reparación */
+.project-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(4px);
+}
+
+.project-badge.tipo-pantalla {
+    background-color: rgba(193, 232, 255, 0.95);
+    color: #0f4c64;
+}
+
+.project-badge.tipo-bateria {
+    background-color: rgba(209, 231, 221, 0.95);
+    color: #0f5132;
+}
+
+.project-badge.tipo-placa {
+    background-color: rgba(248, 215, 218, 0.95);
+    color: #842029;
+}
+
+.project-badge.tipo-software {
+    background-color: rgba(255, 243, 205, 0.95);
+    color: #856404;
+}
+
+.project-badge.tipo-carga {
+    background-color: rgba(134, 240, 243, 0.95);
+    color: #006e70;
+}
+
+.project-badge.tipo-camara {
+    background-color: rgba(223, 216, 255, 0.95);
+    color: #3a2f7a;
+}
+
+.project-badge.tipo-default {
+    background-color: rgba(232, 244, 255, 0.95);
+    color: #0b4a62;
+}
+
+/* Info */
+.project-info {
+    padding: 22px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.project-titulo {
+    color: #0b4a62;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    line-height: 1.35;
+}
+
+.project-descripcion {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 16px;
+    flex-grow: 1;
+}
+
+.project-fecha {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #888;
+    font-size: 0.8rem;
+    margin-top: auto;
+}
+
+.project-fecha i {
+    color: #0a9396;
+}
+
+/* Estados (cargando / vacío / error) */
+.portafolio-estado {
+    text-align: center;
+    padding: 60px 20px;
+    color: #777;
+}
+
+.portafolio-estado i {
+    font-size: 3rem;
+    color: #c0c7cd;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.portafolio-estado p {
+    font-size: 1.1rem;
+    margin: 0 0 6px;
+    color: #555;
+}
+
+.portafolio-estado small {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+#estado-error i {
+    color: #d9534f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .portafolio-hero {
+        padding: 50px 20px;
+        border-radius: 0 0 24px 24px;
+    }
+
+    .portafolio-hero h1 {
+        font-size: 2rem;
+    }
+
+    .portafolio-hero p {
+        font-size: 1rem;
+    }
+
+    .portafolio-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .project-list {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .project-imagen-wrapper {
+        height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .portafolio-hero h1 {
+        font-size: 1.6rem;
+    }
+
+    .project-titulo {
+        font-size: 1.05rem;
+    }
 }
