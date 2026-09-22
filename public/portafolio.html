@@ -3,13 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="css/normalize.css" />
-    <link rel="stylesheet" href="css/pie_encabezado.css" />
-    <link rel="stylesheet" href="css/portafolio.css" />
-    <title>Portafolio - DuoTechBros</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/pie_encabezado.css" />
+    <link rel="stylesheet" href="/css/portafolio.css" />
+    <title>Portafolio - DuotechBros</title>
   </head>
   <body>
-    <!-- header -->
+    <!-- ========== HEADER ========== -->
     <header>
       <nav>
         <div class="nav-brand">DuotechBros</div>
@@ -22,34 +26,67 @@
       </nav>
     </header>
 
-    <!--contenido prinsipal -->
-    <main class="container">
-      <section id="proyectos" class="content-section">
-        <h2>Proyectos Destacados</h2>
-        <div class="project-list">
-          <div class="project-card">
-            <a href="proyecto1.html">Proyecto 1: Cambios de módulo</a>
-          </div>
-          <div class="project-card">
-            <a href="proyecto2.html">Proyecto 2: Trabajos con pin de Carga</a>
-          </div>
-          <div class="project-card">
-            <a href="proyecto3.html">Proyecto 3: Trabajos con Software</a>
-          </div>
-        </div>
+    <!-- ========== HERO ========== -->
+    <section class="portafolio-hero">
+      <div class="portafolio-hero-content">
+        <h1>Nuestro Portafolio</h1>
         <p>
-          Explora nuestros proyectos para conocer más sobre nuestro trabajo y
-          como podemos brindarte ayuda en el mantenimiento de tu dispositivo.
+          Conocé algunos de los trabajos que realizamos en DuotechBros. Cada
+          reparación refleja nuestro compromiso con la calidad y la atención
+          personalizada.
         </p>
+      </div>
+    </section>
+
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <main class="container">
+      <section class="portafolio-section">
+        <div class="portafolio-header">
+          <h2>Trabajos Realizados</h2>
+          <span class="portafolio-counter" id="contador-trabajos">0 trabajos</span>
+        </div>
+
+        <!-- Grilla de trabajos (se llena dinámicamente) -->
+        <div class="project-list" id="lista-trabajos">
+          <!-- Se renderizan aquí las tarjetas -->
+        </div>
+
+        <!-- Estado: cargando -->
+        <div class="portafolio-estado" id="estado-cargando">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Cargando trabajos...</p>
+        </div>
+
+        <!-- Estado: vacío -->
+        <div class="portafolio-estado" id="estado-vacio" style="display: none">
+          <i class="fas fa-briefcase"></i>
+          <p>Aún no hay trabajos publicados</p>
+          <small>Pronto subiremos fotos de nuestras reparaciones.</small>
+        </div>
+
+        <!-- Estado: error -->
+        <div class="portafolio-estado" id="estado-error" style="display: none">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>No se pudieron cargar los trabajos</p>
+          <small>Intentá recargar la página en unos segundos.</small>
+        </div>
       </section>
     </main>
 
-    <!-- footer -->
+    <!-- ========== FOOTER ========== -->
     <footer>
       <p>© 2024 DuotechBros. Todos los derechos reservados.</p>
-      <a class="footer-admin" href="admin/login.html">
+      <div class="footer-social">
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <a href="#"><i class="fas fa-envelope"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+      <a class="footer-admin" href="/admin/login.html">
         <i class="fas fa-lock"></i> Acceso Admin
       </a>
     </footer>
+
+    <!-- Script específico del portafolio -->
+    <script src="/js/portafolio.js"></script>
   </body>
 </html>

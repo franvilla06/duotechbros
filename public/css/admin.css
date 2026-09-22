@@ -671,3 +671,346 @@ table.admin-table tbody tr:last-child td {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+/* FORMULARIO + LISTA (layout de dos columnas) */
+
+.admin-grid-2col {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .admin-grid-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Formulario de alta */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-form-group label {
+    font-weight: 600;
+    color: #0b4a62;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d0e6ea;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background-color: #f7feff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.admin-form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.admin-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.admin-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #007BFF;
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    width: 100%;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #005b9f;
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+    background-color: #a0c8e8;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #f0f4f8;
+    color: #0b4a62;
+    border: 1px solid #c0c7cd;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e8ef;
+}
+
+/* Imagen miniatura en la tabla */
+.cell-imagen {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: #f0f4f8;
+    display: block;
+}
+
+.cell-imagen-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    background-color: #f0f4f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c0c7cd;
+    font-size: 1.2rem;
+}
+
+/* Badge de stock */
+.badge-stock {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-stock-bajo {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-stock-agotado {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* Botón de eliminar (ícono rojo) */
+.btn-eliminar {
+    background-color: transparent;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+}
+
+.btn-eliminar:hover {
+    background-color: #f8d7da;
+}
+
+/* Contador de tabla */
+.table-counter {
+    background-color: #e8f4ff;
+    color: #007BFF;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Encabezado de la tabla */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eef3f6;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.table-header h2 {
+    color: #0b4a62;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+table.admin-table thead {
+    background-color: #f7fafc;
+    border-bottom: 2px solid #e0eaf0;
+}
+
+table.admin-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #5a6b73;
+    white-space: nowrap;
+}
+
+table.admin-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f4f8;
+    color: #333;
+    vertical-align: middle;
+}
+
+table.admin-table tbody tr:hover {
+    background-color: #f9fcff;
+}
+
+.cell-nombre {
+    font-weight: 600;
+    color: #0b4a62;
+}
+
+.cell-precio {
+    font-weight: 700;
+    color: #007BFF;
+}
+
+.cell-descripcion {
+    max-width: 220px;
+    color: #555;
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.table-empty {
+    padding: 50px 20px;
+    text-align: center;
+    color: #888;
+}
+
+.table-empty i {
+    font-size: 3rem;
+    color: #c0c7cd;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.table-empty p {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.table-empty small {
+    color: #aaa;
+    font-size: 0.85rem;
+}
+
+/* BADGES ESPECÍFICOS PARA PORTAFOLIO */
+
+.badge-tipo {
+    background-color: #e8f4ff;
+    color: #0b4a62;
+}
+
+.badge-tipo-pantalla {
+    background-color: #c1e8ff;
+    color: #0f4c64;
+}
+
+.badge-tipo-bateria {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-tipo-placa {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.badge-tipo-software {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-tipo-default {
+    background-color: #e8f4ff;
+    color: #0b4a62;
+}
+
+/* Imagen miniatura para portafolio (más grande que productos) */
+.cell-imagen-portafolio {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: #f0f4f8;
+    display: block;
+}
+
+.cell-imagen-portafolio-placeholder {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    background-color: #f0f4f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c0c7cd;
+    font-size: 1.3rem;
+}
+
+/* Fecha en la tabla */
+.cell-fecha {
+    color: #777;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
