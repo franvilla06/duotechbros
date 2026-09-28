@@ -24,19 +24,19 @@
         </div>
 
         <nav class="admin-nav">
-          <a href="../admin/dashboard.html">
+          <a href="dashboard.html">
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
           </a>
-          <a href="../admin/productos.html">
+          <a href="productos.html">
             <i class="fas fa-box"></i>
             <span>Gestionar Productos</span>
           </a>
-          <a href="../admin/portafolio.html">
+          <a href="portafolio.html">
             <i class="fas fa-briefcase"></i>
             <span>Gestionar Portafolio</span>
           </a>
-          <a href="../admin/pedidos.html" class="active">
+          <a href="pedidos.html" class="active">
             <i class="fas fa-clipboard-list"></i>
             <span>Ver Pedidos</span>
           </a>
@@ -53,15 +53,12 @@
         </div>
       </aside>
 
-      <!-- CONTENIDO PRINCIPAL -->
+      <!-- ========== CONTENIDO PRINCIPAL ========== -->
       <main class="admin-main">
         <header class="admin-header">
           <div>
             <h1>Solicitudes de Reparación</h1>
-            <p>
-              Todos los pedidos enviados por los clientes desde el formulario
-              público.
-            </p>
+            <p>Administrá el estado de cada pedido recibido desde el sitio público.</p>
           </div>
           <button class="btn-refresh" id="btn-refresh">
             <i class="fas fa-sync-alt"></i>
@@ -85,6 +82,7 @@
                   <th>Descripción</th>
                   <th>Fecha</th>
                   <th>Estado</th>
+                  <th style="text-align: right">Acciones</th>
                 </tr>
               </thead>
               <tbody id="tbody-pedidos">
@@ -93,13 +91,11 @@
             </table>
           </div>
 
-          <!-- Estado de carga / vacío -->
+          <!-- Estado vacío / cargando -->
           <div class="table-empty" id="estado-vacio" style="display: none">
             <i class="fas fa-inbox"></i>
             <p>No hay pedidos registrados</p>
-            <small
-              >Cuando un cliente envíe una solicitud, aparecerá aquí.</small
-            >
+            <small>Cuando un cliente envíe una solicitud, aparecerá aquí.</small>
           </div>
 
           <div class="table-empty" id="estado-cargando">
@@ -110,7 +106,7 @@
       </main>
     </div>
 
-    <script src="../js/admin.js"></script>
-    <script src="../js/admin-pedidos.js"></script>
+    <script src="/js/admin.js"></script>
+    <script src="/js/admin-pedidos.js"></script>
   </body>
 </html>

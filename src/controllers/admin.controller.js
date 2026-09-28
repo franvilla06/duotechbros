@@ -1,4 +1,6 @@
+// ============================================================
 // GESTIÓN DE PRODUCTOS
+// ============================================================
 
 function crearProducto(req, res) {
     const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
@@ -39,7 +41,9 @@ function eliminarProducto(req, res) {
     }
 }
 
+// ============================================================
 // GESTIÓN DE PORTAFOLIO
+// ============================================================
 
 function crearTrabajo(req, res) {
     const { titulo, descripcion, imagen_url, tipo_reparacion } = req.body;
@@ -78,9 +82,56 @@ function eliminarTrabajo(req, res) {
     }
 }
 
+// ============================================================
+// GESTIÓN DE PEDIDOS
+// ============================================================
+
+const ESTADOS_VALIDOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
+
+function actualizarEstadoPedido(req, res) {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    if (!estado || !ESTADOS_VALIDOS.includes(estado)) {
+        return res.status(400).json({
+            success: false,
+            error: `Estado inválido. Valores permitidos: ${ESTADOS_VALIDOS.join(', ')}`,
+        });
+    }
+
+    try {
+        const info = req.app.locals.db
+            .prepare('UPDATE pedidos SET estado = ? WHERE id = ?')
+            .run(estado, id);
+
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
+        }
+
+        return res.json({ success: true, message: 'Estado actualizado', estado });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+function eliminarPedido(req, res) {
+    const { id } = req.params;
+    try {
+        const info = req.app.locals.db.prepare('DELETE FROM pedidos WHERE id = ?').run(id);
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
+        }
+        return res.json({ success: true, message: 'Pedido eliminado' });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 module.exports = {
     crearProducto,
     eliminarProducto,
     crearTrabajo,
     eliminarTrabajo,
+    actualizarEstadoPedido,
+    eliminarPedido,
 };

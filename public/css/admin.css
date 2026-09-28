@@ -1014,3 +1014,78 @@ table.admin-table tbody tr:hover {
     font-size: 0.8rem;
     white-space: nowrap;
 }
+
+/* ============================================================
+   SELECTOR DE ESTADO EN LA TABLA DE PEDIDOS
+   ============================================================ */
+
+.estado-select {
+    padding: 7px 12px;
+    border: 1px solid #d0e6ea;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background-color: #f7feff;
+    color: #0b4a62;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+    min-width: 130px;
+}
+
+.estado-select:hover:not(:disabled) {
+    border-color: #007BFF;
+}
+
+.estado-select:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.estado-select:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* ============================================================
+   TOAST (notificación flotante)
+   ============================================================ */
+
+.toast-admin {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    color: #ffffff;
+    padding: 14px 22px;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(11, 74, 98, 0.28);
+    font-size: 0.9rem;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 360px;
+    pointer-events: none;
+}
+
+.toast-admin.toast-error {
+    background: linear-gradient(135deg, #842029 0%, #d9534f 100%);
+    box-shadow: 0 12px 32px rgba(132, 32, 41, 0.3);
+}
+
+.toast-admin.toast-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+    .toast-admin {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
+    }
+}
