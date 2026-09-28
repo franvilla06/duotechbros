@@ -9,6 +9,7 @@ router.use(requiereAuth);
 
 // ----- Productos -----
 router.post('/productos', adminController.crearProducto);
+router.put('/productos/:id', adminController.actualizarProducto);
 router.delete('/productos/:id', adminController.eliminarProducto);
 
 // ----- Portafolio -----

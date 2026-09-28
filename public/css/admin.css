@@ -1089,3 +1089,150 @@ table.admin-table tbody tr:hover {
         max-width: none;
     }
 }
+
+/* ============================================================
+   BOTÓN DE EDITAR (ícono azul)
+   ============================================================ */
+
+.btn-editar {
+    background-color: transparent;
+    border: none;
+    color: #007BFF;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    margin-right: 4px;
+    transition: background-color 0.2s;
+}
+
+.btn-editar:hover {
+    background-color: #e8f4ff;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(11, 74, 98, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-overlay.modal-visible {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 25px 60px rgba(11, 74, 98, 0.3);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    animation: slideUp 0.25s ease;
+    box-sizing: border-box;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #eef3f6;
+}
+
+.modal-header h2 {
+    color: #0b4a62;
+    font-size: 1.3rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h2 i {
+    color: #007BFF;
+}
+
+.modal-close {
+    background-color: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.modal-close:hover {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* Botones del modal (reutilizan estilos existentes) */
+.modal-card .admin-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-card .btn-primary {
+    width: auto;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .modal-card {
+        padding: 22px;
+        max-height: 95vh;
+    }
+
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .modal-card .admin-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-card .admin-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .modal-card .btn-primary,
+    .modal-card .btn-secondary {
+        width: 100%;
+    }
+}

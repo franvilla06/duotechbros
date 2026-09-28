@@ -28,6 +28,39 @@ function crearProducto(req, res) {
     }
 }
 
+function actualizarProducto(req, res) {
+    const { id } = req.params;
+    const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
+
+    if (!nombre || precio === undefined) {
+        return res.status(400).json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
+    }
+
+    try {
+        const info = req.app.locals.db.prepare(`
+            UPDATE productos
+            SET nombre = ?, descripcion = ?, precio = ?, imagen_url = ?, categoria = ?, stock = ?
+            WHERE id = ?
+        `).run(
+            nombre,
+            descripcion || null,
+            precio,
+            imagen_url || null,
+            categoria || null,
+            stock || 0,
+            id
+        );
+
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Producto no encontrado' });
+        }
+
+        return res.json({ success: true, message: 'Producto actualizado' });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 function eliminarProducto(req, res) {
     const { id } = req.params;
     try {
@@ -129,6 +162,7 @@ function eliminarPedido(req, res) {
 
 module.exports = {
     crearProducto,
+    actualizarProducto,
     eliminarProducto,
     crearTrabajo,
     eliminarTrabajo,

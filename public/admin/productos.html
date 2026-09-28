@@ -183,6 +183,64 @@
       </main>
     </div>
 
+    <!-- ============================================================
+         MODAL: EDITAR PRODUCTO
+         ============================================================ -->
+    <div class="modal-overlay" id="modal-editar">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2><i class="fas fa-edit"></i> Editar Producto</h2>
+          <button class="modal-close" id="modal-close" title="Cerrar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form class="admin-form" id="form-editar">
+          <input type="hidden" id="edit-id" />
+
+          <div class="admin-form-group">
+            <label for="edit-nombre">Nombre del producto *</label>
+            <input type="text" id="edit-nombre" required />
+          </div>
+
+          <div class="admin-form-group">
+            <label for="edit-descripcion">Descripción</label>
+            <textarea id="edit-descripcion"></textarea>
+          </div>
+
+          <div class="admin-form-row">
+            <div class="admin-form-group">
+              <label for="edit-precio">Precio ($) *</label>
+              <input type="number" id="edit-precio" step="0.01" min="0" required />
+            </div>
+            <div class="admin-form-group">
+              <label for="edit-stock">Stock</label>
+              <input type="number" id="edit-stock" min="0" />
+            </div>
+          </div>
+
+          <div class="admin-form-group">
+            <label for="edit-categoria">Categoría</label>
+            <input type="text" id="edit-categoria" />
+          </div>
+
+          <div class="admin-form-group">
+            <label for="edit-imagen_url">URL de la imagen</label>
+            <input type="url" id="edit-imagen_url" />
+          </div>
+
+          <div class="admin-form-actions">
+            <button type="button" class="btn-secondary" id="btn-cancelar">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary" id="btn-actualizar">
+              <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script src="/js/admin.js"></script>
     <script src="/js/admin-productos.js"></script>
   </body>

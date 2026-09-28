@@ -1,4 +1,6 @@
-// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS"
+// ============================================================
+// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DuotechBros Admin
+// ============================================================
 
 const API_PRODUCTOS = '/api/productos';
 const API_ADMIN_PRODUCTOS = '/api/admin/productos';
@@ -10,7 +12,14 @@ const estadoVacio = document.getElementById('estado-vacio');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
 
-//  UTILIDADES 
+// Modal de edición
+const modalEditar = document.getElementById('modal-editar');
+const modalClose = document.getElementById('modal-close');
+const formEditar = document.getElementById('form-editar');
+const btnCancelar = document.getElementById('btn-cancelar');
+const btnActualizar = document.getElementById('btn-actualizar');
+
+// ----- UTILIDADES -----
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -32,7 +41,24 @@ function claseStock(stock) {
     return 'badge-stock';
 }
 
-//  RENDERIZADO 
+function mostrarToast(mensaje, esError = false) {
+    const anterior = document.getElementById('toast-admin');
+    if (anterior) anterior.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-admin';
+    toast.className = 'toast-admin' + (esError ? ' toast-error' : '');
+    toast.innerHTML = `<span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ----- RENDERIZADO -----
 
 function renderizarProductos(productos) {
     tbody.innerHTML = '';
@@ -67,6 +93,9 @@ function renderizarProductos(productos) {
                 <span class="badge ${claseStock(p.stock)}">${escapar(p.stock)} ud.</span>
             </td>
             <td style="text-align: right">
+                <button class="btn-editar" title="Editar" data-id="${p.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
                 <button class="btn-eliminar" title="Eliminar" data-id="${p.id}" data-nombre="${escapar(p.nombre)}">
                     <i class="fas fa-trash-alt"></i>
                 </button>
@@ -75,7 +104,15 @@ function renderizarProductos(productos) {
         tbody.appendChild(tr);
     });
 
-    // Asignar evento a cada botón de eliminar
+    // Asignar eventos a los botones de editar
+    tbody.querySelectorAll('.btn-editar').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            abrirModalEdicion(id);
+        });
+    });
+
+    // Asignar eventos a los botones de eliminar
     tbody.querySelectorAll('.btn-eliminar').forEach((btn) => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -85,7 +122,7 @@ function renderizarProductos(productos) {
     });
 }
 
-//  CARGA DE DATOS 
+// ----- CARGA DE DATOS -----
 
 async function cargarProductos() {
     estadoCargando.style.display = 'block';
@@ -111,12 +148,11 @@ async function cargarProductos() {
     }
 }
 
-//  CREAR PRODUCTO 
+// ----- CREAR PRODUCTO -----
 
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Recolectar y limpiar datos
     const datos = {
         nombre: document.getElementById('nombre').value.trim(),
         descripcion: document.getElementById('descripcion').value.trim() || null,
@@ -126,17 +162,15 @@ formProducto.addEventListener('submit', async (e) => {
         imagen_url: document.getElementById('imagen_url').value.trim() || null,
     };
 
-    // Validaciones
     if (!datos.nombre) {
-        alert('El nombre del producto es obligatorio.');
+        mostrarToast('El nombre del producto es obligatorio.', true);
         return;
     }
     if (isNaN(datos.precio) || datos.precio < 0) {
-        alert('Ingresá un precio válido.');
+        mostrarToast('Ingresá un precio válido.', true);
         return;
     }
 
-    // Deshabilitar botón
     btnGuardar.disabled = true;
     btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
@@ -149,23 +183,129 @@ formProducto.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            alert('Producto agregado correctamente.');
+            mostrarToast('✅ Producto agregado correctamente.');
             formProducto.reset();
             document.getElementById('stock').value = '0';
             cargarProductos();
         } else {
-            alert(`Error: ${resultado.error || 'No se pudo guardar el producto.'}`);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar el producto.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear producto:', error);
-        // fetchAdmin ya maneja el 401
     } finally {
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar Producto';
     }
 });
 
-//  ELIMINAR PRODUCTO 
+// ----- MODAL: ABRIR Y CERRAR -----
+
+function abrirModalEdicion(id) {
+    // Buscar el producto en el DOM usando los datos de la fila
+    // En lugar de re-consultar la API, extraemos los datos del fetch inicial
+    // Pero como no los tenemos guardados, hacemos un fetch específico al endpoint público
+    // y filtramos el producto por ID.
+    fetch(API_PRODUCTOS)
+        .then((r) => r.json())
+        .then((productos) => {
+            const producto = productos.find((p) => String(p.id) === String(id));
+            if (!producto) {
+                mostrarToast('No se encontró el producto.', true);
+                return;
+            }
+
+            // Rellenar el formulario del modal
+            document.getElementById('edit-id').value = producto.id;
+            document.getElementById('edit-nombre').value = producto.nombre || '';
+            document.getElementById('edit-descripcion').value = producto.descripcion || '';
+            document.getElementById('edit-precio').value = producto.precio || '';
+            document.getElementById('edit-stock').value = producto.stock || 0;
+            document.getElementById('edit-categoria').value = producto.categoria || '';
+            document.getElementById('edit-imagen_url').value = producto.imagen_url || '';
+
+            // Mostrar el modal
+            modalEditar.classList.add('modal-visible');
+        })
+        .catch((error) => {
+            console.error('Error al cargar producto para editar:', error);
+            mostrarToast('No se pudo cargar el producto.', true);
+        });
+}
+
+function cerrarModalEdicion() {
+    modalEditar.classList.remove('modal-visible');
+    formEditar.reset();
+}
+
+modalClose.addEventListener('click', cerrarModalEdicion);
+btnCancelar.addEventListener('click', cerrarModalEdicion);
+
+// Cerrar al hacer clic fuera del modal
+modalEditar.addEventListener('click', (e) => {
+    if (e.target === modalEditar) {
+        cerrarModalEdicion();
+    }
+});
+
+// Cerrar con la tecla Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalEditar.classList.contains('modal-visible')) {
+        cerrarModalEdicion();
+    }
+});
+
+// ----- GUARDAR CAMBIOS (PUT) -----
+
+formEditar.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById('edit-id').value;
+
+    const datos = {
+        nombre: document.getElementById('edit-nombre').value.trim(),
+        descripcion: document.getElementById('edit-descripcion').value.trim() || null,
+        precio: parseFloat(document.getElementById('edit-precio').value),
+        stock: parseInt(document.getElementById('edit-stock').value) || 0,
+        categoria: document.getElementById('edit-categoria').value.trim() || null,
+        imagen_url: document.getElementById('edit-imagen_url').value.trim() || null,
+    };
+
+    if (!datos.nombre) {
+        mostrarToast('El nombre del producto es obligatorio.', true);
+        return;
+    }
+    if (isNaN(datos.precio) || datos.precio < 0) {
+        mostrarToast('Ingresá un precio válido.', true);
+        return;
+    }
+
+    btnActualizar.disabled = true;
+    btnActualizar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+    try {
+        const respuesta = await fetchAdmin(`${API_ADMIN_PRODUCTOS}/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarToast('✅ Producto actualizado correctamente.');
+            cerrarModalEdicion();
+            cargarProductos();
+        } else {
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+        }
+    } catch (error) {
+        console.error('Error al actualizar producto:', error);
+    } finally {
+        btnActualizar.disabled = false;
+        btnActualizar.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+    }
+});
+
+// ----- ELIMINAR PRODUCTO -----
 
 async function eliminarProducto(id, nombre) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${nombre}"?`);
@@ -179,19 +319,18 @@ async function eliminarProducto(id, nombre) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            alert('Producto eliminado.');
+            mostrarToast('✅ Producto eliminado.');
             cargarProductos();
         } else {
-            alert(`Error: ${resultado.error || 'No se pudo eliminar el producto.'}`);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar el producto.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar producto:', error);
     }
 }
 
-//  INICIO 
+// ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Espera breve para que protegerPagina() de admin.js corra primero
     setTimeout(cargarProductos, 100);
 });
