@@ -1,73 +1,73 @@
 const form = document.getElementById('form-pedido');
 const mensajeDiv = document.getElementById('mensaje');
 
-// Función para mostrar mensajes
+// FUNCIÓN PARA MOSTRAR MENSAJES
 function mostrarMensaje(texto, tipo) {
     mensajeDiv.textContent = texto;
     mensajeDiv.className = `mensaje ${tipo}`;
     mensajeDiv.style.display = 'block';
 
-    // Ocultar después de 5 segundos
+    // ocultar después de 5 segundos
     setTimeout(() => {
         mensajeDiv.style.display = 'none';
     }, 5000);
 }
 
-// Función para validar el email
+// FUNCIÓN PARA VALIDAR EL EMAIL
 function esEmailValido(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 }
 
-// Función para validar el teléfono (solo números, mínimo 7 dígitos)
+// FUNCIÓN PARA VALIDAR EL TELÉFONO (SOLO NÚMEROS, MÍNIMO 7 DÍGITOS)
 function esTelefonoValido(telefono) {
     const soloNumeros = /^[0-9]+$/.test(telefono);
     return soloNumeros && telefono.length >= 7;
 }
 
-// Función para validar el formulario
+// FUNCIÓN PARA VALIDAR EL FORMULARIO
 function validarFormulario(datos) {
-    // Validar nombre
+    // VALIDAR NOMBRE
     if (!datos.nombre_cliente || datos.nombre_cliente.trim().length < 3) {
-        mostrarMensaje('❌ El nombre debe tener al menos 3 caracteres.', 'error');
+        mostrarMensaje('El nombre debe tener al menos 3 caracteres.', 'error');
         return false;
     }
 
-    // Validar email
+    // VALIDAR EMAIL
     if (!datos.email || !esEmailValido(datos.email)) {
-        mostrarMensaje('❌ Ingresá un email válido (ej: usuario@dominio.com).', 'error');
+        mostrarMensaje('Ingresá un email válido (ej: usuario@dominio.com).', 'error');
         return false;
     }
 
-    // Validar teléfono (si se ingresó, que sea válido)
+    // VALIDAR TELÉFONO (SI SE INGRESÓ, QUE SEA VÁLIDO)
     if (datos.telefono && datos.telefono.trim() !== '') {
         if (!esTelefonoValido(datos.telefono)) {
-            mostrarMensaje('❌ El teléfono debe contener solo números y tener al menos 7 dígitos.', 'error');
+            mostrarMensaje('El teléfono debe contener solo números y tener al menos 7 dígitos.', 'error');
             return false;
         }
     }
 
-    // Validar modelo del celular
+    // VALIDAR MODELO DEL CELULAR
     if (!datos.modelo_celular || datos.modelo_celular.trim().length < 2) {
-        mostrarMensaje('❌ Ingresá el modelo del celular.', 'error');
+        mostrarMensaje('Ingresá el modelo del celular.', 'error');
         return false;
     }
 
-    // Validar descripción del problema
+    // VALIDAR DESCRIPCIÓN DEL PROBLEMA
     if (!datos.descripcion_problema || datos.descripcion_problema.trim().length < 10) {
-        mostrarMensaje('❌ La descripción debe tener al menos 10 caracteres.', 'error');
+        mostrarMensaje('La descripción debe tener al menos 10 caracteres.', 'error');
         return false;
     }
 
-    // Todas las validaciones pasaron
+    // todas las validaciones pasaron
     return true;
 }
 
-// Evento submit del formulario
+// EVENTO SUBMIT DEL FORMULARIO
 form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Evita que recargue la página
+    e.preventDefault(); // evita que recargue la página
 
-    // Obtener datos del formulario
+    // obtener datos del formulario
     const datos = {
         nombre_cliente: document.getElementById('nombre_cliente').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -76,12 +76,12 @@ form.addEventListener('submit', async (e) => {
         descripcion_problema: document.getElementById('descripcion_problema').value.trim()
     };
 
-    // Validar los datos antes de enviar
+    // validar los datos antes de enviar
     if (!validarFormulario(datos)) {
-        return; // Si hay error, no enviamos
+        return; // si hay error, no enviamos
     }
 
-    // Deshabilitar el botón mientras se envía
+    // deshabilitar el botón mientras se envía
     const boton = form.querySelector('button[type="submit"]');
     boton.disabled = true;
     boton.textContent = 'Enviando...';
@@ -96,23 +96,23 @@ form.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarMensaje('✅ ¡Pedido enviado con éxito!', 'exito');
-            form.reset(); // Limpia el formulario
+            mostrarMensaje('¡Pedido enviado con éxito!', 'exito');
+            form.reset(); // limpia el formulario
         } else {
-            mostrarMensaje(`❌ Error: ${resultado.error}`, 'error');
+            mostrarMensaje(`Error: ${resultado.error}`, 'error');
         }
     } catch (error) {
-        mostrarMensaje('❌ No se pudo conectar con el servidor. Asegurate de que esté corriendo (npm run dev)', 'error');
+        mostrarMensaje('No se pudo conectar con el servidor. Asegurate de que esté corriendo (npm run dev)', 'error');
         console.error('Error de conexión:', error);
     } finally {
-        // Rehabilitar el botón
+        // rehabilitar el botón
         boton.disabled = false;
         boton.textContent = 'Enviar pedido';
     }
 });
 
-// Validaciones en tiempo real (mientras el usuario escribe)
-// Opcional: cambiar el borde del campo si es inválido
+// VALIDACIONES EN TIEMPO REAL (MIENTRAS EL USUARIO ESCRIBE)
+// opcional: cambiar el borde del campo si es inválido
 
 document.getElementById('nombre_cliente').addEventListener('blur', function () {
     if (this.value.trim().length < 3) {

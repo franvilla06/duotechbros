@@ -1,4 +1,4 @@
-/* Fondo y tipografía general  */
+/* FONDO Y TIPOGRAFÍA GENERAL */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #CCEBED;
@@ -7,7 +7,7 @@ body {
     padding: 0;
 }
 
-/* Contenedor principal */
+/* CONTENEDOR PRINCIPAL */
 main.container {
     max-width: 600px;
     margin: 30px auto;
@@ -17,7 +17,7 @@ main.container {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
-/* Título */
+/* TÍTULO */
 h1 {
     text-align: center;
     color: #0b4a62;
@@ -25,7 +25,7 @@ h1 {
     margin-bottom: 25px;
 }
 
-/* Formulario */
+/* FORMULARIO */
 form {
     display: flex;
     flex-direction: column;
@@ -38,7 +38,8 @@ label {
     margin-bottom: 2px;
 }
 
-input, textarea {
+input,
+textarea {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid #dceff2;
@@ -49,7 +50,8 @@ input, textarea {
     transition: border-color 0.2s;
 }
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
     outline: none;
     border-color: #007BFF;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
@@ -60,7 +62,7 @@ textarea {
     min-height: 100px;
 }
 
-/* Botón de envío */
+/* BOTÓN DE ENVÍO */
 button[type="submit"] {
     background: #007BFF;
     color: white;
@@ -82,13 +84,14 @@ button[type="submit"]:active {
     transform: scale(0.97);
 }
 
-/* Mensaje de éxito/error */
+/* MENSAJE DE ÉXITO/ERROR */
 .mensaje {
     margin-top: 20px;
     padding: 12px;
     border-radius: 8px;
     text-align: center;
-    display: none;  /* se muestra con JS */
+    display: none;
+    /* se muestra con js */
     font-weight: 600;
 }
 

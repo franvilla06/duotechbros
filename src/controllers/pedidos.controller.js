@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-// Clave secreta para firmar tokens (en producción iría en .env)
+// clave secreta para firmar tokens (en producción iría en .env)
 const SECRET = 'duotech-secret-2024';
 
 function generarToken(usuario) {

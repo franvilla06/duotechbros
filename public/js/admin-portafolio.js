@@ -1,4 +1,6 @@
+// ============================================================
 // LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DuotechBros Admin
+// ============================================================
 
 const API_PORTAFOLIO = '/api/portafolio';
 const API_ADMIN_PORTAFOLIO = '/api/admin/portafolio';
@@ -7,10 +9,32 @@ const formTrabajo = document.getElementById('form-trabajo');
 const tbody = document.getElementById('tbody-trabajos');
 const contador = document.getElementById('contador-trabajos');
 const estadoVacio = document.getElementById('estado-vacio');
+const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
+const btnExportar = document.getElementById('btn-exportar-portafolio');
 
-// UTILIDADES
+const buscador = document.getElementById('buscador-trabajos');
+const filtrosTipo = document.getElementById('filtros-tipo');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+const modalEditar = document.getElementById('modal-editar');
+const modalClose = document.getElementById('modal-close');
+const formEditar = document.getElementById('form-editar');
+const btnCancelar = document.getElementById('btn-cancelar');
+const btnActualizar = document.getElementById('btn-actualizar');
+
+const POR_PAGINA = 10;
+
+// Estado local
+let trabajosOriginales = [];
+let trabajosFiltrados = [];   // ← nuevo
+let tipoFiltroActivo = 'Todos';
+let textoBusqueda = '';
+let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
+let paginador = null;
+
+// ----- UTILIDADES -----
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -40,21 +64,139 @@ function claseTipo(tipo) {
     return 'badge-tipo-default';
 }
 
-// RENDERIZADO
+function mostrarToast(mensaje, esError = false) {
+    const anterior = document.getElementById('toast-admin');
+    if (anterior) anterior.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-admin';
+    toast.className = 'toast-admin' + (esError ? ' toast-error' : '');
+    toast.innerHTML = `<span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+function aplicarOrdenamiento(array) {
+    if (!ordenActual.campo) return array;
+    return [...array].sort((a, b) => {
+        const cmp = compararValores(a[ordenActual.campo], b[ordenActual.campo], ordenActual.tipo);
+        return ordenActual.direccion === 'asc' ? cmp : -cmp;
+    });
+}
+
+// ----- EXPORTAR A CSV -----
+
+function escaparCSV(valor) {
+    if (valor === null || valor === undefined) return '';
+    const texto = String(valor);
+    if (texto.includes(',') || texto.includes('"') || texto.includes('\n') || texto.includes('\r')) {
+        return `"${texto.replace(/"/g, '""')}"`;
+    }
+    return texto;
+}
+
+function exportarCSV() {
+    if (trabajosFiltrados.length === 0) {
+        mostrarToast('No hay trabajos para exportar.', true);
+        return;
+    }
+
+    const encabezados = ['ID', 'Título', 'Descripción', 'Tipo de reparación', 'Fecha'];
+
+    const filas = trabajosFiltrados.map((t) => [
+        t.id,
+        t.titulo,
+        t.descripcion,
+        t.tipo_reparacion,
+        formatearFecha(t.fecha),
+    ]);
+
+    const lineas = [
+        encabezados.map(escaparCSV).join(','),
+        ...filas.map((fila) => fila.map(escaparCSV).join(',')),
+    ];
+
+    const contenido = lineas.join('\r\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + contenido], { type: 'text/csv;charset=utf-8;' });
+
+    const hoy = new Date();
+    const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    const nombreArchivo = `portafolio-duotechbros-${fecha}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    mostrarToast(`✅ Se exportaron ${trabajosFiltrados.length} trabajo${trabajosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+}
+
+// ----- FILTROS -----
+
+function construirFiltrosTipo() {
+    const tipos = ['Todos'];
+    trabajosOriginales.forEach((t) => {
+        if (t.tipo_reparacion && !tipos.includes(t.tipo_reparacion)) {
+            tipos.push(t.tipo_reparacion);
+        }
+    });
+
+    filtrosTipo.innerHTML = '';
+
+    tipos.forEach((tipo) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (tipo === tipoFiltroActivo ? ' active' : '');
+        chip.dataset.tipo = tipo;
+        chip.textContent = tipo;
+
+        chip.addEventListener('click', () => {
+            tipoFiltroActivo = tipo;
+            filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.tipo === tipo);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosTipo.appendChild(chip);
+    });
+}
+
+function actualizarBotonLimpiar() {
+    const hayFiltro = tipoFiltroActivo !== 'Todos' || textoBusqueda.trim() !== '';
+    btnLimpiar.disabled = !hayFiltro;
+}
+
+// ----- RENDERIZADO -----
 
 function renderizarTrabajos(trabajos) {
     tbody.innerHTML = '';
 
-    if (!trabajos || trabajos.length === 0) {
-        estadoVacio.style.display = 'block';
+    if (trabajos.length === 0) {
+        if (trabajosOriginales.length === 0) {
+            estadoVacio.style.display = 'block';
+        } else {
+            estadoSinResultados.style.display = 'block';
+        }
         contador.textContent = '0 trabajos';
         return;
     }
 
-    estadoVacio.style.display = 'none';
     contador.textContent = `${trabajos.length} trabajo${trabajos.length !== 1 ? 's' : ''}`;
 
-    trabajos.forEach((t) => {
+    const itemsPagina = paginador ? paginador.getItems(trabajos) : trabajos;
+
+    itemsPagina.forEach((t) => {
         const tr = document.createElement('tr');
 
         const imagenHTML = t.imagen_url
@@ -76,6 +218,9 @@ function renderizarTrabajos(trabajos) {
             </td>
             <td><span class="cell-fecha">${formatearFecha(t.fecha)}</span></td>
             <td style="text-align: right">
+                <button class="btn-editar" title="Editar" data-id="${t.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
                 <button class="btn-eliminar" title="Eliminar" data-id="${t.id}" data-titulo="${escapar(t.titulo)}">
                     <i class="fas fa-trash-alt"></i>
                 </button>
@@ -84,31 +229,77 @@ function renderizarTrabajos(trabajos) {
         tbody.appendChild(tr);
     });
 
-    // Asignar evento a cada botón de eliminar
+    tbody.querySelectorAll('.btn-editar').forEach((btn) => {
+        btn.addEventListener('click', () => abrirModalEdicion(btn.dataset.id));
+    });
+
     tbody.querySelectorAll('.btn-eliminar').forEach((btn) => {
         btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const titulo = btn.dataset.titulo;
-            eliminarTrabajo(id, titulo);
+            eliminarTrabajo(btn.dataset.id, btn.dataset.titulo);
         });
     });
 }
 
-// CARGA DE DATOS
+// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
+
+function aplicarFiltros() {
+    estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
+
+    let filtrados = [...trabajosOriginales];
+
+    if (tipoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter((t) => t.tipo_reparacion === tipoFiltroActivo);
+    }
+
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter(
+            (t) =>
+                (t.titulo && t.titulo.toLowerCase().includes(q)) ||
+                (t.descripcion && t.descripcion.toLowerCase().includes(q)) ||
+                (t.tipo_reparacion && t.tipo_reparacion.toLowerCase().includes(q))
+        );
+    }
+
+    filtrados = aplicarOrdenamiento(filtrados);
+
+    trabajosFiltrados = filtrados;   // ← guardar para exportar
+
+    if (paginador) paginador.actualizar(filtrados.length, true);
+
+    actualizarBotonLimpiar();
+    renderizarTrabajos(filtrados);
+}
+
+// ----- CARGA DE DATOS -----
 
 async function cargarTrabajos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
     tbody.innerHTML = '';
 
     try {
         const respuesta = await fetch(API_PORTAFOLIO);
         if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
         const trabajos = await respuesta.json();
-        renderizarTrabajos(trabajos);
+
+        trabajosOriginales = trabajos;
+        construirFiltrosTipo();
+
+        if (trabajos.length === 0) {
+            trabajosFiltrados = [];
+            estadoVacio.style.display = 'block';
+            contador.textContent = '0 trabajos';
+            if (paginador) paginador.actualizar(0, true);
+        } else {
+            aplicarFiltros();
+        }
     } catch (error) {
         console.error('Error al cargar trabajos:', error);
         tbody.innerHTML = '';
+        trabajosFiltrados = [];
         estadoVacio.style.display = 'block';
         estadoVacio.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="color:#d9534f"></i>
@@ -120,7 +311,7 @@ async function cargarTrabajos() {
     }
 }
 
-// CREAR TRABAJO
+// ----- CREAR TRABAJO -----
 
 formTrabajo.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -133,7 +324,7 @@ formTrabajo.addEventListener('submit', async (e) => {
     };
 
     if (!datos.titulo) {
-        alert('El título del trabajo es obligatorio.');
+        mostrarToast('El título del trabajo es obligatorio.', true);
         return;
     }
 
@@ -149,11 +340,11 @@ formTrabajo.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            alert('Trabajo publicado correctamente.');
+            mostrarToast('✅ Trabajo publicado correctamente.');
             formTrabajo.reset();
             cargarTrabajos();
         } else {
-            alert(`Error: ${resultado.error || 'No se pudo guardar el trabajo.'}`);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear trabajo:', error);
@@ -163,7 +354,88 @@ formTrabajo.addEventListener('submit', async (e) => {
     }
 });
 
-// ELIMINAR TRABAJO
+// ----- MODAL -----
+
+function abrirModalEdicion(id) {
+    const trabajo = trabajosOriginales.find((t) => String(t.id) === String(id));
+    if (!trabajo) {
+        mostrarToast('No se encontró el trabajo.', true);
+        return;
+    }
+
+    document.getElementById('edit-id').value = trabajo.id;
+    document.getElementById('edit-titulo').value = trabajo.titulo || '';
+    document.getElementById('edit-descripcion').value = trabajo.descripcion || '';
+    document.getElementById('edit-tipo_reparacion').value = trabajo.tipo_reparacion || '';
+    document.getElementById('edit-imagen_url').value = trabajo.imagen_url || '';
+
+    modalEditar.classList.add('modal-visible');
+}
+
+function cerrarModalEdicion() {
+    modalEditar.classList.remove('modal-visible');
+    formEditar.reset();
+}
+
+modalClose.addEventListener('click', cerrarModalEdicion);
+btnCancelar.addEventListener('click', cerrarModalEdicion);
+
+modalEditar.addEventListener('click', (e) => {
+    if (e.target === modalEditar) cerrarModalEdicion();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalEditar.classList.contains('modal-visible')) {
+        cerrarModalEdicion();
+    }
+});
+
+// ----- GUARDAR CAMBIOS -----
+
+formEditar.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById('edit-id').value;
+
+    const datos = {
+        titulo: document.getElementById('edit-titulo').value.trim(),
+        descripcion: document.getElementById('edit-descripcion').value.trim() || null,
+        tipo_reparacion: document.getElementById('edit-tipo_reparacion').value || null,
+        imagen_url: document.getElementById('edit-imagen_url').value.trim() || null,
+    };
+
+    if (!datos.titulo) {
+        mostrarToast('El título del trabajo es obligatorio.', true);
+        return;
+    }
+
+    btnActualizar.disabled = true;
+    btnActualizar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+    try {
+        const respuesta = await fetchAdmin(`${API_ADMIN_PORTAFOLIO}/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarToast('✅ Trabajo actualizado correctamente.');
+            cerrarModalEdicion();
+            cargarTrabajos();
+        } else {
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+        }
+    } catch (error) {
+        console.error('Error al actualizar trabajo:', error);
+    } finally {
+        btnActualizar.disabled = false;
+        btnActualizar.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+    }
+});
+
+// ----- ELIMINAR -----
 
 async function eliminarTrabajo(id, titulo) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
@@ -177,18 +449,68 @@ async function eliminarTrabajo(id, titulo) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            alert('Trabajo eliminado.');
+            mostrarToast('✅ Trabajo eliminado.');
             cargarTrabajos();
         } else {
-            alert(`Error: ${resultado.error || 'No se pudo eliminar el trabajo.'}`);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar trabajo:', error);
     }
 }
 
-//  INICIO 
+// ----- EVENTOS -----
+
+buscador.addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    aplicarFiltros();
+});
+
+btnLimpiar.addEventListener('click', () => {
+    textoBusqueda = '';
+    buscador.value = '';
+    tipoFiltroActivo = 'Todos';
+    filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.tipo === 'Todos');
+    });
+    aplicarFiltros();
+});
+
+btnExportar.addEventListener('click', exportarCSV);
+
+// ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
+    paginador = crearPaginador('paginacion-trabajos', POR_PAGINA, () => {
+        let filtrados = [...trabajosOriginales];
+        if (tipoFiltroActivo !== 'Todos') {
+            filtrados = filtrados.filter((t) => t.tipo_reparacion === tipoFiltroActivo);
+        }
+        if (textoBusqueda.trim() !== '') {
+            const q = textoBusqueda.trim().toLowerCase();
+            filtrados = filtrados.filter(
+                (t) =>
+                    (t.titulo && t.titulo.toLowerCase().includes(q)) ||
+                    (t.descripcion && t.descripcion.toLowerCase().includes(q)) ||
+                    (t.tipo_reparacion && t.tipo_reparacion.toLowerCase().includes(q))
+            );
+        }
+        filtrados = aplicarOrdenamiento(filtrados);
+        renderizarTrabajos(filtrados);
+    });
+
+    configurarColumnasOrdenables(
+        'tabla-trabajos',
+        {
+            1: { campo: 'titulo', tipo: 'string' },
+            2: { campo: 'descripcion', tipo: 'string' },
+            3: { campo: 'tipo_reparacion', tipo: 'string' },
+            4: { campo: 'fecha', tipo: 'fecha' },
+        },
+        () => ordenActual,
+        (nuevo) => { ordenActual = nuevo; },
+        aplicarFiltros
+    );
+
     setTimeout(cargarTrabajos, 100);
 });

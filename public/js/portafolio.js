@@ -1,5 +1,5 @@
-// LÓGICA DEL PORTAFOLIO PÚBLICO - DuotechBros
-// Consume GET /api/portafolio y renderiza las tarjetas
+// LÓGICA DEL PORTAFOLIO PÚBLICO - DUOTECHBROS
+// consume get /api/portafolio y renderiza las tarjetas
 
 const API_PORTAFOLIO = '/api/portafolio';
 
@@ -9,7 +9,7 @@ const estadoCargando = document.getElementById('estado-cargando');
 const estadoVacio = document.getElementById('estado-vacio');
 const estadoError = document.getElementById('estado-error');
 
-//  UTILIDADES 
+// UTILIDADES
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '';
@@ -42,7 +42,7 @@ function claseTipoBadge(tipo) {
     return 'tipo-default';
 }
 
-//  RENDERIZADO 
+// RENDERIZADO
 
 function renderizarTrabajos(trabajos) {
     lista.innerHTML = '';
@@ -98,7 +98,7 @@ function renderizarTrabajos(trabajos) {
     });
 }
 
-//  CARGA DE DATOS 
+// CARGA DE DATOS
 
 async function cargarPortafolio() {
     estadoCargando.style.display = 'block';
@@ -122,6 +122,6 @@ async function cargarPortafolio() {
     }
 }
 
-//  INICIO 
+// INICIO
 
 document.addEventListener('DOMContentLoaded', cargarPortafolio);

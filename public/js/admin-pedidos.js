@@ -1,16 +1,33 @@
-// LÓGICA DE LA PÁGINA "VER PEDIDOS" - DuotechBros Admin
+// LÓGICA DE LA PÁGINA "VER PEDIDOS" - DUOTECHBROS ADMIN
 
 const API_PEDIDOS = '/api/pedidos';
+const API_ADMIN_PEDIDOS = '/api/admin/pedidos';
 
 const tbody = document.getElementById('tbody-pedidos');
 const contador = document.getElementById('contador-pedidos');
 const estadoVacio = document.getElementById('estado-vacio');
+const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnRefresh = document.getElementById('btn-refresh');
+const btnExportar = document.getElementById('btn-exportar');
+
+const buscador = document.getElementById('buscador-pedidos');
+const filtrosEstado = document.getElementById('filtros-estado');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
+const POR_PAGINA = 10;
+
+// ESTADO LOCAL
+let pedidosOriginales = [];
+let pedidosFiltrados = [];
+let estadoFiltroActivo = 'Todos';
+let textoBusqueda = '';
+let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
+let paginador = null;
 
 // UTILIDADES
 
-/* Formatea una fecha ISO a formato legible: "15/09/2026 14:30" */ 
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -21,11 +38,9 @@ function formatearFecha(fechaISO) {
     const anio = fecha.getFullYear();
     const horas = String(fecha.getHours()).padStart(2, '0');
     const minutos = String(fecha.getMinutes()).padStart(2, '0');
-
     return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
 }
 
-/* Escapa texto para prevenir inyección HTML. */
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
     const div = document.createElement('div');
@@ -33,29 +48,169 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
-/* Devuelve la clase CSS según el estado del pedido. */
-function claseEstado(estado) {
-    const e = (estado || 'pendiente').toLowerCase().replace(/\s+/g, '-');
-    const clasesValidas = ['pendiente', 'en-proceso', 'completado', 'cancelado'];
-    return clasesValidas.includes(e) ? `badge-${e}` : 'badge-pendiente';
+function normalizarEstado(estado) {
+    return (estado || 'pendiente').toLowerCase().trim().replace(/\s+/g, '-');
+}
+
+function claseBadgeEstado(estado) {
+    const e = normalizarEstado(estado);
+    const validos = ['pendiente', 'en-proceso', 'completado', 'cancelado'];
+    return validos.includes(e) ? `badge-${e}` : 'badge-pendiente';
+}
+
+function capitalizar(texto) {
+    if (!texto) return '';
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function mostrarToast(mensaje, esError = false) {
+    const anterior = document.getElementById('toast-admin');
+    if (anterior) anterior.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-admin';
+    toast.className = 'toast-admin' + (esError ? ' toast-error' : '');
+    toast.innerHTML = `<span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ORDENAMIENTO
+
+function aplicarOrdenamiento(array) {
+    if (!ordenActual.campo) return array;
+    return [...array].sort((a, b) => {
+        const cmp = compararValores(a[ordenActual.campo], b[ordenActual.campo], ordenActual.tipo);
+        return ordenActual.direccion === 'asc' ? cmp : -cmp;
+    });
+}
+
+// EXPORTAR A CSV
+
+function escaparCSV(valor) {
+    if (valor === null || valor === undefined) return '';
+    const texto = String(valor);
+    if (texto.includes(',') || texto.includes('"') || texto.includes('\n') || texto.includes('\r')) {
+        return `"${texto.replace(/"/g, '""')}"`;
+    }
+    return texto;
+}
+
+function exportarCSV() {
+    if (pedidosFiltrados.length === 0) {
+        mostrarToast('No hay pedidos para exportar.', true);
+        return;
+    }
+
+    const encabezados = [
+        'ID',
+        'Nombre del cliente',
+        'Teléfono',
+        'Email',
+        'Modelo del celular',
+        'Descripción del problema',
+        'Estado',
+        'Fecha de creación',
+    ];
+
+    const filas = pedidosFiltrados.map((p) => [
+        p.id,
+        p.nombre_cliente,
+        p.telefono,
+        p.email,
+        p.modelo_celular,
+        p.descripcion_problema,
+        capitalizar(p.estado || 'pendiente'),
+        formatearFecha(p.creado_en),
+    ]);
+
+    const lineas = [
+        encabezados.map(escaparCSV).join(','),
+        ...filas.map((fila) => fila.map(escaparCSV).join(',')),
+    ];
+
+    const contenido = lineas.join('\r\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + contenido], { type: 'text/csv;charset=utf-8;' });
+
+    const hoy = new Date();
+    const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    const nombreArchivo = `pedidos-duotechbros-${fecha}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    mostrarToast(`Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+}
+
+// FILTROS
+
+function construirFiltrosEstado() {
+    const opciones = ['Todos', ...ESTADOS];
+    filtrosEstado.innerHTML = '';
+
+    opciones.forEach((estado) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (estado === estadoFiltroActivo ? ' active' : '');
+        chip.dataset.estado = estado;
+        chip.textContent = estado === 'Todos' ? 'Todos' : capitalizar(estado);
+
+        chip.addEventListener('click', () => {
+            estadoFiltroActivo = estado;
+            filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.estado === estado);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosEstado.appendChild(chip);
+    });
+}
+
+function actualizarBotonLimpiar() {
+    const hayFiltro = estadoFiltroActivo !== 'Todos' || textoBusqueda.trim() !== '';
+    btnLimpiar.disabled = !hayFiltro;
 }
 
 // RENDERIZADO
 
-/* Renderiza la lista de pedidos en la tabla. */
 function renderizarPedidos(pedidos) {
     tbody.innerHTML = '';
 
-    if (!pedidos || pedidos.length === 0) {
-        estadoVacio.style.display = 'block';
+    if (pedidos.length === 0) {
+        if (pedidosOriginales.length === 0) {
+            estadoVacio.style.display = 'block';
+        } else {
+            estadoSinResultados.style.display = 'block';
+        }
         contador.textContent = '0 pedidos';
         return;
     }
 
-    estadoVacio.style.display = 'none';
     contador.textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''}`;
 
-    pedidos.forEach((p) => {
+    // PAGINAR
+    const itemsPagina = paginador ? paginador.getItems(pedidos) : pedidos;
+
+    itemsPagina.forEach((p) => {
+        const estadoActual = p.estado || 'pendiente';
+
+        const opciones = ESTADOS.map(
+            (e) => `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
+        ).join('');
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><span class="cell-nombre">${escapar(p.nombre_cliente)}</span></td>
@@ -71,37 +226,98 @@ function renderizarPedidos(pedidos) {
             </td>
             <td><span class="cell-fecha">${formatearFecha(p.creado_en)}</span></td>
             <td>
-                <span class="badge ${claseEstado(p.estado)}">${escapar(p.estado || 'pendiente')}</span>
+                <span class="badge ${claseBadgeEstado(estadoActual)}" id="badge-${p.id}">
+                    ${capitalizar(estadoActual)}
+                </span>
+            </td>
+            <td style="text-align: right">
+                <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}">
+                    ${opciones}
+                </select>
             </td>
         `;
         tbody.appendChild(tr);
     });
+
+    tbody.querySelectorAll('.estado-select').forEach((select) => {
+        select.addEventListener('change', () => {
+            const id = select.dataset.id;
+            const nuevoEstado = select.value;
+            const estadoAnterior = select.dataset.estadoAnterior;
+            if (nuevoEstado === estadoAnterior) return;
+            cambiarEstado(id, nuevoEstado, estadoAnterior, select);
+        });
+    });
+}
+
+// APLICAR FILTROS + ORDEN + PAGINACIÓN
+
+function aplicarFiltros() {
+    estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
+
+    let filtrados = [...pedidosOriginales];
+
+    if (estadoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter(
+            (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
+        );
+    }
+
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter(
+            (p) =>
+                (p.nombre_cliente && p.nombre_cliente.toLowerCase().includes(q)) ||
+                (p.email && p.email.toLowerCase().includes(q)) ||
+                (p.modelo_celular && p.modelo_celular.toLowerCase().includes(q)) ||
+                (p.telefono && String(p.telefono).toLowerCase().includes(q))
+        );
+    }
+
+    filtrados = aplicarOrdenamiento(filtrados);
+    pedidosFiltrados = filtrados;
+
+    // actualizar paginador (resetear a página 1)
+    if (paginador) {
+        paginador.actualizar(pedidosFiltrados.length, true);
+    }
+
+    actualizarBotonLimpiar();
+    renderizarPedidos(pedidosFiltrados);
 }
 
 // CARGA DE DATOS
 
-/* Carga los pedidos desde la API y los renderiza. */
 async function cargarPedidos() {
-    // Mostrar estado de carga
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
     tbody.innerHTML = '';
 
-    // Animar el icono del botón de refrescar
     const icono = btnRefresh.querySelector('i');
     icono.classList.add('spinning');
     btnRefresh.disabled = true;
 
     try {
         const respuesta = await fetch(API_PEDIDOS);
-        if (!respuesta.ok) {
-            throw new Error(`Error HTTP ${respuesta.status}`);
-        }
+        if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
         const pedidos = await respuesta.json();
-        renderizarPedidos(pedidos);
+
+        pedidosOriginales = pedidos;
+
+        if (pedidos.length === 0) {
+            pedidosFiltrados = [];
+            estadoVacio.style.display = 'block';
+            contador.textContent = '0 pedidos';
+            if (paginador) paginador.actualizar(0, true);
+        } else {
+            aplicarFiltros();
+        }
     } catch (error) {
         console.error('Error al cargar pedidos:', error);
         tbody.innerHTML = '';
+        pedidosFiltrados = [];
         estadoVacio.style.display = 'block';
         estadoVacio.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="color:#d9534f"></i>
@@ -115,12 +331,117 @@ async function cargarPedidos() {
     }
 }
 
+// CAMBIO DE ESTADO
+
+async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
+    selectElement.disabled = true;
+
+    try {
+        const respuesta = await fetchAdmin(`${API_ADMIN_PEDIDOS}/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ estado: nuevoEstado }),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            const badge = document.getElementById(`badge-${id}`);
+            if (badge) {
+                badge.className = `badge ${claseBadgeEstado(nuevoEstado)}`;
+                badge.textContent = capitalizar(nuevoEstado);
+            }
+            selectElement.dataset.estadoAnterior = nuevoEstado;
+
+            const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
+            if (pedido) pedido.estado = nuevoEstado;
+
+            mostrarToast(`Estado actualizado a "${capitalizar(nuevoEstado)}"`);
+
+            // recalcular (no resetea página porque el cambio de estado no afecta el filtro de página)
+            pedidosFiltrados = aplicarFiltrosSinReset();
+            renderizarPedidos(pedidosFiltrados);
+        } else {
+            selectElement.value = estadoAnterior;
+            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar'}`, true);
+        }
+    } catch (error) {
+        console.error('Error al cambiar estado:', error);
+        selectElement.value = estadoAnterior;
+        mostrarToast('No se pudo conectar con el servidor', true);
+    } finally {
+        selectElement.disabled = false;
+    }
+}
+
+/** variante de aplicarFiltros que no resetea la página (para cambios de estado). */
+function aplicarFiltrosSinReset() {
+    let filtrados = [...pedidosOriginales];
+
+    if (estadoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter(
+            (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
+        );
+    }
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter(
+            (p) =>
+                (p.nombre_cliente && p.nombre_cliente.toLowerCase().includes(q)) ||
+                (p.email && p.email.toLowerCase().includes(q)) ||
+                (p.modelo_celular && p.modelo_celular.toLowerCase().includes(q)) ||
+                (p.telefono && String(p.telefono).toLowerCase().includes(q))
+        );
+    }
+    filtrados = aplicarOrdenamiento(filtrados);
+    if (paginador) paginador.actualizar(filtrados.length, false);
+    return filtrados;
+}
+
 // EVENTOS
 
 btnRefresh.addEventListener('click', cargarPedidos);
+btnExportar.addEventListener('click', exportarCSV);
 
-// Cargar pedidos al iniciar la página
+buscador.addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    aplicarFiltros();
+});
+
+btnLimpiar.addEventListener('click', () => {
+    textoBusqueda = '';
+    buscador.value = '';
+    estadoFiltroActivo = 'Todos';
+    filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.estado === 'Todos');
+    });
+    aplicarFiltros();
+});
+
+// INICIO
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Pequeña espera para que protegerPagina() (en admin.js) corra primero
+    // CREAR PAGINADOR
+    paginador = crearPaginador('paginacion-pedidos', POR_PAGINA, () => {
+        renderizarPedidos(pedidosFiltrados);
+    });
+
+    construirFiltrosEstado();
+
+    // CONFIGURAR ORDENAMIENTO
+    configurarColumnasOrdenables(
+        'tabla-pedidos',
+        {
+            0: { campo: 'nombre_cliente', tipo: 'string' },
+            1: { campo: 'email', tipo: 'string' },
+            2: { campo: 'modelo_celular', tipo: 'string' },
+            3: { campo: 'descripcion_problema', tipo: 'string' },
+            4: { campo: 'creado_en', tipo: 'fecha' },
+            5: { campo: 'estado', tipo: 'string' },
+        },
+        () => ordenActual,
+        (nuevo) => { ordenActual = nuevo; },
+        aplicarFiltros
+    );
+
     setTimeout(cargarPedidos, 100);
 });
