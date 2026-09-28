@@ -1398,3 +1398,208 @@ table.admin-table tbody tr:hover {
         max-width: 100%;
     }
 }
+
+/* ============================================================
+   DASHBOARD - TARJETAS DE ESTADÍSTICAS
+   ============================================================ */
+
+/* ----- Grid de tarjetas principales ----- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 4px 15px rgba(11, 74, 98, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(11, 74, 98, 0.14);
+}
+
+.stat-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon i {
+    font-size: 1.4rem;
+    color: #ffffff;
+}
+
+.stat-icon-blue {
+    background: linear-gradient(135deg, #007bff 0%, #005b9f 100%);
+}
+
+.stat-icon-green {
+    background: linear-gradient(135deg, #0a9396 0%, #056b6d 100%);
+}
+
+.stat-icon-teal {
+    background: linear-gradient(135deg, #0b4a62 0%, #083b50 100%);
+}
+
+.stat-icon-amber {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.stat-numero {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #0b4a62;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.stat-label {
+    font-size: 0.82rem;
+    color: #777;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   DASHBOARD - PEDIDOS POR ESTADO
+   ============================================================ */
+
+.estados-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.estado-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 22px 16px;
+    border-radius: 14px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.estado-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(11, 74, 98, 0.12);
+}
+
+.estado-card i {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+}
+
+.estado-numero {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.estado-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+}
+
+/* Colores por estado (coherentes con los badges) */
+.estado-pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.estado-en-proceso {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.estado-completado {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.estado-cancelado {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* ============================================================
+   RESPONSIVE DEL DASHBOARD
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .stat-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .stat-icon i {
+        font-size: 1.1rem;
+    }
+
+    .stat-numero {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.72rem;
+    }
+
+    .estados-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .estado-numero {
+        font-size: 1.5rem;
+    }
+
+    .estado-label {
+        font-size: 0.72rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .estados-grid {
+        grid-template-columns: 1fr;
+    }
+}

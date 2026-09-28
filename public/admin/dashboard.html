@@ -7,14 +7,13 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="../css/normalize.css" />
-    <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
     <title>Dashboard - DuotechBros Admin</title>
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
-      <!-- SIDEBAR -->
-
+      <!-- ========== SIDEBAR ========== -->
       <aside class="admin-sidebar">
         <div class="admin-sidebar-brand">
           <i class="fas fa-tools"></i>
@@ -29,15 +28,15 @@
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
           </a>
-          <a href="../admin/productos.html">
+          <a href="productos.html">
             <i class="fas fa-box"></i>
             <span>Gestionar Productos</span>
           </a>
-          <a href="../admin/portafolio.html">
+          <a href="portafolio.html">
             <i class="fas fa-briefcase"></i>
             <span>Gestionar Portafolio</span>
           </a>
-          <a href="../admin/pedidos.html">
+          <a href="pedidos.html">
             <i class="fas fa-clipboard-list"></i>
             <span>Ver Pedidos</span>
           </a>
@@ -54,76 +53,152 @@
         </div>
       </aside>
 
-      <!-- contenido principal -->
-
+      <!-- ========== CONTENIDO PRINCIPAL ========== -->
       <main class="admin-main">
         <header class="admin-header">
           <div>
             <h1>Bienvenido al Panel</h1>
-            <p>
-              Seleccioná una sección para comenzar a gestionar el contenido del
-              sitio.
-            </p>
+            <p>Resumen general de la actividad de DuotechBros.</p>
           </div>
-          <a href="../admin/pedidos.html" class="admin-header-action">
-            <i class="fas fa-clipboard-list"></i>
-            Ver Pedidos
-          </a>
+          <button class="btn-refresh" id="btn-refresh">
+            <i class="fas fa-sync-alt"></i> Actualizar
+          </button>
         </header>
 
-        <!-- Tarjetas del dashboard -->
-        <section class="dashboard-grid">
-          <a href="../admin/productos.html" class="dashboard-card">
-            <i class="fas fa-box"></i>
-            <h3>Gestionar Productos</h3>
-            <p>
-              Agregá o eliminá accesorios y repuestos del catálogo de la tienda.
-            </p>
-          </a>
+        <!-- ========== ESTADÍSTICAS PRINCIPALES ========== -->
+        <section class="stats-grid" id="stats-principales">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-blue">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-numero" id="total-pedidos">—</span>
+              <span class="stat-label">Pedidos totales</span>
+            </div>
+          </div>
 
-          <a href="../admin/portafolio.html" class="dashboard-card">
-            <i class="fas fa-briefcase"></i>
-            <h3>Gestionar Portafolio</h3>
-            <p>
-              Publicá nuevos trabajos realizados o retirá los que ya no quieras
-              mostrar.
-            </p>
-          </a>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-green">
+              <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-numero" id="total-productos">—</span>
+              <span class="stat-label">Productos en tienda</span>
+            </div>
+          </div>
 
-          <a href="../admin/pedidos.html" class="dashboard-card">
-            <i class="fas fa-clipboard-list"></i>
-            <h3>Ver Pedidos</h3>
-            <p>
-              Revisá todas las solicitudes de reparación enviadas por los
-              clientes.
-            </p>
-          </a>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-teal">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-numero" id="total-portafolio">—</span>
+              <span class="stat-label">Trabajos publicados</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-amber">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-numero" id="total-stock-bajo">—</span>
+              <span class="stat-label">Productos con stock bajo</span>
+            </div>
+          </div>
         </section>
 
-        <!-- Sección de información rápida (opcional) -->
+        <!-- ========== ESTADOS DE PEDIDOS ========== -->
         <section class="admin-card" style="margin-top: 30px">
-          <h2>Información del sistema</h2>
-          <p style="color: #555; line-height: 1.7; font-size: 0.9rem">
-            Este panel te permite gestionar el contenido de la web pública de
-            <strong>DuotechBros</strong>. Los cambios que realices se guardan
-            directamente en la base de datos y se reflejan en el sitio en tiempo
-            real.
-          </p>
-          <p
-            style="
-              color: #555;
-              line-height: 1.7;
-              font-size: 0.9rem;
-              margin-top: 10px;
-            "
-          >
-            Si tenés problemas o necesitás soporte técnico, contactá al equipo
-            de desarrollo.
-          </p>
+          <h2><i class="fas fa-chart-pie"></i> Pedidos por estado</h2>
+
+          <div class="estados-grid">
+            <div class="estado-card estado-pendiente">
+              <i class="fas fa-clock"></i>
+              <span class="estado-numero" id="pedidos-pendiente">—</span>
+              <span class="estado-label">Pendientes</span>
+            </div>
+
+            <div class="estado-card estado-en-proceso">
+              <i class="fas fa-tools"></i>
+              <span class="estado-numero" id="pedidos-en-proceso">—</span>
+              <span class="estado-label">En proceso</span>
+            </div>
+
+            <div class="estado-card estado-completado">
+              <i class="fas fa-check-circle"></i>
+              <span class="estado-numero" id="pedidos-completado">—</span>
+              <span class="estado-label">Completados</span>
+            </div>
+
+            <div class="estado-card estado-cancelado">
+              <i class="fas fa-times-circle"></i>
+              <span class="estado-numero" id="pedidos-cancelado">—</span>
+              <span class="estado-label">Cancelados</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== ÚLTIMOS PEDIDOS ========== -->
+        <section class="admin-card" style="margin-top: 30px; padding: 0; overflow: hidden">
+          <div class="table-header">
+            <h2><i class="fas fa-history"></i> Últimos pedidos recibidos</h2>
+            <a href="pedidos.html" class="btn-secondary">
+              Ver todos <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="admin-table" id="tabla-ultimos">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Modelo</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-ultimos">
+                <!-- Se carga dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-empty" id="estado-vacio" style="display: none">
+            <i class="fas fa-inbox"></i>
+            <p>Aún no hay pedidos recibidos</p>
+            <small>Cuando un cliente envíe una solicitud aparecerá aquí.</small>
+          </div>
+        </section>
+
+        <!-- ========== ACCESOS RÁPIDOS ========== -->
+        <section class="admin-card" style="margin-top: 30px">
+          <h2><i class="fas fa-bolt"></i> Accesos rápidos</h2>
+
+          <div class="dashboard-grid">
+            <a href="productos.html" class="dashboard-card">
+              <i class="fas fa-box"></i>
+              <h3>Gestionar Productos</h3>
+              <p>Agregá o eliminá accesorios del catálogo de la tienda.</p>
+            </a>
+
+            <a href="portafolio.html" class="dashboard-card">
+              <i class="fas fa-briefcase"></i>
+              <h3>Gestionar Portafolio</h3>
+              <p>Publicá nuevos trabajos realizados o retirá los que ya no quieras mostrar.</p>
+            </a>
+
+            <a href="pedidos.html" class="dashboard-card">
+              <i class="fas fa-clipboard-list"></i>
+              <h3>Ver Pedidos</h3>
+              <p>Revisá todas las solicitudes de reparación enviadas por los clientes.</p>
+            </a>
+          </div>
         </section>
       </main>
     </div>
 
-    <script src="../js/admin.js"></script>
+    <script src="/js/admin.js"></script>
+    <script src="/js/admin-dashboard.js"></script>
   </body>
 </html>
