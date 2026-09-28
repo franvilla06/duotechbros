@@ -1656,3 +1656,46 @@ table.admin-table tbody tr:hover {
         margin-left: 0;
     }
 }
+
+/* ============================================================
+   AGRUPACIÓN DE BOTONES EN EL HEADER
+   ============================================================ */
+
+.admin-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* El botón "Exportar CSV" hereda de .btn-refresh, pero le damos un toque verde */
+#btn-exportar {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-color: #a3cfbb;
+}
+
+#btn-exportar:hover {
+    background-color: #b7e0c5;
+    border-color: #0a9396;
+    color: #0a9396;
+}
+
+#btn-exportar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive: en pantallas pequeñas los botones ocupan todo el ancho */
+@media (max-width: 600px) {
+    .admin-header-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .admin-header-actions .btn-refresh {
+        width: 100%;
+        justify-content: center;
+    }
+}

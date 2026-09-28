@@ -1,6 +1,6 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "VER PEDIDOS" - DuotechBros Admin
-// Incluye: ver, cambiar estado, buscar y filtrar
+// Incluye: ver, cambiar estado, buscar, filtrar y exportar CSV
 // ============================================================
 
 const API_PEDIDOS = '/api/pedidos';
@@ -12,17 +12,19 @@ const estadoVacio = document.getElementById('estado-vacio');
 const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnRefresh = document.getElementById('btn-refresh');
+const btnExportar = document.getElementById('btn-exportar');
 
-// Elementos de búsqueda y filtros
+// Búsqueda y filtros
 const buscador = document.getElementById('buscador-pedidos');
 const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
-// Estados válidos y de filtro
+// Estados
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 
 // Estado local
 let pedidosOriginales = [];
+let pedidosFiltrados = []; // ← guardamos lo que se muestra actualmente (para exportar)
 let estadoFiltroActivo = 'Todos';
 let textoBusqueda = '';
 
@@ -79,6 +81,87 @@ function mostrarToast(mensaje, esError = false) {
         toast.classList.remove('toast-visible');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+// ============================================================
+// EXPORTAR A CSV
+// ============================================================
+
+/**
+ * Escapa un campo para CSV: si contiene comas, comillas o saltos de línea,
+ * se encierra entre comillas dobles y las comillas internas se duplican.
+ */
+function escaparCSV(valor) {
+    if (valor === null || valor === undefined) return '';
+    const texto = String(valor);
+    // Si tiene coma, comilla o salto de línea, envolver en comillas
+    if (texto.includes(',') || texto.includes('"') || texto.includes('\n') || texto.includes('\r')) {
+        return `"${texto.replace(/"/g, '""')}"`;
+    }
+    return texto;
+}
+
+/**
+ * Exporta los pedidos actualmente filtrados a un archivo CSV.
+ */
+function exportarCSV() {
+    if (pedidosFiltrados.length === 0) {
+        mostrarToast('No hay pedidos para exportar.', true);
+        return;
+    }
+
+    // Encabezados del CSV
+    const encabezados = [
+        'ID',
+        'Nombre del cliente',
+        'Teléfono',
+        'Email',
+        'Modelo del celular',
+        'Descripción del problema',
+        'Estado',
+        'Fecha de creación',
+    ];
+
+    // Construir las filas
+    const filas = pedidosFiltrados.map((p) => [
+        p.id,
+        p.nombre_cliente,
+        p.telefono,
+        p.email,
+        p.modelo_celular,
+        p.descripcion_problema,
+        capitalizar(p.estado || 'pendiente'),
+        formatearFecha(p.creado_en),
+    ]);
+
+    // Construir el contenido del CSV
+    const lineas = [
+        encabezados.map(escaparCSV).join(','),
+        ...filas.map((fila) => fila.map(escaparCSV).join(',')),
+    ];
+
+    const contenido = lineas.join('\r\n');
+
+    // BOM UTF-8 para que Excel reconozca los acentos
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + contenido], { type: 'text/csv;charset=utf-8;' });
+
+    // Nombre del archivo con la fecha actual
+    const hoy = new Date();
+    const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    const nombreArchivo = `pedidos-duotechbros-${fecha}.csv`;
+
+    // Descargar
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    mostrarToast(`✅ Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
 }
 
 // ----- FILTROS -----
@@ -164,7 +247,6 @@ function renderizarPedidos(pedidos) {
         tbody.appendChild(tr);
     });
 
-    // Asignar eventos a los selects
     tbody.querySelectorAll('.estado-select').forEach((select) => {
         select.addEventListener('change', () => {
             const id = select.dataset.id;
@@ -184,14 +266,12 @@ function aplicarFiltros() {
 
     let filtrados = [...pedidosOriginales];
 
-    // Filtrar por estado
     if (estadoFiltroActivo !== 'Todos') {
         filtrados = filtrados.filter(
             (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
         );
     }
 
-    // Filtrar por búsqueda
     if (textoBusqueda.trim() !== '') {
         const q = textoBusqueda.trim().toLowerCase();
         filtrados = filtrados.filter(
@@ -202,6 +282,9 @@ function aplicarFiltros() {
                 (p.telefono && String(p.telefono).toLowerCase().includes(q))
         );
     }
+
+    // Guardar para exportar CSV
+    pedidosFiltrados = filtrados;
 
     actualizarBotonLimpiar();
     renderizarPedidos(filtrados);
@@ -227,6 +310,7 @@ async function cargarPedidos() {
         pedidosOriginales = pedidos;
 
         if (pedidos.length === 0) {
+            pedidosFiltrados = [];
             estadoVacio.style.display = 'block';
             contador.textContent = '0 pedidos';
         } else {
@@ -235,6 +319,7 @@ async function cargarPedidos() {
     } catch (error) {
         console.error('Error al cargar pedidos:', error);
         tbody.innerHTML = '';
+        pedidosFiltrados = [];
         estadoVacio.style.display = 'block';
         estadoVacio.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="color:#d9534f"></i>
@@ -269,15 +354,16 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
             }
             selectElement.dataset.estadoAnterior = nuevoEstado;
 
-            // Actualizar el pedido en el array local
             const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
             if (pedido) pedido.estado = nuevoEstado;
 
             mostrarToast(`✅ Estado actualizado a "${capitalizar(nuevoEstado)}"`);
 
-            // Si hay un filtro activo, re-aplicar (por si el pedido ya no corresponde)
             if (estadoFiltroActivo !== 'Todos') {
                 setTimeout(aplicarFiltros, 400);
+            } else {
+                // Refrescar el array de exportación
+                pedidosFiltrados = [...pedidosOriginales];
             }
         } else {
             selectElement.value = estadoAnterior;
@@ -295,6 +381,7 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
 // ----- EVENTOS -----
 
 btnRefresh.addEventListener('click', cargarPedidos);
+btnExportar.addEventListener('click', exportarCSV);
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;
