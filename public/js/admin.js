@@ -1,8 +1,16 @@
-// LÓGICA COMÚN DEL PANEL DE ADMINISTRACIÓN
+// ============================================================
+// LÓGICA COMÚN DEL PANEL DE ADMINISTRACIÓN - DuotechBros
+// ============================================================
 
 const API_BASE = '/api';
 
+// Intervalo de refresco de notificaciones (30 segundos)
+const INTERVALO_NOTIFICACIONES = 30000;
+let intervalNotificaciones = null;
+
+// ============================================================
 // UTILIDADES DE SESIÓN
+// ============================================================
 
 function guardarSesion(usuario, token) {
     sessionStorage.setItem('adminLogueado', 'true');
@@ -51,22 +59,92 @@ async function fetchAdmin(url, opciones = {}) {
     return respuesta;
 }
 
-/** 
- * Protege una página del panel.
- * Si no hay sesión activa, redirige al login.
- * También coloca el nombre del usuario en el sidebar y configura el logout.
+// ============================================================
+// NOTIFICACIONES DE PEDIDOS PENDIENTES
+// ============================================================
+
+/**
+ * Inserta el badge de notificaciones en el link "Ver Pedidos" del sidebar.
+ * Se llama una sola vez al cargar cada página.
  */
+function insertarBadgeNotificacion() {
+    // Buscar el link del sidebar que apunta a pedidos.html
+    const linkPedidos = document.querySelector('.admin-nav a[href="pedidos.html"]');
+    if (!linkPedidos) return;
+
+    // Evitar insertar dos veces
+    if (linkPedidos.querySelector('.notif-badge')) return;
+
+    // Crear el badge (oculto por defecto)
+    const badge = document.createElement('span');
+    badge.className = 'notif-badge';
+    badge.id = 'notif-badge';
+    badge.style.display = 'none';
+    badge.textContent = '0';
+
+    linkPedidos.appendChild(badge);
+}
+
+/**
+ * Consulta la cantidad de pedidos pendientes y actualiza el badge.
+ */
+async function actualizarNotificaciones() {
+    const badge = document.getElementById('notif-badge');
+    if (!badge) return;
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/pedidos`);
+        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+
+        const pedidos = await respuesta.json();
+
+        // Contar solo los pendientes
+        const pendientes = pedidos.filter(
+            (p) => (p.estado || 'pendiente').toLowerCase().trim() === 'pendiente'
+        ).length;
+
+        if (pendientes > 0) {
+            badge.textContent = pendientes > 99 ? '99+' : String(pendientes);
+            badge.style.display = 'inline-flex';
+            badge.title = `${pendientes} pedido${pendientes !== 1 ? 's' : ''} pendiente${pendientes !== 1 ? 's' : ''}`;
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch (error) {
+        console.warn('No se pudieron cargar las notificaciones:', error.message);
+        // No mostramos error al usuario porque es una notificación secundaria
+    }
+}
+
+/**
+ * Inicia el ciclo de actualización automática cada 30 segundos.
+ */
+function iniciarNotificaciones() {
+    insertarBadgeNotificacion();
+    actualizarNotificaciones();
+
+    // Limpiar intervalo previo (por si acaso)
+    if (intervalNotificaciones) clearInterval(intervalNotificaciones);
+    intervalNotificaciones = setInterval(actualizarNotificaciones, INTERVALO_NOTIFICACIONES);
+}
+
+// ============================================================
+// PROTECCIÓN DE PÁGINAS + INICIALIZACIÓN
+// ============================================================
+
 function protegerPagina() {
     if (!estaLogueado()) {
         window.location.href = '/admin/login.html';
         return;
     }
 
+    // Nombre del usuario en el sidebar
     const nombreUsuario = document.getElementById('nombre-usuario');
     if (nombreUsuario) {
         nombreUsuario.textContent = obtenerUsuario();
     }
 
+    // Configurar el botón de logout
     const botonLogout = document.getElementById('logout-btn');
     if (botonLogout) {
         botonLogout.addEventListener('click', () => {
@@ -75,9 +153,14 @@ function protegerPagina() {
             }
         });
     }
+
+    // Iniciar las notificaciones (solo en páginas protegidas del panel)
+    iniciarNotificaciones();
 }
 
+// ============================================================
 // LÓGICA DE LOGIN
+// ============================================================
 
 const formLogin = document.getElementById('form-login');
 
@@ -115,20 +198,20 @@ if (formLogin) {
 
             if (resultado.success) {
                 guardarSesion(resultado.usuario, resultado.token);
-                mostrarMensajeLogin('Acceso correcto. Redirigiendo...', 'exito');
+                mostrarMensajeLogin('✅ Acceso correcto. Redirigiendo...', 'exito');
                 setTimeout(() => {
                     window.location.href = '/admin/dashboard.html';
                 }, 800);
             } else {
                 mostrarMensajeLogin(
-                    `${resultado.error || 'Usuario o contraseña incorrectos.'}`,
+                    `❌ ${resultado.error || 'Usuario o contraseña incorrectos.'}`,
                     'error'
                 );
             }
         } catch (error) {
             console.error('Error de conexión:', error);
             mostrarMensajeLogin(
-                'No se pudo conectar con el servidor. Verificá que esté corriendo.',
+                '❌ No se pudo conectar con el servidor. Verificá que esté corriendo.',
                 'error'
             );
         } finally {
@@ -143,7 +226,9 @@ if (formLogin) {
     }
 }
 
+// ============================================================
 // PROTECCIÓN AUTOMÁTICA DE PÁGINAS INTERNAS
+// ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     if (document.body.dataset.adminProtected === 'true') {
