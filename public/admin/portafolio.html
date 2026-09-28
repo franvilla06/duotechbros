@@ -160,6 +160,62 @@
       </main>
     </div>
 
+    <!-- ============================================================
+         MODAL: EDITAR TRABAJO
+         ============================================================ -->
+    <div class="modal-overlay" id="modal-editar">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2><i class="fas fa-edit"></i> Editar Trabajo</h2>
+          <button class="modal-close" id="modal-close" title="Cerrar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form class="admin-form" id="form-editar">
+          <input type="hidden" id="edit-id" />
+
+          <div class="admin-form-group">
+            <label for="edit-titulo">Título del trabajo *</label>
+            <input type="text" id="edit-titulo" required />
+          </div>
+
+          <div class="admin-form-group">
+            <label for="edit-descripcion">Descripción</label>
+            <textarea id="edit-descripcion"></textarea>
+          </div>
+
+          <div class="admin-form-group">
+            <label for="edit-tipo_reparacion">Tipo de reparación</label>
+            <select id="edit-tipo_reparacion">
+              <option value="">Seleccionar categoría...</option>
+              <option value="Pantalla">Pantalla / Display</option>
+              <option value="Batería">Batería</option>
+              <option value="Placa Base">Placa Base</option>
+              <option value="Software">Software / Datos</option>
+              <option value="Módulo de Carga">Módulo de Carga</option>
+              <option value="Cámara">Cámara</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div class="admin-form-group">
+            <label for="edit-imagen_url">URL de la imagen</label>
+            <input type="url" id="edit-imagen_url" />
+          </div>
+
+          <div class="admin-form-actions">
+            <button type="button" class="btn-secondary" id="btn-cancelar">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary" id="btn-actualizar">
+              <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script src="/js/admin.js"></script>
     <script src="/js/admin-portafolio.js"></script>
   </body>

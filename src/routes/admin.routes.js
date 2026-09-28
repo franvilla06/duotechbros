@@ -14,6 +14,7 @@ router.delete('/productos/:id', adminController.eliminarProducto);
 
 // ----- Portafolio -----
 router.post('/portafolio', adminController.crearTrabajo);
+router.put('/portafolio/:id', adminController.actualizarTrabajo);
 router.delete('/portafolio/:id', adminController.eliminarTrabajo);
 
 // ----- Pedidos -----

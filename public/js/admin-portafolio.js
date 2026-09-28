@@ -1,4 +1,6 @@
+// ============================================================
 // LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DuotechBros Admin
+// ============================================================
 
 const API_PORTAFOLIO = '/api/portafolio';
 const API_ADMIN_PORTAFOLIO = '/api/admin/portafolio';
@@ -10,7 +12,14 @@ const estadoVacio = document.getElementById('estado-vacio');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
 
-// UTILIDADES
+// Modal de edición
+const modalEditar = document.getElementById('modal-editar');
+const modalClose = document.getElementById('modal-close');
+const formEditar = document.getElementById('form-editar');
+const btnCancelar = document.getElementById('btn-cancelar');
+const btnActualizar = document.getElementById('btn-actualizar');
+
+// ----- UTILIDADES -----
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -40,7 +49,24 @@ function claseTipo(tipo) {
     return 'badge-tipo-default';
 }
 
-// RENDERIZADO
+function mostrarToast(mensaje, esError = false) {
+    const anterior = document.getElementById('toast-admin');
+    if (anterior) anterior.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-admin';
+    toast.className = 'toast-admin' + (esError ? ' toast-error' : '');
+    toast.innerHTML = `<span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ----- RENDERIZADO -----
 
 function renderizarTrabajos(trabajos) {
     tbody.innerHTML = '';
@@ -76,6 +102,9 @@ function renderizarTrabajos(trabajos) {
             </td>
             <td><span class="cell-fecha">${formatearFecha(t.fecha)}</span></td>
             <td style="text-align: right">
+                <button class="btn-editar" title="Editar" data-id="${t.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
                 <button class="btn-eliminar" title="Eliminar" data-id="${t.id}" data-titulo="${escapar(t.titulo)}">
                     <i class="fas fa-trash-alt"></i>
                 </button>
@@ -84,7 +113,15 @@ function renderizarTrabajos(trabajos) {
         tbody.appendChild(tr);
     });
 
-    // Asignar evento a cada botón de eliminar
+    // Asignar eventos a los botones de editar
+    tbody.querySelectorAll('.btn-editar').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            abrirModalEdicion(id);
+        });
+    });
+
+    // Asignar eventos a los botones de eliminar
     tbody.querySelectorAll('.btn-eliminar').forEach((btn) => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -94,7 +131,7 @@ function renderizarTrabajos(trabajos) {
     });
 }
 
-// CARGA DE DATOS
+// ----- CARGA DE DATOS -----
 
 async function cargarTrabajos() {
     estadoCargando.style.display = 'block';
@@ -120,7 +157,7 @@ async function cargarTrabajos() {
     }
 }
 
-// CREAR TRABAJO
+// ----- CREAR TRABAJO -----
 
 formTrabajo.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -133,7 +170,7 @@ formTrabajo.addEventListener('submit', async (e) => {
     };
 
     if (!datos.titulo) {
-        alert('El título del trabajo es obligatorio.');
+        mostrarToast('El título del trabajo es obligatorio.', true);
         return;
     }
 
@@ -149,11 +186,11 @@ formTrabajo.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            alert('Trabajo publicado correctamente.');
+            mostrarToast('✅ Trabajo publicado correctamente.');
             formTrabajo.reset();
             cargarTrabajos();
         } else {
-            alert(`Error: ${resultado.error || 'No se pudo guardar el trabajo.'}`);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar el trabajo.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear trabajo:', error);
@@ -163,7 +200,100 @@ formTrabajo.addEventListener('submit', async (e) => {
     }
 });
 
-// ELIMINAR TRABAJO
+// ----- MODAL: ABRIR Y CERRAR -----
+
+function abrirModalEdicion(id) {
+    fetch(API_PORTAFOLIO)
+        .then((r) => r.json())
+        .then((trabajos) => {
+            const trabajo = trabajos.find((t) => String(t.id) === String(id));
+            if (!trabajo) {
+                mostrarToast('No se encontró el trabajo.', true);
+                return;
+            }
+
+            // Rellenar el formulario del modal
+            document.getElementById('edit-id').value = trabajo.id;
+            document.getElementById('edit-titulo').value = trabajo.titulo || '';
+            document.getElementById('edit-descripcion').value = trabajo.descripcion || '';
+            document.getElementById('edit-tipo_reparacion').value = trabajo.tipo_reparacion || '';
+            document.getElementById('edit-imagen_url').value = trabajo.imagen_url || '';
+
+            // Mostrar el modal
+            modalEditar.classList.add('modal-visible');
+        })
+        .catch((error) => {
+            console.error('Error al cargar trabajo para editar:', error);
+            mostrarToast('No se pudo cargar el trabajo.', true);
+        });
+}
+
+function cerrarModalEdicion() {
+    modalEditar.classList.remove('modal-visible');
+    formEditar.reset();
+}
+
+modalClose.addEventListener('click', cerrarModalEdicion);
+btnCancelar.addEventListener('click', cerrarModalEdicion);
+
+modalEditar.addEventListener('click', (e) => {
+    if (e.target === modalEditar) {
+        cerrarModalEdicion();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalEditar.classList.contains('modal-visible')) {
+        cerrarModalEdicion();
+    }
+});
+
+// ----- GUARDAR CAMBIOS (PUT) -----
+
+formEditar.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById('edit-id').value;
+
+    const datos = {
+        titulo: document.getElementById('edit-titulo').value.trim(),
+        descripcion: document.getElementById('edit-descripcion').value.trim() || null,
+        tipo_reparacion: document.getElementById('edit-tipo_reparacion').value || null,
+        imagen_url: document.getElementById('edit-imagen_url').value.trim() || null,
+    };
+
+    if (!datos.titulo) {
+        mostrarToast('El título del trabajo es obligatorio.', true);
+        return;
+    }
+
+    btnActualizar.disabled = true;
+    btnActualizar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+    try {
+        const respuesta = await fetchAdmin(`${API_ADMIN_PORTAFOLIO}/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarToast('✅ Trabajo actualizado correctamente.');
+            cerrarModalEdicion();
+            cargarTrabajos();
+        } else {
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+        }
+    } catch (error) {
+        console.error('Error al actualizar trabajo:', error);
+    } finally {
+        btnActualizar.disabled = false;
+        btnActualizar.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+    }
+});
+
+// ----- ELIMINAR TRABAJO -----
 
 async function eliminarTrabajo(id, titulo) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
@@ -177,17 +307,17 @@ async function eliminarTrabajo(id, titulo) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            alert('Trabajo eliminado.');
+            mostrarToast('✅ Trabajo eliminado.');
             cargarTrabajos();
         } else {
-            alert(`Error: ${resultado.error || 'No se pudo eliminar el trabajo.'}`);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar el trabajo.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar trabajo:', error);
     }
 }
 
-//  INICIO 
+// ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(cargarTrabajos, 100);

@@ -102,6 +102,37 @@ function crearTrabajo(req, res) {
     }
 }
 
+function actualizarTrabajo(req, res) {
+    const { id } = req.params;
+    const { titulo, descripcion, imagen_url, tipo_reparacion } = req.body;
+
+    if (!titulo) {
+        return res.status(400).json({ success: false, error: 'El título es obligatorio' });
+    }
+
+    try {
+        const info = req.app.locals.db.prepare(`
+            UPDATE portafolio
+            SET titulo = ?, descripcion = ?, imagen_url = ?, tipo_reparacion = ?
+            WHERE id = ?
+        `).run(
+            titulo,
+            descripcion || null,
+            imagen_url || null,
+            tipo_reparacion || null,
+            id
+        );
+
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Trabajo no encontrado' });
+        }
+
+        return res.json({ success: true, message: 'Trabajo actualizado' });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 function eliminarTrabajo(req, res) {
     const { id } = req.params;
     try {
@@ -165,6 +196,7 @@ module.exports = {
     actualizarProducto,
     eliminarProducto,
     crearTrabajo,
+    actualizarTrabajo,
     eliminarTrabajo,
     actualizarEstadoPedido,
     eliminarPedido,
