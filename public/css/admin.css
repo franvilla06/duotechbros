@@ -1831,3 +1831,22 @@ table.admin-table th.th-ordenable.activo {
         justify-content: center;
     }
 }
+
+/* BOTÓN DE EXPORTAR CSV (reutilizable en todas las tablas) */
+
+.btn-exportar {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-color: #a3cfbb;
+}
+
+.btn-exportar:hover {
+    background-color: #b7e0c5;
+    border-color: #0a9396;
+    color: #0a9396;
+}
+
+.btn-exportar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

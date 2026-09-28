@@ -1,4 +1,6 @@
-// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DUOTECHBROS ADMIN
+// ============================================================
+// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DuotechBros Admin
+// ============================================================
 
 const API_PRODUCTOS = '/api/productos';
 const API_ADMIN_PRODUCTOS = '/api/admin/productos';
@@ -10,6 +12,7 @@ const estadoVacio = document.getElementById('estado-vacio');
 const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
+const btnExportar = document.getElementById('btn-exportar-productos');
 
 const buscador = document.getElementById('buscador-productos');
 const filtrosCategoria = document.getElementById('filtros-categoria');
@@ -23,14 +26,15 @@ const btnActualizar = document.getElementById('btn-actualizar');
 
 const POR_PAGINA = 10;
 
-// ESTADO LOCAL
+// Estado local
 let productosOriginales = [];
+let productosFiltrados = [];   // ← nuevo
 let categoriaFiltroActivo = 'Todas';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
 
-// UTILIDADES
+// ----- UTILIDADES -----
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -77,7 +81,60 @@ function aplicarOrdenamiento(array) {
     });
 }
 
-// FILTROS
+// ----- EXPORTAR A CSV -----
+
+function escaparCSV(valor) {
+    if (valor === null || valor === undefined) return '';
+    const texto = String(valor);
+    if (texto.includes(',') || texto.includes('"') || texto.includes('\n') || texto.includes('\r')) {
+        return `"${texto.replace(/"/g, '""')}"`;
+    }
+    return texto;
+}
+
+function exportarCSV() {
+    if (productosFiltrados.length === 0) {
+        mostrarToast('No hay productos para exportar.', true);
+        return;
+    }
+
+    const encabezados = ['ID', 'Nombre', 'Descripción', 'Categoría', 'Precio', 'Stock'];
+
+    const filas = productosFiltrados.map((p) => [
+        p.id,
+        p.nombre,
+        p.descripcion,
+        p.categoria,
+        p.precio,
+        p.stock,
+    ]);
+
+    const lineas = [
+        encabezados.map(escaparCSV).join(','),
+        ...filas.map((fila) => fila.map(escaparCSV).join(',')),
+    ];
+
+    const contenido = lineas.join('\r\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + contenido], { type: 'text/csv;charset=utf-8;' });
+
+    const hoy = new Date();
+    const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    const nombreArchivo = `productos-duotechbros-${fecha}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    mostrarToast(`✅ Se exportaron ${productosFiltrados.length} producto${productosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+}
+
+// ----- FILTROS -----
 
 function construirFiltrosCategoria() {
     const categorias = ['Todas'];
@@ -113,7 +170,7 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// RENDERIZADO
+// ----- RENDERIZADO -----
 
 function renderizarProductos(productos) {
     tbody.innerHTML = '';
@@ -173,7 +230,7 @@ function renderizarProductos(productos) {
     });
 }
 
-// APLICAR FILTROS + ORDEN + PAGINACIÓN
+// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -197,13 +254,15 @@ function aplicarFiltros() {
 
     filtrados = aplicarOrdenamiento(filtrados);
 
+    productosFiltrados = filtrados;   // ← guardar para exportar
+
     if (paginador) paginador.actualizar(filtrados.length, true);
 
     actualizarBotonLimpiar();
     renderizarProductos(filtrados);
 }
 
-// CARGA DE DATOS
+// ----- CARGA DE DATOS -----
 
 async function cargarProductos() {
     estadoCargando.style.display = 'block';
@@ -220,6 +279,7 @@ async function cargarProductos() {
         construirFiltrosCategoria();
 
         if (productos.length === 0) {
+            productosFiltrados = [];
             estadoVacio.style.display = 'block';
             contador.textContent = '0 productos';
             if (paginador) paginador.actualizar(0, true);
@@ -229,6 +289,7 @@ async function cargarProductos() {
     } catch (error) {
         console.error('Error al cargar productos:', error);
         tbody.innerHTML = '';
+        productosFiltrados = [];
         estadoVacio.style.display = 'block';
         estadoVacio.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="color:#d9534f"></i>
@@ -240,7 +301,7 @@ async function cargarProductos() {
     }
 }
 
-// CREAR PRODUCTO
+// ----- CREAR PRODUCTO -----
 
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -275,12 +336,12 @@ formProducto.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('Producto agregado correctamente.');
+            mostrarToast('✅ Producto agregado correctamente.');
             formProducto.reset();
             document.getElementById('stock').value = '0';
             cargarProductos();
         } else {
-            mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear producto:', error);
@@ -290,7 +351,7 @@ formProducto.addEventListener('submit', async (e) => {
     }
 });
 
-// MODAL
+// ----- MODAL -----
 
 function abrirModalEdicion(id) {
     const producto = productosOriginales.find((p) => String(p.id) === String(id));
@@ -328,7 +389,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// GUARDAR CAMBIOS
+// ----- GUARDAR CAMBIOS -----
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -365,11 +426,11 @@ formEditar.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('Producto actualizado correctamente.');
+            mostrarToast('✅ Producto actualizado correctamente.');
             cerrarModalEdicion();
             cargarProductos();
         } else {
-            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
         }
     } catch (error) {
         console.error('Error al actualizar producto:', error);
@@ -379,7 +440,7 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ELIMINAR
+// ----- ELIMINAR -----
 
 async function eliminarProducto(id, nombre) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${nombre}"?`);
@@ -393,17 +454,17 @@ async function eliminarProducto(id, nombre) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('Producto eliminado.');
+            mostrarToast('✅ Producto eliminado.');
             cargarProductos();
         } else {
-            mostrarToast(`Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar producto:', error);
     }
 }
 
-// EVENTOS
+// ----- EVENTOS -----
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;
@@ -420,11 +481,12 @@ btnLimpiar.addEventListener('click', () => {
     aplicarFiltros();
 });
 
-// INICIO
+btnExportar.addEventListener('click', exportarCSV);
+
+// ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
     paginador = crearPaginador('paginacion-productos', POR_PAGINA, () => {
-        // volver a renderizar con los filtros actuales (sin resetear página)
         let filtrados = [...productosOriginales];
         if (categoriaFiltroActivo !== 'Todas') {
             filtrados = filtrados.filter((p) => p.categoria === categoriaFiltroActivo);

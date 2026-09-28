@@ -1,4 +1,6 @@
-// LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DUOTECHBROS ADMIN
+// ============================================================
+// LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DuotechBros Admin
+// ============================================================
 
 const API_PORTAFOLIO = '/api/portafolio';
 const API_ADMIN_PORTAFOLIO = '/api/admin/portafolio';
@@ -10,6 +12,7 @@ const estadoVacio = document.getElementById('estado-vacio');
 const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
+const btnExportar = document.getElementById('btn-exportar-portafolio');
 
 const buscador = document.getElementById('buscador-trabajos');
 const filtrosTipo = document.getElementById('filtros-tipo');
@@ -23,14 +26,15 @@ const btnActualizar = document.getElementById('btn-actualizar');
 
 const POR_PAGINA = 10;
 
-// ESTADO LOCAL
+// Estado local
 let trabajosOriginales = [];
+let trabajosFiltrados = [];   // ← nuevo
 let tipoFiltroActivo = 'Todos';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
 
-// UTILIDADES
+// ----- UTILIDADES -----
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -85,7 +89,59 @@ function aplicarOrdenamiento(array) {
     });
 }
 
-// FILTROS
+// ----- EXPORTAR A CSV -----
+
+function escaparCSV(valor) {
+    if (valor === null || valor === undefined) return '';
+    const texto = String(valor);
+    if (texto.includes(',') || texto.includes('"') || texto.includes('\n') || texto.includes('\r')) {
+        return `"${texto.replace(/"/g, '""')}"`;
+    }
+    return texto;
+}
+
+function exportarCSV() {
+    if (trabajosFiltrados.length === 0) {
+        mostrarToast('No hay trabajos para exportar.', true);
+        return;
+    }
+
+    const encabezados = ['ID', 'Título', 'Descripción', 'Tipo de reparación', 'Fecha'];
+
+    const filas = trabajosFiltrados.map((t) => [
+        t.id,
+        t.titulo,
+        t.descripcion,
+        t.tipo_reparacion,
+        formatearFecha(t.fecha),
+    ]);
+
+    const lineas = [
+        encabezados.map(escaparCSV).join(','),
+        ...filas.map((fila) => fila.map(escaparCSV).join(',')),
+    ];
+
+    const contenido = lineas.join('\r\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + contenido], { type: 'text/csv;charset=utf-8;' });
+
+    const hoy = new Date();
+    const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    const nombreArchivo = `portafolio-duotechbros-${fecha}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    mostrarToast(`✅ Se exportaron ${trabajosFiltrados.length} trabajo${trabajosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+}
+
+// ----- FILTROS -----
 
 function construirFiltrosTipo() {
     const tipos = ['Todos'];
@@ -121,7 +177,7 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// RENDERIZADO
+// ----- RENDERIZADO -----
 
 function renderizarTrabajos(trabajos) {
     tbody.innerHTML = '';
@@ -184,7 +240,7 @@ function renderizarTrabajos(trabajos) {
     });
 }
 
-// APLICAR FILTROS + ORDEN + PAGINACIÓN
+// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -208,13 +264,15 @@ function aplicarFiltros() {
 
     filtrados = aplicarOrdenamiento(filtrados);
 
+    trabajosFiltrados = filtrados;   // ← guardar para exportar
+
     if (paginador) paginador.actualizar(filtrados.length, true);
 
     actualizarBotonLimpiar();
     renderizarTrabajos(filtrados);
 }
 
-// CARGA DE DATOS
+// ----- CARGA DE DATOS -----
 
 async function cargarTrabajos() {
     estadoCargando.style.display = 'block';
@@ -231,6 +289,7 @@ async function cargarTrabajos() {
         construirFiltrosTipo();
 
         if (trabajos.length === 0) {
+            trabajosFiltrados = [];
             estadoVacio.style.display = 'block';
             contador.textContent = '0 trabajos';
             if (paginador) paginador.actualizar(0, true);
@@ -240,6 +299,7 @@ async function cargarTrabajos() {
     } catch (error) {
         console.error('Error al cargar trabajos:', error);
         tbody.innerHTML = '';
+        trabajosFiltrados = [];
         estadoVacio.style.display = 'block';
         estadoVacio.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="color:#d9534f"></i>
@@ -251,7 +311,7 @@ async function cargarTrabajos() {
     }
 }
 
-// CREAR TRABAJO
+// ----- CREAR TRABAJO -----
 
 formTrabajo.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -280,11 +340,11 @@ formTrabajo.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('Trabajo publicado correctamente.');
+            mostrarToast('✅ Trabajo publicado correctamente.');
             formTrabajo.reset();
             cargarTrabajos();
         } else {
-            mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear trabajo:', error);
@@ -294,7 +354,7 @@ formTrabajo.addEventListener('submit', async (e) => {
     }
 });
 
-// MODAL
+// ----- MODAL -----
 
 function abrirModalEdicion(id) {
     const trabajo = trabajosOriginales.find((t) => String(t.id) === String(id));
@@ -330,7 +390,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// GUARDAR CAMBIOS
+// ----- GUARDAR CAMBIOS -----
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -361,11 +421,11 @@ formEditar.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('Trabajo actualizado correctamente.');
+            mostrarToast('✅ Trabajo actualizado correctamente.');
             cerrarModalEdicion();
             cargarTrabajos();
         } else {
-            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
         }
     } catch (error) {
         console.error('Error al actualizar trabajo:', error);
@@ -375,7 +435,7 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ELIMINAR
+// ----- ELIMINAR -----
 
 async function eliminarTrabajo(id, titulo) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
@@ -389,17 +449,17 @@ async function eliminarTrabajo(id, titulo) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('Trabajo eliminado.');
+            mostrarToast('✅ Trabajo eliminado.');
             cargarTrabajos();
         } else {
-            mostrarToast(`Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar trabajo:', error);
     }
 }
 
-// EVENTOS
+// ----- EVENTOS -----
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;
@@ -416,7 +476,9 @@ btnLimpiar.addEventListener('click', () => {
     aplicarFiltros();
 });
 
-// INICIO
+btnExportar.addEventListener('click', exportarCSV);
+
+// ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
     paginador = crearPaginador('paginacion-trabajos', POR_PAGINA, () => {

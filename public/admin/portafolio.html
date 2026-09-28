@@ -23,19 +23,10 @@
         </div>
 
         <nav class="admin-nav">
-          <a href="dashboard.html"
-            ><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a
-          >
-          <a href="productos.html"
-            ><i class="fas fa-box"></i><span>Gestionar Productos</span></a
-          >
-          <a href="portafolio.html" class="active"
-            ><i class="fas fa-briefcase"></i
-            ><span>Gestionar Portafolio</span></a
-          >
-          <a href="pedidos.html"
-            ><i class="fas fa-clipboard-list"></i><span>Ver Pedidos</span></a
-          >
+          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+          <a href="productos.html"><i class="fas fa-box"></i><span>Gestionar Productos</span></a>
+          <a href="portafolio.html" class="active"><i class="fas fa-briefcase"></i><span>Gestionar Portafolio</span></a>
+          <a href="pedidos.html"><i class="fas fa-clipboard-list"></i><span>Ver Pedidos</span></a>
         </nav>
 
         <div class="admin-sidebar-footer">
@@ -55,6 +46,9 @@
             <h1>Gestión de Portafolio</h1>
             <p>Publicá y administrá los trabajos realizados por DuotechBros.</p>
           </div>
+          <button class="btn-refresh btn-exportar" id="btn-exportar-portafolio">
+            <i class="fas fa-file-csv"></i> Exportar CSV
+          </button>
         </header>
 
         <div class="admin-grid-2col">
@@ -64,22 +58,12 @@
             <form class="admin-form" id="form-trabajo">
               <div class="admin-form-group">
                 <label for="titulo">Título del trabajo *</label>
-                <input
-                  type="text"
-                  id="titulo"
-                  name="titulo"
-                  placeholder="Ej. Cambio de pantalla iPhone 13 Pro"
-                  required
-                />
+                <input type="text" id="titulo" name="titulo" placeholder="Ej. Cambio de pantalla iPhone 13 Pro" required />
               </div>
 
               <div class="admin-form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea
-                  id="descripcion"
-                  name="descripcion"
-                  placeholder="Detalles del trabajo realizado..."
-                ></textarea>
+                <textarea id="descripcion" name="descripcion" placeholder="Detalles del trabajo realizado..."></textarea>
               </div>
 
               <div class="admin-form-group">
@@ -98,12 +82,7 @@
 
               <div class="admin-form-group">
                 <label for="imagen_url">URL de la imagen</label>
-                <input
-                  type="url"
-                  id="imagen_url"
-                  name="imagen_url"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                />
+                <input type="url" id="imagen_url" name="imagen_url" placeholder="https://ejemplo.com/imagen.jpg" />
               </div>
 
               <div class="admin-form-actions">
@@ -117,9 +96,7 @@
           <section class="admin-card" style="padding: 0; overflow: hidden">
             <div class="table-header">
               <h2>Trabajos Publicados</h2>
-              <span class="table-counter" id="contador-trabajos"
-                >0 trabajos</span
-              >
+              <span class="table-counter" id="contador-trabajos">0 trabajos</span>
             </div>
 
             <div class="admin-toolbar">
@@ -154,31 +131,18 @@
               </table>
             </div>
 
-            <div
-              class="paginacion"
-              id="paginacion-trabajos"
-              style="display: none"
-            ></div>
+            <div class="paginacion" id="paginacion-trabajos" style="display: none"></div>
 
             <div class="table-empty" id="estado-vacio" style="display: none">
               <i class="fas fa-briefcase"></i>
               <p>No hay trabajos publicados</p>
-              <small
-                >Agregá el primer trabajo usando el formulario de la
-                izquierda.</small
-              >
+              <small>Agregá el primer trabajo usando el formulario de la izquierda.</small>
             </div>
 
-            <div
-              class="table-sin-filtros"
-              id="estado-sin-resultados"
-              style="display: none"
-            >
+            <div class="table-sin-filtros" id="estado-sin-resultados" style="display: none">
               <i class="fas fa-search"></i>
               <p>No se encontraron trabajos</p>
-              <small
-                >Probá con otro término de búsqueda o quitá los filtros.</small
-              >
+              <small>Probá con otro término de búsqueda o quitá los filtros.</small>
             </div>
 
             <div class="table-empty" id="estado-cargando">
@@ -190,7 +154,7 @@
       </main>
     </div>
 
-    <!-- MODAL: EDITAR TRABAJO -->
+    <!-- Modal: Editar Trabajo -->
     <div class="modal-overlay" id="modal-editar">
       <div class="modal-card">
         <div class="modal-header">
@@ -233,9 +197,7 @@
           </div>
 
           <div class="admin-form-actions">
-            <button type="button" class="btn-secondary" id="btn-cancelar">
-              Cancelar
-            </button>
+            <button type="button" class="btn-secondary" id="btn-cancelar">Cancelar</button>
             <button type="submit" class="btn-primary" id="btn-actualizar">
               <i class="fas fa-save"></i> Guardar Cambios
             </button>
