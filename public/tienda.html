@@ -3,13 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="css/normalize.css" />
-    <link rel="stylesheet" href="css/pie_encabezado.css" />
-    <link rel="stylesheet" href="css/tienda.css" />
-    <title>Tienda - DuoTechBros</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/pie_encabezado.css" />
+    <link rel="stylesheet" href="/css/tienda.css" />
+    <title>Tienda - DuotechBros</title>
   </head>
   <body>
-    <!-- header -->
+    <!-- ========== HEADER ========== -->
     <header>
       <nav>
         <div class="nav-brand">DuotechBros</div>
@@ -22,17 +26,89 @@
       </nav>
     </header>
 
-    <!--contenido prinsipal -->
+    <!-- ========== HERO ========== -->
+    <section class="tienda-hero">
+      <div class="tienda-hero-content">
+        <h1>Accesorios Premium</h1>
+        <p>
+          Protegé y mejorá tu experiencia tecnológica con nuestra selección de
+          accesorios de alta calidad, pensados para durar.
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <main class="container">
-      <!-- aca va el cuerpo de cada pagina -->
+      <!-- Barra de herramientas (filtros + buscador) -->
+      <section class="tienda-toolbar">
+        <div class="tienda-buscador">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="buscador"
+            placeholder="Buscar producto..."
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="tienda-filtros" id="filtros-categorias">
+          <!-- Los botones de filtro se generan dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Cabecera de sección -->
+      <div class="tienda-header">
+        <h2>Nuestros Productos</h2>
+        <span class="tienda-counter" id="contador-productos">0 productos</span>
+      </div>
+
+      <!-- Grilla de productos (se llena dinámicamente) -->
+      <div class="products-grid" id="lista-productos">
+        <!-- Se renderizan aquí las tarjetas -->
+      </div>
+
+      <!-- Estado: cargando -->
+      <div class="tienda-estado" id="estado-cargando">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Cargando productos...</p>
+      </div>
+
+      <!-- Estado: vacío -->
+      <div class="tienda-estado" id="estado-vacio" style="display: none">
+        <i class="fas fa-box-open"></i>
+        <p>No hay productos disponibles</p>
+        <small>Pronto agregaremos nuevos accesorios al catálogo.</small>
+      </div>
+
+      <!-- Estado: sin resultados (por filtros) -->
+      <div class="tienda-estado" id="estado-sin-resultados" style="display: none">
+        <i class="fas fa-search"></i>
+        <p>No se encontraron productos</p>
+        <small>Probá con otra búsqueda o categoría.</small>
+      </div>
+
+      <!-- Estado: error -->
+      <div class="tienda-estado" id="estado-error" style="display: none">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>No se pudieron cargar los productos</p>
+        <small>Intentá recargar la página en unos segundos.</small>
+      </div>
     </main>
 
-    <!-- footer -->
+    <!-- ========== FOOTER ========== -->
     <footer>
       <p>© 2024 DuotechBros. Todos los derechos reservados.</p>
-      <a class="footer-admin" href="admin/login.html">
+      <div class="footer-social">
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <a href="#"><i class="fas fa-envelope"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+      <a class="footer-admin" href="/admin/login.html">
         <i class="fas fa-lock"></i> Acceso Admin
       </a>
     </footer>
+
+    <!-- Script específico de la tienda -->
+    <script src="/js/tienda.js"></script>
   </body>
 </html>
