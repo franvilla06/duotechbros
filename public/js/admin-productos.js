@@ -1,6 +1,6 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DuotechBros Admin
-// Incluye: crear, editar, eliminar, buscar y filtrar
+// Incluye: crear, editar, eliminar, buscar, filtrar y ordenar
 // ============================================================
 
 const API_PRODUCTOS = '/api/productos';
@@ -14,12 +14,10 @@ const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
 
-// Búsqueda y filtros
 const buscador = document.getElementById('buscador-productos');
 const filtrosCategoria = document.getElementById('filtros-categoria');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
-// Modal de edición
 const modalEditar = document.getElementById('modal-editar');
 const modalClose = document.getElementById('modal-close');
 const formEditar = document.getElementById('form-editar');
@@ -30,6 +28,9 @@ const btnActualizar = document.getElementById('btn-actualizar');
 let productosOriginales = [];
 let categoriaFiltroActivo = 'Todas';
 let textoBusqueda = '';
+
+// Ordenamiento
+let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 
 // ----- UTILIDADES -----
 
@@ -68,6 +69,17 @@ function mostrarToast(mensaje, esError = false) {
         toast.classList.remove('toast-visible');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+// ----- ORDENAMIENTO -----
+
+function aplicarOrdenamiento(array) {
+    if (!ordenActual.campo) return array;
+
+    return [...array].sort((a, b) => {
+        const cmp = compararValores(a[ordenActual.campo], b[ordenActual.campo], ordenActual.tipo);
+        return ordenActual.direccion === 'asc' ? cmp : -cmp;
+    });
 }
 
 // ----- FILTROS -----
@@ -164,7 +176,7 @@ function renderizarProductos(productos) {
     });
 }
 
-// ----- APLICAR FILTROS -----
+// ----- APLICAR FILTROS + ORDEN -----
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -186,6 +198,8 @@ function aplicarFiltros() {
         );
     }
 
+    filtrados = aplicarOrdenamiento(filtrados);
+
     actualizarBotonLimpiar();
     renderizarProductos(filtrados);
 }
@@ -205,7 +219,6 @@ async function cargarProductos() {
 
         productosOriginales = productos;
 
-        // Reconstruir filtros (por si aparecieron nuevas categorías)
         construirFiltrosCategoria();
 
         if (productos.length === 0) {
@@ -278,7 +291,7 @@ formProducto.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- MODAL: ABRIR Y CERRAR -----
+// ----- MODAL -----
 
 function abrirModalEdicion(id) {
     const producto = productosOriginales.find((p) => String(p.id) === String(id));
@@ -411,5 +424,21 @@ btnLimpiar.addEventListener('click', () => {
 // ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Configurar ordenamiento
+    configurarColumnasOrdenables(
+        'tabla-productos',
+        {
+            1: { campo: 'nombre', tipo: 'string' },
+            2: { campo: 'descripcion', tipo: 'string' },
+            3: { campo: 'categoria', tipo: 'string' },
+            4: { campo: 'precio', tipo: 'numero' },
+            5: { campo: 'stock', tipo: 'numero' },
+            // 0 = Imagen, 6 = Acciones → no ordenables
+        },
+        () => ordenActual,
+        (nuevo) => { ordenActual = nuevo; },
+        aplicarFiltros
+    );
+
     setTimeout(cargarProductos, 100);
 });

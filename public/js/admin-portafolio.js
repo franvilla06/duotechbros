@@ -1,6 +1,6 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DuotechBros Admin
-// Incluye: crear, editar, eliminar, buscar y filtrar
+// Incluye: crear, editar, eliminar, buscar, filtrar y ordenar
 // ============================================================
 
 const API_PORTAFOLIO = '/api/portafolio';
@@ -14,12 +14,10 @@ const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
 
-// Búsqueda y filtros
 const buscador = document.getElementById('buscador-trabajos');
 const filtrosTipo = document.getElementById('filtros-tipo');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
-// Modal
 const modalEditar = document.getElementById('modal-editar');
 const modalClose = document.getElementById('modal-close');
 const formEditar = document.getElementById('form-editar');
@@ -30,6 +28,9 @@ const btnActualizar = document.getElementById('btn-actualizar');
 let trabajosOriginales = [];
 let tipoFiltroActivo = 'Todos';
 let textoBusqueda = '';
+
+// Ordenamiento
+let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 
 // ----- UTILIDADES -----
 
@@ -76,6 +77,17 @@ function mostrarToast(mensaje, esError = false) {
         toast.classList.remove('toast-visible');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+// ----- ORDENAMIENTO -----
+
+function aplicarOrdenamiento(array) {
+    if (!ordenActual.campo) return array;
+
+    return [...array].sort((a, b) => {
+        const cmp = compararValores(a[ordenActual.campo], b[ordenActual.campo], ordenActual.tipo);
+        return ordenActual.direccion === 'asc' ? cmp : -cmp;
+    });
 }
 
 // ----- FILTROS -----
@@ -175,7 +187,7 @@ function renderizarTrabajos(trabajos) {
     });
 }
 
-// ----- APLICAR FILTROS -----
+// ----- APLICAR FILTROS + ORDEN -----
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -196,6 +208,8 @@ function aplicarFiltros() {
                 (t.tipo_reparacion && t.tipo_reparacion.toLowerCase().includes(q))
         );
     }
+
+    filtrados = aplicarOrdenamiento(filtrados);
 
     actualizarBotonLimpiar();
     renderizarTrabajos(filtrados);
@@ -406,5 +420,19 @@ btnLimpiar.addEventListener('click', () => {
 // ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
+    configurarColumnasOrdenables(
+        'tabla-trabajos',
+        {
+            1: { campo: 'titulo', tipo: 'string' },
+            2: { campo: 'descripcion', tipo: 'string' },
+            3: { campo: 'tipo_reparacion', tipo: 'string' },
+            4: { campo: 'fecha', tipo: 'fecha' },
+            // 0 = Imagen, 5 = Acciones → no ordenables
+        },
+        () => ordenActual,
+        (nuevo) => { ordenActual = nuevo; },
+        aplicarFiltros
+    );
+
     setTimeout(cargarTrabajos, 100);
 });

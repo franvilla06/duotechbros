@@ -4,7 +4,6 @@
 
 const API_BASE = '/api';
 
-// Intervalo de refresco de notificaciones (30 segundos)
 const INTERVALO_NOTIFICACIONES = 30000;
 let intervalNotificaciones = null;
 
@@ -37,9 +36,6 @@ function cerrarSesion() {
     window.location.href = '/admin/login.html';
 }
 
-/**
- * fetch con autenticación: agrega automáticamente el header Authorization.
- */
 async function fetchAdmin(url, opciones = {}) {
     const token = obtenerToken();
     const headers = {
@@ -60,22 +56,103 @@ async function fetchAdmin(url, opciones = {}) {
 }
 
 // ============================================================
-// NOTIFICACIONES DE PEDIDOS PENDIENTES
+// ORDENAMIENTO DE TABLAS
 // ============================================================
 
 /**
- * Inserta el badge de notificaciones en el link "Ver Pedidos" del sidebar.
- * Se llama una sola vez al cargar cada página.
+ * Compara dos valores según el tipo especificado.
+ * @returns -1, 0 o 1
  */
+function compararValores(a, b, tipo) {
+    // Valores nulos/indefinidos van al final
+    if (a === null || a === undefined || a === '') return 1;
+    if (b === null || b === undefined || b === '') return -1;
+
+    if (tipo === 'numero') {
+        return Number(a) - Number(b);
+    }
+    if (tipo === 'fecha') {
+        return new Date(a).getTime() - new Date(b).getTime();
+    }
+    // string por defecto (con sensibilidad a acentos)
+    return String(a).localeCompare(String(b), 'es', { sensitivity: 'base' });
+}
+
+/**
+ * Actualiza los íconos de los th según el orden activo.
+ */
+function actualizarIconosOrden(tabla, campoActivo, direccion) {
+    tabla.querySelectorAll('thead th').forEach((th) => {
+        const icono = th.querySelector('.th-sort-icon');
+        if (!icono) return;
+
+        if (th.dataset.campo === campoActivo) {
+            icono.className = `fas fa-sort-${direccion === 'asc' ? 'up' : 'down'} th-sort-icon th-sort-activo`;
+            th.classList.add('activo');
+        } else {
+            icono.className = 'fas fa-sort th-sort-icon';
+            th.classList.remove('activo');
+        }
+    });
+}
+
+/**
+ * Configura las columnas ordenables de una tabla.
+ * @param {string} tablaId - id del elemento <table>
+ * @param {Object} mapaColumnas - { indice: { campo, tipo } }
+ * @param {Function} getOrden - función que devuelve el objeto de orden actual
+ * @param {Function} setOrden - función que recibe el nuevo objeto de orden
+ * @param {Function} callbackReRender - función a llamar cuando cambia el orden
+ */
+function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden, callbackReRender) {
+    const tabla = document.getElementById(tablaId);
+    if (!tabla) return;
+
+    const ths = tabla.querySelectorAll('thead th');
+
+    Object.entries(mapaColumnas).forEach(([indice, config]) => {
+        const th = ths[indice];
+        if (!th) return;
+
+        // Marcar el th como ordenable y agregar el ícono si no existe
+        th.classList.add('th-ordenable');
+        th.dataset.campo = config.campo;
+        th.dataset.tipo = config.tipo;
+
+        if (!th.querySelector('.th-sort-icon')) {
+            th.innerHTML = `${th.innerHTML} <i class="fas fa-sort th-sort-icon"></i>`;
+        }
+
+        // Listener de clic
+        th.addEventListener('click', () => {
+            const orden = getOrden();
+
+            if (orden.campo === config.campo) {
+                // Alternar dirección
+                orden.direccion = orden.direccion === 'asc' ? 'desc' : 'asc';
+            } else {
+                // Nueva columna → empezar ascendente
+                orden.campo = config.campo;
+                orden.tipo = config.tipo;
+                orden.direccion = 'asc';
+            }
+
+            setOrden(orden);
+            actualizarIconosOrden(tabla, orden.campo, orden.direccion);
+            callbackReRender();
+        });
+    });
+}
+
+// ============================================================
+// NOTIFICACIONES DE PEDIDOS PENDIENTES
+// ============================================================
+
 function insertarBadgeNotificacion() {
-    // Buscar el link del sidebar que apunta a pedidos.html
     const linkPedidos = document.querySelector('.admin-nav a[href="pedidos.html"]');
     if (!linkPedidos) return;
-
-    // Evitar insertar dos veces
     if (linkPedidos.querySelector('.notif-badge')) return;
 
-    // Crear el badge (oculto por defecto)
     const badge = document.createElement('span');
     badge.className = 'notif-badge';
     badge.id = 'notif-badge';
@@ -85,9 +162,6 @@ function insertarBadgeNotificacion() {
     linkPedidos.appendChild(badge);
 }
 
-/**
- * Consulta la cantidad de pedidos pendientes y actualiza el badge.
- */
 async function actualizarNotificaciones() {
     const badge = document.getElementById('notif-badge');
     if (!badge) return;
@@ -98,7 +172,6 @@ async function actualizarNotificaciones() {
 
         const pedidos = await respuesta.json();
 
-        // Contar solo los pendientes
         const pendientes = pedidos.filter(
             (p) => (p.estado || 'pendiente').toLowerCase().trim() === 'pendiente'
         ).length;
@@ -112,18 +185,13 @@ async function actualizarNotificaciones() {
         }
     } catch (error) {
         console.warn('No se pudieron cargar las notificaciones:', error.message);
-        // No mostramos error al usuario porque es una notificación secundaria
     }
 }
 
-/**
- * Inicia el ciclo de actualización automática cada 30 segundos.
- */
 function iniciarNotificaciones() {
     insertarBadgeNotificacion();
     actualizarNotificaciones();
 
-    // Limpiar intervalo previo (por si acaso)
     if (intervalNotificaciones) clearInterval(intervalNotificaciones);
     intervalNotificaciones = setInterval(actualizarNotificaciones, INTERVALO_NOTIFICACIONES);
 }
@@ -138,13 +206,11 @@ function protegerPagina() {
         return;
     }
 
-    // Nombre del usuario en el sidebar
     const nombreUsuario = document.getElementById('nombre-usuario');
     if (nombreUsuario) {
         nombreUsuario.textContent = obtenerUsuario();
     }
 
-    // Configurar el botón de logout
     const botonLogout = document.getElementById('logout-btn');
     if (botonLogout) {
         botonLogout.addEventListener('click', () => {
@@ -154,7 +220,6 @@ function protegerPagina() {
         });
     }
 
-    // Iniciar las notificaciones (solo en páginas protegidas del panel)
     iniciarNotificaciones();
 }
 
@@ -168,7 +233,6 @@ if (formLogin) {
     const mensajeDiv = document.getElementById('login-mensaje');
     const boton = formLogin.querySelector('button[type="submit"]');
 
-    // Si ya está logueado, redirige directo al dashboard
     if (estaLogueado()) {
         window.location.href = '/admin/dashboard.html';
     }

@@ -1,6 +1,6 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "VER PEDIDOS" - DuotechBros Admin
-// Incluye: ver, cambiar estado, buscar, filtrar y exportar CSV
+// Incluye: ver, cambiar estado, buscar, filtrar, exportar CSV y ordenar
 // ============================================================
 
 const API_PEDIDOS = '/api/pedidos';
@@ -14,19 +14,20 @@ const estadoCargando = document.getElementById('estado-cargando');
 const btnRefresh = document.getElementById('btn-refresh');
 const btnExportar = document.getElementById('btn-exportar');
 
-// Búsqueda y filtros
 const buscador = document.getElementById('buscador-pedidos');
 const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
-// Estados
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 
 // Estado local
 let pedidosOriginales = [];
-let pedidosFiltrados = []; // ← guardamos lo que se muestra actualmente (para exportar)
+let pedidosFiltrados = [];
 let estadoFiltroActivo = 'Todos';
 let textoBusqueda = '';
+
+// Ordenamiento
+let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 
 // ----- UTILIDADES -----
 
@@ -83,34 +84,34 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
-// ============================================================
-// EXPORTAR A CSV
-// ============================================================
+// ----- ORDENAMIENTO -----
 
-/**
- * Escapa un campo para CSV: si contiene comas, comillas o saltos de línea,
- * se encierra entre comillas dobles y las comillas internas se duplican.
- */
+function aplicarOrdenamiento(array) {
+    if (!ordenActual.campo) return array;
+
+    return [...array].sort((a, b) => {
+        const cmp = compararValores(a[ordenActual.campo], b[ordenActual.campo], ordenActual.tipo);
+        return ordenActual.direccion === 'asc' ? cmp : -cmp;
+    });
+}
+
+// ----- EXPORTAR A CSV -----
+
 function escaparCSV(valor) {
     if (valor === null || valor === undefined) return '';
     const texto = String(valor);
-    // Si tiene coma, comilla o salto de línea, envolver en comillas
     if (texto.includes(',') || texto.includes('"') || texto.includes('\n') || texto.includes('\r')) {
         return `"${texto.replace(/"/g, '""')}"`;
     }
     return texto;
 }
 
-/**
- * Exporta los pedidos actualmente filtrados a un archivo CSV.
- */
 function exportarCSV() {
     if (pedidosFiltrados.length === 0) {
         mostrarToast('No hay pedidos para exportar.', true);
         return;
     }
 
-    // Encabezados del CSV
     const encabezados = [
         'ID',
         'Nombre del cliente',
@@ -122,7 +123,6 @@ function exportarCSV() {
         'Fecha de creación',
     ];
 
-    // Construir las filas
     const filas = pedidosFiltrados.map((p) => [
         p.id,
         p.nombre_cliente,
@@ -134,24 +134,19 @@ function exportarCSV() {
         formatearFecha(p.creado_en),
     ]);
 
-    // Construir el contenido del CSV
     const lineas = [
         encabezados.map(escaparCSV).join(','),
         ...filas.map((fila) => fila.map(escaparCSV).join(',')),
     ];
 
     const contenido = lineas.join('\r\n');
-
-    // BOM UTF-8 para que Excel reconozca los acentos
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + contenido], { type: 'text/csv;charset=utf-8;' });
 
-    // Nombre del archivo con la fecha actual
     const hoy = new Date();
     const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
     const nombreArchivo = `pedidos-duotechbros-${fecha}.csv`;
 
-    // Descargar
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -258,7 +253,7 @@ function renderizarPedidos(pedidos) {
     });
 }
 
-// ----- APLICAR FILTROS -----
+// ----- APLICAR FILTROS + ORDEN -----
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -283,7 +278,9 @@ function aplicarFiltros() {
         );
     }
 
-    // Guardar para exportar CSV
+    // Aplicar ordenamiento
+    filtrados = aplicarOrdenamiento(filtrados);
+
     pedidosFiltrados = filtrados;
 
     actualizarBotonLimpiar();
@@ -359,12 +356,8 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
 
             mostrarToast(`✅ Estado actualizado a "${capitalizar(nuevoEstado)}"`);
 
-            if (estadoFiltroActivo !== 'Todos') {
-                setTimeout(aplicarFiltros, 400);
-            } else {
-                // Refrescar el array de exportación
-                pedidosFiltrados = [...pedidosOriginales];
-            }
+            // Re-aplicar filtros y orden
+            aplicarFiltros();
         } else {
             selectElement.value = estadoAnterior;
             mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar'}`, true);
@@ -402,5 +395,23 @@ btnLimpiar.addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     construirFiltrosEstado();
+
+    // Configurar ordenamiento
+    configurarColumnasOrdenables(
+        'tabla-pedidos',
+        {
+            0: { campo: 'nombre_cliente', tipo: 'string' },
+            1: { campo: 'email', tipo: 'string' },
+            2: { campo: 'modelo_celular', tipo: 'string' },
+            3: { campo: 'descripcion_problema', tipo: 'string' },
+            4: { campo: 'creado_en', tipo: 'fecha' },
+            5: { campo: 'estado', tipo: 'string' },
+            // 6 = Acciones → no ordenable
+        },
+        () => ordenActual,
+        (nuevo) => { ordenActual = nuevo; },
+        aplicarFiltros
+    );
+
     setTimeout(cargarPedidos, 100);
 });

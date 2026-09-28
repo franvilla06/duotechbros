@@ -1699,3 +1699,44 @@ table.admin-table tbody tr:hover {
         justify-content: center;
     }
 }
+
+/* ============================================================
+   ENCABEZADOS ORDENABLES
+   ============================================================ */
+
+table.admin-table th.th-ordenable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s, color 0.2s;
+    position: relative;
+    white-space: nowrap;
+}
+
+table.admin-table th.th-ordenable:hover {
+    background-color: #e8f4ff;
+    color: #007BFF;
+}
+
+.th-sort-icon {
+    margin-left: 6px;
+    font-size: 0.72rem;
+    color: #c0c7cd;
+    transition: color 0.2s, transform 0.2s;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+table.admin-table th.th-ordenable:hover .th-sort-icon {
+    color: #007BFF;
+}
+
+.th-sort-icon.th-sort-activo {
+    color: #007BFF;
+    font-weight: 900;
+}
+
+/* La columna activa tiene un fondo más marcado */
+table.admin-table th.th-ordenable.activo {
+    background-color: #e8f4ff;
+    color: #007BFF;
+}
