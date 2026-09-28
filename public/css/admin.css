@@ -1236,3 +1236,165 @@ table.admin-table tbody tr:hover {
         width: 100%;
     }
 }
+
+/* ============================================================
+   BARRA DE BÚSQUEDA Y FILTROS
+   ============================================================ */
+
+.admin-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eef3f6;
+    flex-wrap: wrap;
+}
+
+/* ----- Buscador ----- */
+.admin-search {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 380px;
+}
+
+.admin-search i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+.admin-search input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    border: 1px solid #d0e6ea;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    background-color: #f7feff;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-search input:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* ----- Botones de filtro ----- */
+.admin-filtros {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filtro-chip {
+    background-color: #f0f4f8;
+    color: #0b4a62;
+    border: 1px solid transparent;
+    padding: 7px 15px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s, color 0.2s, transform 0.15s,
+        box-shadow 0.2s;
+    white-space: nowrap;
+}
+
+.filtro-chip:hover {
+    background-color: #e0e8ef;
+    transform: translateY(-1px);
+}
+
+.filtro-chip.active {
+    background: linear-gradient(135deg, #007BFF 0%, #0a9396 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
+}
+
+/* ----- Contador de resultados (dentro del toolbar) ----- */
+.admin-resultados {
+    font-size: 0.78rem;
+    color: #777;
+    font-weight: 600;
+    padding-left: 4px;
+}
+
+/* ----- Botón limpiar filtros ----- */
+.btn-limpiar {
+    background-color: transparent;
+    border: 1px solid #d0e6ea;
+    color: #0b4a62;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-limpiar:hover {
+    background-color: #f0f4f8;
+    border-color: #007BFF;
+    color: #007BFF;
+}
+
+.btn-limpiar:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: transparent;
+    border-color: #d0e6ea;
+    color: #0b4a62;
+}
+
+.btn-limpiar i {
+    font-size: 0.72rem;
+}
+
+/* ----- Mensaje de "sin resultados" en el body ----- */
+.table-sin-filtros {
+    text-align: center;
+    padding: 50px 20px;
+    color: #777;
+}
+
+.table-sin-filtros i {
+    font-size: 2.5rem;
+    color: #c0c7cd;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.table-sin-filtros p {
+    font-size: 1rem;
+    margin: 0 0 5px;
+    color: #555;
+}
+
+.table-sin-filtros small {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .admin-toolbar {
+        padding: 14px 16px;
+    }
+
+    .admin-search {
+        max-width: 100%;
+    }
+}

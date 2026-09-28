@@ -13,7 +13,6 @@
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
-      <!-- ========== SIDEBAR ========== -->
       <aside class="admin-sidebar">
         <div class="admin-sidebar-brand">
           <i class="fas fa-tools"></i>
@@ -53,7 +52,6 @@
         </div>
       </aside>
 
-      <!-- ========== CONTENIDO PRINCIPAL ========== -->
       <main class="admin-main">
         <header class="admin-header">
           <div>
@@ -63,29 +61,18 @@
         </header>
 
         <div class="admin-grid-2col">
-          <!-- ========== FORMULARIO DE ALTA ========== -->
           <section class="admin-card">
             <h2><i class="fas fa-plus-circle"></i> Añadir Nuevo Trabajo</h2>
 
             <form class="admin-form" id="form-trabajo">
               <div class="admin-form-group">
                 <label for="titulo">Título del trabajo *</label>
-                <input
-                  type="text"
-                  id="titulo"
-                  name="titulo"
-                  placeholder="Ej. Cambio de pantalla iPhone 13 Pro"
-                  required
-                />
+                <input type="text" id="titulo" name="titulo" placeholder="Ej. Cambio de pantalla iPhone 13 Pro" required />
               </div>
 
               <div class="admin-form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea
-                  id="descripcion"
-                  name="descripcion"
-                  placeholder="Detalles del trabajo realizado..."
-                ></textarea>
+                <textarea id="descripcion" name="descripcion" placeholder="Detalles del trabajo realizado..."></textarea>
               </div>
 
               <div class="admin-form-group">
@@ -104,12 +91,7 @@
 
               <div class="admin-form-group">
                 <label for="imagen_url">URL de la imagen</label>
-                <input
-                  type="url"
-                  id="imagen_url"
-                  name="imagen_url"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                />
+                <input type="url" id="imagen_url" name="imagen_url" placeholder="https://ejemplo.com/imagen.jpg" />
               </div>
 
               <div class="admin-form-actions">
@@ -120,11 +102,31 @@
             </form>
           </section>
 
-          <!-- ========== LISTA DE TRABAJOS ========== -->
           <section class="admin-card" style="padding: 0; overflow: hidden">
             <div class="table-header">
               <h2>Trabajos Publicados</h2>
               <span class="table-counter" id="contador-trabajos">0 trabajos</span>
+            </div>
+
+            <!-- Toolbar: búsqueda + filtros -->
+            <div class="admin-toolbar">
+              <div class="admin-search">
+                <i class="fas fa-search"></i>
+                <input
+                  type="text"
+                  id="buscador-trabajos"
+                  placeholder="Buscar por título, descripción..."
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="admin-filtros" id="filtros-tipo">
+                <!-- Los chips se generan dinámicamente -->
+              </div>
+
+              <button class="btn-limpiar" id="btn-limpiar" disabled>
+                <i class="fas fa-times"></i> Limpiar
+              </button>
             </div>
 
             <div class="table-wrapper">
@@ -139,9 +141,7 @@
                     <th style="text-align: right">Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="tbody-trabajos">
-                  <!-- Se carga dinámicamente -->
-                </tbody>
+                <tbody id="tbody-trabajos"></tbody>
               </table>
             </div>
 
@@ -149,6 +149,12 @@
               <i class="fas fa-briefcase"></i>
               <p>No hay trabajos publicados</p>
               <small>Agregá el primer trabajo usando el formulario de la izquierda.</small>
+            </div>
+
+            <div class="table-sin-filtros" id="estado-sin-resultados" style="display: none">
+              <i class="fas fa-search"></i>
+              <p>No se encontraron trabajos</p>
+              <small>Probá con otro término de búsqueda o quitá los filtros.</small>
             </div>
 
             <div class="table-empty" id="estado-cargando">
@@ -160,9 +166,7 @@
       </main>
     </div>
 
-    <!-- ============================================================
-         MODAL: EDITAR TRABAJO
-         ============================================================ -->
+    <!-- Modal: Editar Trabajo -->
     <div class="modal-overlay" id="modal-editar">
       <div class="modal-card">
         <div class="modal-header">
@@ -205,9 +209,7 @@
           </div>
 
           <div class="admin-form-actions">
-            <button type="button" class="btn-secondary" id="btn-cancelar">
-              Cancelar
-            </button>
+            <button type="button" class="btn-secondary" id="btn-cancelar">Cancelar</button>
             <button type="submit" class="btn-primary" id="btn-actualizar">
               <i class="fas fa-save"></i> Guardar Cambios
             </button>

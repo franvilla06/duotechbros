@@ -1,5 +1,6 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "VER PEDIDOS" - DuotechBros Admin
+// Incluye: ver, cambiar estado, buscar y filtrar
 // ============================================================
 
 const API_PEDIDOS = '/api/pedidos';
@@ -8,11 +9,22 @@ const API_ADMIN_PEDIDOS = '/api/admin/pedidos';
 const tbody = document.getElementById('tbody-pedidos');
 const contador = document.getElementById('contador-pedidos');
 const estadoVacio = document.getElementById('estado-vacio');
+const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnRefresh = document.getElementById('btn-refresh');
 
-// Estados válidos del sistema
+// Elementos de búsqueda y filtros
+const buscador = document.getElementById('buscador-pedidos');
+const filtrosEstado = document.getElementById('filtros-estado');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+// Estados válidos y de filtro
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
+
+// Estado local
+let pedidosOriginales = [];
+let estadoFiltroActivo = 'Todos';
+let textoBusqueda = '';
 
 // ----- UTILIDADES -----
 
@@ -37,10 +49,6 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
-/**
- * Normaliza el estado para usar como clase CSS.
- * "en proceso" → "en-proceso"
- */
 function normalizarEstado(estado) {
     return (estado || 'pendiente').toLowerCase().trim().replace(/\s+/g, '-');
 }
@@ -51,24 +59,78 @@ function claseBadgeEstado(estado) {
     return validos.includes(e) ? `badge-${e}` : 'badge-pendiente';
 }
 
+function capitalizar(texto) {
+    if (!texto) return '';
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function mostrarToast(mensaje, esError = false) {
+    const anterior = document.getElementById('toast-admin');
+    if (anterior) anterior.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-admin';
+    toast.className = 'toast-admin' + (esError ? ' toast-error' : '');
+    toast.innerHTML = `<span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ----- FILTROS -----
+
+function construirFiltrosEstado() {
+    const opciones = ['Todos', ...ESTADOS];
+    filtrosEstado.innerHTML = '';
+
+    opciones.forEach((estado) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (estado === estadoFiltroActivo ? ' active' : '');
+        chip.dataset.estado = estado;
+        chip.textContent = estado === 'Todos' ? 'Todos' : capitalizar(estado);
+
+        chip.addEventListener('click', () => {
+            estadoFiltroActivo = estado;
+            filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.estado === estado);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosEstado.appendChild(chip);
+    });
+}
+
+function actualizarBotonLimpiar() {
+    const hayFiltro = estadoFiltroActivo !== 'Todos' || textoBusqueda.trim() !== '';
+    btnLimpiar.disabled = !hayFiltro;
+}
+
 // ----- RENDERIZADO -----
 
 function renderizarPedidos(pedidos) {
     tbody.innerHTML = '';
 
-    if (!pedidos || pedidos.length === 0) {
-        estadoVacio.style.display = 'block';
+    if (pedidos.length === 0) {
+        if (pedidosOriginales.length === 0) {
+            estadoVacio.style.display = 'block';
+        } else {
+            estadoSinResultados.style.display = 'block';
+        }
         contador.textContent = '0 pedidos';
         return;
     }
 
-    estadoVacio.style.display = 'none';
     contador.textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''}`;
 
     pedidos.forEach((p) => {
         const estadoActual = p.estado || 'pendiente';
 
-        // Construir las opciones del select
         const opciones = ESTADOS.map(
             (e) =>
                 `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
@@ -104,22 +166,45 @@ function renderizarPedidos(pedidos) {
 
     // Asignar eventos a los selects
     tbody.querySelectorAll('.estado-select').forEach((select) => {
-        select.addEventListener('change', (e) => {
+        select.addEventListener('change', () => {
             const id = select.dataset.id;
             const nuevoEstado = select.value;
             const estadoAnterior = select.dataset.estadoAnterior;
-
-            // Si no cambió, no hacer nada
             if (nuevoEstado === estadoAnterior) return;
-
             cambiarEstado(id, nuevoEstado, estadoAnterior, select);
         });
     });
 }
 
-function capitalizar(texto) {
-    if (!texto) return '';
-    return texto.charAt(0).toUpperCase() + texto.slice(1);
+// ----- APLICAR FILTROS -----
+
+function aplicarFiltros() {
+    estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
+
+    let filtrados = [...pedidosOriginales];
+
+    // Filtrar por estado
+    if (estadoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter(
+            (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
+        );
+    }
+
+    // Filtrar por búsqueda
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter(
+            (p) =>
+                (p.nombre_cliente && p.nombre_cliente.toLowerCase().includes(q)) ||
+                (p.email && p.email.toLowerCase().includes(q)) ||
+                (p.modelo_celular && p.modelo_celular.toLowerCase().includes(q)) ||
+                (p.telefono && String(p.telefono).toLowerCase().includes(q))
+        );
+    }
+
+    actualizarBotonLimpiar();
+    renderizarPedidos(filtrados);
 }
 
 // ----- CARGA DE DATOS -----
@@ -127,6 +212,7 @@ function capitalizar(texto) {
 async function cargarPedidos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
     tbody.innerHTML = '';
 
     const icono = btnRefresh.querySelector('i');
@@ -137,7 +223,15 @@ async function cargarPedidos() {
         const respuesta = await fetch(API_PEDIDOS);
         if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
         const pedidos = await respuesta.json();
-        renderizarPedidos(pedidos);
+
+        pedidosOriginales = pedidos;
+
+        if (pedidos.length === 0) {
+            estadoVacio.style.display = 'block';
+            contador.textContent = '0 pedidos';
+        } else {
+            aplicarFiltros();
+        }
     } catch (error) {
         console.error('Error al cargar pedidos:', error);
         tbody.innerHTML = '';
@@ -157,7 +251,6 @@ async function cargarPedidos() {
 // ----- CAMBIO DE ESTADO -----
 
 async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
-    // Deshabilitar el select mientras se procesa
     selectElement.disabled = true;
 
     try {
@@ -169,16 +262,24 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            // Actualizar el badge y el dataset
             const badge = document.getElementById(`badge-${id}`);
             if (badge) {
                 badge.className = `badge ${claseBadgeEstado(nuevoEstado)}`;
                 badge.textContent = capitalizar(nuevoEstado);
             }
             selectElement.dataset.estadoAnterior = nuevoEstado;
+
+            // Actualizar el pedido en el array local
+            const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
+            if (pedido) pedido.estado = nuevoEstado;
+
             mostrarToast(`✅ Estado actualizado a "${capitalizar(nuevoEstado)}"`);
+
+            // Si hay un filtro activo, re-aplicar (por si el pedido ya no corresponde)
+            if (estadoFiltroActivo !== 'Todos') {
+                setTimeout(aplicarFiltros, 400);
+            }
         } else {
-            // Revertir el select al estado anterior
             selectElement.value = estadoAnterior;
             mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar'}`, true);
         }
@@ -191,37 +292,28 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
     }
 }
 
-// ----- TOAST (notificación pequeña no invasiva) -----
-
-function mostrarToast(mensaje, esError = false) {
-    // Eliminar toast anterior si existe
-    const anterior = document.getElementById('toast-admin');
-    if (anterior) anterior.remove();
-
-    const toast = document.createElement('div');
-    toast.id = 'toast-admin';
-    toast.className = 'toast-admin' + (esError ? ' toast-error' : '');
-    toast.innerHTML = `
-        <span>${mensaje}</span>
-    `;
-    document.body.appendChild(toast);
-
-    // Mostrar
-    setTimeout(() => toast.classList.add('toast-visible'), 10);
-
-    // Ocultar después de 3 segundos
-    setTimeout(() => {
-        toast.classList.remove('toast-visible');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
 // ----- EVENTOS -----
 
 btnRefresh.addEventListener('click', cargarPedidos);
 
+buscador.addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    aplicarFiltros();
+});
+
+btnLimpiar.addEventListener('click', () => {
+    textoBusqueda = '';
+    buscador.value = '';
+    estadoFiltroActivo = 'Todos';
+    filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.estado === 'Todos');
+    });
+    aplicarFiltros();
+});
+
 // ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
+    construirFiltrosEstado();
     setTimeout(cargarPedidos, 100);
 });

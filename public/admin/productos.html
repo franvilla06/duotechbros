@@ -13,7 +13,6 @@
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
-      <!-- ========== SIDEBAR ========== -->
       <aside class="admin-sidebar">
         <div class="admin-sidebar-brand">
           <i class="fas fa-tools"></i>
@@ -53,7 +52,6 @@
         </div>
       </aside>
 
-      <!-- ========== CONTENIDO PRINCIPAL ========== -->
       <main class="admin-main">
         <header class="admin-header">
           <div>
@@ -63,75 +61,40 @@
         </header>
 
         <div class="admin-grid-2col">
-          <!-- ========== FORMULARIO DE ALTA ========== -->
+          <!-- Formulario de alta -->
           <section class="admin-card">
             <h2><i class="fas fa-plus-circle"></i> Añadir Nuevo Producto</h2>
 
             <form class="admin-form" id="form-producto">
               <div class="admin-form-group">
                 <label for="nombre">Nombre del producto *</label>
-                <input
-                  type="text"
-                  id="nombre"
-                  name="nombre"
-                  placeholder="Ej. Funda iPhone 15"
-                  required
-                />
+                <input type="text" id="nombre" name="nombre" placeholder="Ej. Funda iPhone 15" required />
               </div>
 
               <div class="admin-form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea
-                  id="descripcion"
-                  name="descripcion"
-                  placeholder="Detalles del producto..."
-                ></textarea>
+                <textarea id="descripcion" name="descripcion" placeholder="Detalles del producto..."></textarea>
               </div>
 
               <div class="admin-form-row">
                 <div class="admin-form-group">
                   <label for="precio">Precio ($) *</label>
-                  <input
-                    type="number"
-                    id="precio"
-                    name="precio"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    required
-                  />
+                  <input type="number" id="precio" name="precio" step="0.01" min="0" placeholder="0.00" required />
                 </div>
                 <div class="admin-form-group">
                   <label for="stock">Stock</label>
-                  <input
-                    type="number"
-                    id="stock"
-                    name="stock"
-                    min="0"
-                    placeholder="0"
-                    value="0"
-                  />
+                  <input type="number" id="stock" name="stock" min="0" placeholder="0" value="0" />
                 </div>
               </div>
 
               <div class="admin-form-group">
                 <label for="categoria">Categoría</label>
-                <input
-                  type="text"
-                  id="categoria"
-                  name="categoria"
-                  placeholder="Ej. Fundas, Cargadores, Auriculares"
-                />
+                <input type="text" id="categoria" name="categoria" placeholder="Ej. Fundas, Cargadores" />
               </div>
 
               <div class="admin-form-group">
                 <label for="imagen_url">URL de la imagen</label>
-                <input
-                  type="url"
-                  id="imagen_url"
-                  name="imagen_url"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                />
+                <input type="url" id="imagen_url" name="imagen_url" placeholder="https://ejemplo.com/imagen.jpg" />
               </div>
 
               <div class="admin-form-actions">
@@ -142,11 +105,32 @@
             </form>
           </section>
 
-          <!-- ========== LISTA DE PRODUCTOS ========== -->
+          <!-- Lista de productos -->
           <section class="admin-card" style="padding: 0; overflow: hidden">
             <div class="table-header">
               <h2>Productos Existentes</h2>
               <span class="table-counter" id="contador-productos">0 productos</span>
+            </div>
+
+            <!-- Toolbar: búsqueda + filtros -->
+            <div class="admin-toolbar">
+              <div class="admin-search">
+                <i class="fas fa-search"></i>
+                <input
+                  type="text"
+                  id="buscador-productos"
+                  placeholder="Buscar por nombre, categoría..."
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="admin-filtros" id="filtros-categoria">
+                <!-- Los chips se generan dinámicamente -->
+              </div>
+
+              <button class="btn-limpiar" id="btn-limpiar" disabled>
+                <i class="fas fa-times"></i> Limpiar
+              </button>
             </div>
 
             <div class="table-wrapper">
@@ -162,9 +146,7 @@
                     <th style="text-align: right">Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="tbody-productos">
-                  <!-- Se carga dinámicamente -->
-                </tbody>
+                <tbody id="tbody-productos"></tbody>
               </table>
             </div>
 
@@ -172,6 +154,12 @@
               <i class="fas fa-box-open"></i>
               <p>No hay productos registrados</p>
               <small>Agregá el primer producto usando el formulario de la izquierda.</small>
+            </div>
+
+            <div class="table-sin-filtros" id="estado-sin-resultados" style="display: none">
+              <i class="fas fa-search"></i>
+              <p>No se encontraron productos</p>
+              <small>Probá con otro término de búsqueda o quitá los filtros.</small>
             </div>
 
             <div class="table-empty" id="estado-cargando">
@@ -183,9 +171,7 @@
       </main>
     </div>
 
-    <!-- ============================================================
-         MODAL: EDITAR PRODUCTO
-         ============================================================ -->
+    <!-- Modal: Editar Producto -->
     <div class="modal-overlay" id="modal-editar">
       <div class="modal-card">
         <div class="modal-header">
@@ -230,9 +216,7 @@
           </div>
 
           <div class="admin-form-actions">
-            <button type="button" class="btn-secondary" id="btn-cancelar">
-              Cancelar
-            </button>
+            <button type="button" class="btn-secondary" id="btn-cancelar">Cancelar</button>
             <button type="submit" class="btn-primary" id="btn-actualizar">
               <i class="fas fa-save"></i> Guardar Cambios
             </button>

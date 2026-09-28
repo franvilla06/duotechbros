@@ -72,6 +72,27 @@
             <span class="table-counter" id="contador-pedidos">0 pedidos</span>
           </div>
 
+          <!-- ========== TOOLBAR: BÚSQUEDA + FILTROS ========== -->
+          <div class="admin-toolbar">
+            <div class="admin-search">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="buscador-pedidos"
+                placeholder="Buscar por cliente, email, modelo..."
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="admin-filtros" id="filtros-estado">
+              <!-- Los chips se generan dinámicamente -->
+            </div>
+
+            <button class="btn-limpiar" id="btn-limpiar" disabled>
+              <i class="fas fa-times"></i> Limpiar
+            </button>
+          </div>
+
           <div class="table-wrapper">
             <table class="admin-table" id="tabla-pedidos">
               <thead>
@@ -86,16 +107,23 @@
                 </tr>
               </thead>
               <tbody id="tbody-pedidos">
-                <!-- Las filas se cargan dinámicamente -->
+                <!-- Se carga dinámicamente -->
               </tbody>
             </table>
           </div>
 
-          <!-- Estado vacío / cargando -->
+          <!-- Estado: vacío (sin datos) -->
           <div class="table-empty" id="estado-vacio" style="display: none">
             <i class="fas fa-inbox"></i>
             <p>No hay pedidos registrados</p>
             <small>Cuando un cliente envíe una solicitud, aparecerá aquí.</small>
+          </div>
+
+          <!-- Estado: sin resultados (por filtros) -->
+          <div class="table-sin-filtros" id="estado-sin-resultados" style="display: none">
+            <i class="fas fa-search"></i>
+            <p>No se encontraron pedidos</p>
+            <small>Probá con otro término de búsqueda o quitá los filtros.</small>
           </div>
 
           <div class="table-empty" id="estado-cargando">

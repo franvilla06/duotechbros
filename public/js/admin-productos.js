@@ -1,5 +1,6 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DuotechBros Admin
+// Incluye: crear, editar, eliminar, buscar y filtrar
 // ============================================================
 
 const API_PRODUCTOS = '/api/productos';
@@ -9,8 +10,14 @@ const formProducto = document.getElementById('form-producto');
 const tbody = document.getElementById('tbody-productos');
 const contador = document.getElementById('contador-productos');
 const estadoVacio = document.getElementById('estado-vacio');
+const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
+
+// Búsqueda y filtros
+const buscador = document.getElementById('buscador-productos');
+const filtrosCategoria = document.getElementById('filtros-categoria');
+const btnLimpiar = document.getElementById('btn-limpiar');
 
 // Modal de edición
 const modalEditar = document.getElementById('modal-editar');
@@ -18,6 +25,11 @@ const modalClose = document.getElementById('modal-close');
 const formEditar = document.getElementById('form-editar');
 const btnCancelar = document.getElementById('btn-cancelar');
 const btnActualizar = document.getElementById('btn-actualizar');
+
+// Estado local
+let productosOriginales = [];
+let categoriaFiltroActivo = 'Todas';
+let textoBusqueda = '';
 
 // ----- UTILIDADES -----
 
@@ -58,18 +70,57 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
+// ----- FILTROS -----
+
+function construirFiltrosCategoria() {
+    const categorias = ['Todas'];
+    productosOriginales.forEach((p) => {
+        if (p.categoria && !categorias.includes(p.categoria)) {
+            categorias.push(p.categoria);
+        }
+    });
+
+    filtrosCategoria.innerHTML = '';
+
+    categorias.forEach((cat) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (cat === categoriaFiltroActivo ? ' active' : '');
+        chip.dataset.categoria = cat;
+        chip.textContent = cat;
+
+        chip.addEventListener('click', () => {
+            categoriaFiltroActivo = cat;
+            filtrosCategoria.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.categoria === cat);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosCategoria.appendChild(chip);
+    });
+}
+
+function actualizarBotonLimpiar() {
+    const hayFiltro = categoriaFiltroActivo !== 'Todas' || textoBusqueda.trim() !== '';
+    btnLimpiar.disabled = !hayFiltro;
+}
+
 // ----- RENDERIZADO -----
 
 function renderizarProductos(productos) {
     tbody.innerHTML = '';
 
-    if (!productos || productos.length === 0) {
-        estadoVacio.style.display = 'block';
+    if (productos.length === 0) {
+        if (productosOriginales.length === 0) {
+            estadoVacio.style.display = 'block';
+        } else {
+            estadoSinResultados.style.display = 'block';
+        }
         contador.textContent = '0 productos';
         return;
     }
 
-    estadoVacio.style.display = 'none';
     contador.textContent = `${productos.length} producto${productos.length !== 1 ? 's' : ''}`;
 
     productos.forEach((p) => {
@@ -89,9 +140,7 @@ function renderizarProductos(productos) {
             </td>
             <td>${escapar(p.categoria)}</td>
             <td><span class="cell-precio">${formatearPrecio(p.precio)}</span></td>
-            <td>
-                <span class="badge ${claseStock(p.stock)}">${escapar(p.stock)} ud.</span>
-            </td>
+            <td><span class="badge ${claseStock(p.stock)}">${escapar(p.stock)} ud.</span></td>
             <td style="text-align: right">
                 <button class="btn-editar" title="Editar" data-id="${p.id}">
                     <i class="fas fa-edit"></i>
@@ -104,22 +153,41 @@ function renderizarProductos(productos) {
         tbody.appendChild(tr);
     });
 
-    // Asignar eventos a los botones de editar
     tbody.querySelectorAll('.btn-editar').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            abrirModalEdicion(id);
-        });
+        btn.addEventListener('click', () => abrirModalEdicion(btn.dataset.id));
     });
 
-    // Asignar eventos a los botones de eliminar
     tbody.querySelectorAll('.btn-eliminar').forEach((btn) => {
         btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const nombre = btn.dataset.nombre;
-            eliminarProducto(id, nombre);
+            eliminarProducto(btn.dataset.id, btn.dataset.nombre);
         });
     });
+}
+
+// ----- APLICAR FILTROS -----
+
+function aplicarFiltros() {
+    estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
+
+    let filtrados = [...productosOriginales];
+
+    if (categoriaFiltroActivo !== 'Todas') {
+        filtrados = filtrados.filter((p) => p.categoria === categoriaFiltroActivo);
+    }
+
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter(
+            (p) =>
+                (p.nombre && p.nombre.toLowerCase().includes(q)) ||
+                (p.descripcion && p.descripcion.toLowerCase().includes(q)) ||
+                (p.categoria && p.categoria.toLowerCase().includes(q))
+        );
+    }
+
+    actualizarBotonLimpiar();
+    renderizarProductos(filtrados);
 }
 
 // ----- CARGA DE DATOS -----
@@ -127,13 +195,25 @@ function renderizarProductos(productos) {
 async function cargarProductos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
     tbody.innerHTML = '';
 
     try {
         const respuesta = await fetch(API_PRODUCTOS);
         if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
         const productos = await respuesta.json();
-        renderizarProductos(productos);
+
+        productosOriginales = productos;
+
+        // Reconstruir filtros (por si aparecieron nuevas categorías)
+        construirFiltrosCategoria();
+
+        if (productos.length === 0) {
+            estadoVacio.style.display = 'block';
+            contador.textContent = '0 productos';
+        } else {
+            aplicarFiltros();
+        }
     } catch (error) {
         console.error('Error al cargar productos:', error);
         tbody.innerHTML = '';
@@ -188,7 +268,7 @@ formProducto.addEventListener('submit', async (e) => {
             document.getElementById('stock').value = '0';
             cargarProductos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar el producto.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear producto:', error);
@@ -201,35 +281,21 @@ formProducto.addEventListener('submit', async (e) => {
 // ----- MODAL: ABRIR Y CERRAR -----
 
 function abrirModalEdicion(id) {
-    // Buscar el producto en el DOM usando los datos de la fila
-    // En lugar de re-consultar la API, extraemos los datos del fetch inicial
-    // Pero como no los tenemos guardados, hacemos un fetch específico al endpoint público
-    // y filtramos el producto por ID.
-    fetch(API_PRODUCTOS)
-        .then((r) => r.json())
-        .then((productos) => {
-            const producto = productos.find((p) => String(p.id) === String(id));
-            if (!producto) {
-                mostrarToast('No se encontró el producto.', true);
-                return;
-            }
+    const producto = productosOriginales.find((p) => String(p.id) === String(id));
+    if (!producto) {
+        mostrarToast('No se encontró el producto.', true);
+        return;
+    }
 
-            // Rellenar el formulario del modal
-            document.getElementById('edit-id').value = producto.id;
-            document.getElementById('edit-nombre').value = producto.nombre || '';
-            document.getElementById('edit-descripcion').value = producto.descripcion || '';
-            document.getElementById('edit-precio').value = producto.precio || '';
-            document.getElementById('edit-stock').value = producto.stock || 0;
-            document.getElementById('edit-categoria').value = producto.categoria || '';
-            document.getElementById('edit-imagen_url').value = producto.imagen_url || '';
+    document.getElementById('edit-id').value = producto.id;
+    document.getElementById('edit-nombre').value = producto.nombre || '';
+    document.getElementById('edit-descripcion').value = producto.descripcion || '';
+    document.getElementById('edit-precio').value = producto.precio || '';
+    document.getElementById('edit-stock').value = producto.stock || 0;
+    document.getElementById('edit-categoria').value = producto.categoria || '';
+    document.getElementById('edit-imagen_url').value = producto.imagen_url || '';
 
-            // Mostrar el modal
-            modalEditar.classList.add('modal-visible');
-        })
-        .catch((error) => {
-            console.error('Error al cargar producto para editar:', error);
-            mostrarToast('No se pudo cargar el producto.', true);
-        });
+    modalEditar.classList.add('modal-visible');
 }
 
 function cerrarModalEdicion() {
@@ -240,21 +306,17 @@ function cerrarModalEdicion() {
 modalClose.addEventListener('click', cerrarModalEdicion);
 btnCancelar.addEventListener('click', cerrarModalEdicion);
 
-// Cerrar al hacer clic fuera del modal
 modalEditar.addEventListener('click', (e) => {
-    if (e.target === modalEditar) {
-        cerrarModalEdicion();
-    }
+    if (e.target === modalEditar) cerrarModalEdicion();
 });
 
-// Cerrar con la tecla Escape
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modalEditar.classList.contains('modal-visible')) {
         cerrarModalEdicion();
     }
 });
 
-// ----- GUARDAR CAMBIOS (PUT) -----
+// ----- GUARDAR CAMBIOS -----
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -305,7 +367,7 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- ELIMINAR PRODUCTO -----
+// ----- ELIMINAR -----
 
 async function eliminarProducto(id, nombre) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${nombre}"?`);
@@ -322,12 +384,29 @@ async function eliminarProducto(id, nombre) {
             mostrarToast('✅ Producto eliminado.');
             cargarProductos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar el producto.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar producto:', error);
     }
 }
+
+// ----- EVENTOS -----
+
+buscador.addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    aplicarFiltros();
+});
+
+btnLimpiar.addEventListener('click', () => {
+    textoBusqueda = '';
+    buscador.value = '';
+    categoriaFiltroActivo = 'Todas';
+    filtrosCategoria.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.categoria === 'Todas');
+    });
+    aplicarFiltros();
+});
 
 // ----- INICIO -----
 

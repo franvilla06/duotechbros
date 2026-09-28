@@ -1,5 +1,6 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DuotechBros Admin
+// Incluye: crear, editar, eliminar, buscar y filtrar
 // ============================================================
 
 const API_PORTAFOLIO = '/api/portafolio';
@@ -9,15 +10,26 @@ const formTrabajo = document.getElementById('form-trabajo');
 const tbody = document.getElementById('tbody-trabajos');
 const contador = document.getElementById('contador-trabajos');
 const estadoVacio = document.getElementById('estado-vacio');
+const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoCargando = document.getElementById('estado-cargando');
 const btnGuardar = document.getElementById('btn-guardar');
 
-// Modal de edición
+// Búsqueda y filtros
+const buscador = document.getElementById('buscador-trabajos');
+const filtrosTipo = document.getElementById('filtros-tipo');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+// Modal
 const modalEditar = document.getElementById('modal-editar');
 const modalClose = document.getElementById('modal-close');
 const formEditar = document.getElementById('form-editar');
 const btnCancelar = document.getElementById('btn-cancelar');
 const btnActualizar = document.getElementById('btn-actualizar');
+
+// Estado local
+let trabajosOriginales = [];
+let tipoFiltroActivo = 'Todos';
+let textoBusqueda = '';
 
 // ----- UTILIDADES -----
 
@@ -66,18 +78,57 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
+// ----- FILTROS -----
+
+function construirFiltrosTipo() {
+    const tipos = ['Todos'];
+    trabajosOriginales.forEach((t) => {
+        if (t.tipo_reparacion && !tipos.includes(t.tipo_reparacion)) {
+            tipos.push(t.tipo_reparacion);
+        }
+    });
+
+    filtrosTipo.innerHTML = '';
+
+    tipos.forEach((tipo) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (tipo === tipoFiltroActivo ? ' active' : '');
+        chip.dataset.tipo = tipo;
+        chip.textContent = tipo;
+
+        chip.addEventListener('click', () => {
+            tipoFiltroActivo = tipo;
+            filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.tipo === tipo);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosTipo.appendChild(chip);
+    });
+}
+
+function actualizarBotonLimpiar() {
+    const hayFiltro = tipoFiltroActivo !== 'Todos' || textoBusqueda.trim() !== '';
+    btnLimpiar.disabled = !hayFiltro;
+}
+
 // ----- RENDERIZADO -----
 
 function renderizarTrabajos(trabajos) {
     tbody.innerHTML = '';
 
-    if (!trabajos || trabajos.length === 0) {
-        estadoVacio.style.display = 'block';
+    if (trabajos.length === 0) {
+        if (trabajosOriginales.length === 0) {
+            estadoVacio.style.display = 'block';
+        } else {
+            estadoSinResultados.style.display = 'block';
+        }
         contador.textContent = '0 trabajos';
         return;
     }
 
-    estadoVacio.style.display = 'none';
     contador.textContent = `${trabajos.length} trabajo${trabajos.length !== 1 ? 's' : ''}`;
 
     trabajos.forEach((t) => {
@@ -113,22 +164,41 @@ function renderizarTrabajos(trabajos) {
         tbody.appendChild(tr);
     });
 
-    // Asignar eventos a los botones de editar
     tbody.querySelectorAll('.btn-editar').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            abrirModalEdicion(id);
-        });
+        btn.addEventListener('click', () => abrirModalEdicion(btn.dataset.id));
     });
 
-    // Asignar eventos a los botones de eliminar
     tbody.querySelectorAll('.btn-eliminar').forEach((btn) => {
         btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            const titulo = btn.dataset.titulo;
-            eliminarTrabajo(id, titulo);
+            eliminarTrabajo(btn.dataset.id, btn.dataset.titulo);
         });
     });
+}
+
+// ----- APLICAR FILTROS -----
+
+function aplicarFiltros() {
+    estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
+
+    let filtrados = [...trabajosOriginales];
+
+    if (tipoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter((t) => t.tipo_reparacion === tipoFiltroActivo);
+    }
+
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter(
+            (t) =>
+                (t.titulo && t.titulo.toLowerCase().includes(q)) ||
+                (t.descripcion && t.descripcion.toLowerCase().includes(q)) ||
+                (t.tipo_reparacion && t.tipo_reparacion.toLowerCase().includes(q))
+        );
+    }
+
+    actualizarBotonLimpiar();
+    renderizarTrabajos(filtrados);
 }
 
 // ----- CARGA DE DATOS -----
@@ -136,13 +206,24 @@ function renderizarTrabajos(trabajos) {
 async function cargarTrabajos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
     tbody.innerHTML = '';
 
     try {
         const respuesta = await fetch(API_PORTAFOLIO);
         if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
         const trabajos = await respuesta.json();
-        renderizarTrabajos(trabajos);
+
+        trabajosOriginales = trabajos;
+
+        construirFiltrosTipo();
+
+        if (trabajos.length === 0) {
+            estadoVacio.style.display = 'block';
+            contador.textContent = '0 trabajos';
+        } else {
+            aplicarFiltros();
+        }
     } catch (error) {
         console.error('Error al cargar trabajos:', error);
         tbody.innerHTML = '';
@@ -190,7 +271,7 @@ formTrabajo.addEventListener('submit', async (e) => {
             formTrabajo.reset();
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar el trabajo.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear trabajo:', error);
@@ -200,32 +281,22 @@ formTrabajo.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- MODAL: ABRIR Y CERRAR -----
+// ----- MODAL -----
 
 function abrirModalEdicion(id) {
-    fetch(API_PORTAFOLIO)
-        .then((r) => r.json())
-        .then((trabajos) => {
-            const trabajo = trabajos.find((t) => String(t.id) === String(id));
-            if (!trabajo) {
-                mostrarToast('No se encontró el trabajo.', true);
-                return;
-            }
+    const trabajo = trabajosOriginales.find((t) => String(t.id) === String(id));
+    if (!trabajo) {
+        mostrarToast('No se encontró el trabajo.', true);
+        return;
+    }
 
-            // Rellenar el formulario del modal
-            document.getElementById('edit-id').value = trabajo.id;
-            document.getElementById('edit-titulo').value = trabajo.titulo || '';
-            document.getElementById('edit-descripcion').value = trabajo.descripcion || '';
-            document.getElementById('edit-tipo_reparacion').value = trabajo.tipo_reparacion || '';
-            document.getElementById('edit-imagen_url').value = trabajo.imagen_url || '';
+    document.getElementById('edit-id').value = trabajo.id;
+    document.getElementById('edit-titulo').value = trabajo.titulo || '';
+    document.getElementById('edit-descripcion').value = trabajo.descripcion || '';
+    document.getElementById('edit-tipo_reparacion').value = trabajo.tipo_reparacion || '';
+    document.getElementById('edit-imagen_url').value = trabajo.imagen_url || '';
 
-            // Mostrar el modal
-            modalEditar.classList.add('modal-visible');
-        })
-        .catch((error) => {
-            console.error('Error al cargar trabajo para editar:', error);
-            mostrarToast('No se pudo cargar el trabajo.', true);
-        });
+    modalEditar.classList.add('modal-visible');
 }
 
 function cerrarModalEdicion() {
@@ -237,9 +308,7 @@ modalClose.addEventListener('click', cerrarModalEdicion);
 btnCancelar.addEventListener('click', cerrarModalEdicion);
 
 modalEditar.addEventListener('click', (e) => {
-    if (e.target === modalEditar) {
-        cerrarModalEdicion();
-    }
+    if (e.target === modalEditar) cerrarModalEdicion();
 });
 
 document.addEventListener('keydown', (e) => {
@@ -248,7 +317,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ----- GUARDAR CAMBIOS (PUT) -----
+// ----- GUARDAR CAMBIOS -----
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -293,7 +362,7 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- ELIMINAR TRABAJO -----
+// ----- ELIMINAR -----
 
 async function eliminarTrabajo(id, titulo) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
@@ -310,12 +379,29 @@ async function eliminarTrabajo(id, titulo) {
             mostrarToast('✅ Trabajo eliminado.');
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar el trabajo.'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar trabajo:', error);
     }
 }
+
+// ----- EVENTOS -----
+
+buscador.addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    aplicarFiltros();
+});
+
+btnLimpiar.addEventListener('click', () => {
+    textoBusqueda = '';
+    buscador.value = '';
+    tipoFiltroActivo = 'Todos';
+    filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.tipo === 'Todos');
+    });
+    aplicarFiltros();
+});
 
 // ----- INICIO -----
 
