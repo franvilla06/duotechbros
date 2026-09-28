@@ -1,15 +1,11 @@
-// ============================================================
-// LÓGICA COMÚN DEL PANEL DE ADMINISTRACIÓN - DuotechBros
-// ============================================================
+// LÓGICA COMÚN DEL PANEL DE ADMINISTRACIÓN - DUOTECHBROS
 
 const API_BASE = '/api';
 
 const INTERVALO_NOTIFICACIONES = 30000;
 let intervalNotificaciones = null;
 
-// ============================================================
 // UTILIDADES DE SESIÓN
-// ============================================================
 
 function guardarSesion(usuario, token) {
     sessionStorage.setItem('adminLogueado', 'true');
@@ -55,9 +51,7 @@ async function fetchAdmin(url, opciones = {}) {
     return respuesta;
 }
 
-// ============================================================
 // ORDENAMIENTO DE TABLAS
-// ============================================================
 
 function compararValores(a, b, tipo) {
     if (a === null || a === undefined || a === '') return 1;
@@ -119,16 +113,14 @@ function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden,
     });
 }
 
-// ============================================================
 // PAGINACIÓN
-// ============================================================
 
 /**
- * Crea un paginador con estado propio.
+ * crea un paginador con estado propio.
  * @param {string} contenedorId - id del div donde se dibujan los controles.
- * @param {number} porPagina - Cantidad de items por página.
- * @param {Function} onCambiarPagina - Callback que se ejecuta al cambiar de página.
- * @returns Objeto con métodos para actualizar el total, resetear, y paginar.
+ * @param {number} porPagina - cantidad de items por página.
+ * @param {Function} onCambiarPagina - callback que se ejecuta al cambiar de página.
+ * @returns objeto con métodos para actualizar el total, resetear, y paginar.
  */
 function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
     let paginaActual = 1;
@@ -142,7 +134,7 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
     }
 
     /**
-     * Genera la lista de botones a mostrar con elipsis si hay muchas páginas.
+    * genera la lista de botones a mostrar con elipsis si hay muchas páginas.
      */
     function generarBotones(pag) {
         const total = getTotalPaginas();
@@ -203,7 +195,7 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
             </div>
         `;
 
-        // Números de página
+        // NÚMEROS DE PÁGINA
         contenedor.querySelectorAll('.pag-num').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const num = parseInt(btn.dataset.pagina);
@@ -215,7 +207,7 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
             });
         });
 
-        // Botones prev/next
+        // BOTONES PREV/NEXT
         const btnPrev = contenedor.querySelector('.pag-prev');
         const btnNext = contenedor.querySelector('.pag-next');
 
@@ -241,7 +233,7 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
     }
 
     return {
-        /** Actualiza el total de items. Si resetPagina=true, vuelve a la página 1. */
+        /** actualiza el total de items. si resetPagina=true, vuelve a la página 1. */
         actualizar(nuevoTotal, resetPagina = false) {
             totalItems = nuevoTotal;
             if (resetPagina) paginaActual = 1;
@@ -252,20 +244,18 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
 
             render();
         },
-        /** Devuelve el slice de items correspondiente a la página actual. */
+        /** devuelve el slice de items correspondiente a la página actual. */
         getItems(items) {
             return items.slice((paginaActual - 1) * porPagina, paginaActual * porPagina);
         },
-        /** Devuelve la página actual. */
+        /** devuelve la página actual. */
         getPaginaActual() {
             return paginaActual;
         },
     };
 }
 
-// ============================================================
 // NOTIFICACIONES DE PEDIDOS PENDIENTES
-// ============================================================
 
 function insertarBadgeNotificacion() {
     const linkPedidos = document.querySelector('.admin-nav a[href="pedidos.html"]');
@@ -315,9 +305,7 @@ function iniciarNotificaciones() {
     intervalNotificaciones = setInterval(actualizarNotificaciones, INTERVALO_NOTIFICACIONES);
 }
 
-// ============================================================
 // PROTECCIÓN DE PÁGINAS + INICIALIZACIÓN
-// ============================================================
 
 function protegerPagina() {
     if (!estaLogueado()) {
@@ -342,9 +330,7 @@ function protegerPagina() {
     iniciarNotificaciones();
 }
 
-// ============================================================
 // LÓGICA DE LOGIN
-// ============================================================
 
 const formLogin = document.getElementById('form-login');
 
@@ -381,20 +367,20 @@ if (formLogin) {
 
             if (resultado.success) {
                 guardarSesion(resultado.usuario, resultado.token);
-                mostrarMensajeLogin('✅ Acceso correcto. Redirigiendo...', 'exito');
+                mostrarMensajeLogin('Acceso correcto. Redirigiendo...', 'exito');
                 setTimeout(() => {
                     window.location.href = '/admin/dashboard.html';
                 }, 800);
             } else {
                 mostrarMensajeLogin(
-                    `❌ ${resultado.error || 'Usuario o contraseña incorrectos.'}`,
+                    `${resultado.error || 'Usuario o contraseña incorrectos.'}`,
                     'error'
                 );
             }
         } catch (error) {
             console.error('Error de conexión:', error);
             mostrarMensajeLogin(
-                '❌ No se pudo conectar con el servidor. Verificá que esté corriendo.',
+                'No se pudo conectar con el servidor. Verificá que esté corriendo.',
                 'error'
             );
         } finally {
@@ -409,9 +395,7 @@ if (formLogin) {
     }
 }
 
-// ============================================================
 // PROTECCIÓN AUTOMÁTICA DE PÁGINAS INTERNAS
-// ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     if (document.body.dataset.adminProtected === 'true') {

@@ -13,7 +13,7 @@
     <title>Portafolio - DuotechBros</title>
   </head>
   <body>
-    <!-- ========== HEADER ========== -->
+    <!-- HEADER -->
     <header>
       <nav>
         <div class="nav-brand">DuotechBros</div>
@@ -26,7 +26,7 @@
       </nav>
     </header>
 
-    <!-- ========== HERO ========== -->
+    <!-- HERO -->
     <section class="portafolio-hero">
       <div class="portafolio-hero-content">
         <h1>Nuestro Portafolio</h1>
@@ -38,33 +38,35 @@
       </div>
     </section>
 
-    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="container">
       <section class="portafolio-section">
         <div class="portafolio-header">
           <h2>Trabajos Realizados</h2>
-          <span class="portafolio-counter" id="contador-trabajos">0 trabajos</span>
+          <span class="portafolio-counter" id="contador-trabajos"
+            >0 trabajos</span
+          >
         </div>
 
-        <!-- Grilla de trabajos (se llena dinámicamente) -->
+        <!-- GRILLA DE TRABAJOS (SE LLENA DINÁMICAMENTE) -->
         <div class="project-list" id="lista-trabajos">
-          <!-- Se renderizan aquí las tarjetas -->
+          <!-- se renderizan aquí las tarjetas -->
         </div>
 
-        <!-- Estado: cargando -->
+        <!-- ESTADO: CARGANDO -->
         <div class="portafolio-estado" id="estado-cargando">
           <i class="fas fa-spinner fa-spin"></i>
           <p>Cargando trabajos...</p>
         </div>
 
-        <!-- Estado: vacío -->
+        <!-- ESTADO: VACÍO -->
         <div class="portafolio-estado" id="estado-vacio" style="display: none">
           <i class="fas fa-briefcase"></i>
           <p>Aún no hay trabajos publicados</p>
           <small>Pronto subiremos fotos de nuestras reparaciones.</small>
         </div>
 
-        <!-- Estado: error -->
+        <!-- ESTADO: ERROR -->
         <div class="portafolio-estado" id="estado-error" style="display: none">
           <i class="fas fa-exclamation-triangle"></i>
           <p>No se pudieron cargar los trabajos</p>
@@ -73,7 +75,7 @@
       </section>
     </main>
 
-    <!-- ========== FOOTER ========== -->
+    <!-- FOOTER -->
     <footer>
       <p>© 2024 DuotechBros. Todos los derechos reservados.</p>
       <div class="footer-social">
@@ -86,7 +88,7 @@
       </a>
     </footer>
 
-    <!-- Script específico del portafolio -->
+    <!-- SCRIPT ESPECÍFICO DEL PORTAFOLIO -->
     <script src="/js/portafolio.js"></script>
   </body>
 </html>

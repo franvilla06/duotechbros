@@ -7,11 +7,9 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: linear-gradient(
-        180deg,
-        rgba(204, 235, 237, 0.95) 0%,
-        rgba(204, 235, 237, 0) 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(204, 235, 237, 0.95) 0%,
+            rgba(204, 235, 237, 0) 100%);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
@@ -38,7 +36,7 @@ nav:hover {
     box-shadow: 0 12px 40px rgba(11, 74, 98, 0.14);
 }
 
-/* Marca / Logo */
+/* MARCA / LOGO */
 .nav-brand {
     font-size: 1.3rem;
     font-weight: 800;
@@ -65,7 +63,7 @@ nav:hover {
     flex-shrink: 0;
 }
 
-/* Menú */
+/* MENÚ */
 .nav-menu {
     display: flex;
     gap: 6px;
@@ -125,12 +123,10 @@ footer::before {
     transform: translateX(-50%);
     width: 60%;
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.35),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.35),
+            transparent);
 }
 
 footer p {
@@ -140,7 +136,7 @@ footer p {
     letter-spacing: 0.01em;
 }
 
-/* Redes sociales */
+/* REDES SOCIALES */
 .footer-social {
     display: flex;
     justify-content: center;
@@ -171,7 +167,7 @@ footer p {
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
 }
 
-/* Botón de acceso admin (discreto) */
+/* BOTÓN DE ACCESO ADMIN (DISCRETO) */
 .footer-admin {
     display: inline-flex;
     align-items: center;

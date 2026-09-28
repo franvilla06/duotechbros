@@ -13,7 +13,7 @@
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
-      <!-- ========== SIDEBAR ========== -->
+      <!-- SIDEBAR -->
       <aside class="admin-sidebar">
         <div class="admin-sidebar-brand">
           <i class="fas fa-tools"></i>
@@ -53,7 +53,7 @@
         </div>
       </aside>
 
-      <!-- ========== CONTENIDO PRINCIPAL ========== -->
+      <!-- CONTENIDO PRINCIPAL -->
       <main class="admin-main">
         <header class="admin-header">
           <div>
@@ -65,7 +65,7 @@
           </button>
         </header>
 
-        <!-- ========== ESTADÍSTICAS PRINCIPALES ========== -->
+        <!-- ESTADÍSTICAS PRINCIPALES -->
         <section class="stats-grid" id="stats-principales">
           <div class="stat-card">
             <div class="stat-icon stat-icon-blue">
@@ -108,7 +108,7 @@
           </div>
         </section>
 
-        <!-- ========== ESTADOS DE PEDIDOS ========== -->
+        <!-- ESTADOS DE PEDIDOS -->
         <section class="admin-card" style="margin-top: 30px">
           <h2><i class="fas fa-chart-pie"></i> Pedidos por estado</h2>
 
@@ -139,8 +139,11 @@
           </div>
         </section>
 
-        <!-- ========== ÚLTIMOS PEDIDOS ========== -->
-        <section class="admin-card" style="margin-top: 30px; padding: 0; overflow: hidden">
+        <!-- ÚLTIMOS PEDIDOS -->
+        <section
+          class="admin-card"
+          style="margin-top: 30px; padding: 0; overflow: hidden"
+        >
           <div class="table-header">
             <h2><i class="fas fa-history"></i> Últimos pedidos recibidos</h2>
             <a href="pedidos.html" class="btn-secondary">
@@ -159,7 +162,7 @@
                 </tr>
               </thead>
               <tbody id="tbody-ultimos">
-                <!-- Se carga dinámicamente -->
+                <!-- se carga dinámicamente -->
               </tbody>
             </table>
           </div>
@@ -171,7 +174,7 @@
           </div>
         </section>
 
-        <!-- ========== ACCESOS RÁPIDOS ========== -->
+        <!-- ACCESOS RÁPIDOS -->
         <section class="admin-card" style="margin-top: 30px">
           <h2><i class="fas fa-bolt"></i> Accesos rápidos</h2>
 
@@ -185,13 +188,19 @@
             <a href="portafolio.html" class="dashboard-card">
               <i class="fas fa-briefcase"></i>
               <h3>Gestionar Portafolio</h3>
-              <p>Publicá nuevos trabajos realizados o retirá los que ya no quieras mostrar.</p>
+              <p>
+                Publicá nuevos trabajos realizados o retirá los que ya no
+                quieras mostrar.
+              </p>
             </a>
 
             <a href="pedidos.html" class="dashboard-card">
               <i class="fas fa-clipboard-list"></i>
               <h3>Ver Pedidos</h3>
-              <p>Revisá todas las solicitudes de reparación enviadas por los clientes.</p>
+              <p>
+                Revisá todas las solicitudes de reparación enviadas por los
+                clientes.
+              </p>
             </a>
           </div>
         </section>

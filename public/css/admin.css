@@ -1,4 +1,4 @@
-/* ----- BASE ----- */
+/* BASE */
 
 * {
     box-sizing: border-box;
@@ -164,7 +164,7 @@ a {
     display: block;
 }
 
-/* LAYOUT DEL PANEL (dashboard y páginas internas) */
+/* LAYOUT DEL PANEL (DASHBOARD Y PÁGINAS INTERNAS) */
 
 
 .admin-layout {
@@ -172,7 +172,7 @@ a {
     min-height: 100vh;
 }
 
-/* ----- Sidebar ----- */
+/* SIDEBAR */
 .admin-sidebar {
     width: 240px;
     background: linear-gradient(180deg, #0b4a62 0%, #083b50 100%);
@@ -299,7 +299,7 @@ a {
     background-color: #d9534f;
 }
 
-/* ----- Contenido principal ----- */
+/* CONTENIDO PRINCIPAL */
 .admin-main {
     flex: 1;
     margin-left: 240px;
@@ -326,7 +326,7 @@ a {
     margin-top: 5px;
 }
 
-/* ----- Tarjetas ----- */
+/* TARJETAS */
 .admin-card {
     background-color: #ffffff;
     border-radius: 12px;
@@ -343,7 +343,7 @@ a {
     border-bottom: 1px solid #eef3f6;
 }
 
-/* ----- Grid para tarjetas del dashboard ----- */
+/* GRID PARA TARJETAS DEL DASHBOARD */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -384,7 +384,7 @@ a {
     line-height: 1.5;
 }
 
-/* ----- Responsive ----- */
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .admin-sidebar {
         width: 70px;
@@ -418,9 +418,9 @@ a {
     }
 }
 
-/* complemento del DASHBOARD */
+/* COMPLEMENTO DEL DASHBOARD */
 
-/* Botón de acción en el header */
+/* BOTÓN DE ACCIÓN EN EL HEADER */
 .admin-header-action {
     display: inline-flex;
     align-items: center;
@@ -440,7 +440,7 @@ a {
     transform: translateY(-1px);
 }
 
-/* Subtítulo de tarjeta del dashboard */
+/* SUBTÍTULO DE TARJETA DEL DASHBOARD */
 .dashboard-subtitle {
     color: #777;
     font-size: 0.85rem;
@@ -448,7 +448,7 @@ a {
     line-height: 1.4;
 }
 
-/* Etiqueta de "En construcción" (para secciones futuras) */
+/* ETIQUETA DE "EN CONSTRUCCIÓN" (PARA SECCIONES FUTURAS) */
 .badge-construccion {
     display: inline-block;
     background-color: #fff3cd;
@@ -571,7 +571,7 @@ table.admin-table tbody tr:last-child td {
     white-space: nowrap;
 }
 
-/* Badges de estado */
+/* BADGES DE ESTADO */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -612,7 +612,7 @@ table.admin-table tbody tr:last-child td {
     color: #842029;
 }
 
-/* Estado vacío / cargando */
+/* ESTADO VACÍO / CARGANDO */
 .table-empty {
     padding: 50px 20px;
     text-align: center;
@@ -636,7 +636,7 @@ table.admin-table tbody tr:last-child td {
     font-size: 0.85rem;
 }
 
-/* Botón de refrescar */
+/* BOTÓN DE REFRESCAR */
 .btn-refresh {
     display: inline-flex;
     align-items: center;
@@ -668,11 +668,16 @@ table.admin-table tbody tr:last-child td {
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-/* FORMULARIO + LISTA (layout de dos columnas) */
+/* FORMULARIO + LISTA (LAYOUT DE DOS COLUMNAS) */
 
 .admin-grid-2col {
     display: grid;
@@ -687,7 +692,7 @@ table.admin-table tbody tr:last-child td {
     }
 }
 
-/* Formulario de alta */
+/* FORMULARIO DE ALTA */
 .admin-form {
     display: flex;
     flex-direction: column;
@@ -794,7 +799,7 @@ table.admin-table tbody tr:last-child td {
     background-color: #e0e8ef;
 }
 
-/* Imagen miniatura en la tabla */
+/* IMAGEN MINIATURA EN LA TABLA */
 .cell-imagen {
     width: 50px;
     height: 50px;
@@ -816,7 +821,7 @@ table.admin-table tbody tr:last-child td {
     font-size: 1.2rem;
 }
 
-/* Badge de stock */
+/* BADGE DE STOCK */
 .badge-stock {
     background-color: #d1e7dd;
     color: #0f5132;
@@ -832,7 +837,7 @@ table.admin-table tbody tr:last-child td {
     color: #842029;
 }
 
-/* Botón de eliminar (ícono rojo) */
+/* BOTÓN DE ELIMINAR (ÍCONO ROJO) */
 .btn-eliminar {
     background-color: transparent;
     border: none;
@@ -848,7 +853,7 @@ table.admin-table tbody tr:last-child td {
     background-color: #f8d7da;
 }
 
-/* Contador de tabla */
+/* CONTADOR DE TABLA */
 .table-counter {
     background-color: #e8f4ff;
     color: #007BFF;
@@ -858,7 +863,7 @@ table.admin-table tbody tr:last-child td {
     font-weight: 700;
 }
 
-/* Encabezado de la tabla */
+/* ENCABEZADO DE LA TABLA */
 .table-header {
     display: flex;
     justify-content: space-between;
@@ -986,7 +991,7 @@ table.admin-table tbody tr:hover {
     color: #0b4a62;
 }
 
-/* Imagen miniatura para portafolio (más grande que productos) */
+/* IMAGEN MINIATURA PARA PORTAFOLIO (MÁS GRANDE QUE PRODUCTOS) */
 .cell-imagen-portafolio {
     width: 80px;
     height: 60px;
@@ -1008,16 +1013,14 @@ table.admin-table tbody tr:hover {
     font-size: 1.3rem;
 }
 
-/* Fecha en la tabla */
+/* FECHA EN LA TABLA */
 .cell-fecha {
     color: #777;
     font-size: 0.8rem;
     white-space: nowrap;
 }
 
-/* ============================================================
-   SELECTOR DE ESTADO EN LA TABLA DE PEDIDOS
-   ============================================================ */
+/* SELECTOR DE ESTADO EN LA TABLA DE PEDIDOS */
 
 .estado-select {
     padding: 7px 12px;
@@ -1048,9 +1051,7 @@ table.admin-table tbody tr:hover {
     cursor: wait;
 }
 
-/* ============================================================
-   TOAST (notificación flotante)
-   ============================================================ */
+/* TOAST (NOTIFICACIÓN FLOTANTE) */
 
 .toast-admin {
     position: fixed;
@@ -1090,9 +1091,7 @@ table.admin-table tbody tr:hover {
     }
 }
 
-/* ============================================================
-   BOTÓN DE EDITAR (ícono azul)
-   ============================================================ */
+/* BOTÓN DE EDITAR (ÍCONO AZUL) */
 
 .btn-editar {
     background-color: transparent;
@@ -1110,9 +1109,7 @@ table.admin-table tbody tr:hover {
     background-color: #e8f4ff;
 }
 
-/* ============================================================
-   MODAL
-   ============================================================ */
+/* MODAL */
 
 .modal-overlay {
     display: none;
@@ -1134,8 +1131,13 @@ table.admin-table tbody tr:hover {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-card {
@@ -1156,6 +1158,7 @@ table.admin-table tbody tr:hover {
         transform: translateY(20px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -1200,7 +1203,7 @@ table.admin-table tbody tr:hover {
     color: #842029;
 }
 
-/* Botones del modal (reutilizan estilos existentes) */
+/* BOTONES DEL MODAL (REUTILIZAN ESTILOS EXISTENTES) */
 .modal-card .admin-form-actions {
     display: flex;
     justify-content: flex-end;
@@ -1212,7 +1215,7 @@ table.admin-table tbody tr:hover {
     width: auto;
 }
 
-/* Responsive */
+/* RESPONSIVE */
 @media (max-width: 600px) {
     .modal-card {
         padding: 22px;
@@ -1237,9 +1240,7 @@ table.admin-table tbody tr:hover {
     }
 }
 
-/* ============================================================
-   BARRA DE BÚSQUEDA Y FILTROS
-   ============================================================ */
+/* BARRA DE BÚSQUEDA Y FILTROS */
 
 .admin-toolbar {
     display: flex;
@@ -1251,7 +1252,7 @@ table.admin-table tbody tr:hover {
     flex-wrap: wrap;
 }
 
-/* ----- Buscador ----- */
+/* BUSCADOR */
 .admin-search {
     position: relative;
     flex: 1;
@@ -1287,7 +1288,7 @@ table.admin-table tbody tr:hover {
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
-/* ----- Botones de filtro ----- */
+/* BOTONES DE FILTRO */
 .admin-filtros {
     display: flex;
     gap: 6px;
@@ -1321,7 +1322,7 @@ table.admin-table tbody tr:hover {
     box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
 }
 
-/* ----- Contador de resultados (dentro del toolbar) ----- */
+/* CONTADOR DE RESULTADOS (DENTRO DEL TOOLBAR) */
 .admin-resultados {
     font-size: 0.78rem;
     color: #777;
@@ -1329,7 +1330,7 @@ table.admin-table tbody tr:hover {
     padding-left: 4px;
 }
 
-/* ----- Botón limpiar filtros ----- */
+/* BOTÓN LIMPIAR FILTROS */
 .btn-limpiar {
     background-color: transparent;
     border: 1px solid #d0e6ea;
@@ -1364,7 +1365,7 @@ table.admin-table tbody tr:hover {
     font-size: 0.72rem;
 }
 
-/* ----- Mensaje de "sin resultados" en el body ----- */
+/* MENSAJE DE "SIN RESULTADOS" EN EL BODY */
 .table-sin-filtros {
     text-align: center;
     padding: 50px 20px;
@@ -1399,11 +1400,9 @@ table.admin-table tbody tr:hover {
     }
 }
 
-/* ============================================================
-   DASHBOARD - TARJETAS DE ESTADÍSTICAS
-   ============================================================ */
+/* DASHBOARD - TARJETAS DE ESTADÍSTICAS */
 
-/* ----- Grid de tarjetas principales ----- */
+/* GRID DE TARJETAS PRINCIPALES */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1481,9 +1480,7 @@ table.admin-table tbody tr:hover {
     text-overflow: ellipsis;
 }
 
-/* ============================================================
-   DASHBOARD - PEDIDOS POR ESTADO
-   ============================================================ */
+/* DASHBOARD - PEDIDOS POR ESTADO */
 
 .estados-grid {
     display: grid;
@@ -1528,7 +1525,7 @@ table.admin-table tbody tr:hover {
     opacity: 0.85;
 }
 
-/* Colores por estado (coherentes con los badges) */
+/* COLORES POR ESTADO (COHERENTES CON LOS BADGES) */
 .estado-pendiente {
     background-color: #fff3cd;
     color: #856404;
@@ -1549,9 +1546,7 @@ table.admin-table tbody tr:hover {
     color: #842029;
 }
 
-/* ============================================================
-   RESPONSIVE DEL DASHBOARD
-   ============================================================ */
+/* RESPONSIVE DEL DASHBOARD */
 
 @media (max-width: 768px) {
     .stats-grid {
@@ -1604,11 +1599,9 @@ table.admin-table tbody tr:hover {
     }
 }
 
-/* ============================================================
-   BADGE DE NOTIFICACIONES EN EL SIDEBAR
-   ============================================================ */
+/* BADGE DE NOTIFICACIONES EN EL SIDEBAR */
 
-/* El link de "Ver Pedidos" necesita position:relative para posicionar el badge */
+/* el link de "ver pedidos" necesita position:relative para posicionar el badge */
 .admin-nav a {
     position: relative;
 }
@@ -1633,17 +1626,20 @@ table.admin-table tbody tr:hover {
     flex-shrink: 0;
 }
 
-/* Pulso sutil para llamar la atención */
+/* pulso sutil para llamar la atención */
 @keyframes pulse-badge {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 2px 8px rgba(220, 53, 69, 0.45);
     }
+
     50% {
         box-shadow: 0 2px 14px rgba(220, 53, 69, 0.75);
     }
 }
 
-/* Cuando el sidebar está colapsado en móvil (solo íconos), el badge se posiciona arriba */
+/* cuando el sidebar está colapsado en móvil (solo íconos), el badge se posiciona arriba */
 @media (max-width: 768px) {
     .notif-badge {
         position: absolute;
@@ -1657,9 +1653,7 @@ table.admin-table tbody tr:hover {
     }
 }
 
-/* ============================================================
-   AGRUPACIÓN DE BOTONES EN EL HEADER
-   ============================================================ */
+/* AGRUPACIÓN DE BOTONES EN EL HEADER */
 
 .admin-header-actions {
     display: flex;
@@ -1668,7 +1662,7 @@ table.admin-table tbody tr:hover {
     align-items: center;
 }
 
-/* El botón "Exportar CSV" hereda de .btn-refresh, pero le damos un toque verde */
+/* el botón "exportar csv" hereda de .btn-refresh, pero le damos un toque verde */
 #btn-exportar {
     background-color: #d1e7dd;
     color: #0f5132;
@@ -1686,7 +1680,7 @@ table.admin-table tbody tr:hover {
     cursor: not-allowed;
 }
 
-/* Responsive: en pantallas pequeñas los botones ocupan todo el ancho */
+/* responsive: en pantallas pequeñas los botones ocupan todo el ancho */
 @media (max-width: 600px) {
     .admin-header-actions {
         width: 100%;
@@ -1700,9 +1694,7 @@ table.admin-table tbody tr:hover {
     }
 }
 
-/* ============================================================
-   ENCABEZADOS ORDENABLES
-   ============================================================ */
+/* ENCABEZADOS ORDENABLES */
 
 table.admin-table th.th-ordenable {
     cursor: pointer;
@@ -1735,15 +1727,13 @@ table.admin-table th.th-ordenable:hover .th-sort-icon {
     font-weight: 900;
 }
 
-/* La columna activa tiene un fondo más marcado */
+/* la columna activa tiene un fondo más marcado */
 table.admin-table th.th-ordenable.activo {
     background-color: #e8f4ff;
     color: #007BFF;
 }
 
-/* ============================================================
-   PAGINACIÓN
-   ============================================================ */
+/* PAGINACIÓN */
 
 .paginacion {
     display: flex;

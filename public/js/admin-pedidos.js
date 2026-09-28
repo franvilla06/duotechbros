@@ -1,6 +1,4 @@
-// ============================================================
-// LÓGICA DE LA PÁGINA "VER PEDIDOS" - DuotechBros Admin
-// ============================================================
+// LÓGICA DE LA PÁGINA "VER PEDIDOS" - DUOTECHBROS ADMIN
 
 const API_PEDIDOS = '/api/pedidos';
 const API_ADMIN_PEDIDOS = '/api/admin/pedidos';
@@ -20,7 +18,7 @@ const btnLimpiar = document.getElementById('btn-limpiar');
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 const POR_PAGINA = 10;
 
-// Estado local
+// ESTADO LOCAL
 let pedidosOriginales = [];
 let pedidosFiltrados = [];
 let estadoFiltroActivo = 'Todos';
@@ -28,7 +26,7 @@ let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
 
-// ----- UTILIDADES -----
+// UTILIDADES
 
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
@@ -82,7 +80,7 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
-// ----- ORDENAMIENTO -----
+// ORDENAMIENTO
 
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
@@ -92,7 +90,7 @@ function aplicarOrdenamiento(array) {
     });
 }
 
-// ----- EXPORTAR A CSV -----
+// EXPORTAR A CSV
 
 function escaparCSV(valor) {
     if (valor === null || valor === undefined) return '';
@@ -153,10 +151,10 @@ function exportarCSV() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    mostrarToast(`✅ Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+    mostrarToast(`Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
 }
 
-// ----- FILTROS -----
+// FILTROS
 
 function construirFiltrosEstado() {
     const opciones = ['Todos', ...ESTADOS];
@@ -186,7 +184,7 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// ----- RENDERIZADO -----
+// RENDERIZADO
 
 function renderizarPedidos(pedidos) {
     tbody.innerHTML = '';
@@ -203,7 +201,7 @@ function renderizarPedidos(pedidos) {
 
     contador.textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''}`;
 
-    // Paginar
+    // PAGINAR
     const itemsPagina = paginador ? paginador.getItems(pedidos) : pedidos;
 
     itemsPagina.forEach((p) => {
@@ -252,7 +250,7 @@ function renderizarPedidos(pedidos) {
     });
 }
 
-// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
+// APLICAR FILTROS + ORDEN + PAGINACIÓN
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -280,7 +278,7 @@ function aplicarFiltros() {
     filtrados = aplicarOrdenamiento(filtrados);
     pedidosFiltrados = filtrados;
 
-    // Actualizar paginador (resetear a página 1)
+    // actualizar paginador (resetear a página 1)
     if (paginador) {
         paginador.actualizar(pedidosFiltrados.length, true);
     }
@@ -289,7 +287,7 @@ function aplicarFiltros() {
     renderizarPedidos(pedidosFiltrados);
 }
 
-// ----- CARGA DE DATOS -----
+// CARGA DE DATOS
 
 async function cargarPedidos() {
     estadoCargando.style.display = 'block';
@@ -333,7 +331,7 @@ async function cargarPedidos() {
     }
 }
 
-// ----- CAMBIO DE ESTADO -----
+// CAMBIO DE ESTADO
 
 async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
     selectElement.disabled = true;
@@ -357,25 +355,25 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
             const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
             if (pedido) pedido.estado = nuevoEstado;
 
-            mostrarToast(`✅ Estado actualizado a "${capitalizar(nuevoEstado)}"`);
+            mostrarToast(`Estado actualizado a "${capitalizar(nuevoEstado)}"`);
 
-            // Recalcular (no resetea página porque el cambio de estado no afecta el filtro de página)
+            // recalcular (no resetea página porque el cambio de estado no afecta el filtro de página)
             pedidosFiltrados = aplicarFiltrosSinReset();
             renderizarPedidos(pedidosFiltrados);
         } else {
             selectElement.value = estadoAnterior;
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar'}`, true);
         }
     } catch (error) {
         console.error('Error al cambiar estado:', error);
         selectElement.value = estadoAnterior;
-        mostrarToast('❌ No se pudo conectar con el servidor', true);
+        mostrarToast('No se pudo conectar con el servidor', true);
     } finally {
         selectElement.disabled = false;
     }
 }
 
-/** Variante de aplicarFiltros que NO resetea la página (para cambios de estado). */
+/** variante de aplicarFiltros que no resetea la página (para cambios de estado). */
 function aplicarFiltrosSinReset() {
     let filtrados = [...pedidosOriginales];
 
@@ -399,7 +397,7 @@ function aplicarFiltrosSinReset() {
     return filtrados;
 }
 
-// ----- EVENTOS -----
+// EVENTOS
 
 btnRefresh.addEventListener('click', cargarPedidos);
 btnExportar.addEventListener('click', exportarCSV);
@@ -419,17 +417,17 @@ btnLimpiar.addEventListener('click', () => {
     aplicarFiltros();
 });
 
-// ----- INICIO -----
+// INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Crear paginador
+    // CREAR PAGINADOR
     paginador = crearPaginador('paginacion-pedidos', POR_PAGINA, () => {
         renderizarPedidos(pedidosFiltrados);
     });
 
     construirFiltrosEstado();
 
-    // Configurar ordenamiento
+    // CONFIGURAR ORDENAMIENTO
     configurarColumnasOrdenables(
         'tabla-pedidos',
         {

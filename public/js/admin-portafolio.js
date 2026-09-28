@@ -1,6 +1,4 @@
-// ============================================================
-// LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DuotechBros Admin
-// ============================================================
+// LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DUOTECHBROS ADMIN
 
 const API_PORTAFOLIO = '/api/portafolio';
 const API_ADMIN_PORTAFOLIO = '/api/admin/portafolio';
@@ -25,14 +23,14 @@ const btnActualizar = document.getElementById('btn-actualizar');
 
 const POR_PAGINA = 10;
 
-// Estado local
+// ESTADO LOCAL
 let trabajosOriginales = [];
 let tipoFiltroActivo = 'Todos';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
 
-// ----- UTILIDADES -----
+// UTILIDADES
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -87,7 +85,7 @@ function aplicarOrdenamiento(array) {
     });
 }
 
-// ----- FILTROS -----
+// FILTROS
 
 function construirFiltrosTipo() {
     const tipos = ['Todos'];
@@ -123,7 +121,7 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// ----- RENDERIZADO -----
+// RENDERIZADO
 
 function renderizarTrabajos(trabajos) {
     tbody.innerHTML = '';
@@ -186,7 +184,7 @@ function renderizarTrabajos(trabajos) {
     });
 }
 
-// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
+// APLICAR FILTROS + ORDEN + PAGINACIÓN
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -216,7 +214,7 @@ function aplicarFiltros() {
     renderizarTrabajos(filtrados);
 }
 
-// ----- CARGA DE DATOS -----
+// CARGA DE DATOS
 
 async function cargarTrabajos() {
     estadoCargando.style.display = 'block';
@@ -253,7 +251,7 @@ async function cargarTrabajos() {
     }
 }
 
-// ----- CREAR TRABAJO -----
+// CREAR TRABAJO
 
 formTrabajo.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -282,11 +280,11 @@ formTrabajo.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Trabajo publicado correctamente.');
+            mostrarToast('Trabajo publicado correctamente.');
             formTrabajo.reset();
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear trabajo:', error);
@@ -296,7 +294,7 @@ formTrabajo.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- MODAL -----
+// MODAL
 
 function abrirModalEdicion(id) {
     const trabajo = trabajosOriginales.find((t) => String(t.id) === String(id));
@@ -332,7 +330,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ----- GUARDAR CAMBIOS -----
+// GUARDAR CAMBIOS
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -363,11 +361,11 @@ formEditar.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Trabajo actualizado correctamente.');
+            mostrarToast('Trabajo actualizado correctamente.');
             cerrarModalEdicion();
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
         }
     } catch (error) {
         console.error('Error al actualizar trabajo:', error);
@@ -377,7 +375,7 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- ELIMINAR -----
+// ELIMINAR
 
 async function eliminarTrabajo(id, titulo) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
@@ -391,17 +389,17 @@ async function eliminarTrabajo(id, titulo) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Trabajo eliminado.');
+            mostrarToast('Trabajo eliminado.');
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar trabajo:', error);
     }
 }
 
-// ----- EVENTOS -----
+// EVENTOS
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;
@@ -418,7 +416,7 @@ btnLimpiar.addEventListener('click', () => {
     aplicarFiltros();
 });
 
-// ----- INICIO -----
+// INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
     paginador = crearPaginador('paginacion-trabajos', POR_PAGINA, () => {

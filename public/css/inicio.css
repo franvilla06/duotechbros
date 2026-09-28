@@ -1,4 +1,4 @@
-/* HERO (Bienvenida)  */
+/* HERO (BIENVENIDA) */
 .hero {
     background-image: url(../img/Bienvenida.svg);
     background-repeat: no-repeat;
@@ -67,14 +67,14 @@
     transform: scale(1.05);
 }
 
-/*  CONTENEDOR GENERAL  */
+/* CONTENEDOR GENERAL */
 .contenedor {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px 40px;
 }
 
-/*  SECCIÓN NOSOTROS  */
+/* SECCIÓN NOSOTROS */
 .nosotros {
     background-color: white;
     padding: 40px;
@@ -109,7 +109,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/*  SERVICIOS  */
+/* SERVICIOS */
 .servicios {
     margin-bottom: 40px;
 }
@@ -168,7 +168,7 @@
     line-height: 1.6;
 }
 
-/*  ESTADÍSTICAS  */
+/* ESTADÍSTICAS */
 .estadisticas {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -194,7 +194,7 @@
     opacity: 0.9;
 }
 
-/*  POR QUÉ ELEGIRNOS  */
+/* POR QUÉ ELEGIRNOS */
 .por-que-elegirnos {
     background-color: white;
     padding: 40px;
@@ -238,7 +238,7 @@
     line-height: 1.6;
 }
 
-/*  LLAMADA A LA ACCIÓN (CTA)  */
+/* LLAMADA A LA ACCIÓN (CTA) */
 .cta {
     background: linear-gradient(135deg, #0b4a62, #0a9396);
     padding: 50px 30px;
@@ -277,37 +277,37 @@
     transform: scale(1.05);
 }
 
-/*  RESPONSIVE  */
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .hero {
         height: 350px;
     }
-    
+
     .contenido-hero h1 {
         font-size: 2.8rem;
     }
-    
+
     .contenido-hero .subtitulo {
         font-size: 1.2rem;
     }
-    
+
     .nosotros-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .servicios-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .estadisticas {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
-    
+
     .beneficios-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .estadistica .numero {
         font-size: 2.2rem;
     }
@@ -317,11 +317,11 @@
     .hero {
         height: 300px;
     }
-    
+
     .contenido-hero h1 {
         font-size: 2rem;
     }
-    
+
     .btn-hero {
         padding: 10px 25px;
         font-size: 1rem;

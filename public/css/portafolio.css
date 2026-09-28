@@ -1,6 +1,6 @@
 /* ESTILOS DE LA PÁGINA DE PORTAFOLIO */
 
-/* Base */
+/* BASE */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #CCEBED;
@@ -9,7 +9,7 @@ body {
     padding: 0;
 }
 
-/* HERO del portafolio */
+/* HERO DEL PORTAFOLIO */
 .portafolio-hero {
     background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
     padding: 70px 20px;
@@ -38,7 +38,7 @@ body {
     margin: 0;
 }
 
-/* Contenedor general */
+/* CONTENEDOR GENERAL */
 main.container {
     max-width: 1200px;
     margin: 0 auto;
@@ -49,7 +49,7 @@ main.container {
     margin-bottom: 40px;
 }
 
-/* Cabecera de sección */
+/* CABECERA DE SECCIÓN */
 .portafolio-header {
     display: flex;
     justify-content: space-between;
@@ -87,14 +87,14 @@ main.container {
     font-weight: 700;
 }
 
-/* Grilla de trabajos */
+/* GRILLA DE TRABAJOS */
 .project-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 28px;
 }
 
-/* ----- Tarjeta de trabajo ----- */
+/* TARJETA DE TRABAJO */
 .project-card {
     background-color: #ffffff;
     border-radius: 16px;
@@ -110,7 +110,7 @@ main.container {
     box-shadow: 0 14px 35px rgba(11, 74, 98, 0.15);
 }
 
-/* ----- Imagen ----- */
+/* IMAGEN */
 .project-imagen-wrapper {
     position: relative;
     width: 100%;
@@ -142,7 +142,7 @@ main.container {
     background: linear-gradient(135deg, #e8f4ff 0%, #d0e6ea 100%);
 }
 
-/* Badge de tipo de reparación */
+/* BADGE DE TIPO DE REPARACIÓN */
 .project-badge {
     position: absolute;
     top: 14px;
@@ -195,7 +195,7 @@ main.container {
     color: #0b4a62;
 }
 
-/* Info */
+/* INFO */
 .project-info {
     padding: 22px 22px 24px;
     display: flex;
@@ -232,7 +232,7 @@ main.container {
     color: #0a9396;
 }
 
-/* Estados (cargando / vacío / error) */
+/* ESTADOS (CARGANDO / VACÍO / ERROR) */
 .portafolio-estado {
     text-align: center;
     padding: 60px 20px;
@@ -261,7 +261,7 @@ main.container {
     color: #d9534f;
 }
 
-/* Responsive */
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .portafolio-hero {
         padding: 50px 20px;

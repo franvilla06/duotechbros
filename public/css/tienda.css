@@ -1,8 +1,6 @@
-/* ============================================================
-   ESTILOS DE LA PÁGINA DE TIENDA - DuotechBros
-   ============================================================ */
+/* ESTILOS DE LA PÁGINA DE TIENDA - DUOTECHBROS */
 
-/* ----- Base ----- */
+/* BASE */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #CCEBED;
@@ -11,7 +9,7 @@ body {
     padding: 0;
 }
 
-/* ----- HERO de la tienda ----- */
+/* HERO DE LA TIENDA */
 .tienda-hero {
     background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
     padding: 70px 20px;
@@ -40,16 +38,14 @@ body {
     margin: 0;
 }
 
-/* ----- Contenedor general ----- */
+/* CONTENEDOR GENERAL */
 main.container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px 60px;
 }
 
-/* ============================================================
-   BARRA DE HERRAMIENTAS (buscador + filtros)
-   ============================================================ */
+/* BARRA DE HERRAMIENTAS (BUSCADOR + FILTROS) */
 
 .tienda-toolbar {
     background-color: #ffffff;
@@ -62,7 +58,7 @@ main.container {
     gap: 16px;
 }
 
-/* ----- Buscador ----- */
+/* BUSCADOR */
 .tienda-buscador {
     position: relative;
     width: 100%;
@@ -96,7 +92,7 @@ main.container {
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
-/* ----- Filtros por categoría ----- */
+/* FILTROS POR CATEGORÍA */
 .tienda-filtros {
     display: flex;
     gap: 8px;
@@ -130,9 +126,7 @@ main.container {
     box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
 }
 
-/* ============================================================
-   CABECERA DE SECCIÓN
-   ============================================================ */
+/* CABECERA DE SECCIÓN */
 
 .tienda-header {
     display: flex;
@@ -171,9 +165,7 @@ main.container {
     font-weight: 700;
 }
 
-/* ============================================================
-   GRILLA DE PRODUCTOS
-   ============================================================ */
+/* GRILLA DE PRODUCTOS */
 
 .products-grid {
     display: grid;
@@ -181,7 +173,7 @@ main.container {
     gap: 24px;
 }
 
-/* ----- Tarjeta de producto ----- */
+/* TARJETA DE PRODUCTO */
 .product-card {
     background-color: #ffffff;
     border-radius: 16px;
@@ -197,7 +189,7 @@ main.container {
     box-shadow: 0 14px 35px rgba(11, 74, 98, 0.15);
 }
 
-/* ----- Imagen ----- */
+/* IMAGEN */
 .product-imagen-wrapper {
     position: relative;
     width: 100%;
@@ -229,7 +221,7 @@ main.container {
     background: linear-gradient(135deg, #e8f4ff 0%, #d0e6ea 100%);
 }
 
-/* ----- Badge de categoría ----- */
+/* BADGE DE CATEGORÍA */
 .product-badge-categoria {
     position: absolute;
     top: 12px;
@@ -246,7 +238,7 @@ main.container {
     backdrop-filter: blur(4px);
 }
 
-/* ----- Info ----- */
+/* INFO */
 .product-info {
     padding: 20px 20px 22px;
     display: flex;
@@ -274,7 +266,7 @@ main.container {
     overflow: hidden;
 }
 
-/* ----- Footer de la tarjeta (precio + stock) ----- */
+/* FOOTER DE LA TARJETA (PRECIO + STOCK) */
 .product-footer {
     display: flex;
     justify-content: space-between;
@@ -291,7 +283,7 @@ main.container {
     letter-spacing: -0.01em;
 }
 
-/* ----- Badge de stock ----- */
+/* BADGE DE STOCK */
 .product-stock {
     display: inline-flex;
     align-items: center;
@@ -323,7 +315,7 @@ main.container {
     color: #842029;
 }
 
-/* ----- Botón de consulta ----- */
+/* BOTÓN DE CONSULTA */
 .product-btn {
     display: inline-flex;
     align-items: center;
@@ -364,9 +356,7 @@ main.container {
     transform: none;
 }
 
-/* ============================================================
-   ESTADOS (cargando / vacío / error)
-   ============================================================ */
+/* ESTADOS (CARGANDO / VACÍO / ERROR) */
 
 .tienda-estado {
     text-align: center;
@@ -396,9 +386,7 @@ main.container {
     color: #d9534f;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* RESPONSIVE */
 
 @media (max-width: 768px) {
     .tienda-hero {

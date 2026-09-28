@@ -1,6 +1,4 @@
-// ============================================================
 // GESTIÓN DE PRODUCTOS
-// ============================================================
 
 function crearProducto(req, res) {
     const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
@@ -74,9 +72,7 @@ function eliminarProducto(req, res) {
     }
 }
 
-// ============================================================
 // GESTIÓN DE PORTAFOLIO
-// ============================================================
 
 function crearTrabajo(req, res) {
     const { titulo, descripcion, imagen_url, tipo_reparacion } = req.body;
@@ -146,9 +142,7 @@ function eliminarTrabajo(req, res) {
     }
 }
 
-// ============================================================
 // GESTIÓN DE PEDIDOS
-// ============================================================
 
 const ESTADOS_VALIDOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 

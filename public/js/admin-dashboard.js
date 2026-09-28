@@ -1,7 +1,5 @@
-// ============================================================
-// LÓGICA DEL DASHBOARD - DuotechBros Admin
-// Calcula estadísticas reales a partir de las 3 APIs públicas
-// ============================================================
+// LÓGICA DEL DASHBOARD - DUOTECHBROS ADMIN
+// calcula estadísticas reales a partir de las 3 apis públicas
 
 const API_PEDIDOS = '/api/pedidos';
 const API_PRODUCTOS = '/api/productos';
@@ -11,7 +9,7 @@ const btnRefresh = document.getElementById('btn-refresh');
 const tbodyUltimos = document.getElementById('tbody-ultimos');
 const estadoVacio = document.getElementById('estado-vacio');
 
-// ----- UTILIDADES -----
+// UTILIDADES
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -63,19 +61,19 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
-// ----- RENDERIZADO -----
+// RENDERIZADO
 
 function renderizarEstadisticas(pedidos, productos, portafolio) {
-    // Totales principales
+    // TOTALES PRINCIPALES
     document.getElementById('total-pedidos').textContent = pedidos.length;
     document.getElementById('total-productos').textContent = productos.length;
     document.getElementById('total-portafolio').textContent = portafolio.length;
 
-    // Productos con stock bajo (<= 3 unidades)
+    // PRODUCTOS CON STOCK BAJO (<= 3 UNIDADES)
     const stockBajo = productos.filter((p) => Number(p.stock) <= 3).length;
     document.getElementById('total-stock-bajo').textContent = stockBajo;
 
-    // Conteo por estado de pedidos
+    // CONTEO POR ESTADO DE PEDIDOS
     const conteo = {
         pendiente: 0,
         'en proceso': 0,
@@ -88,7 +86,7 @@ function renderizarEstadisticas(pedidos, productos, portafolio) {
         if (estado in conteo) {
             conteo[estado]++;
         } else {
-            conteo.pendiente++; // Los desconocidos se cuentan como pendientes
+            conteo.pendiente++; // los desconocidos se cuentan como pendientes
         }
     });
 
@@ -108,7 +106,7 @@ function renderizarUltimosPedidos(pedidos) {
 
     estadoVacio.style.display = 'none';
 
-    // Tomar los 5 más recientes (ya vienen ordenados por fecha desc desde la API)
+    // tomar los 5 más recientes (ya vienen ordenados por fecha desc desde la api)
     const ultimos = pedidos.slice(0, 5);
 
     ultimos.forEach((p) => {
@@ -128,7 +126,7 @@ function renderizarUltimosPedidos(pedidos) {
     });
 }
 
-// ----- CARGA DE DATOS -----
+// CARGA DE DATOS
 
 async function cargarDashboard() {
     const icono = btnRefresh.querySelector('i');
@@ -136,7 +134,7 @@ async function cargarDashboard() {
     btnRefresh.disabled = true;
 
     try {
-        // Hacemos las 3 peticiones en paralelo
+        // hacemos las 3 peticiones en paralelo
         const [resPedidos, resProductos, resPortafolio] = await Promise.all([
             fetch(API_PEDIDOS),
             fetch(API_PRODUCTOS),
@@ -157,9 +155,9 @@ async function cargarDashboard() {
         renderizarUltimosPedidos(pedidos);
     } catch (error) {
         console.error('Error al cargar el dashboard:', error);
-        mostrarToast('❌ No se pudieron cargar las estadísticas.', true);
+        mostrarToast('No se pudieron cargar las estadísticas.', true);
 
-        // Poner guiones en los números si falla
+        // poner guiones en los números si falla
         document.querySelectorAll('.stat-numero, .estado-numero').forEach((el) => {
             el.textContent = '—';
         });
@@ -177,11 +175,11 @@ async function cargarDashboard() {
     }
 }
 
-// ----- EVENTOS -----
+// EVENTOS
 
 btnRefresh.addEventListener('click', cargarDashboard);
 
-// ----- INICIO -----
+// INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(cargarDashboard, 100);

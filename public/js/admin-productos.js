@@ -1,6 +1,4 @@
-// ============================================================
-// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DuotechBros Admin
-// ============================================================
+// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DUOTECHBROS ADMIN
 
 const API_PRODUCTOS = '/api/productos';
 const API_ADMIN_PRODUCTOS = '/api/admin/productos';
@@ -25,14 +23,14 @@ const btnActualizar = document.getElementById('btn-actualizar');
 
 const POR_PAGINA = 10;
 
-// Estado local
+// ESTADO LOCAL
 let productosOriginales = [];
 let categoriaFiltroActivo = 'Todas';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
 
-// ----- UTILIDADES -----
+// UTILIDADES
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -79,7 +77,7 @@ function aplicarOrdenamiento(array) {
     });
 }
 
-// ----- FILTROS -----
+// FILTROS
 
 function construirFiltrosCategoria() {
     const categorias = ['Todas'];
@@ -115,7 +113,7 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// ----- RENDERIZADO -----
+// RENDERIZADO
 
 function renderizarProductos(productos) {
     tbody.innerHTML = '';
@@ -175,7 +173,7 @@ function renderizarProductos(productos) {
     });
 }
 
-// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
+// APLICAR FILTROS + ORDEN + PAGINACIÓN
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -205,7 +203,7 @@ function aplicarFiltros() {
     renderizarProductos(filtrados);
 }
 
-// ----- CARGA DE DATOS -----
+// CARGA DE DATOS
 
 async function cargarProductos() {
     estadoCargando.style.display = 'block';
@@ -242,7 +240,7 @@ async function cargarProductos() {
     }
 }
 
-// ----- CREAR PRODUCTO -----
+// CREAR PRODUCTO
 
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -277,12 +275,12 @@ formProducto.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Producto agregado correctamente.');
+            mostrarToast('Producto agregado correctamente.');
             formProducto.reset();
             document.getElementById('stock').value = '0';
             cargarProductos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear producto:', error);
@@ -292,7 +290,7 @@ formProducto.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- MODAL -----
+// MODAL
 
 function abrirModalEdicion(id) {
     const producto = productosOriginales.find((p) => String(p.id) === String(id));
@@ -330,7 +328,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ----- GUARDAR CAMBIOS -----
+// GUARDAR CAMBIOS
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -367,11 +365,11 @@ formEditar.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Producto actualizado correctamente.');
+            mostrarToast('Producto actualizado correctamente.');
             cerrarModalEdicion();
             cargarProductos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
         }
     } catch (error) {
         console.error('Error al actualizar producto:', error);
@@ -381,7 +379,7 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- ELIMINAR -----
+// ELIMINAR
 
 async function eliminarProducto(id, nombre) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${nombre}"?`);
@@ -395,17 +393,17 @@ async function eliminarProducto(id, nombre) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Producto eliminado.');
+            mostrarToast('Producto eliminado.');
             cargarProductos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar producto:', error);
     }
 }
 
-// ----- EVENTOS -----
+// EVENTOS
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;
@@ -422,11 +420,11 @@ btnLimpiar.addEventListener('click', () => {
     aplicarFiltros();
 });
 
-// ----- INICIO -----
+// INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
     paginador = crearPaginador('paginacion-productos', POR_PAGINA, () => {
-        // Re-renderizar con los filtros actuales (sin resetear página)
+        // volver a renderizar con los filtros actuales (sin resetear página)
         let filtrados = [...productosOriginales];
         if (categoriaFiltroActivo !== 'Todas') {
             filtrados = filtrados.filter((p) => p.categoria === categoriaFiltroActivo);
