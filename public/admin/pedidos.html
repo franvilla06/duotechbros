@@ -13,7 +13,6 @@
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
-      <!-- ========== SIDEBAR ========== -->
       <aside class="admin-sidebar">
         <div class="admin-sidebar-brand">
           <i class="fas fa-tools"></i>
@@ -24,22 +23,10 @@
         </div>
 
         <nav class="admin-nav">
-          <a href="dashboard.html">
-            <i class="fas fa-tachometer-alt"></i>
-            <span>Dashboard</span>
-          </a>
-          <a href="productos.html">
-            <i class="fas fa-box"></i>
-            <span>Gestionar Productos</span>
-          </a>
-          <a href="portafolio.html">
-            <i class="fas fa-briefcase"></i>
-            <span>Gestionar Portafolio</span>
-          </a>
-          <a href="pedidos.html" class="active">
-            <i class="fas fa-clipboard-list"></i>
-            <span>Ver Pedidos</span>
-          </a>
+          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+          <a href="productos.html"><i class="fas fa-box"></i><span>Gestionar Productos</span></a>
+          <a href="portafolio.html"><i class="fas fa-briefcase"></i><span>Gestionar Portafolio</span></a>
+          <a href="pedidos.html" class="active"><i class="fas fa-clipboard-list"></i><span>Ver Pedidos</span></a>
         </nav>
 
         <div class="admin-sidebar-footer">
@@ -53,7 +40,6 @@
         </div>
       </aside>
 
-      <!-- ========== CONTENIDO PRINCIPAL ========== -->
       <main class="admin-main">
         <header class="admin-header">
           <div>
@@ -62,12 +48,10 @@
           </div>
           <div class="admin-header-actions">
             <button class="btn-refresh" id="btn-exportar">
-              <i class="fas fa-file-csv"></i>
-              Exportar CSV
+              <i class="fas fa-file-csv"></i> Exportar CSV
             </button>
             <button class="btn-refresh" id="btn-refresh">
-              <i class="fas fa-sync-alt"></i>
-              Actualizar
+              <i class="fas fa-sync-alt"></i> Actualizar
             </button>
           </div>
         </header>
@@ -78,7 +62,6 @@
             <span class="table-counter" id="contador-pedidos">0 pedidos</span>
           </div>
 
-          <!-- ========== TOOLBAR: BÚSQUEDA + FILTROS ========== -->
           <div class="admin-toolbar">
             <div class="admin-search">
               <i class="fas fa-search"></i>
@@ -89,11 +72,7 @@
                 autocomplete="off"
               />
             </div>
-
-            <div class="admin-filtros" id="filtros-estado">
-              <!-- Los chips se generan dinámicamente -->
-            </div>
-
+            <div class="admin-filtros" id="filtros-estado"></div>
             <button class="btn-limpiar" id="btn-limpiar" disabled>
               <i class="fas fa-times"></i> Limpiar
             </button>
@@ -112,20 +91,19 @@
                   <th style="text-align: right">Acciones</th>
                 </tr>
               </thead>
-              <tbody id="tbody-pedidos">
-                <!-- Se carga dinámicamente -->
-              </tbody>
+              <tbody id="tbody-pedidos"></tbody>
             </table>
           </div>
 
-          <!-- Estado: vacío (sin datos) -->
+          <!-- Paginación -->
+          <div class="paginacion" id="paginacion-pedidos" style="display: none"></div>
+
           <div class="table-empty" id="estado-vacio" style="display: none">
             <i class="fas fa-inbox"></i>
             <p>No hay pedidos registrados</p>
             <small>Cuando un cliente envíe una solicitud, aparecerá aquí.</small>
           </div>
 
-          <!-- Estado: sin resultados (por filtros) -->
           <div class="table-sin-filtros" id="estado-sin-resultados" style="display: none">
             <i class="fas fa-search"></i>
             <p>No se encontraron pedidos</p>

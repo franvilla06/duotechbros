@@ -59,28 +59,15 @@ async function fetchAdmin(url, opciones = {}) {
 // ORDENAMIENTO DE TABLAS
 // ============================================================
 
-/**
- * Compara dos valores según el tipo especificado.
- * @returns -1, 0 o 1
- */
 function compararValores(a, b, tipo) {
-    // Valores nulos/indefinidos van al final
     if (a === null || a === undefined || a === '') return 1;
     if (b === null || b === undefined || b === '') return -1;
 
-    if (tipo === 'numero') {
-        return Number(a) - Number(b);
-    }
-    if (tipo === 'fecha') {
-        return new Date(a).getTime() - new Date(b).getTime();
-    }
-    // string por defecto (con sensibilidad a acentos)
+    if (tipo === 'numero') return Number(a) - Number(b);
+    if (tipo === 'fecha') return new Date(a).getTime() - new Date(b).getTime();
     return String(a).localeCompare(String(b), 'es', { sensitivity: 'base' });
 }
 
-/**
- * Actualiza los íconos de los th según el orden activo.
- */
 function actualizarIconosOrden(tabla, campoActivo, direccion) {
     tabla.querySelectorAll('thead th').forEach((th) => {
         const icono = th.querySelector('.th-sort-icon');
@@ -96,14 +83,6 @@ function actualizarIconosOrden(tabla, campoActivo, direccion) {
     });
 }
 
-/**
- * Configura las columnas ordenables de una tabla.
- * @param {string} tablaId - id del elemento <table>
- * @param {Object} mapaColumnas - { indice: { campo, tipo } }
- * @param {Function} getOrden - función que devuelve el objeto de orden actual
- * @param {Function} setOrden - función que recibe el nuevo objeto de orden
- * @param {Function} callbackReRender - función a llamar cuando cambia el orden
- */
 function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden, callbackReRender) {
     const tabla = document.getElementById(tablaId);
     if (!tabla) return;
@@ -114,7 +93,6 @@ function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden,
         const th = ths[indice];
         if (!th) return;
 
-        // Marcar el th como ordenable y agregar el ícono si no existe
         th.classList.add('th-ordenable');
         th.dataset.campo = config.campo;
         th.dataset.tipo = config.tipo;
@@ -123,15 +101,12 @@ function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden,
             th.innerHTML = `${th.innerHTML} <i class="fas fa-sort th-sort-icon"></i>`;
         }
 
-        // Listener de clic
         th.addEventListener('click', () => {
             const orden = getOrden();
 
             if (orden.campo === config.campo) {
-                // Alternar dirección
                 orden.direccion = orden.direccion === 'asc' ? 'desc' : 'asc';
             } else {
-                // Nueva columna → empezar ascendente
                 orden.campo = config.campo;
                 orden.tipo = config.tipo;
                 orden.direccion = 'asc';
@@ -142,6 +117,150 @@ function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden,
             callbackReRender();
         });
     });
+}
+
+// ============================================================
+// PAGINACIÓN
+// ============================================================
+
+/**
+ * Crea un paginador con estado propio.
+ * @param {string} contenedorId - id del div donde se dibujan los controles.
+ * @param {number} porPagina - Cantidad de items por página.
+ * @param {Function} onCambiarPagina - Callback que se ejecuta al cambiar de página.
+ * @returns Objeto con métodos para actualizar el total, resetear, y paginar.
+ */
+function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
+    let paginaActual = 1;
+    let totalItems = 0;
+
+    const contenedor = document.getElementById(contenedorId);
+    if (!contenedor) return null;
+
+    function getTotalPaginas() {
+        return Math.max(1, Math.ceil(totalItems / porPagina));
+    }
+
+    /**
+     * Genera la lista de botones a mostrar con elipsis si hay muchas páginas.
+     */
+    function generarBotones(pag) {
+        const total = getTotalPaginas();
+        const botones = [];
+
+        if (total <= 7) {
+            for (let i = 1; i <= total; i++) botones.push(i);
+        } else {
+            botones.push(1);
+            let inicio = Math.max(2, pag - 1);
+            let fin = Math.min(total - 1, pag + 1);
+            if (pag <= 3) fin = 4;
+            if (pag >= total - 2) inicio = total - 3;
+
+            if (inicio > 2) botones.push('...');
+            for (let i = inicio; i <= fin; i++) botones.push(i);
+            if (fin < total - 1) botones.push('...');
+            botones.push(total);
+        }
+        return botones;
+    }
+
+    function render() {
+        const totalPags = getTotalPaginas();
+
+        if (totalItems === 0 || totalPags <= 1) {
+            contenedor.innerHTML = '';
+            contenedor.style.display = 'none';
+            return;
+        }
+
+        contenedor.style.display = 'flex';
+
+        const inicio = (paginaActual - 1) * porPagina + 1;
+        const fin = Math.min(paginaActual * porPagina, totalItems);
+
+        const botones = generarBotones(paginaActual);
+        const botonesHTML = botones
+            .map((b) => {
+                if (b === '...') return '<span class="pag-ellipsis">…</span>';
+                const activo = b === paginaActual ? 'active' : '';
+                return `<button class="pag-num ${activo}" data-pagina="${b}">${b}</button>`;
+            })
+            .join('');
+
+        contenedor.innerHTML = `
+            <div class="paginacion-info">
+                Mostrando <strong>${inicio}–${fin}</strong> de <strong>${totalItems}</strong>
+            </div>
+            <div class="paginacion-controles">
+                <button class="pag-btn pag-prev" ${paginaActual === 1 ? 'disabled' : ''} title="Anterior">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                ${botonesHTML}
+                <button class="pag-btn pag-next" ${paginaActual === totalPags ? 'disabled' : ''} title="Siguiente">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+
+        // Números de página
+        contenedor.querySelectorAll('.pag-num').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const num = parseInt(btn.dataset.pagina);
+                if (num !== paginaActual) {
+                    paginaActual = num;
+                    render();
+                    onCambiarPagina();
+                }
+            });
+        });
+
+        // Botones prev/next
+        const btnPrev = contenedor.querySelector('.pag-prev');
+        const btnNext = contenedor.querySelector('.pag-next');
+
+        if (btnPrev) {
+            btnPrev.addEventListener('click', () => {
+                if (paginaActual > 1) {
+                    paginaActual--;
+                    render();
+                    onCambiarPagina();
+                }
+            });
+        }
+
+        if (btnNext) {
+            btnNext.addEventListener('click', () => {
+                if (paginaActual < totalPags) {
+                    paginaActual++;
+                    render();
+                    onCambiarPagina();
+                }
+            });
+        }
+    }
+
+    return {
+        /** Actualiza el total de items. Si resetPagina=true, vuelve a la página 1. */
+        actualizar(nuevoTotal, resetPagina = false) {
+            totalItems = nuevoTotal;
+            if (resetPagina) paginaActual = 1;
+
+            const totalPags = getTotalPaginas();
+            if (paginaActual > totalPags) paginaActual = totalPags;
+            if (paginaActual < 1) paginaActual = 1;
+
+            render();
+        },
+        /** Devuelve el slice de items correspondiente a la página actual. */
+        getItems(items) {
+            return items.slice((paginaActual - 1) * porPagina, paginaActual * porPagina);
+        },
+        /** Devuelve la página actual. */
+        getPaginaActual() {
+            return paginaActual;
+        },
+    };
 }
 
 // ============================================================

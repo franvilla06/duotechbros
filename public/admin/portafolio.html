@@ -23,22 +23,10 @@
         </div>
 
         <nav class="admin-nav">
-          <a href="dashboard.html">
-            <i class="fas fa-tachometer-alt"></i>
-            <span>Dashboard</span>
-          </a>
-          <a href="productos.html">
-            <i class="fas fa-box"></i>
-            <span>Gestionar Productos</span>
-          </a>
-          <a href="portafolio.html" class="active">
-            <i class="fas fa-briefcase"></i>
-            <span>Gestionar Portafolio</span>
-          </a>
-          <a href="pedidos.html">
-            <i class="fas fa-clipboard-list"></i>
-            <span>Ver Pedidos</span>
-          </a>
+          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+          <a href="productos.html"><i class="fas fa-box"></i><span>Gestionar Productos</span></a>
+          <a href="portafolio.html" class="active"><i class="fas fa-briefcase"></i><span>Gestionar Portafolio</span></a>
+          <a href="pedidos.html"><i class="fas fa-clipboard-list"></i><span>Ver Pedidos</span></a>
         </nav>
 
         <div class="admin-sidebar-footer">
@@ -108,7 +96,6 @@
               <span class="table-counter" id="contador-trabajos">0 trabajos</span>
             </div>
 
-            <!-- Toolbar: búsqueda + filtros -->
             <div class="admin-toolbar">
               <div class="admin-search">
                 <i class="fas fa-search"></i>
@@ -119,11 +106,7 @@
                   autocomplete="off"
                 />
               </div>
-
-              <div class="admin-filtros" id="filtros-tipo">
-                <!-- Los chips se generan dinámicamente -->
-              </div>
-
+              <div class="admin-filtros" id="filtros-tipo"></div>
               <button class="btn-limpiar" id="btn-limpiar" disabled>
                 <i class="fas fa-times"></i> Limpiar
               </button>
@@ -144,6 +127,8 @@
                 <tbody id="tbody-trabajos"></tbody>
               </table>
             </div>
+
+            <div class="paginacion" id="paginacion-trabajos" style="display: none"></div>
 
             <div class="table-empty" id="estado-vacio" style="display: none">
               <i class="fas fa-briefcase"></i>

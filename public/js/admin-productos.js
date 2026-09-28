@@ -1,6 +1,5 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DuotechBros Admin
-// Incluye: crear, editar, eliminar, buscar, filtrar y ordenar
 // ============================================================
 
 const API_PRODUCTOS = '/api/productos';
@@ -24,13 +23,14 @@ const formEditar = document.getElementById('form-editar');
 const btnCancelar = document.getElementById('btn-cancelar');
 const btnActualizar = document.getElementById('btn-actualizar');
 
+const POR_PAGINA = 10;
+
 // Estado local
 let productosOriginales = [];
 let categoriaFiltroActivo = 'Todas';
 let textoBusqueda = '';
-
-// Ordenamiento
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
+let paginador = null;
 
 // ----- UTILIDADES -----
 
@@ -71,11 +71,8 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
-// ----- ORDENAMIENTO -----
-
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
-
     return [...array].sort((a, b) => {
         const cmp = compararValores(a[ordenActual.campo], b[ordenActual.campo], ordenActual.tipo);
         return ordenActual.direccion === 'asc' ? cmp : -cmp;
@@ -135,7 +132,9 @@ function renderizarProductos(productos) {
 
     contador.textContent = `${productos.length} producto${productos.length !== 1 ? 's' : ''}`;
 
-    productos.forEach((p) => {
+    const itemsPagina = paginador ? paginador.getItems(productos) : productos;
+
+    itemsPagina.forEach((p) => {
         const tr = document.createElement('tr');
 
         const imagenHTML = p.imagen_url
@@ -176,7 +175,7 @@ function renderizarProductos(productos) {
     });
 }
 
-// ----- APLICAR FILTROS + ORDEN -----
+// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -200,6 +199,8 @@ function aplicarFiltros() {
 
     filtrados = aplicarOrdenamiento(filtrados);
 
+    if (paginador) paginador.actualizar(filtrados.length, true);
+
     actualizarBotonLimpiar();
     renderizarProductos(filtrados);
 }
@@ -218,12 +219,12 @@ async function cargarProductos() {
         const productos = await respuesta.json();
 
         productosOriginales = productos;
-
         construirFiltrosCategoria();
 
         if (productos.length === 0) {
             estadoVacio.style.display = 'block';
             contador.textContent = '0 productos';
+            if (paginador) paginador.actualizar(0, true);
         } else {
             aplicarFiltros();
         }
@@ -424,7 +425,25 @@ btnLimpiar.addEventListener('click', () => {
 // ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Configurar ordenamiento
+    paginador = crearPaginador('paginacion-productos', POR_PAGINA, () => {
+        // Re-renderizar con los filtros actuales (sin resetear página)
+        let filtrados = [...productosOriginales];
+        if (categoriaFiltroActivo !== 'Todas') {
+            filtrados = filtrados.filter((p) => p.categoria === categoriaFiltroActivo);
+        }
+        if (textoBusqueda.trim() !== '') {
+            const q = textoBusqueda.trim().toLowerCase();
+            filtrados = filtrados.filter(
+                (p) =>
+                    (p.nombre && p.nombre.toLowerCase().includes(q)) ||
+                    (p.descripcion && p.descripcion.toLowerCase().includes(q)) ||
+                    (p.categoria && p.categoria.toLowerCase().includes(q))
+            );
+        }
+        filtrados = aplicarOrdenamiento(filtrados);
+        renderizarProductos(filtrados);
+    });
+
     configurarColumnasOrdenables(
         'tabla-productos',
         {
@@ -433,7 +452,6 @@ document.addEventListener('DOMContentLoaded', () => {
             3: { campo: 'categoria', tipo: 'string' },
             4: { campo: 'precio', tipo: 'numero' },
             5: { campo: 'stock', tipo: 'numero' },
-            // 0 = Imagen, 6 = Acciones → no ordenables
         },
         () => ordenActual,
         (nuevo) => { ordenActual = nuevo; },

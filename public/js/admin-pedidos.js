@@ -1,6 +1,5 @@
 // ============================================================
 // LÓGICA DE LA PÁGINA "VER PEDIDOS" - DuotechBros Admin
-// Incluye: ver, cambiar estado, buscar, filtrar, exportar CSV y ordenar
 // ============================================================
 
 const API_PEDIDOS = '/api/pedidos';
@@ -19,15 +18,15 @@ const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
+const POR_PAGINA = 10;
 
 // Estado local
 let pedidosOriginales = [];
 let pedidosFiltrados = [];
 let estadoFiltroActivo = 'Todos';
 let textoBusqueda = '';
-
-// Ordenamiento
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
+let paginador = null;
 
 // ----- UTILIDADES -----
 
@@ -41,7 +40,6 @@ function formatearFecha(fechaISO) {
     const anio = fecha.getFullYear();
     const horas = String(fecha.getHours()).padStart(2, '0');
     const minutos = String(fecha.getMinutes()).padStart(2, '0');
-
     return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
 }
 
@@ -88,7 +86,6 @@ function mostrarToast(mensaje, esError = false) {
 
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
-
     return [...array].sort((a, b) => {
         const cmp = compararValores(a[ordenActual.campo], b[ordenActual.campo], ordenActual.tipo);
         return ordenActual.direccion === 'asc' ? cmp : -cmp;
@@ -206,12 +203,14 @@ function renderizarPedidos(pedidos) {
 
     contador.textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''}`;
 
-    pedidos.forEach((p) => {
+    // Paginar
+    const itemsPagina = paginador ? paginador.getItems(pedidos) : pedidos;
+
+    itemsPagina.forEach((p) => {
         const estadoActual = p.estado || 'pendiente';
 
         const opciones = ESTADOS.map(
-            (e) =>
-                `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
+            (e) => `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
         ).join('');
 
         const tr = document.createElement('tr');
@@ -253,7 +252,7 @@ function renderizarPedidos(pedidos) {
     });
 }
 
-// ----- APLICAR FILTROS + ORDEN -----
+// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -278,13 +277,16 @@ function aplicarFiltros() {
         );
     }
 
-    // Aplicar ordenamiento
     filtrados = aplicarOrdenamiento(filtrados);
-
     pedidosFiltrados = filtrados;
 
+    // Actualizar paginador (resetear a página 1)
+    if (paginador) {
+        paginador.actualizar(pedidosFiltrados.length, true);
+    }
+
     actualizarBotonLimpiar();
-    renderizarPedidos(filtrados);
+    renderizarPedidos(pedidosFiltrados);
 }
 
 // ----- CARGA DE DATOS -----
@@ -310,6 +312,7 @@ async function cargarPedidos() {
             pedidosFiltrados = [];
             estadoVacio.style.display = 'block';
             contador.textContent = '0 pedidos';
+            if (paginador) paginador.actualizar(0, true);
         } else {
             aplicarFiltros();
         }
@@ -356,8 +359,9 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
 
             mostrarToast(`✅ Estado actualizado a "${capitalizar(nuevoEstado)}"`);
 
-            // Re-aplicar filtros y orden
-            aplicarFiltros();
+            // Recalcular (no resetea página porque el cambio de estado no afecta el filtro de página)
+            pedidosFiltrados = aplicarFiltrosSinReset();
+            renderizarPedidos(pedidosFiltrados);
         } else {
             selectElement.value = estadoAnterior;
             mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar'}`, true);
@@ -369,6 +373,30 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
     } finally {
         selectElement.disabled = false;
     }
+}
+
+/** Variante de aplicarFiltros que NO resetea la página (para cambios de estado). */
+function aplicarFiltrosSinReset() {
+    let filtrados = [...pedidosOriginales];
+
+    if (estadoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter(
+            (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
+        );
+    }
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter(
+            (p) =>
+                (p.nombre_cliente && p.nombre_cliente.toLowerCase().includes(q)) ||
+                (p.email && p.email.toLowerCase().includes(q)) ||
+                (p.modelo_celular && p.modelo_celular.toLowerCase().includes(q)) ||
+                (p.telefono && String(p.telefono).toLowerCase().includes(q))
+        );
+    }
+    filtrados = aplicarOrdenamiento(filtrados);
+    if (paginador) paginador.actualizar(filtrados.length, false);
+    return filtrados;
 }
 
 // ----- EVENTOS -----
@@ -394,6 +422,11 @@ btnLimpiar.addEventListener('click', () => {
 // ----- INICIO -----
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Crear paginador
+    paginador = crearPaginador('paginacion-pedidos', POR_PAGINA, () => {
+        renderizarPedidos(pedidosFiltrados);
+    });
+
     construirFiltrosEstado();
 
     // Configurar ordenamiento
@@ -406,7 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
             3: { campo: 'descripcion_problema', tipo: 'string' },
             4: { campo: 'creado_en', tipo: 'fecha' },
             5: { campo: 'estado', tipo: 'string' },
-            // 6 = Acciones → no ordenable
         },
         () => ordenActual,
         (nuevo) => { ordenActual = nuevo; },
