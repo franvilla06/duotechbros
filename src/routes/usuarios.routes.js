@@ -18,5 +18,6 @@ router.get('/carrito', requiereAuthUsuario, carritoController.listarCarrito);
 router.put('/carrito/:id', requiereAuthUsuario, carritoController.cambiarCantidad);
 router.delete('/carrito/:id', requiereAuthUsuario, carritoController.eliminarItem);
 router.delete('/carrito', requiereAuthUsuario, carritoController.vaciarCarrito);
+router.post('/carrito/enviar-pedido', requiereAuthUsuario, carritoController.enviarPedido);
 
 module.exports = router;

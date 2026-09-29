@@ -52,6 +52,16 @@ db.exec(`
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
         FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS pedido_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pedido_id INTEGER NOT NULL,
+        producto_id INTEGER,
+        nombre_producto TEXT NOT NULL,
+        precio_unitario DECIMAL(10,2) NOT NULL,
+        cantidad INTEGER NOT NULL,
+        subtotal DECIMAL(10,2) NOT NULL,
+        FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE
+    );
 `);
 
 // MIGRACIONES
@@ -63,6 +73,21 @@ const tieneNotas = columnasPedidos.some((col) => col.name === 'notas');
 if (!tieneNotas) {
     db.exec('ALTER TABLE pedidos ADD COLUMN notas TEXT');
     console.log('Migracion aplicada: columna notas agregada a pedidos');
+}
+
+// agregar columna usuario_id a pedidos si no existe
+const tieneUsuarioId = columnasPedidos.some((col) => col.name === 'usuario_id');
+if (!tieneUsuarioId) {
+    db.exec('ALTER TABLE pedidos ADD COLUMN usuario_id INTEGER');
+    console.log('Migracion aplicada: columna usuario_id agregada a pedidos');
+}
+
+// agregar columna tipo a pedidos si no existe
+// valores: reparacion (default) o producto
+const tieneTipo = columnasPedidos.some((col) => col.name === 'tipo');
+if (!tieneTipo) {
+    db.exec("ALTER TABLE pedidos ADD COLUMN tipo TEXT DEFAULT 'reparacion'");
+    console.log('Migracion aplicada: columna tipo agregada a pedidos');
 }
 
 // DATOS INICIALES

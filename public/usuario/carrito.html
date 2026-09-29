@@ -121,6 +121,39 @@
       </div>
     </main>
 
+    <!-- MODAL: PEDIDO ENVIADO CON EXITO -->
+    <div class="modal-overlay" id="modal-exito">
+      <div class="modal-card modal-exito-card">
+        <div class="modal-exito-icono">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Pedido enviado</h2>
+        <p class="modal-exito-mensaje">
+          Tu pedido fue recibido correctamente. En breve nos pondremos en
+          contacto para coordinar la entrega.
+        </p>
+
+        <div class="modal-exito-info">
+          <div class="modal-exito-linea">
+            <span>Numero de pedido</span>
+            <strong id="modal-pedido-id">#000</strong>
+          </div>
+          <div class="modal-exito-linea">
+            <span>Unidades</span>
+            <strong id="modal-pedido-unidades">0</strong>
+          </div>
+          <div class="modal-exito-linea">
+            <span>Total</span>
+            <strong id="modal-pedido-total">$0.00</strong>
+          </div>
+        </div>
+
+        <a href="/tienda.html" class="carrito-btn-primario">
+          <i class="fas fa-shopping-bag"></i> Seguir comprando
+        </a>
+      </div>
+    </div>
+
     <!-- SCRIPT -->
     <script src="/js/usuario-carrito.js"></script>
   </body>

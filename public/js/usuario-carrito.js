@@ -18,6 +18,12 @@ const resumenTotal = document.getElementById('resumen-total');
 const btnEnviarPedido = document.getElementById('btn-enviar-pedido');
 const btnVaciarCarrito = document.getElementById('btn-vaciar-carrito');
 
+// modal de exito
+const modalExito = document.getElementById('modal-exito');
+const modalPedidoId = document.getElementById('modal-pedido-id');
+const modalPedidoUnidades = document.getElementById('modal-pedido-unidades');
+const modalPedidoTotal = document.getElementById('modal-pedido-total');
+
 // estado local
 let itemsActuales = [];
 
@@ -75,8 +81,6 @@ function mostrarToast(mensaje, tipo = 'exito') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-
-// AVISAR AL HEADER QUE EL CARRITO CAMBIO
 
 function notificarCambioCarrito() {
     document.dispatchEvent(new CustomEvent('carritoActualizado'));
@@ -161,12 +165,10 @@ function renderizarItems(items) {
         carritoItems.appendChild(div);
     });
 
-    // asignar eventos a los botones
     asignarEventosItems();
 }
 
 function asignarEventosItems() {
-    // restar cantidad
     carritoItems.querySelectorAll('[data-accion="restar"]').forEach((btn) => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -176,7 +178,6 @@ function asignarEventosItems() {
         });
     });
 
-    // sumar cantidad
     carritoItems.querySelectorAll('[data-accion="sumar"]').forEach((btn) => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -190,7 +191,6 @@ function asignarEventosItems() {
         });
     });
 
-    // editar cantidad a mano
     carritoItems.querySelectorAll('.carrito-cantidad-input').forEach((input) => {
         input.addEventListener('change', () => {
             const id = input.dataset.id;
@@ -212,7 +212,6 @@ function asignarEventosItems() {
             cambiarCantidad(id, valor, null);
         });
 
-        // evitar escribir letras raras
         input.addEventListener('keydown', (e) => {
             if (e.key === '-' || e.key === 'e' || e.key === 'E') {
                 e.preventDefault();
@@ -220,7 +219,6 @@ function asignarEventosItems() {
         });
     });
 
-    // eliminar item
     carritoItems.querySelectorAll('.carrito-item-eliminar').forEach((btn) => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -239,7 +237,6 @@ function actualizarResumen(resumen) {
     resumenTotal.textContent = formatearPrecio(resumen.total_precio);
     carritoCounter.textContent = `${resumen.total_items} item${resumen.total_items !== 1 ? 's' : ''}`;
 
-    // habilitar o deshabilitar el boton de enviar
     btnEnviarPedido.disabled = resumen.total_items === 0;
 }
 
@@ -397,10 +394,63 @@ async function vaciarCarrito() {
     }
 }
 
-// ENVIAR PEDIDO (placeholder - se implementa en la parte 6)
+// ENVIAR PEDIDO
 
-function enviarPedido() {
-    mostrarToast('El envio de pedidos se implementa en la proxima version.', 'error');
+async function enviarPedido() {
+    // confirmar antes de enviar
+    const confirmar = confirm(
+        'Confirmas el envio de tu pedido?\n\nAl enviarlo, se descontara el stock de los productos.'
+    );
+    if (!confirmar) return;
+
+    btnEnviarPedido.disabled = true;
+    const contenidoOriginal = btnEnviarPedido.innerHTML;
+    btnEnviarPedido.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando pedido...';
+
+    try {
+        const respuesta = await fetch(`${API_CARRITO}/enviar-pedido`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${obtenerTokenUsuario()}`,
+            },
+        });
+
+        const resultado = await respuesta.json();
+
+        if (respuesta.status === 401) {
+            cerrarSesionUsuario();
+            window.location.href = '/usuario/login.html';
+            return;
+        }
+
+        if (resultado.success) {
+            // mostrar el modal de exito
+            modalPedidoId.textContent = `#${String(resultado.pedido_id).padStart(4, '0')}`;
+            modalPedidoUnidades.textContent = resultado.unidades;
+            modalPedidoTotal.textContent = formatearPrecio(resultado.total);
+            modalExito.classList.add('modal-visible');
+
+            // limpiar el carrito y notificar al header
+            itemsActuales = [];
+            notificarCambioCarrito();
+        } else {
+            // error del backend (ej: falta de stock)
+            let mensaje = resultado.error || 'No se pudo enviar el pedido.';
+            if (resultado.detalle && Array.isArray(resultado.detalle)) {
+                mensaje += '\n\n' + resultado.detalle.join('\n');
+            }
+            alert(mensaje);
+            // recargar el carrito por si cambio el stock
+            await cargarCarrito();
+        }
+    } catch (error) {
+        console.error('Error al enviar pedido:', error);
+        mostrarToast('No se pudo conectar con el servidor.', 'error');
+    } finally {
+        btnEnviarPedido.disabled = false;
+        btnEnviarPedido.innerHTML = contenidoOriginal;
+    }
 }
 
 // EVENTOS
@@ -411,17 +461,14 @@ btnVaciarCarrito.addEventListener('click', vaciarCarrito);
 // INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
-    // si no esta logueado, redirigir al login
     if (!estaLogueadoUsuario()) {
         window.location.href = '/usuario/login.html';
         return;
     }
 
-    // mostrar el nombre del usuario en el header
     if (usuarioSpan) {
         usuarioSpan.innerHTML = `<i class="fas fa-user-circle"></i> ${obtenerUsuarioActual()}`;
     }
 
-    // cargar el carrito
     cargarCarrito();
 });
