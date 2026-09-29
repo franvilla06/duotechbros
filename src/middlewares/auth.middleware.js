@@ -1,38 +1,4 @@
-const crypto = require('crypto');
-
-// clave secreta para firmar tokens (en produccion deberia ir en variables de entorno)
-const SECRET = 'duotech-secret-2024';
-
-// generar un token simple firmado con sha256
-// formato: rol.usuario.timestamp.hash
-function generarToken(rol, usuario) {
-    const timestamp = Date.now();
-    const hash = crypto
-        .createHash('sha256')
-        .update(`${rol}-${usuario}-${timestamp}-${SECRET}`)
-        .digest('hex')
-        .substring(0, 16);
-    return `${rol}.${usuario}.${timestamp}.${hash}`;
-}
-
-// verificar que el token sea valido y tenga el rol esperado
-function verificarToken(token, rolEsperado) {
-    if (!token || typeof token !== 'string') return false;
-
-    const partes = token.split('.');
-    if (partes.length !== 4) return false;
-
-    const [rol, usuario, timestamp, hash] = partes;
-    if (rol !== rolEsperado) return false;
-
-    const hashEsperado = crypto
-        .createHash('sha256')
-        .update(`${rol}-${usuario}-${timestamp}-${SECRET}`)
-        .digest('hex')
-        .substring(0, 16);
-
-    return hash === hashEsperado;
-}
+const { verificarToken } = require('../utils/token.util');
 
 // extraer el token del header authorization
 function extraerToken(req) {
@@ -84,8 +50,6 @@ function requiereAuthUsuario(req, res, next) {
 }
 
 module.exports = {
-    generarToken,
-    verificarToken,
     requiereAuth,
     requiereAuthUsuario,
 };

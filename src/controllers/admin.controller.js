@@ -1,5 +1,9 @@
 // GESTIÓN DE PRODUCTOS
 
+const productosModel = require('../models/productos.model');
+const portafolioModel = require('../models/portafolio.model');
+const pedidosModel = require('../models/pedidos.model');
+
 function crearProducto(req, res) {
     const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
 
@@ -8,18 +12,14 @@ function crearProducto(req, res) {
     }
 
     try {
-        const insert = req.app.locals.db.prepare(`
-            INSERT INTO productos (nombre, descripcion, precio, imagen_url, categoria, stock)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `);
-        const info = insert.run(
+        const info = productosModel.crear(req.app.locals.db, {
             nombre,
-            descripcion || null,
+            descripcion: descripcion || null,
             precio,
-            imagen_url || null,
-            categoria || null,
-            stock || 0
-        );
+            imagen_url: imagen_url || null,
+            categoria: categoria || null,
+            stock: stock || 0,
+        });
         return res.json({ success: true, id: info.lastInsertRowid });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -35,19 +35,14 @@ function actualizarProducto(req, res) {
     }
 
     try {
-        const info = req.app.locals.db.prepare(`
-            UPDATE productos
-            SET nombre = ?, descripcion = ?, precio = ?, imagen_url = ?, categoria = ?, stock = ?
-            WHERE id = ?
-        `).run(
+        const info = productosModel.actualizar(req.app.locals.db, id, {
             nombre,
-            descripcion || null,
+            descripcion: descripcion || null,
             precio,
-            imagen_url || null,
-            categoria || null,
-            stock || 0,
-            id
-        );
+            imagen_url: imagen_url || null,
+            categoria: categoria || null,
+            stock: stock || 0,
+        });
 
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
@@ -62,7 +57,7 @@ function actualizarProducto(req, res) {
 function eliminarProducto(req, res) {
     const { id } = req.params;
     try {
-        const info = req.app.locals.db.prepare('DELETE FROM productos WHERE id = ?').run(id);
+        const info = productosModel.eliminar(req.app.locals.db, id);
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
@@ -82,16 +77,12 @@ function crearTrabajo(req, res) {
     }
 
     try {
-        const insert = req.app.locals.db.prepare(`
-            INSERT INTO portafolio (titulo, descripcion, imagen_url, tipo_reparacion)
-            VALUES (?, ?, ?, ?)
-        `);
-        const info = insert.run(
+        const info = portafolioModel.crear(req.app.locals.db, {
             titulo,
-            descripcion || null,
-            imagen_url || null,
-            tipo_reparacion || null
-        );
+            descripcion: descripcion || null,
+            imagen_url: imagen_url || null,
+            tipo_reparacion: tipo_reparacion || null,
+        });
         return res.json({ success: true, id: info.lastInsertRowid });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -107,17 +98,12 @@ function actualizarTrabajo(req, res) {
     }
 
     try {
-        const info = req.app.locals.db.prepare(`
-            UPDATE portafolio
-            SET titulo = ?, descripcion = ?, imagen_url = ?, tipo_reparacion = ?
-            WHERE id = ?
-        `).run(
+        const info = portafolioModel.actualizar(req.app.locals.db, id, {
             titulo,
-            descripcion || null,
-            imagen_url || null,
-            tipo_reparacion || null,
-            id
-        );
+            descripcion: descripcion || null,
+            imagen_url: imagen_url || null,
+            tipo_reparacion: tipo_reparacion || null,
+        });
 
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Trabajo no encontrado' });
@@ -132,7 +118,7 @@ function actualizarTrabajo(req, res) {
 function eliminarTrabajo(req, res) {
     const { id } = req.params;
     try {
-        const info = req.app.locals.db.prepare('DELETE FROM portafolio WHERE id = ?').run(id);
+        const info = portafolioModel.eliminar(req.app.locals.db, id);
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Trabajo no encontrado' });
         }
@@ -158,9 +144,7 @@ function actualizarEstadoPedido(req, res) {
     }
 
     try {
-        const info = req.app.locals.db
-            .prepare('UPDATE pedidos SET estado = ? WHERE id = ?')
-            .run(estado, id);
+        const info = pedidosModel.actualizarEstado(req.app.locals.db, id, estado);
 
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
@@ -184,9 +168,7 @@ function actualizarNotasPedido(req, res) {
     }
 
     try {
-        const info = req.app.locals.db
-            .prepare('UPDATE pedidos SET notas = ? WHERE id = ?')
-            .run(notasValor, id);
+        const info = pedidosModel.actualizarNotas(req.app.locals.db, id, notasValor);
 
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
@@ -201,7 +183,7 @@ function actualizarNotasPedido(req, res) {
 function eliminarPedido(req, res) {
     const { id } = req.params;
     try {
-        const info = req.app.locals.db.prepare('DELETE FROM pedidos WHERE id = ?').run(id);
+        const info = pedidosModel.eliminar(req.app.locals.db, id);
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }

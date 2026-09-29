@@ -47,13 +47,19 @@ Estas credenciales deben cambiarse antes de utilizar el sistema en producción.
 ## Estructura básica
 
 ```text
-public/                 Páginas, estilos, imágenes y scripts del frontend
+public/                 Páginas, estilos, recursos y scripts del frontend
+public/assets/          Imágenes y recursos multimedia
 public/admin/           Páginas del panel administrativo
+public/user/            Páginas del área de usuarios
 src/app.js              Configuración de Express
-src/server.js           Inicio del servidor
+server.js               Inicio del servidor
 src/routes/             Rutas de la API
-src/controllers/        Lógica de las solicitudes
-src/database/           Conexión y configuración de SQLite
+src/controllers/        Manejo de solicitudes HTTP
+src/config/             Conexión a SQLite y configuración
+src/models/             Consultas de datos por entidad
+src/services/           Flujos de negocio e integraciones
+src/middlewares/        Autenticación y validaciones HTTP
+src/utils/              Funciones auxiliares reutilizables
 package.json            Dependencias y comandos del proyecto
 ```
 

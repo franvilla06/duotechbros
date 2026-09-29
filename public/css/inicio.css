@@ -1,6 +1,6 @@
 /* HERO (BIENVENIDA) */
 .hero {
-    background-image: url(../img/Bienvenida.svg);
+    background-image: url(../assets/Bienvenida.svg);
     background-repeat: no-repeat;
     background-size: cover;
     height: 410px;

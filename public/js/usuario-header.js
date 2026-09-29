@@ -90,14 +90,14 @@ function renderizarUsuarioHeader() {
                     <small>Sesion activa</small>
                     <strong>${usuario}</strong>
                 </div>
-                <a href="/usuario/perfil.html" class="usuario-menu-item">
+                <a href="/user/perfil.html" class="usuario-menu-item">
                     <i class="fas fa-user"></i> Mi perfil
                 </a>
-                <a href="/usuario/carrito.html" class="usuario-menu-item">
+                <a href="/user/carrito.html" class="usuario-menu-item">
                     <i class="fas fa-shopping-cart"></i> Mi carrito
                     <span class="cart-count" id="cart-count-menu" style="display: none;">0</span>
                 </a>
-                <a href="/usuario/pedidos.html" class="usuario-menu-item">
+                <a href="/user/pedidos.html" class="usuario-menu-item">
                     <i class="fas fa-box"></i> Mis pedidos
                 </a>
                 <button type="button" class="usuario-menu-item cerrar-sesion" id="btn-cerrar-sesion">
@@ -149,7 +149,7 @@ function renderizarUsuarioHeader() {
         setInterval(actualizarContadorCarrito, 60000);
     } else {
         contenedor.innerHTML = `
-            <a href="/usuario/login.html" class="usuario-btn-header">
+            <a href="/user/login.html" class="usuario-btn-header">
                 <i class="fas fa-user-circle"></i> Ingresar
             </a>
         `;

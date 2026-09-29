@@ -1,5 +1,7 @@
-const bcrypt = require('bcryptjs');
-const { generarToken } = require('../middlewares/auth.middleware');
+const pedidosModel = require('../models/pedidos.model');
+const productosModel = require('../models/productos.model');
+const portafolioModel = require('../models/portafolio.model');
+const authService = require('../services/auth.service');
 
 function crearPedido(req, res) {
     const { nombre_cliente, telefono, email, modelo_celular, descripcion_problema } = req.body;
@@ -8,11 +10,13 @@ function crearPedido(req, res) {
     }
 
     try {
-        const insert = req.app.locals.db.prepare(`
-            INSERT INTO pedidos (nombre_cliente, telefono, email, modelo_celular, descripcion_problema)
-            VALUES (?, ?, ?, ?, ?)
-        `);
-        const info = insert.run(nombre_cliente, telefono, email, modelo_celular, descripcion_problema);
+        const info = pedidosModel.crear(req.app.locals.db, {
+            nombre_cliente,
+            telefono,
+            email,
+            modelo_celular,
+            descripcion_problema,
+        });
         return res.json({ success: true, id: info.lastInsertRowid });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -21,7 +25,7 @@ function crearPedido(req, res) {
 
 function listarPedidos(req, res) {
     try {
-        const pedidos = req.app.locals.db.prepare('SELECT * FROM pedidos ORDER BY creado_en DESC').all();
+        const pedidos = pedidosModel.listar(req.app.locals.db);
         return res.json(pedidos);
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -30,7 +34,7 @@ function listarPedidos(req, res) {
 
 function listarProductos(req, res) {
     try {
-        return res.json(req.app.locals.db.prepare('SELECT * FROM productos ORDER BY id DESC').all());
+        return res.json(productosModel.listar(req.app.locals.db));
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -38,7 +42,7 @@ function listarProductos(req, res) {
 
 function listarPortafolio(req, res) {
     try {
-        return res.json(req.app.locals.db.prepare('SELECT * FROM portafolio ORDER BY fecha DESC').all());
+        return res.json(portafolioModel.listar(req.app.locals.db));
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -47,16 +51,15 @@ function listarPortafolio(req, res) {
 function iniciarSesion(req, res) {
     const { usuario, password } = req.body;
     try {
-        const admin = req.app.locals.db.prepare('SELECT * FROM admin WHERE usuario = ?').get(usuario);
-        if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+        const admin = authService.autenticarAdministrador(req.app.locals.db, usuario, password);
+        if (!admin) {
             return res.status(401).json({ success: false, error: 'Usuario o contrasenia incorrectos' });
         }
-        const token = generarToken('admin', admin.usuario);
         return res.json({
             success: true,
             message: 'Login exitoso',
             usuario: admin.usuario,
-            token: token,
+            token: admin.token,
         });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });

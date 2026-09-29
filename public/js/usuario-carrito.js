@@ -258,7 +258,7 @@ async function cargarCarrito() {
 
         if (respuesta.status === 401) {
             cerrarSesionUsuario();
-            window.location.href = '/usuario/login.html';
+            window.location.href = '/user/login.html';
             return;
         }
 
@@ -301,7 +301,7 @@ async function cambiarCantidad(id, nuevaCantidad, btnElement) {
 
         if (respuesta.status === 401) {
             cerrarSesionUsuario();
-            window.location.href = '/usuario/login.html';
+            window.location.href = '/user/login.html';
             return;
         }
 
@@ -336,7 +336,7 @@ async function eliminarItem(id) {
 
         if (respuesta.status === 401) {
             cerrarSesionUsuario();
-            window.location.href = '/usuario/login.html';
+            window.location.href = '/user/login.html';
             return;
         }
 
@@ -374,7 +374,7 @@ async function vaciarCarrito() {
 
         if (respuesta.status === 401) {
             cerrarSesionUsuario();
-            window.location.href = '/usuario/login.html';
+            window.location.href = '/user/login.html';
             return;
         }
 
@@ -420,7 +420,7 @@ async function enviarPedido() {
 
         if (respuesta.status === 401) {
             cerrarSesionUsuario();
-            window.location.href = '/usuario/login.html';
+            window.location.href = '/user/login.html';
             return;
         }
 
@@ -462,7 +462,7 @@ btnVaciarCarrito.addEventListener('click', vaciarCarrito);
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!estaLogueadoUsuario()) {
-        window.location.href = '/usuario/login.html';
+        window.location.href = '/user/login.html';
         return;
     }
 

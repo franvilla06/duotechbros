@@ -216,7 +216,7 @@ async function agregarAlCarrito(productoId, btnElement) {
             'Necesitas iniciar sesion para agregar productos al carrito.\n\nQueres ingresar ahora?'
         );
         if (quiereIngresar) {
-            window.location.href = '/usuario/login.html';
+            window.location.href = '/user/login.html';
         }
         return;
     }
@@ -245,7 +245,7 @@ async function agregarAlCarrito(productoId, btnElement) {
             sessionStorage.removeItem('usuarioToken');
             mostrarToast('Tu sesion expiro. Volve a iniciar sesion.', 'error');
             setTimeout(() => {
-                window.location.href = '/usuario/login.html';
+                window.location.href = '/user/login.html';
             }, 1500);
             return;
         }

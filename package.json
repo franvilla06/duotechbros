@@ -2,11 +2,11 @@
   "name": "proyecto_duotechbros",
   "version": "1.0.0",
   "description": "Este repositorio tiene como objetivo ser de utilidad para subir y modificar los archivos del Proyecto para la empresa DuotechBros",
-  "main": "src/server.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js",
-    "dev": "node src/server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -21,9 +21,9 @@
   },
   "homepage": "https://github.com/PiruProgramer/Proyecto_DuotechBros#readme",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.10.0",
-    "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "bcryptjs": "3.0.3",
+    "better-sqlite3": "12.10.0",
+    "cors": "2.8.6",
+    "express": "5.2.1"
   }
 }

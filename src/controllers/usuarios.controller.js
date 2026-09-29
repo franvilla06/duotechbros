@@ -1,5 +1,5 @@
-const bcrypt = require('bcryptjs');
-const { generarToken } = require('../middlewares/auth.middleware');
+const authService = require('../services/auth.service');
+const usuariosModel = require('../models/usuarios.model');
 
 // VALIDACIONES
 
@@ -38,34 +38,20 @@ function registrar(req, res) {
     }
 
     try {
-        // verificar si el usuario ya existe
-        const existe = req.app.locals.db
-            .prepare('SELECT COUNT(*) as count FROM usuarios WHERE usuario = ?')
-            .get(usuario);
-        if (existe.count > 0) {
+        const resultado = authService.registrarUsuario(req.app.locals.db, usuario, password);
+        if (resultado.existe) {
             return res.status(409).json({
                 success: false,
                 error: 'Ese nombre de usuario ya esta en uso.',
             });
         }
 
-        // hashear la contrasenia antes de guardarla
-        const hash = bcrypt.hashSync(password, 10);
-
-        // insertar el usuario en la base de datos
-        const info = req.app.locals.db
-            .prepare('INSERT INTO usuarios (usuario, password_hash) VALUES (?, ?)')
-            .run(usuario, hash);
-
-        // generar el token para dejarlo logueado automaticamente
-        const token = generarToken('usuario', usuario);
-
         return res.json({
             success: true,
             message: 'Usuario registrado correctamente',
             usuario: usuario,
-            id: info.lastInsertRowid,
-            token: token,
+            id: resultado.id,
+            token: resultado.token,
         });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -84,24 +70,20 @@ function iniciarSesion(req, res) {
     }
 
     try {
-        const user = req.app.locals.db
-            .prepare('SELECT * FROM usuarios WHERE usuario = ?')
-            .get(usuario);
-        if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+        const user = authService.autenticarUsuario(req.app.locals.db, usuario, password);
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 error: 'Usuario o contrasenia incorrectos.',
             });
         }
 
-        const token = generarToken('usuario', user.usuario);
-
         return res.json({
             success: true,
             message: 'Login exitoso',
             usuario: user.usuario,
             id: user.id,
-            token: token,
+            token: user.token,
         });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -113,9 +95,7 @@ function iniciarSesion(req, res) {
 // obtener el perfil del usuario autenticado
 function obtenerPerfil(req, res) {
     try {
-        const user = req.app.locals.db
-            .prepare('SELECT id, usuario, creado_en FROM usuarios WHERE usuario = ?')
-            .get(req.usuario);
+        const user = usuariosModel.obtenerPerfil(req.app.locals.db, req.usuario);
         if (!user) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
