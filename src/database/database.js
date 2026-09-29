@@ -42,6 +42,16 @@ db.exec(`
         password_hash TEXT NOT NULL,
         creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS carrito (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER NOT NULL,
+        producto_id INTEGER NOT NULL,
+        cantidad INTEGER NOT NULL DEFAULT 1,
+        agregado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (usuario_id, producto_id),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+        FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
+    );
 `);
 
 // MIGRACIONES
