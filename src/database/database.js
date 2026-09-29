@@ -36,17 +36,23 @@ db.exec(`
         usuario TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
 `);
 
 // MIGRACIONES
 // agregar columnas nuevas a tablas existentes sin perder datos
 
-// MIGRACIÓN: AGREGAR COLUMNA "NOTAS" A PEDIDOS SI NO EXISTE
+// agregar columna notas a pedidos si no existe
 const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
 const tieneNotas = columnasPedidos.some((col) => col.name === 'notas');
 if (!tieneNotas) {
     db.exec('ALTER TABLE pedidos ADD COLUMN notas TEXT');
-    console.log('Migración aplicada: columna "notas" agregada a pedidos');
+    console.log('Migracion aplicada: columna notas agregada a pedidos');
 }
 
 // DATOS INICIALES

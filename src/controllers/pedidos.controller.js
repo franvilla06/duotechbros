@@ -1,18 +1,5 @@
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-
-// clave secreta para firmar tokens (en producción iría en .env)
-const SECRET = 'duotech-secret-2024';
-
-function generarToken(usuario) {
-    const timestamp = Date.now();
-    const hash = crypto
-        .createHash('sha256')
-        .update(`${usuario}-${timestamp}-${SECRET}`)
-        .digest('hex')
-        .substring(0, 16);
-    return `${usuario}.${timestamp}.${hash}`;
-}
+const { generarToken } = require('../middlewares/auth.middleware');
 
 function crearPedido(req, res) {
     const { nombre_cliente, telefono, email, modelo_celular, descripcion_problema } = req.body;
@@ -62,9 +49,9 @@ function iniciarSesion(req, res) {
     try {
         const admin = req.app.locals.db.prepare('SELECT * FROM admin WHERE usuario = ?').get(usuario);
         if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
-            return res.status(401).json({ success: false, error: 'Usuario o contraseña incorrectos' });
+            return res.status(401).json({ success: false, error: 'Usuario o contrasenia incorrectos' });
         }
-        const token = generarToken(admin.usuario);
+        const token = generarToken('admin', admin.usuario);
         return res.json({
             success: true,
             message: 'Login exitoso',
