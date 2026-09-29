@@ -172,6 +172,32 @@ function actualizarEstadoPedido(req, res) {
     }
 }
 
+function actualizarNotasPedido(req, res) {
+    const { id } = req.params;
+    const { notas } = req.body;
+
+    // normalizar: string vacío o solo espacios → null (borrar la nota)
+    let notasValor = null;
+    if (notas !== undefined && notas !== null) {
+        const texto = String(notas).trim();
+        notasValor = texto === '' ? null : texto;
+    }
+
+    try {
+        const info = req.app.locals.db
+            .prepare('UPDATE pedidos SET notas = ? WHERE id = ?')
+            .run(notasValor, id);
+
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
+        }
+
+        return res.json({ success: true, message: 'Notas actualizadas', notas: notasValor });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 function eliminarPedido(req, res) {
     const { id } = req.params;
     try {
@@ -193,5 +219,6 @@ module.exports = {
     actualizarTrabajo,
     eliminarTrabajo,
     actualizarEstadoPedido,
+    actualizarNotasPedido,
     eliminarPedido,
 };

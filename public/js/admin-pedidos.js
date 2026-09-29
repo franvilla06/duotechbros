@@ -1,4 +1,6 @@
 // LÓGICA DE LA PÁGINA "VER PEDIDOS" - DUOTECHBROS ADMIN
+// incluye: ver, cambiar estado, notas internas, buscar, filtrar,
+// ordenar, paginar y exportar csv
 
 const API_PEDIDOS = '/api/pedidos';
 const API_ADMIN_PEDIDOS = '/api/admin/pedidos';
@@ -15,6 +17,14 @@ const buscador = document.getElementById('buscador-pedidos');
 const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
+// MODAL DE NOTAS
+const modalNotas = document.getElementById('modal-notas');
+const modalNotasClose = document.getElementById('modal-notas-close');
+const notasInfo = document.getElementById('notas-info');
+const editNotas = document.getElementById('edit-notas');
+const btnNotasCancelar = document.getElementById('btn-notas-cancelar');
+const btnNotasGuardar = document.getElementById('btn-notas-guardar');
+
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 const POR_PAGINA = 10;
 
@@ -25,6 +35,9 @@ let estadoFiltroActivo = 'Todos';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
+
+// pedido actualmente abierto en el modal de notas
+let pedidoNotasActual = null;
 
 // UTILIDADES
 
@@ -115,6 +128,7 @@ function exportarCSV() {
         'Modelo del celular',
         'Descripción del problema',
         'Estado',
+        'Notas internas',
         'Fecha de creación',
     ];
 
@@ -126,6 +140,7 @@ function exportarCSV() {
         p.modelo_celular,
         p.descripcion_problema,
         capitalizar(p.estado || 'pendiente'),
+        p.notas || '',
         formatearFecha(p.creado_en),
     ]);
 
@@ -151,7 +166,7 @@ function exportarCSV() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    mostrarToast(`Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+    mostrarToast(`✅ Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
 }
 
 // FILTROS
@@ -201,15 +216,19 @@ function renderizarPedidos(pedidos) {
 
     contador.textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''}`;
 
-    // PAGINAR
     const itemsPagina = paginador ? paginador.getItems(pedidos) : pedidos;
 
     itemsPagina.forEach((p) => {
         const estadoActual = p.estado || 'pendiente';
+        const tieneNotas = p.notas && p.notas.trim() !== '';
 
         const opciones = ESTADOS.map(
             (e) => `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
         ).join('');
+
+        const claseBotonNotas = tieneNotas ? 'btn-notas tiene-notas' : 'btn-notas';
+        const tituloBotonNotas = tieneNotas ? 'Ver/editar notas (tiene notas)' : 'Agregar notas';
+        const iconoNotas = tieneNotas ? 'fa-solid fa-note-sticky' : 'fa-regular fa-note-sticky';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -234,11 +253,15 @@ function renderizarPedidos(pedidos) {
                 <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}">
                     ${opciones}
                 </select>
+                <button class="${claseBotonNotas}" title="${tituloBotonNotas}" data-id="${p.id}">
+                    <i class="${iconoNotas}"></i>
+                </button>
             </td>
         `;
         tbody.appendChild(tr);
     });
 
+    // EVENTOS DE LOS SELECTS DE ESTADO
     tbody.querySelectorAll('.estado-select').forEach((select) => {
         select.addEventListener('change', () => {
             const id = select.dataset.id;
@@ -246,6 +269,14 @@ function renderizarPedidos(pedidos) {
             const estadoAnterior = select.dataset.estadoAnterior;
             if (nuevoEstado === estadoAnterior) return;
             cambiarEstado(id, nuevoEstado, estadoAnterior, select);
+        });
+    });
+
+    // EVENTOS DE LOS BOTONES DE NOTAS
+    tbody.querySelectorAll('.btn-notas').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            abrirModalNotas(id);
         });
     });
 }
@@ -278,10 +309,7 @@ function aplicarFiltros() {
     filtrados = aplicarOrdenamiento(filtrados);
     pedidosFiltrados = filtrados;
 
-    // actualizar paginador (resetear a página 1)
-    if (paginador) {
-        paginador.actualizar(pedidosFiltrados.length, true);
-    }
+    if (paginador) paginador.actualizar(pedidosFiltrados.length, true);
 
     actualizarBotonLimpiar();
     renderizarPedidos(pedidosFiltrados);
@@ -355,49 +383,145 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
             const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
             if (pedido) pedido.estado = nuevoEstado;
 
-            mostrarToast(`Estado actualizado a "${capitalizar(nuevoEstado)}"`);
+            mostrarToast(`✅ Estado actualizado a "${capitalizar(nuevoEstado)}"`);
 
-            // recalcular (no resetea página porque el cambio de estado no afecta el filtro de página)
-            pedidosFiltrados = aplicarFiltrosSinReset();
+            // volver a renderizar sin resetear la página
+            let filtrados = [...pedidosOriginales];
+            if (estadoFiltroActivo !== 'Todos') {
+                filtrados = filtrados.filter(
+                    (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
+                );
+            }
+            if (textoBusqueda.trim() !== '') {
+                const q = textoBusqueda.trim().toLowerCase();
+                filtrados = filtrados.filter(
+                    (p) =>
+                        (p.nombre_cliente && p.nombre_cliente.toLowerCase().includes(q)) ||
+                        (p.email && p.email.toLowerCase().includes(q)) ||
+                        (p.modelo_celular && p.modelo_celular.toLowerCase().includes(q)) ||
+                        (p.telefono && String(p.telefono).toLowerCase().includes(q))
+                );
+            }
+            filtrados = aplicarOrdenamiento(filtrados);
+            pedidosFiltrados = filtrados;
+            if (paginador) paginador.actualizar(filtrados.length, false);
             renderizarPedidos(pedidosFiltrados);
         } else {
             selectElement.value = estadoAnterior;
-            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar'}`, true);
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar'}`, true);
         }
     } catch (error) {
         console.error('Error al cambiar estado:', error);
         selectElement.value = estadoAnterior;
-        mostrarToast('No se pudo conectar con el servidor', true);
+        mostrarToast('❌ No se pudo conectar con el servidor', true);
     } finally {
         selectElement.disabled = false;
     }
 }
 
-/** variante de aplicarFiltros que no resetea la página (para cambios de estado). */
-function aplicarFiltrosSinReset() {
-    let filtrados = [...pedidosOriginales];
+// MODAL: NOTAS INTERNAS
 
-    if (estadoFiltroActivo !== 'Todos') {
-        filtrados = filtrados.filter(
-            (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
-        );
+function abrirModalNotas(id) {
+    const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
+    if (!pedido) {
+        mostrarToast('No se encontró el pedido.', true);
+        return;
     }
-    if (textoBusqueda.trim() !== '') {
-        const q = textoBusqueda.trim().toLowerCase();
-        filtrados = filtrados.filter(
-            (p) =>
-                (p.nombre_cliente && p.nombre_cliente.toLowerCase().includes(q)) ||
-                (p.email && p.email.toLowerCase().includes(q)) ||
-                (p.modelo_celular && p.modelo_celular.toLowerCase().includes(q)) ||
-                (p.telefono && String(p.telefono).toLowerCase().includes(q))
-        );
-    }
-    filtrados = aplicarOrdenamiento(filtrados);
-    if (paginador) paginador.actualizar(filtrados.length, false);
-    return filtrados;
+
+    pedidoNotasActual = pedido;
+
+    // rellenar la info del pedido
+    notasInfo.innerHTML = `
+        <div class="notas-info-linea">
+            <span class="notas-info-label">Cliente</span>
+            <span class="notas-info-valor">${escapar(pedido.nombre_cliente)}</span>
+        </div>
+        <div class="notas-info-linea">
+            <span class="notas-info-label">Modelo</span>
+            <span class="notas-info-valor">${escapar(pedido.modelo_celular)}</span>
+        </div>
+        <div class="notas-info-linea">
+            <span class="notas-info-label">Estado</span>
+            <span class="badge ${claseBadgeEstado(pedido.estado || 'pendiente')}">
+                ${capitalizar(pedido.estado || 'pendiente')}
+            </span>
+        </div>
+        <div class="notas-info-linea">
+            <span class="notas-info-label">Recibido</span>
+            <span class="notas-info-valor">${formatearFecha(pedido.creado_en)}</span>
+        </div>
+    `;
+
+    // rellenar el textarea con la nota actual
+    editNotas.value = pedido.notas || '';
+
+    // mostrar el modal
+    modalNotas.classList.add('modal-visible');
+    editNotas.focus();
 }
 
-// EVENTOS
+function cerrarModalNotas() {
+    modalNotas.classList.remove('modal-visible');
+    editNotas.value = '';
+    pedidoNotasActual = null;
+}
+
+async function guardarNotas() {
+    if (!pedidoNotasActual) return;
+
+    const id = pedidoNotasActual.id;
+    const notas = editNotas.value.trim();
+
+    btnNotasGuardar.disabled = true;
+    btnNotasGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+    try {
+        const respuesta = await fetchAdmin(`${API_ADMIN_PEDIDOS}/${id}/notas`, {
+            method: 'PUT',
+            body: JSON.stringify({ notas }),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            // actualizar el pedido en el estado local
+            pedidoNotasActual.notas = resultado.notas;
+
+            const mensaje = resultado.notas
+                ? '✅ Nota guardada correctamente.'
+                : '✅ Nota eliminada.';
+            mostrarToast(mensaje);
+
+            cerrarModalNotas();
+            renderizarPedidos(pedidosFiltrados);
+        } else {
+            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar la nota.'}`, true);
+        }
+    } catch (error) {
+        console.error('Error al guardar notas:', error);
+        mostrarToast('❌ No se pudo conectar con el servidor', true);
+    } finally {
+        btnNotasGuardar.disabled = false;
+        btnNotasGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar Nota';
+    }
+}
+
+// EVENTOS DEL MODAL DE NOTAS
+modalNotasClose.addEventListener('click', cerrarModalNotas);
+btnNotasCancelar.addEventListener('click', cerrarModalNotas);
+btnNotasGuardar.addEventListener('click', guardarNotas);
+
+modalNotas.addEventListener('click', (e) => {
+    if (e.target === modalNotas) cerrarModalNotas();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalNotas.classList.contains('modal-visible')) {
+        cerrarModalNotas();
+    }
+});
+
+// EVENTOS GENERALES
 
 btnRefresh.addEventListener('click', cargarPedidos);
 btnExportar.addEventListener('click', exportarCSV);
@@ -420,14 +544,12 @@ btnLimpiar.addEventListener('click', () => {
 // INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
-    // CREAR PAGINADOR
     paginador = crearPaginador('paginacion-pedidos', POR_PAGINA, () => {
         renderizarPedidos(pedidosFiltrados);
     });
 
     construirFiltrosEstado();
 
-    // CONFIGURAR ORDENAMIENTO
     configurarColumnasOrdenables(
         'tabla-pedidos',
         {

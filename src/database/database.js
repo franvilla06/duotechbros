@@ -38,6 +38,19 @@ db.exec(`
     );
 `);
 
+// MIGRACIONES
+// agregar columnas nuevas a tablas existentes sin perder datos
+
+// MIGRACIÓN: AGREGAR COLUMNA "NOTAS" A PEDIDOS SI NO EXISTE
+const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
+const tieneNotas = columnasPedidos.some((col) => col.name === 'notas');
+if (!tieneNotas) {
+    db.exec('ALTER TABLE pedidos ADD COLUMN notas TEXT');
+    console.log('Migración aplicada: columna "notas" agregada a pedidos');
+}
+
+// DATOS INICIALES
+
 const adminExists = db.prepare('SELECT COUNT(*) as count FROM admin WHERE usuario = ?').get('admin');
 if (adminExists.count === 0) {
     const bcrypt = require('bcryptjs');

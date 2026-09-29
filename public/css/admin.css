@@ -1832,7 +1832,7 @@ table.admin-table th.th-ordenable.activo {
     }
 }
 
-/* BOTÓN DE EXPORTAR CSV (reutilizable en todas las tablas) */
+/* BOTÓN DE EXPORTAR CSV (REUTILIZABLE EN TODAS LAS TABLAS) */
 
 .btn-exportar {
     background-color: #d1e7dd;
@@ -1849,4 +1849,87 @@ table.admin-table th.th-ordenable.activo {
 .btn-exportar:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* BOTÓN DE NOTAS EN LA TABLA DE PEDIDOS */
+
+.btn-notas {
+    background-color: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    margin-left: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-notas:hover {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* cuando el pedido tiene notas, el ícono se ve más marcado */
+.btn-notas.tiene-notas {
+    color: #f59e0b;
+}
+
+.btn-notas.tiene-notas:hover {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* MODAL DE NOTAS: INFO DEL PEDIDO */
+
+.notas-info {
+    background-color: #f7feff;
+    border: 1px solid #d0e6ea;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notas-info-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.88rem;
+}
+
+.notas-info-label {
+    color: #777;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.notas-info-valor {
+    color: #0b4a62;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* TEXTAREA DEL MODAL DE NOTAS */
+#edit-notas {
+    min-height: 130px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+@media (max-width: 480px) {
+    .notas-info-linea {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .notas-info-valor {
+        text-align: left;
+    }
 }
