@@ -23,9 +23,12 @@ function crearPedido(req, res) {
     }
 }
 
+// listar pedidos, con filtro opcional por tipo
+// ?tipo=reparacion o ?tipo=producto
 function listarPedidos(req, res) {
     try {
-        const pedidos = pedidosModel.listar(req.app.locals.db);
+        const tipo = req.query.tipo || null;
+        const pedidos = pedidosModel.listar(req.app.locals.db, tipo);
         return res.json(pedidos);
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -66,4 +69,26 @@ function iniciarSesion(req, res) {
     }
 }
 
-module.exports = { crearPedido, listarPedidos, listarProductos, listarPortafolio, iniciarSesion };
+// DETALLE DE UNA COMPRA PARA EL ADMIN
+
+function obtenerDetallePedidoAdmin(req, res) {
+    const { id } = req.params;
+    try {
+        const pedido = pedidosModel.obtenerPedidoConItems(req.app.locals.db, id);
+        if (!pedido) {
+            return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
+        }
+        return res.json({ success: true, pedido });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+module.exports = {
+    crearPedido,
+    listarPedidos,
+    listarProductos,
+    listarPortafolio,
+    iniciarSesion,
+    obtenerDetallePedidoAdmin,
+};

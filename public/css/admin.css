@@ -1933,3 +1933,433 @@ table.admin-table th.th-ordenable.activo {
         text-align: left;
     }
 }
+
+/* BOTON "VER FACTURA" EN LA TABLA DE COMPRAS */
+
+.btn-ver-factura {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #e8f4ff;
+    color: #007bff;
+    border: 1px solid #c1e8ff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s;
+}
+
+.btn-ver-factura:hover {
+    background-color: #007bff;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* MODAL DE FACTURA */
+
+.factura-modal {
+    max-width: 720px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.factura-header-acciones {
+    display: flex;
+    justify-content: flex-end;
+    padding: 14px 14px 0;
+}
+
+.factura-header-acciones .modal-close {
+    background-color: #f0f4f8;
+    color: #666;
+}
+
+.factura-header-acciones .modal-close:hover {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.factura-contenido {
+    padding: 10px 30px 30px;
+}
+
+.factura-cargando {
+    text-align: center;
+    padding: 40px 20px;
+    color: #777;
+    font-size: 0.9rem;
+}
+
+.factura-cargando i {
+    color: #0a9396;
+    margin-right: 8px;
+}
+
+/* ENCABEZADO DE LA FACTURA */
+
+.factura-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eef3f6;
+    margin-bottom: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.factura-marca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.factura-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(11, 74, 98, 0.25);
+    flex-shrink: 0;
+}
+
+.factura-marca h1 {
+    font-size: 1.3rem;
+    color: #0b4a62;
+    margin: 0 0 2px;
+    font-weight: 800;
+}
+
+.factura-marca p {
+    margin: 0;
+    color: #777;
+    font-size: 0.8rem;
+}
+
+.factura-numero {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.factura-numero-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.factura-numero-valor {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #007bff;
+    letter-spacing: -0.01em;
+}
+
+/* DATOS DEL CLIENTE */
+
+.factura-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    background-color: #f7feff;
+    border: 1px solid #d0e6ea;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.factura-datos-bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.factura-datos-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.factura-datos-bloque strong {
+    color: #0b4a62;
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+/* TABLA DE ITEMS */
+
+.factura-tabla-wrapper {
+    border: 1px solid #eef3f6;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.factura-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.factura-tabla thead {
+    background-color: #f7fafc;
+    border-bottom: 2px solid #e0eaf0;
+}
+
+.factura-tabla th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #5a6b73;
+    white-space: nowrap;
+}
+
+.factura-tabla td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f4f8;
+    color: #333;
+}
+
+.factura-tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* TOTALES */
+
+.factura-totales {
+    background-color: #f7feff;
+    border: 1px solid #d0e6ea;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.factura-total-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.factura-total-linea strong {
+    color: #0b4a62;
+    font-weight: 700;
+}
+
+.factura-total-final {
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 2px solid #d0e6ea;
+}
+
+.factura-total-final span {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0b4a62;
+}
+
+.factura-total-final strong {
+    font-size: 1.5rem;
+    color: #007bff;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+/* NOTA DE FACTURA */
+
+.factura-nota {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background-color: #fff3cd;
+    border-left: 3px solid #f59e0b;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.factura-nota i {
+    color: #856404;
+    font-size: 0.95rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.factura-nota p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #856404;
+    line-height: 1.5;
+}
+
+/* ACCIONES DE LA FACTURA (CAMBIAR ESTADO) */
+
+.factura-acciones {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 30px 26px;
+    border-top: 1px solid #eef3f6;
+    flex-wrap: wrap;
+    background-color: #fbfdfe;
+}
+
+.factura-estado-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: #0b4a62;
+    font-size: 0.85rem;
+}
+
+.factura-estado-label i {
+    color: #0a9396;
+}
+
+.factura-estado-select {
+    padding: 9px 14px;
+    border: 1px solid #d0e6ea;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    background-color: #f7feff;
+    color: #0b4a62;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex: 1;
+    min-width: 160px;
+    max-width: 240px;
+}
+
+.factura-estado-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+#btn-guardar-estado {
+    width: auto;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+    .factura-contenido {
+        padding: 10px 18px 20px;
+    }
+
+    .factura-acciones {
+        padding: 16px 18px 20px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .factura-estado-select {
+        max-width: none;
+    }
+
+    #btn-guardar-estado {
+        width: 100%;
+    }
+
+    .factura-encabezado {
+        flex-direction: column;
+    }
+
+    .factura-numero {
+        align-items: flex-start;
+    }
+
+    .factura-tabla {
+        font-size: 0.8rem;
+    }
+
+    .factura-tabla th,
+    .factura-tabla td {
+        padding: 10px 10px;
+    }
+}
+
+/* FIX: SCROLL INTERNO DEL MODAL DE FACTURA */
+
+.factura-modal {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+/* el contenido hace scroll mientras el header y las acciones quedan fijos */
+.factura-contenido {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding: 10px 30px 30px;
+}
+
+/* el header de acciones (con la X) queda fijo arriba */
+.factura-header-acciones {
+    flex-shrink: 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eef3f6;
+    padding: 14px 20px;
+}
+
+/* el footer de acciones (estado) queda fijo abajo */
+.factura-acciones {
+    flex-shrink: 0;
+    border-top: 1px solid #eef3f6;
+    background-color: #fbfdfe;
+}
+
+/* scroll personalizado sutil */
+.factura-contenido::-webkit-scrollbar {
+    width: 8px;
+}
+
+.factura-contenido::-webkit-scrollbar-track {
+    background: #f0f4f8;
+    border-radius: 999px;
+}
+
+.factura-contenido::-webkit-scrollbar-thumb {
+    background: #c0c7cd;
+    border-radius: 999px;
+}
+
+.factura-contenido::-webkit-scrollbar-thumb:hover {
+    background: #0a9396;
+}
+
+/* responsive */
+@media (max-width: 600px) {
+    .factura-modal {
+        max-height: 95vh;
+    }
+
+    .factura-contenido {
+        padding: 10px 18px 20px;
+    }
+}

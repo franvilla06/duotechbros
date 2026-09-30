@@ -9,7 +9,7 @@
     />
     <link rel="stylesheet" href="/css/normalize.css" />
     <link rel="stylesheet" href="/css/admin.css" />
-    <title>Pedidos - DuotechBros Admin</title>
+    <title>Pedidos de Reparación - DuotechBros Admin</title>
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
@@ -23,19 +23,11 @@
         </div>
 
         <nav class="admin-nav">
-          <a href="dashboard.html"
-            ><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a
-          >
-          <a href="productos.html"
-            ><i class="fas fa-box"></i><span>Gestionar Productos</span></a
-          >
-          <a href="portafolio.html"
-            ><i class="fas fa-briefcase"></i
-            ><span>Gestionar Portafolio</span></a
-          >
-          <a href="pedidos.html" class="active"
-            ><i class="fas fa-clipboard-list"></i><span>Ver Pedidos</span></a
-          >
+          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+          <a href="productos.html"><i class="fas fa-box"></i><span>Gestionar Productos</span></a>
+          <a href="portafolio.html"><i class="fas fa-briefcase"></i><span>Gestionar Portafolio</span></a>
+          <a href="pedidos.html" class="active"><i class="fas fa-tools"></i><span>Pedidos de Reparación</span></a>
+          <a href="compras.html"><i class="fas fa-shopping-bag"></i><span>Compras de Tienda</span></a>
         </nav>
 
         <div class="admin-sidebar-footer">
@@ -52,11 +44,8 @@
       <main class="admin-main">
         <header class="admin-header">
           <div>
-            <h1>Solicitudes de Reparación</h1>
-            <p>
-              Administrá el estado de cada pedido recibido desde el sitio
-              público.
-            </p>
+            <h1>Pedidos de Reparación</h1>
+            <p>Solicitudes enviadas desde el formulario de contacto.</p>
           </div>
           <div class="admin-header-actions">
             <button class="btn-refresh btn-exportar" id="btn-exportar">
@@ -107,30 +96,18 @@
             </table>
           </div>
 
-          <div
-            class="paginacion"
-            id="paginacion-pedidos"
-            style="display: none"
-          ></div>
+          <div class="paginacion" id="paginacion-pedidos" style="display: none"></div>
 
           <div class="table-empty" id="estado-vacio" style="display: none">
             <i class="fas fa-inbox"></i>
-            <p>No hay pedidos registrados</p>
-            <small
-              >Cuando un cliente envíe una solicitud, aparecerá aquí.</small
-            >
+            <p>No hay pedidos de reparación registrados</p>
+            <small>Cuando un cliente envíe una solicitud, aparecerá aquí.</small>
           </div>
 
-          <div
-            class="table-sin-filtros"
-            id="estado-sin-resultados"
-            style="display: none"
-          >
+          <div class="table-sin-filtros" id="estado-sin-resultados" style="display: none">
             <i class="fas fa-search"></i>
             <p>No se encontraron pedidos</p>
-            <small
-              >Probá con otro término de búsqueda o quitá los filtros.</small
-            >
+            <small>Probá con otro término de búsqueda o quitá los filtros.</small>
           </div>
 
           <div class="table-empty" id="estado-cargando">
@@ -141,7 +118,6 @@
       </main>
     </div>
 
-    <!-- MODAL: NOTAS INTERNAS DEL PEDIDO -->
     <div class="modal-overlay" id="modal-notas">
       <div class="modal-card">
         <div class="modal-header">
@@ -151,10 +127,7 @@
           </button>
         </div>
 
-        <!-- INFO DEL PEDIDO -->
-        <div class="notas-info" id="notas-info">
-          <!-- se carga dinámicamente -->
-        </div>
+        <div class="notas-info" id="notas-info"></div>
 
         <div class="admin-form-group">
           <label for="edit-notas">Anotaciones del taller</label>
@@ -166,9 +139,7 @@
         </div>
 
         <div class="admin-form-actions">
-          <button type="button" class="btn-secondary" id="btn-notas-cancelar">
-            Cancelar
-          </button>
+          <button type="button" class="btn-secondary" id="btn-notas-cancelar">Cancelar</button>
           <button type="button" class="btn-primary" id="btn-notas-guardar">
             <i class="fas fa-save"></i> Guardar Nota
           </button>
