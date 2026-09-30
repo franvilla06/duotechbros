@@ -2048,3 +2048,153 @@
         font-size: 1rem;
     }
 }
+
+/* TIPO DE PEDIDO (BADGE) */
+
+.pedido-tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.pedido-tipo-reparacion {
+    background-color: #e8f4ff;
+    color: #0b4a62;
+    border: 1px solid #c1e8ff;
+}
+
+.pedido-tipo-compra {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #a3cfbb;
+}
+
+/* CABECERA DE LA TARJETA SEGUN TIPO */
+
+.pedido-card-header-reparacion {
+    background: linear-gradient(135deg, #f7feff 0%, #e0eaf0 100%);
+}
+
+.pedido-card-header-compra {
+    background: linear-gradient(135deg, #f7feff 0%, #e8f4ff 100%);
+}
+
+/* DESCRIPCION DEL PEDIDO DE REPARACION EN LA TARJETA */
+
+.pedido-card-descripcion {
+    margin: 0;
+    color: #666;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    flex: 1;
+    min-width: 200px;
+    padding-left: 4px;
+    border-left: 3px solid #e0eaf0;
+    padding: 8px 12px;
+    background-color: #f7fafe;
+    border-radius: 6px;
+}
+
+/* DETALLE DEL PEDIDO DE REPARACION EN EL MODAL */
+
+.pedido-reparacion-bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 0;
+}
+
+.pedido-reparacion-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f4f8;
+}
+
+.pedido-reparacion-linea:last-child {
+    border-bottom: none;
+}
+
+.pedido-reparacion-label {
+    color: #777;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pedido-reparacion-valor {
+    color: #0b4a62;
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-align: right;
+}
+
+.pedido-reparacion-linea-descripcion {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pedido-reparacion-texto {
+    margin: 0;
+    color: #333;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    background-color: #f7feff;
+    border: 1px solid #d0e6ea;
+    border-radius: 8px;
+    padding: 12px 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ACLARACION EN EL MODAL */
+
+.pedido-modal-sin-precio {
+    color: #f59e0b !important;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.pedido-modal-aclaracion {
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+    color: #777;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pedido-modal-aclaracion i {
+    color: #0a9396;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .pedido-reparacion-linea {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .pedido-reparacion-valor {
+        text-align: left;
+    }
+
+    .pedido-card-descripcion {
+        min-width: auto;
+        width: 100%;
+    }
+}

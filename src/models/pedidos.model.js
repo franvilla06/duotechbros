@@ -29,7 +29,6 @@ function crear(db, pedido) {
 }
 
 // listar los pedidos, con la opcion de filtrar por tipo
-// tipo puede ser "reparacion", "producto" o null (todos)
 function listar(db, tipo = null) {
     if (tipo) {
         return db
@@ -107,6 +106,9 @@ function insertarItem(db, item) {
 
 // HISTORIAL DEL USUARIO
 
+// listar todos los pedidos del usuario (reparaciones y compras)
+// incluye el tipo, el modelo del celular y la descripcion del problema
+// para poder mostrar la informacion correcta segun el caso
 function listarPorUsuario(db, usuarioId) {
     return db
         .prepare(
@@ -116,6 +118,9 @@ function listarPorUsuario(db, usuarioId) {
                 p.estado,
                 p.creado_en,
                 p.notas,
+                p.tipo,
+                p.modelo_celular,
+                p.descripcion_problema,
                 COUNT(pi.id) AS total_items,
                 COALESCE(SUM(pi.cantidad), 0) AS total_unidades,
                 COALESCE(SUM(pi.subtotal), 0) AS total_precio
@@ -133,7 +138,17 @@ function obtenerPedidoDeUsuario(db, pedidoId, usuarioId) {
     return db
         .prepare(
             `
-            SELECT id, estado, creado_en, notas
+            SELECT
+                id,
+                estado,
+                creado_en,
+                notas,
+                tipo,
+                modelo_celular,
+                descripcion_problema,
+                nombre_cliente,
+                telefono,
+                email
             FROM pedidos
             WHERE id = ? AND usuario_id = ?
         `
