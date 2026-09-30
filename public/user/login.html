@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/usuario.css" />
+    <title>Mi Cuenta - DuotechBros</title>
+  </head>
+  <body class="usuario-page">
+    <div class="usuario-card">
+      <div class="usuario-marca">
+        <div class="usuario-marca-icono">D</div>
+        <h1 class="usuario-titulo">Mi Cuenta</h1>
+        <p class="usuario-subtitulo">DuotechBros</p>
+      </div>
+
+      <!-- tabs para cambiar entre ingresar y registrarme -->
+      <div class="usuario-tabs">
+        <button type="button" class="usuario-tab active" data-tab="login">
+          <i class="fas fa-sign-in-alt"></i> Ingresar
+        </button>
+        <button type="button" class="usuario-tab" data-tab="registro">
+          <i class="fas fa-user-plus"></i> Registrarme
+        </button>
+      </div>
+
+      <!-- formulario de ingreso -->
+      <form class="usuario-form" id="form-login">
+        <div class="usuario-form-grupo">
+          <label for="login-usuario">Usuario</label>
+          <input
+            type="text"
+            id="login-usuario"
+            autocomplete="username"
+            placeholder="Tu nombre de usuario"
+            required
+          />
+        </div>
+
+        <div class="usuario-form-grupo">
+          <label for="login-password">Contrasenia</label>
+          <input
+            type="password"
+            id="login-password"
+            autocomplete="current-password"
+            placeholder="Tu contrasenia"
+            required
+          />
+        </div>
+
+        <button type="submit" class="usuario-btn" id="btn-login">
+          <i class="fas fa-sign-in-alt"></i> Ingresar
+        </button>
+      </form>
+
+      <!-- formulario de registro -->
+      <form class="usuario-form" id="form-registro" style="display: none">
+        <div class="usuario-form-grupo">
+          <label for="registro-usuario">Usuario</label>
+          <input
+            type="text"
+            id="registro-usuario"
+            autocomplete="username"
+            placeholder="Elegi un nombre de usuario"
+            minlength="3"
+            maxlength="30"
+            required
+          />
+          <small class="usuario-ayuda">
+            Minimo 3 caracteres. Solo letras, numeros y guion bajo.
+          </small>
+        </div>
+
+        <div class="usuario-form-grupo">
+          <label for="registro-password">Contrasenia</label>
+          <input
+            type="password"
+            id="registro-password"
+            autocomplete="new-password"
+            placeholder="Minimo 6 caracteres"
+            minlength="6"
+            required
+          />
+        </div>
+
+        <div class="usuario-form-grupo">
+          <label for="registro-password-confirm">Confirmar contrasenia</label>
+          <input
+            type="password"
+            id="registro-password-confirm"
+            autocomplete="new-password"
+            placeholder="Repeti la contrasenia"
+            minlength="6"
+            required
+          />
+        </div>
+
+        <button type="submit" class="usuario-btn" id="btn-registro">
+          <i class="fas fa-user-plus"></i> Crear cuenta
+        </button>
+      </form>
+
+      <div id="mensaje" class="usuario-mensaje"></div>
+
+      <p class="usuario-pie">
+        <a href="/index.html">
+          <i class="fas fa-arrow-left"></i> Volver al sitio
+        </a>
+      </p>
+    </div>
+
+    <script src="/js/usuario-auth.js"></script>
+  </body>
+</html>

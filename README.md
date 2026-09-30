@@ -1,34 +1,43 @@
 # DuotechBros
 
-Proyecto web para DuotechBros, orientado a presentar sus servicios, mostrar trabajos realizados y recibir solicitudes de reparación de celulares.
+Aplicación web para presentar los servicios de DuotechBros, recibir pedidos de reparación y administrar productos, trabajos del portafolio y pedidos desde un panel web.
 
-## ¿Qué incluye?
+## Funcionalidades
 
-- Sitio público con inicio, portafolio, tienda y formulario de pedidos.
-- Backend desarrollado con Node.js y Express.
-- API para registrar y consultar pedidos, productos y trabajos del portafolio.
-- Panel administrativo protegido para gestionar pedidos, productos y portafolio.
-- Dashboard con estadísticas, pedidos recientes y alertas de stock bajo.
-- Herramientas de búsqueda, filtros, ordenamiento, paginación y exportación de pedidos a CSV.
-- Base de datos local SQLite.
+- Sitio público con inicio, catálogo de productos, portafolio y formulario de reparación.
+- Registro e inicio de sesión de usuarios, consulta de productos y carrito de compras.
+- Conversión del carrito en pedido, con validación y descuento de stock en una transacción.
+- Panel de administración con dashboard y gestión de pedidos, productos y portafolio.
+- Búsqueda, filtros, ordenamiento, paginación y exportación a CSV en las tablas del panel.
+- Persistencia local con SQLite.
 
-## Tecnologías principales
+## Tecnologías
 
-- HTML, CSS y JavaScript vanilla.
-- Node.js y Express.
-- SQLite mediante `better-sqlite3`.
-- CORS, `bcryptjs` y autenticación mediante token de sesión.
+- Node.js y Express 5.
+- HTML, CSS y JavaScript sin framework en el navegador.
+- SQLite con `better-sqlite3`.
+- `bcryptjs` para almacenar contraseñas con hash y CORS para el servidor.
 
-## Inicio rápido
+## Requisitos e inicio
+
+Se requiere Node.js y npm. Desde la raíz del repositorio:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Luego, abrir [http://localhost:3000](http://localhost:3000) en el navegador.
+Abrir [http://localhost:3000](http://localhost:3000). Para iniciar el servidor con el comando de producción configurado, usar `npm start`. Ambos comandos ejecutan `server.js`; `PORT` permite cambiar el puerto y, si no se define, se usa `3000`.
 
-Para conocer la estructura, los accesos y el funcionamiento básico, consultar [guia_del_proyecto.md](guia_del_proyecto.md).
+La base `duotechbros.db` se crea o actualiza automáticamente al iniciar el servidor. Consultar [guia_del_proyecto.md](guia_del_proyecto.md) para ver la estructura, páginas, API y detalles de desarrollo.
+
+## Seguridad
+
+El usuario inicial del panel es `admin` y su contraseña inicial es `admin123`. Son credenciales de desarrollo: deben cambiarse antes de exponer la aplicación. La clave de firma de los tokens también está configurada en el código del proyecto.
+
+## Pruebas
+
+El script `npm test` todavía es un marcador y no ejecuta una suite de pruebas.
 
 ## Autores
 

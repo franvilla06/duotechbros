@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/usuario.css" />
+    <title>Mi Carrito - DuotechBros</title>
+  </head>
+  <body class="carrito-page">
+    <!-- HEADER SIMPLIFICADO -->
+    <header class="carrito-header">
+      <div class="carrito-header-inner">
+        <a href="/index.html" class="carrito-brand">
+          <span class="carrito-brand-icono">D</span>
+          <span class="carrito-brand-texto">DuotechBros</span>
+        </a>
+        <div class="carrito-header-acciones">
+          <span class="carrito-header-usuario" id="carrito-usuario">
+            <i class="fas fa-user-circle"></i> ...
+          </span>
+          <a href="/tienda.html" class="carrito-btn-seguir">
+            <i class="fas fa-arrow-left"></i> Seguir comprando
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="carrito-main">
+      <div class="carrito-titulo">
+        <h1><i class="fas fa-shopping-cart"></i> Mi Carrito</h1>
+        <p>Revisa los productos que agregaste antes de enviar tu pedido.</p>
+      </div>
+
+      <!-- ESTADO: CARGANDO -->
+      <div class="carrito-estado" id="estado-cargando">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Cargando carrito...</p>
+      </div>
+
+      <!-- ESTADO: VACIO -->
+      <div class="carrito-estado" id="estado-vacio" style="display: none">
+        <i class="fas fa-shopping-basket"></i>
+        <p>Tu carrito esta vacio</p>
+        <small>Agrega productos desde la tienda para verlos aca.</small>
+        <a href="/tienda.html" class="carrito-btn-volver">
+          <i class="fas fa-shopping-bag"></i> Ir a la tienda
+        </a>
+      </div>
+
+      <!-- ESTADO: ERROR -->
+      <div class="carrito-estado" id="estado-error" style="display: none">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>No se pudo cargar tu carrito</p>
+        <small>Intenta recargar la pagina en unos segundos.</small>
+      </div>
+
+      <!-- CARRITO CON ITEMS -->
+      <div class="carrito-contenido" id="carrito-contenido" style="display: none">
+        <div class="carrito-grid">
+          <!-- LISTA DE ITEMS -->
+          <section class="carrito-lista">
+            <div class="carrito-lista-header">
+              <h2>Productos</h2>
+              <span class="carrito-counter" id="carrito-counter">0 items</span>
+            </div>
+            <div class="carrito-items" id="carrito-items">
+              <!-- se llena dinamicamente -->
+            </div>
+          </section>
+
+          <!-- RESUMEN -->
+          <aside class="carrito-resumen">
+            <div class="carrito-resumen-card">
+              <h2><i class="fas fa-receipt"></i> Resumen</h2>
+
+              <div class="carrito-resumen-lineas">
+                <div class="carrito-resumen-linea">
+                  <span>Productos distintos</span>
+                  <strong id="resumen-items">0</strong>
+                </div>
+                <div class="carrito-resumen-linea">
+                  <span>Unidades totales</span>
+                  <strong id="resumen-unidades">0</strong>
+                </div>
+              </div>
+
+              <div class="carrito-resumen-total">
+                <span>Total estimado</span>
+                <strong id="resumen-total">$0.00</strong>
+              </div>
+
+              <p class="carrito-resumen-nota">
+                <i class="fas fa-info-circle"></i>
+                Los precios son orientativos. Se confirman al enviar el pedido.
+              </p>
+
+              <button
+                type="button"
+                class="carrito-btn-primario"
+                id="btn-enviar-pedido"
+              >
+                <i class="fas fa-paper-plane"></i> Enviar pedido
+              </button>
+
+              <button
+                type="button"
+                class="carrito-btn-secundario"
+                id="btn-vaciar-carrito"
+              >
+                <i class="fas fa-trash-alt"></i> Vaciar carrito
+              </button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL: PEDIDO ENVIADO CON EXITO -->
+    <div class="modal-overlay" id="modal-exito">
+      <div class="modal-card modal-exito-card">
+        <div class="modal-exito-icono">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Pedido enviado</h2>
+        <p class="modal-exito-mensaje">
+          Tu pedido fue recibido correctamente. En breve nos pondremos en
+          contacto para coordinar la entrega.
+        </p>
+
+        <div class="modal-exito-info">
+          <div class="modal-exito-linea">
+            <span>Numero de pedido</span>
+            <strong id="modal-pedido-id">#000</strong>
+          </div>
+          <div class="modal-exito-linea">
+            <span>Unidades</span>
+            <strong id="modal-pedido-unidades">0</strong>
+          </div>
+          <div class="modal-exito-linea">
+            <span>Total</span>
+            <strong id="modal-pedido-total">$0.00</strong>
+          </div>
+        </div>
+
+        <a href="/tienda.html" class="carrito-btn-primario">
+          <i class="fas fa-shopping-bag"></i> Seguir comprando
+        </a>
+      </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script src="/js/usuario-carrito.js"></script>
+  </body>
+</html>
