@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/usuario.css" />
+    <title>Mi Perfil - DuotechBros</title>
+  </head>
+  <body class="perfil-page">
+    <!-- HEADER -->
+    <header class="perfil-header">
+      <div class="perfil-header-inner">
+        <a href="/index.html" class="perfil-brand">
+          <span class="perfil-brand-icono">D</span>
+          <span class="perfil-brand-texto">DuotechBros</span>
+        </a>
+        <div class="perfil-header-acciones">
+          <span class="perfil-header-usuario" id="perfil-usuario">
+            <i class="fas fa-user-circle"></i> ...
+          </span>
+          <a href="/tienda.html" class="perfil-btn-volver">
+            <i class="fas fa-arrow-left"></i> Volver a la tienda
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="perfil-main">
+      <div class="perfil-contenedor">
+        <div class="perfil-titulo">
+          <h1><i class="fas fa-user-cog"></i> Mi Cuenta</h1>
+          <p>Administra tu informacion personal y las opciones de tu cuenta.</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="perfil-tabs">
+          <button type="button" class="perfil-tab active" data-tab="info">
+            <i class="fas fa-user"></i> Mi perfil
+          </button>
+          <button type="button" class="perfil-tab" data-tab="password">
+            <i class="fas fa-lock"></i> Cambiar contrasenia
+          </button>
+          <button type="button" class="perfil-tab" data-tab="baja">
+            <i class="fas fa-exclamation-triangle"></i> Dar de baja
+          </button>
+        </div>
+
+        <!-- SECCION: MI PERFIL -->
+        <section class="perfil-seccion" id="seccion-info">
+          <h2><i class="fas fa-id-card"></i> Informacion de la cuenta</h2>
+
+          <div class="perfil-info-grid">
+            <div class="perfil-info-item">
+              <span class="perfil-info-label">Nombre de usuario</span>
+              <span class="perfil-info-valor" id="info-usuario">—</span>
+            </div>
+            <div class="perfil-info-item">
+              <span class="perfil-info-label">Miembro desde</span>
+              <span class="perfil-info-valor" id="info-creado">—</span>
+            </div>
+            <div class="perfil-info-item">
+              <span class="perfil-info-label">ID de usuario</span>
+              <span class="perfil-info-valor" id="info-id">—</span>
+            </div>
+          </div>
+
+          <div class="perfil-info-note">
+            <i class="fas fa-info-circle"></i>
+            <p>
+              Para cambiar tu nombre de usuario, escribinos desde la seccion de
+              contacto. Por ahora, solo podes modificar tu contrasenia.
+            </p>
+          </div>
+        </section>
+
+        <!-- SECCION: CAMBIAR CONTRASENIA -->
+        <section class="perfil-seccion" id="seccion-password" style="display: none">
+          <h2><i class="fas fa-lock"></i> Cambiar contrasenia</h2>
+
+          <form class="perfil-form" id="form-password">
+            <div class="perfil-form-grupo">
+              <label for="password-actual">Contrasenia actual *</label>
+              <input
+                type="password"
+                id="password-actual"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+
+            <div class="perfil-form-grupo">
+              <label for="password-nueva">Nueva contrasenia *</label>
+              <input
+                type="password"
+                id="password-nueva"
+                autocomplete="new-password"
+                minlength="6"
+                required
+              />
+              <small class="perfil-ayuda">Minimo 6 caracteres.</small>
+            </div>
+
+            <div class="perfil-form-grupo">
+              <label for="password-confirmar">Confirmar nueva contrasenia *</label>
+              <input
+                type="password"
+                id="password-confirmar"
+                autocomplete="new-password"
+                minlength="6"
+                required
+              />
+            </div>
+
+            <button type="submit" class="perfil-btn-primario" id="btn-cambiar">
+              <i class="fas fa-save"></i> Guardar cambios
+            </button>
+          </form>
+
+          <div class="perfil-mensaje" id="mensaje-password"></div>
+        </section>
+
+        <!-- SECCION: DAR DE BAJA -->
+        <section class="perfil-seccion" id="seccion-baja" style="display: none">
+          <h2><i class="fas fa-exclamation-triangle"></i> Dar de baja mi cuenta</h2>
+
+          <div class="perfil-peligro">
+            <div class="perfil-peligro-icono">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Esta accion es irreversible</h3>
+            <p>
+              Si das de baja tu cuenta, no vas a poder volver a iniciar sesion
+              con este usuario. Tus pedidos anteriores se mantienen en nuestro
+              sistema por motivos estadisticos.
+            </p>
+            <p>
+              Para confirmar, ingresa tu contrasenia actual y hace clic en el boton.
+            </p>
+
+            <form class="perfil-form" id="form-baja">
+              <div class="perfil-form-grupo">
+                <label for="baja-password">Contrasenia actual *</label>
+                <input
+                  type="password"
+                  id="baja-password"
+                  autocomplete="current-password"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="perfil-btn-peligro" id="btn-baja">
+                <i class="fas fa-user-times"></i> Dar de baja mi cuenta
+              </button>
+            </form>
+
+            <div class="perfil-mensaje" id="mensaje-baja"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/js/usuario-perfil.js"></script>
+  </body>
+</html>

@@ -35,4 +35,44 @@ function autenticarAdministrador(db, usuario, password) {
     };
 }
 
-module.exports = { registrarUsuario, autenticarUsuario, autenticarAdministrador };
+// cambiar la contrasenia del usuario
+// requiere la contrasenia actual como confirmacion
+function cambiarPassword(db, usuario, passwordActual, passwordNueva) {
+    const user = usuariosModel.buscarPorUsuario(db, usuario);
+    if (!user) {
+        return { error: 'Usuario no encontrado.' };
+    }
+
+    if (!bcrypt.compareSync(passwordActual, user.password_hash)) {
+        return { error: 'La contrasenia actual es incorrecta.' };
+    }
+
+    const nuevoHash = bcrypt.hashSync(passwordNueva, 10);
+    usuariosModel.actualizarPassword(db, usuario, nuevoHash);
+
+    return { success: true };
+}
+
+// dar de baja la cuenta del usuario
+// los pedidos historicos se mantienen para futuros analisis
+function darDeBaja(db, usuario) {
+    const user = usuariosModel.buscarPorUsuario(db, usuario);
+    if (!user) {
+        return { error: 'Usuario no encontrado.' };
+    }
+
+    // eliminar la cuenta
+    // los pedidos historicos quedan intactos porque la tabla pedidos
+    // no tiene fk hacia usuarios
+    usuariosModel.eliminar(db, usuario);
+
+    return { success: true };
+}
+
+module.exports = {
+    registrarUsuario,
+    autenticarUsuario,
+    autenticarAdministrador,
+    cambiarPassword,
+    darDeBaja,
+};

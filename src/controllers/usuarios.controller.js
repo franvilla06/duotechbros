@@ -105,4 +105,96 @@ function obtenerPerfil(req, res) {
     }
 }
 
-module.exports = { registrar, iniciarSesion, obtenerPerfil };
+// cambiar la contrasenia del usuario
+function cambiarPassword(req, res) {
+    const { password_actual, password_nueva, password_confirmar } = req.body;
+
+    if (!password_actual || !password_nueva || !password_confirmar) {
+        return res.status(400).json({
+            success: false,
+            error: 'Completa todos los campos.',
+        });
+    }
+
+    if (password_nueva !== password_confirmar) {
+        return res.status(400).json({
+            success: false,
+            error: 'Las contrasenias nuevas no coinciden.',
+        });
+    }
+
+    const errorPassword = validarPassword(password_nueva);
+    if (errorPassword) {
+        return res.status(400).json({ success: false, error: errorPassword });
+    }
+
+    if (password_nueva === password_actual) {
+        return res.status(400).json({
+            success: false,
+            error: 'La nueva contrasenia debe ser distinta a la actual.',
+        });
+    }
+
+    try {
+        const resultado = authService.cambiarPassword(
+            req.app.locals.db,
+            req.usuario,
+            password_actual,
+            password_nueva
+        );
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Contrasenia actualizada correctamente.',
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// dar de baja la cuenta del usuario
+function darDeBajaUsuario(req, res) {
+    const { password } = req.body;
+
+    if (!password) {
+        return res.status(400).json({
+            success: false,
+            error: 'Ingresa tu contrasenia para confirmar.',
+        });
+    }
+
+    try {
+        // verificar contrasenia antes de eliminar
+        const user = authService.autenticarUsuario(req.app.locals.db, req.usuario, password);
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                error: 'Contrasenia incorrecta.',
+            });
+        }
+
+        const resultado = authService.darDeBaja(req.app.locals.db, req.usuario);
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Cuenta eliminada correctamente.',
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+module.exports = {
+    registrar,
+    iniciarSesion,
+    obtenerPerfil,
+    cambiarPassword,
+    darDeBajaUsuario,
+};

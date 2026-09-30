@@ -11,6 +11,8 @@ router.post('/login', usuariosController.iniciarSesion);
 
 // rutas protegidas (requieren token de usuario)
 router.get('/perfil', requiereAuthUsuario, usuariosController.obtenerPerfil);
+router.put('/perfil/password', requiereAuthUsuario, usuariosController.cambiarPassword);
+router.delete('/perfil', requiereAuthUsuario, usuariosController.darDeBajaUsuario);
 
 // rutas del carrito
 router.post('/carrito/agregar', requiereAuthUsuario, carritoController.agregarAlCarrito);
