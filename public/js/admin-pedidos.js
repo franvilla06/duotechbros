@@ -328,7 +328,7 @@ async function cargarPedidos() {
     btnRefresh.disabled = true;
 
     try {
-        const respuesta = await fetch(API_PEDIDOS);
+        const respuesta = await fetch(`${API_PEDIDOS}?tipo=reparacion`);
         if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
         const pedidos = await respuesta.json();
 

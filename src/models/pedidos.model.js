@@ -1,9 +1,20 @@
+// crea un pedido de reparacion o de producto
+// si no se pasa usuario_id, se guarda como null (compatibilidad con formularios anonimos)
+// el tipo por defecto es 'reparacion'
 function crear(db, pedido) {
     return db
         .prepare(
             `
-            INSERT INTO pedidos (nombre_cliente, telefono, email, modelo_celular, descripcion_problema)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO pedidos (
+                nombre_cliente,
+                telefono,
+                email,
+                modelo_celular,
+                descripcion_problema,
+                usuario_id,
+                tipo
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `
         )
         .run(
@@ -11,11 +22,20 @@ function crear(db, pedido) {
             pedido.telefono,
             pedido.email,
             pedido.modelo_celular,
-            pedido.descripcion_problema
+            pedido.descripcion_problema,
+            pedido.usuario_id || null,
+            pedido.tipo || 'reparacion'
         );
 }
 
-function listar(db) {
+// listar los pedidos, con la opcion de filtrar por tipo
+// tipo puede ser "reparacion", "producto" o null (todos)
+function listar(db, tipo = null) {
+    if (tipo) {
+        return db
+            .prepare('SELECT * FROM pedidos WHERE tipo = ? ORDER BY creado_en DESC')
+            .all(tipo);
+    }
     return db.prepare('SELECT * FROM pedidos ORDER BY creado_en DESC').all();
 }
 
@@ -87,8 +107,6 @@ function insertarItem(db, item) {
 
 // HISTORIAL DEL USUARIO
 
-// listar los pedidos de un usuario con el resumen de items y total
-// solo devuelve pedidos con usuario_id asignado (los del carrito)
 function listarPorUsuario(db, usuarioId) {
     return db
         .prepare(
@@ -111,7 +129,6 @@ function listarPorUsuario(db, usuarioId) {
         .all(usuarioId);
 }
 
-// verificar que un pedido pertenezca al usuario
 function obtenerPedidoDeUsuario(db, pedidoId, usuarioId) {
     return db
         .prepare(
@@ -124,7 +141,6 @@ function obtenerPedidoDeUsuario(db, pedidoId, usuarioId) {
         .get(pedidoId, usuarioId);
 }
 
-// listar los items de un pedido
 function listarItemsDePedido(db, pedidoId) {
     return db
         .prepare(
@@ -144,6 +160,48 @@ function listarItemsDePedido(db, pedidoId) {
         .all(pedidoId);
 }
 
+// DETALLE COMPLETO DE UNA COMPRA PARA EL ADMIN
+
+function obtenerPedidoConItems(db, pedidoId) {
+    const pedido = db
+        .prepare(
+            `
+            SELECT
+                p.id,
+                p.nombre_cliente,
+                p.telefono,
+                p.email,
+                p.modelo_celular,
+                p.descripcion_problema,
+                p.estado,
+                p.creado_en,
+                p.notas,
+                p.usuario_id,
+                p.tipo,
+                u.usuario AS usuario_nombre
+            FROM pedidos p
+            LEFT JOIN usuarios u ON u.id = p.usuario_id
+            WHERE p.id = ?
+        `
+        )
+        .get(pedidoId);
+
+    if (!pedido) return null;
+
+    const items = listarItemsDePedido(db, pedidoId);
+
+    const totalPrecio = items.reduce((acc, item) => acc + Number(item.subtotal), 0);
+    const totalUnidades = items.reduce((acc, item) => acc + item.cantidad, 0);
+
+    return {
+        ...pedido,
+        items,
+        total_items: items.length,
+        total_unidades: totalUnidades,
+        total_precio: Number(totalPrecio.toFixed(2)),
+    };
+}
+
 module.exports = {
     crear,
     listar,
@@ -155,4 +213,5 @@ module.exports = {
     listarPorUsuario,
     obtenerPedidoDeUsuario,
     listarItemsDePedido,
+    obtenerPedidoConItems,
 };

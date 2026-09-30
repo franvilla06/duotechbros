@@ -2,7 +2,6 @@
 
 const API_USUARIOS = '/api/usuarios';
 
-// referencias a los elementos del dom
 const tabs = document.querySelectorAll('.usuario-tab');
 const formLogin = document.getElementById('form-login');
 const formRegistro = document.getElementById('form-registro');
@@ -10,21 +9,41 @@ const mensajeDiv = document.getElementById('mensaje');
 const btnLogin = document.getElementById('btn-login');
 const btnRegistro = document.getElementById('btn-registro');
 
+// REDIRECCION POST LOGIN
+
+// obtener la url a la que hay que volver despues del login
+// si no hay ?redirect=, usar el index
+function obtenerUrlRedireccion() {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+
+    // validar que sea una url interna (empieza con /)
+    // para evitar open redirect
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+        return redirect;
+    }
+    return '/index.html';
+}
+
 // UTILIDADES DE SESION
 
-// guardar la sesion del usuario en sessionStorage
 function guardarSesionUsuario(usuario, token) {
     sessionStorage.setItem('usuarioLogueado', 'true');
     sessionStorage.setItem('usuarioNombre', usuario);
     sessionStorage.setItem('usuarioToken', token);
 }
 
-// verificar si hay una sesion activa
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
         !!sessionStorage.getItem('usuarioToken')
     );
+}
+
+function cerrarSesionUsuario() {
+    sessionStorage.removeItem('usuarioLogueado');
+    sessionStorage.removeItem('usuarioNombre');
+    sessionStorage.removeItem('usuarioToken');
 }
 
 // MENSAJES
@@ -104,7 +123,7 @@ formLogin.addEventListener('submit', async (e) => {
             guardarSesionUsuario(resultado.usuario, resultado.token);
             mostrarMensaje('Acceso correcto. Redirigiendo...', 'exito');
             setTimeout(() => {
-                window.location.href = '/index.html';
+                window.location.href = obtenerUrlRedireccion();
             }, 800);
         } else {
             mostrarMensaje(resultado.error || 'Usuario o contrasenia incorrectos.', 'error');
@@ -127,20 +146,17 @@ formRegistro.addEventListener('submit', async (e) => {
     const password = document.getElementById('registro-password').value;
     const passwordConfirm = document.getElementById('registro-password-confirm').value;
 
-    // validar el usuario
     const errorUsuario = validarUsuarioFrontend(usuario);
     if (errorUsuario) {
         mostrarMensaje(errorUsuario, 'error');
         return;
     }
 
-    // validar la contrasenia
     if (!password || password.length < 6) {
         mostrarMensaje('La contrasenia debe tener al menos 6 caracteres.', 'error');
         return;
     }
 
-    // verificar que las contrasenias coincidan
     if (password !== passwordConfirm) {
         mostrarMensaje('Las contrasenias no coinciden.', 'error');
         return;
@@ -162,7 +178,7 @@ formRegistro.addEventListener('submit', async (e) => {
             guardarSesionUsuario(resultado.usuario, resultado.token);
             mostrarMensaje('Cuenta creada correctamente. Redirigiendo...', 'exito');
             setTimeout(() => {
-                window.location.href = '/index.html';
+                window.location.href = obtenerUrlRedireccion();
             }, 1000);
         } else {
             mostrarMensaje(resultado.error || 'No se pudo crear la cuenta.', 'error');
@@ -179,8 +195,17 @@ formRegistro.addEventListener('submit', async (e) => {
 // INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
-    // si el usuario ya esta logueado, redirigir al inicio
+    // si la url tiene ?logout=1, cerrar la sesion y quedarse en el login
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('logout') === '1') {
+        cerrarSesionUsuario();
+        mostrarMensaje('Sesion cerrada correctamente.', 'exito');
+        window.history.replaceState({}, '', '/user/login.html');
+        return;
+    }
+
+    // si el usuario ya esta logueado, redirigir
     if (estaLogueadoUsuario()) {
-        window.location.href = '/index.html';
+        window.location.href = obtenerUrlRedireccion();
     }
 });

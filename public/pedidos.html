@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
     <link rel="stylesheet" href="css/normalize.css" />
     <link rel="stylesheet" href="css/pie_encabezado.css" />
     <link rel="stylesheet" href="css/pedidos.css" />
@@ -23,10 +27,24 @@
         <div class="nav-usuario" id="nav-usuario"></div>
       </nav>
     </header>
+
     <!-- CONTENIDO PRINCIPAL: FORMULARIO -->
     <main class="container">
-      <!-- FORMULARIO DE REPARACIONES -->
       <h1>Solicitar reparación</h1>
+
+      <!-- AVISO PARA USUARIOS NO LOGUEADOS -->
+      <div class="aviso-login" id="aviso-login" style="display: none">
+        <i class="fas fa-info-circle"></i>
+        <p>
+          Para enviar un pedido de reparacion necesitas iniciar sesion o crear
+          una cuenta. Podes completar el formulario ahora y te vamos a pedir que
+          te registres al momento de enviarlo.
+        </p>
+        <a href="/user/login.html?redirect=/pedidos.html" class="aviso-login-btn">
+          <i class="fas fa-sign-in-alt"></i> Iniciar sesion / Registrarme
+        </a>
+      </div>
+
       <form id="form-pedido">
         <label for="nombre_cliente">Nombre completo:</label>
         <input type="text" id="nombre_cliente" name="nombre_cliente" required />
@@ -48,7 +66,7 @@
           required
         ></textarea>
 
-        <button type="submit">Enviar pedido</button>
+        <button type="submit" id="btn-enviar">Enviar pedido</button>
       </form>
 
       <div id="mensaje" class="mensaje" style="display: none"></div>
@@ -57,12 +75,28 @@
     <!-- FOOTER -->
     <footer>
       <p>© 2024 DuotechBros. Todos los derechos reservados.</p>
+      <div class="footer-social">
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <a href="#"><i class="fas fa-envelope"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
       <a class="footer-admin" href="admin/login.html">
         <i class="fas fa-lock"></i> Acceso Admin
       </a>
     </footer>
 
     <script src="/js/usuario-header.js"></script>
-    <script src="js/Script_Pedidos.js"></script>
+    <script src="/js/Script_Pedidos.js"></script>
+    <script>
+      // mostrar el aviso si el usuario no esta logueado
+      document.addEventListener('DOMContentLoaded', () => {
+        const logueado = sessionStorage.getItem('usuarioLogueado') === 'true'
+          && !!sessionStorage.getItem('usuarioToken');
+        if (!logueado) {
+          const aviso = document.getElementById('aviso-login');
+          if (aviso) aviso.style.display = 'flex';
+        }
+      });
+    </script>
   </body>
 </html>
