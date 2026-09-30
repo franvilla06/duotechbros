@@ -14,6 +14,10 @@ router.get('/perfil', requiereAuthUsuario, usuariosController.obtenerPerfil);
 router.put('/perfil/password', requiereAuthUsuario, usuariosController.cambiarPassword);
 router.delete('/perfil', requiereAuthUsuario, usuariosController.darDeBajaUsuario);
 
+// historial de pedidos
+router.get('/pedidos', requiereAuthUsuario, usuariosController.listarMisPedidos);
+router.get('/pedidos/:id', requiereAuthUsuario, usuariosController.obtenerDetallePedido);
+
 // rutas del carrito
 router.post('/carrito/agregar', requiereAuthUsuario, carritoController.agregarAlCarrito);
 router.get('/carrito', requiereAuthUsuario, carritoController.listarCarrito);

@@ -85,6 +85,65 @@ function insertarItem(db, item) {
         );
 }
 
+// HISTORIAL DEL USUARIO
+
+// listar los pedidos de un usuario con el resumen de items y total
+// solo devuelve pedidos con usuario_id asignado (los del carrito)
+function listarPorUsuario(db, usuarioId) {
+    return db
+        .prepare(
+            `
+            SELECT
+                p.id,
+                p.estado,
+                p.creado_en,
+                p.notas,
+                COUNT(pi.id) AS total_items,
+                COALESCE(SUM(pi.cantidad), 0) AS total_unidades,
+                COALESCE(SUM(pi.subtotal), 0) AS total_precio
+            FROM pedidos p
+            LEFT JOIN pedido_items pi ON pi.pedido_id = p.id
+            WHERE p.usuario_id = ?
+            GROUP BY p.id
+            ORDER BY p.creado_en DESC
+        `
+        )
+        .all(usuarioId);
+}
+
+// verificar que un pedido pertenezca al usuario
+function obtenerPedidoDeUsuario(db, pedidoId, usuarioId) {
+    return db
+        .prepare(
+            `
+            SELECT id, estado, creado_en, notas
+            FROM pedidos
+            WHERE id = ? AND usuario_id = ?
+        `
+        )
+        .get(pedidoId, usuarioId);
+}
+
+// listar los items de un pedido
+function listarItemsDePedido(db, pedidoId) {
+    return db
+        .prepare(
+            `
+            SELECT
+                id,
+                producto_id,
+                nombre_producto,
+                precio_unitario,
+                cantidad,
+                subtotal
+            FROM pedido_items
+            WHERE pedido_id = ?
+            ORDER BY id ASC
+        `
+        )
+        .all(pedidoId);
+}
+
 module.exports = {
     crear,
     listar,
@@ -93,4 +152,7 @@ module.exports = {
     eliminar,
     crearPedidoDeUsuario,
     insertarItem,
+    listarPorUsuario,
+    obtenerPedidoDeUsuario,
+    listarItemsDePedido,
 };

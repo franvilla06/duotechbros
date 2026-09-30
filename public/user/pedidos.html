@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/usuario.css" />
+    <title>Mis Pedidos - DuotechBros</title>
+  </head>
+  <body class="pedidos-user-page">
+    <!-- HEADER -->
+    <header class="perfil-header">
+      <div class="perfil-header-inner">
+        <a href="/index.html" class="perfil-brand">
+          <span class="perfil-brand-icono">D</span>
+          <span class="perfil-brand-texto">DuotechBros</span>
+        </a>
+        <div class="perfil-header-acciones">
+          <span class="perfil-header-usuario" id="pedidos-usuario">
+            <i class="fas fa-user-circle"></i> ...
+          </span>
+          <a href="/tienda.html" class="perfil-btn-volver">
+            <i class="fas fa-arrow-left"></i> Volver a la tienda
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="perfil-main">
+      <div class="perfil-contenedor">
+        <div class="perfil-titulo">
+          <h1><i class="fas fa-box"></i> Mis Pedidos</h1>
+          <p>Historial de todos los pedidos que enviaste desde tu carrito.</p>
+        </div>
+
+        <!-- ESTADO: CARGANDO -->
+        <div class="perfil-seccion" id="estado-cargando">
+          <div class="pedidos-estado">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Cargando pedidos...</p>
+          </div>
+        </div>
+
+        <!-- ESTADO: VACIO -->
+        <div class="perfil-seccion" id="estado-vacio" style="display: none">
+          <div class="pedidos-estado">
+            <i class="fas fa-box-open"></i>
+            <p>Todavia no hiciste ningun pedido</p>
+            <small>Cuando envíes un pedido desde tu carrito, va a aparecer aca.</small>
+            <a href="/tienda.html" class="pedidos-btn-ir">
+              <i class="fas fa-shopping-bag"></i> Ir a la tienda
+            </a>
+          </div>
+        </div>
+
+        <!-- ESTADO: ERROR -->
+        <div class="perfil-seccion" id="estado-error" style="display: none">
+          <div class="pedidos-estado">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>No se pudieron cargar tus pedidos</p>
+            <small>Intenta recargar la pagina en unos segundos.</small>
+          </div>
+        </div>
+
+        <!-- LISTA DE PEDIDOS -->
+        <div class="pedidos-lista" id="pedidos-lista" style="display: none">
+          <!-- se llena dinamicamente -->
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL: DETALLE DEL PEDIDO -->
+    <div class="modal-overlay" id="modal-detalle">
+      <div class="modal-card pedido-modal">
+        <div class="modal-header">
+          <h2>
+            <i class="fas fa-receipt"></i> Detalle del pedido
+            <span class="pedido-modal-id" id="modal-pedido-id">#000</span>
+          </h2>
+          <button class="modal-close" id="modal-close" title="Cerrar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="pedido-modal-info" id="modal-info">
+          <!-- se llena dinamicamente -->
+        </div>
+
+        <div class="pedido-modal-items" id="modal-items">
+          <!-- se llena dinamicamente -->
+        </div>
+
+        <div class="pedido-modal-total" id="modal-total">
+          <!-- se llena dinamicamente -->
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/usuario-pedidos.js"></script>
+  </body>
+</html>

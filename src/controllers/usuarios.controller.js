@@ -1,5 +1,6 @@
 const authService = require('../services/auth.service');
 const usuariosModel = require('../models/usuarios.model');
+const pedidosModel = require('../models/pedidos.model');
 
 // VALIDACIONES
 
@@ -23,7 +24,6 @@ function validarPassword(password) {
 
 // REGISTRO Y LOGIN
 
-// registrar un nuevo usuario
 function registrar(req, res) {
     const { usuario, password } = req.body;
 
@@ -58,7 +58,6 @@ function registrar(req, res) {
     }
 }
 
-// iniciar sesion de un usuario existente
 function iniciarSesion(req, res) {
     const { usuario, password } = req.body;
 
@@ -92,7 +91,6 @@ function iniciarSesion(req, res) {
 
 // PERFIL
 
-// obtener el perfil del usuario autenticado
 function obtenerPerfil(req, res) {
     try {
         const user = usuariosModel.obtenerPerfil(req.app.locals.db, req.usuario);
@@ -105,7 +103,6 @@ function obtenerPerfil(req, res) {
     }
 }
 
-// cambiar la contrasenia del usuario
 function cambiarPassword(req, res) {
     const { password_actual, password_nueva, password_confirmar } = req.body;
 
@@ -156,7 +153,6 @@ function cambiarPassword(req, res) {
     }
 }
 
-// dar de baja la cuenta del usuario
 function darDeBajaUsuario(req, res) {
     const { password } = req.body;
 
@@ -168,7 +164,6 @@ function darDeBajaUsuario(req, res) {
     }
 
     try {
-        // verificar contrasenia antes de eliminar
         const user = authService.autenticarUsuario(req.app.locals.db, req.usuario, password);
         if (!user) {
             return res.status(401).json({
@@ -191,10 +186,87 @@ function darDeBajaUsuario(req, res) {
     }
 }
 
+// HISTORIAL DE PEDIDOS DEL USUARIO
+
+// listar todos los pedidos hechos por el usuario desde el carrito
+function listarMisPedidos(req, res) {
+    try {
+        const usuarioId = usuariosModel.obtenerId(req.app.locals.db, req.usuario);
+        if (!usuarioId) {
+            return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+        }
+
+        const pedidos = pedidosModel.listarPorUsuario(req.app.locals.db, usuarioId);
+
+        // normalizar los decimales que vienen como strings o numeros
+        const pedidosNormalizados = pedidos.map((p) => ({
+            ...p,
+            total_precio: Number(Number(p.total_precio).toFixed(2)),
+        }));
+
+        return res.json({
+            success: true,
+            pedidos: pedidosNormalizados,
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// obtener el detalle de un pedido especifico del usuario
+function obtenerDetallePedido(req, res) {
+    const { id } = req.params;
+
+    try {
+        const usuarioId = usuariosModel.obtenerId(req.app.locals.db, req.usuario);
+        if (!usuarioId) {
+            return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+        }
+
+        const pedido = pedidosModel.obtenerPedidoDeUsuario(req.app.locals.db, id, usuarioId);
+        if (!pedido) {
+            return res.status(404).json({
+                success: false,
+                error: 'Pedido no encontrado o no pertenece a tu cuenta.',
+            });
+        }
+
+        const items = pedidosModel.listarItemsDePedido(req.app.locals.db, id);
+
+        // normalizar los decimales
+        const itemsNormalizados = items.map((item) => ({
+            ...item,
+            precio_unitario: Number(Number(item.precio_unitario).toFixed(2)),
+            subtotal: Number(Number(item.subtotal).toFixed(2)),
+        }));
+
+        const totalPrecio = itemsNormalizados.reduce((acc, item) => acc + item.subtotal, 0);
+        const totalUnidades = itemsNormalizados.reduce((acc, item) => acc + item.cantidad, 0);
+
+        return res.json({
+            success: true,
+            pedido: {
+                id: pedido.id,
+                estado: pedido.estado,
+                creado_en: pedido.creado_en,
+                notas: pedido.notas,
+                items: itemsNormalizados,
+                total_items: itemsNormalizados.length,
+                total_unidades: totalUnidades,
+                total_precio: Number(totalPrecio.toFixed(2)),
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 module.exports = {
     registrar,
     iniciarSesion,
     obtenerPerfil,
     cambiarPassword,
     darDeBajaUsuario,
+    listarMisPedidos,
+    obtenerDetallePedido,
 };
