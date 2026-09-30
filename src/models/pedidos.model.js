@@ -1,9 +1,20 @@
+// crea un pedido de reparacion o de producto
+// si no se pasa usuario_id, se guarda como null (compatibilidad con formularios anonimos)
+// el tipo por defecto es 'reparacion'
 function crear(db, pedido) {
     return db
         .prepare(
             `
-            INSERT INTO pedidos (nombre_cliente, telefono, email, modelo_celular, descripcion_problema)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO pedidos (
+                nombre_cliente,
+                telefono,
+                email,
+                modelo_celular,
+                descripcion_problema,
+                usuario_id,
+                tipo
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `
         )
         .run(
@@ -11,12 +22,14 @@ function crear(db, pedido) {
             pedido.telefono,
             pedido.email,
             pedido.modelo_celular,
-            pedido.descripcion_problema
+            pedido.descripcion_problema,
+            pedido.usuario_id || null,
+            pedido.tipo || 'reparacion'
         );
 }
 
 // listar los pedidos, con la opcion de filtrar por tipo
-// tipo puede ser "reparacion", "producto" o undefined (todos)
+// tipo puede ser "reparacion", "producto" o null (todos)
 function listar(db, tipo = null) {
     if (tipo) {
         return db
@@ -149,7 +162,6 @@ function listarItemsDePedido(db, pedidoId) {
 
 // DETALLE COMPLETO DE UNA COMPRA PARA EL ADMIN
 
-// devuelve el pedido con todos sus items, sin filtrar por usuario
 function obtenerPedidoConItems(db, pedidoId) {
     const pedido = db
         .prepare(

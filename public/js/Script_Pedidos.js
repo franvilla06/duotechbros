@@ -1,87 +1,143 @@
+// LOGICA DEL FORMULARIO DE PEDIDOS DE REPARACION
+// requiere estar logueado para enviar
+// los datos se guardan temporalmente para no perderlos si hay que loguearse
+
 const form = document.getElementById('form-pedido');
 const mensajeDiv = document.getElementById('mensaje');
 
-// FUNCIÓN PARA MOSTRAR MENSAJES
+const STORAGE_KEY = 'pedidoBorrador';
+
+// UTILIDADES DE SESION
+
+function estaLogueadoUsuario() {
+    return (
+        sessionStorage.getItem('usuarioLogueado') === 'true' &&
+        !!sessionStorage.getItem('usuarioToken')
+    );
+}
+
+function obtenerTokenUsuario() {
+    return sessionStorage.getItem('usuarioToken') || '';
+}
+
+// FUNCION PARA MOSTRAR MENSAJES
+
 function mostrarMensaje(texto, tipo) {
     mensajeDiv.textContent = texto;
     mensajeDiv.className = `mensaje ${tipo}`;
     mensajeDiv.style.display = 'block';
 
-    // ocultar después de 5 segundos
     setTimeout(() => {
         mensajeDiv.style.display = 'none';
     }, 5000);
 }
 
-// FUNCIÓN PARA VALIDAR EL EMAIL
+// VALIDACIONES
+
 function esEmailValido(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 }
 
-// FUNCIÓN PARA VALIDAR EL TELÉFONO (SOLO NÚMEROS, MÍNIMO 7 DÍGITOS)
 function esTelefonoValido(telefono) {
     const soloNumeros = /^[0-9]+$/.test(telefono);
     return soloNumeros && telefono.length >= 7;
 }
 
-// FUNCIÓN PARA VALIDAR EL FORMULARIO
 function validarFormulario(datos) {
-    // VALIDAR NOMBRE
     if (!datos.nombre_cliente || datos.nombre_cliente.trim().length < 3) {
         mostrarMensaje('El nombre debe tener al menos 3 caracteres.', 'error');
         return false;
     }
 
-    // VALIDAR EMAIL
     if (!datos.email || !esEmailValido(datos.email)) {
-        mostrarMensaje('Ingresá un email válido (ej: usuario@dominio.com).', 'error');
+        mostrarMensaje('Ingresa un email valido (ej: usuario@dominio.com).', 'error');
         return false;
     }
 
-    // VALIDAR TELÉFONO (SI SE INGRESÓ, QUE SEA VÁLIDO)
     if (datos.telefono && datos.telefono.trim() !== '') {
         if (!esTelefonoValido(datos.telefono)) {
-            mostrarMensaje('El teléfono debe contener solo números y tener al menos 7 dígitos.', 'error');
+            mostrarMensaje('El telefono debe contener solo numeros y tener al menos 7 digitos.', 'error');
             return false;
         }
     }
 
-    // VALIDAR MODELO DEL CELULAR
     if (!datos.modelo_celular || datos.modelo_celular.trim().length < 2) {
-        mostrarMensaje('Ingresá el modelo del celular.', 'error');
+        mostrarMensaje('Ingresa el modelo del celular.', 'error');
         return false;
     }
 
-    // VALIDAR DESCRIPCIÓN DEL PROBLEMA
     if (!datos.descripcion_problema || datos.descripcion_problema.trim().length < 10) {
-        mostrarMensaje('La descripción debe tener al menos 10 caracteres.', 'error');
+        mostrarMensaje('La descripcion debe tener al menos 10 caracteres.', 'error');
         return false;
     }
 
-    // todas las validaciones pasaron
     return true;
 }
 
-// EVENTO SUBMIT DEL FORMULARIO
-form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // evita que recargue la página
+// GUARDAR / RESTAURAR DATOS DEL FORMULARIO
 
-    // obtener datos del formulario
+function guardarBorrador(datos) {
+    try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+    } catch (error) {
+        console.warn('No se pudo guardar el borrador:', error.message);
+    }
+}
+
+function restaurarBorrador() {
+    try {
+        const guardado = sessionStorage.getItem(STORAGE_KEY);
+        if (!guardado) return;
+
+        const datos = JSON.parse(guardado);
+        if (datos.nombre_cliente) document.getElementById('nombre_cliente').value = datos.nombre_cliente;
+        if (datos.email) document.getElementById('email').value = datos.email;
+        if (datos.telefono) document.getElementById('telefono').value = datos.telefono;
+        if (datos.modelo_celular) document.getElementById('modelo_celular').value = datos.modelo_celular;
+        if (datos.descripcion_problema) document.getElementById('descripcion_problema').value = datos.descripcion_problema;
+
+        // mostrar un aviso de que se restauro el borrador
+        mostrarMensaje('Se restauraron los datos que habias cargado antes de iniciar sesion.', 'exito');
+
+        // eliminar el borrador
+        sessionStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+        console.warn('No se pudo restaurar el borrador:', error.message);
+    }
+}
+
+// EVENTO SUBMIT DEL FORMULARIO
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
     const datos = {
         nombre_cliente: document.getElementById('nombre_cliente').value.trim(),
         email: document.getElementById('email').value.trim(),
         telefono: document.getElementById('telefono').value.trim(),
         modelo_celular: document.getElementById('modelo_celular').value.trim(),
-        descripcion_problema: document.getElementById('descripcion_problema').value.trim()
+        descripcion_problema: document.getElementById('descripcion_problema').value.trim(),
     };
 
-    // validar los datos antes de enviar
     if (!validarFormulario(datos)) {
-        return; // si hay error, no enviamos
+        return;
     }
 
-    // deshabilitar el botón mientras se envía
+    // si no esta logueado, guardar el borrador y redirigir al login
+    if (!estaLogueadoUsuario()) {
+        guardarBorrador(datos);
+
+        // mostrar mensaje antes de redirigir
+        mostrarMensaje('Necesitas iniciar sesion para enviar el pedido. Redirigiendo...', 'error');
+
+        setTimeout(() => {
+            window.location.href = '/user/login.html?redirect=/pedidos.html';
+        }, 1500);
+        return;
+    }
+
+    // deshabilitar el boton mientras se envia
     const boton = form.querySelector('button[type="submit"]');
     boton.disabled = true;
     boton.textContent = 'Enviando...';
@@ -89,30 +145,43 @@ form.addEventListener('submit', async (e) => {
     try {
         const respuesta = await fetch('/api/pedidos', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos)
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${obtenerTokenUsuario()}`,
+            },
+            body: JSON.stringify(datos),
         });
+
+        // si expiro el token, redirigir al login
+        if (respuesta.status === 401) {
+            sessionStorage.removeItem('usuarioLogueado');
+            sessionStorage.removeItem('usuarioNombre');
+            sessionStorage.removeItem('usuarioToken');
+            mostrarMensaje('Tu sesion expiro. Redirigiendo al login...', 'error');
+            setTimeout(() => {
+                window.location.href = '/user/login.html?redirect=/pedidos.html';
+            }, 1500);
+            return;
+        }
 
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarMensaje('¡Pedido enviado con éxito!', 'exito');
-            form.reset(); // limpia el formulario
+            mostrarMensaje('Pedido enviado con exito.', 'exito');
+            form.reset();
         } else {
             mostrarMensaje(`Error: ${resultado.error}`, 'error');
         }
     } catch (error) {
-        mostrarMensaje('No se pudo conectar con el servidor. Asegurate de que esté corriendo (npm run dev)', 'error');
-        console.error('Error de conexión:', error);
+        mostrarMensaje('No se pudo conectar con el servidor.', 'error');
+        console.error('Error de conexion:', error);
     } finally {
-        // rehabilitar el botón
         boton.disabled = false;
         boton.textContent = 'Enviar pedido';
     }
 });
 
-// VALIDACIONES EN TIEMPO REAL (MIENTRAS EL USUARIO ESCRIBE)
-// opcional: cambiar el borde del campo si es inválido
+// VALIDACIONES EN TIEMPO REAL
 
 document.getElementById('nombre_cliente').addEventListener('blur', function () {
     if (this.value.trim().length < 3) {
@@ -153,4 +222,11 @@ document.getElementById('descripcion_problema').addEventListener('blur', functio
     } else {
         this.style.borderColor = '#28a745';
     }
+});
+
+// INICIO
+
+document.addEventListener('DOMContentLoaded', () => {
+    // si volvimos del login con un borrador guardado, restaurarlo
+    restaurarBorrador();
 });
