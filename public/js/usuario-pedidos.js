@@ -1,12 +1,22 @@
 // LOGICA DE LA PAGINA DE MIS PEDIDOS DEL USUARIO
-// muestra tanto reparaciones como compras, con vista adaptada segun el tipo
+// muestra reparaciones y compras, con filtros y buscador
 
 const API_PEDIDOS_USUARIO = '/api/usuarios/pedidos';
 
 const usuarioSpan = document.getElementById('pedidos-usuario');
 
+const pedidosToolbar = document.getElementById('pedidos-toolbar');
+const buscador = document.getElementById('buscador-pedidos');
+const filtrosTipo = document.getElementById('filtros-tipo');
+const filtrosEstado = document.getElementById('filtros-estado');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+const pedidosContador = document.getElementById('pedidos-contador');
+const contadorTexto = document.getElementById('contador-texto');
+
 const estadoCargando = document.getElementById('estado-cargando');
 const estadoVacio = document.getElementById('estado-vacio');
+const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoError = document.getElementById('estado-error');
 const pedidosLista = document.getElementById('pedidos-lista');
 
@@ -18,8 +28,15 @@ const modalInfo = document.getElementById('modal-info');
 const modalItems = document.getElementById('modal-items');
 const modalTotal = document.getElementById('modal-total');
 
+// tipos y estados disponibles
+const TIPOS = ['Todos', 'Reparacion', 'Compra'];
+const ESTADOS = ['Todos', 'pendiente', 'en proceso', 'completado', 'cancelado'];
+
 // estado local
 let pedidosActuales = [];
+let tipoFiltroActivo = 'Todos';
+let estadoFiltroActivo = 'Todos';
+let textoBusqueda = '';
 
 // UTILIDADES DE SESION
 
@@ -93,27 +110,140 @@ function esReparacion(pedido) {
     return (pedido.tipo || 'reparacion') === 'reparacion';
 }
 
-function tipoTexto(pedido) {
-    return esReparacion(pedido) ? 'Reparacion' : 'Compra';
+// FILTROS
+
+function construirFiltrosTipo() {
+    filtrosTipo.innerHTML = '';
+
+    TIPOS.forEach((tipo) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (tipo === tipoFiltroActivo ? ' active' : '');
+        chip.dataset.tipo = tipo;
+
+        // texto e icono segun el tipo
+        let icono = '';
+        if (tipo === 'Reparacion') icono = '<i class="fas fa-tools"></i> ';
+        else if (tipo === 'Compra') icono = '<i class="fas fa-shopping-bag"></i> ';
+        chip.innerHTML = icono + tipo;
+
+        chip.addEventListener('click', () => {
+            tipoFiltroActivo = tipo;
+            filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.tipo === tipo);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosTipo.appendChild(chip);
+    });
 }
 
-function tipoIcono(pedido) {
-    return esReparacion(pedido) ? 'fa-tools' : 'fa-shopping-bag';
+function construirFiltrosEstado() {
+    filtrosEstado.innerHTML = '';
+
+    ESTADOS.forEach((estado) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (estado === estadoFiltroActivo ? ' active' : '');
+        chip.dataset.estado = estado;
+        chip.textContent = estado === 'Todos' ? 'Todos los estados' : capitalizar(estado);
+
+        chip.addEventListener('click', () => {
+            estadoFiltroActivo = estado;
+            filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.estado === estado);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosEstado.appendChild(chip);
+    });
+}
+
+function actualizarBotonLimpiar() {
+    const hayFiltro =
+        tipoFiltroActivo !== 'Todos' ||
+        estadoFiltroActivo !== 'Todos' ||
+        textoBusqueda.trim() !== '';
+    btnLimpiar.disabled = !hayFiltro;
+}
+
+// APLICAR FILTROS
+
+function aplicarFiltros() {
+    // ocultar todos los estados
+    estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
+    estadoError.style.display = 'none';
+
+    let filtrados = [...pedidosActuales];
+
+    // filtro por tipo
+    if (tipoFiltroActivo === 'Reparacion') {
+        filtrados = filtrados.filter((p) => esReparacion(p));
+    } else if (tipoFiltroActivo === 'Compra') {
+        filtrados = filtrados.filter((p) => !esReparacion(p));
+    }
+
+    // filtro por estado
+    if (estadoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter(
+            (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
+        );
+    }
+
+    // busqueda por texto
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter((p) => {
+            const numero = String(p.id).padStart(4, '0');
+            const modelo = (p.modelo_celular || '').toLowerCase();
+            const descripcion = (p.descripcion_problema || '').toLowerCase();
+
+            return (
+                numero.includes(q) ||
+                modelo.includes(q) ||
+                descripcion.includes(q)
+            );
+        });
+    }
+
+    // si no hay pedidos originales, mostrar vacio
+    if (pedidosActuales.length === 0) {
+        estadoVacio.style.display = 'block';
+        pedidosLista.style.display = 'none';
+        pedidosContador.style.display = 'none';
+        actualizarBotonLimpiar();
+        return;
+    }
+
+    // hay pedidos originales pero los filtros no devolvieron nada
+    if (filtrados.length === 0) {
+        estadoSinResultados.style.display = 'block';
+        pedidosLista.style.display = 'none';
+        pedidosContador.style.display = 'none';
+        actualizarBotonLimpiar();
+        return;
+    }
+
+    // mostrar lista
+    pedidosLista.style.display = 'flex';
+    pedidosContador.style.display = 'block';
+    actualizarContador(filtrados.length);
+
+    renderizarPedidos(filtrados);
+    actualizarBotonLimpiar();
+}
+
+function actualizarContador(cantidad) {
+    contadorTexto.textContent = `${cantidad} pedido${cantidad !== 1 ? 's' : ''}`;
 }
 
 // RENDERIZADO
 
 function renderizarPedidos(pedidos) {
     pedidosLista.innerHTML = '';
-
-    if (!pedidos || pedidos.length === 0) {
-        estadoVacio.style.display = 'block';
-        pedidosLista.style.display = 'none';
-        return;
-    }
-
-    estadoVacio.style.display = 'none';
-    pedidosLista.style.display = 'flex';
 
     pedidos.forEach((pedido) => {
         const card = document.createElement('article');
@@ -135,7 +265,6 @@ function renderizarPedidos(pedidos) {
     });
 }
 
-// tarjeta para un pedido de reparacion
 function generarCardReparacion(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
     const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
@@ -181,7 +310,6 @@ function generarCardReparacion(pedido) {
     `;
 }
 
-// tarjeta para una compra de la tienda
 function generarCardCompra(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
     const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
@@ -237,8 +365,11 @@ function generarCardCompra(pedido) {
 async function cargarPedidos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
     estadoError.style.display = 'none';
     pedidosLista.style.display = 'none';
+    pedidosToolbar.style.display = 'none';
+    pedidosContador.style.display = 'none';
 
     try {
         const respuesta = await fetch(API_PEDIDOS_USUARIO, {
@@ -258,7 +389,17 @@ async function cargarPedidos() {
         const data = await respuesta.json();
         pedidosActuales = data.pedidos || [];
 
-        renderizarPedidos(pedidosActuales);
+        // construir los filtros la primera vez
+        construirFiltrosTipo();
+        construirFiltrosEstado();
+
+        // aplicar filtros y renderizar
+        aplicarFiltros();
+
+        // mostrar la toolbar solo si hay pedidos
+        if (pedidosActuales.length > 0) {
+            pedidosToolbar.style.display = 'flex';
+        }
     } catch (error) {
         console.error('Error al cargar pedidos:', error);
         estadoError.style.display = 'block';
@@ -298,7 +439,6 @@ async function abrirModalDetalle(pedidoId) {
             return;
         }
 
-        // adaptar la vista segun el tipo
         if (esReparacion(data.pedido)) {
             renderizarDetalleReparacion(data.pedido);
         } else {
@@ -310,7 +450,6 @@ async function abrirModalDetalle(pedidoId) {
     }
 }
 
-// detalle de un pedido de reparacion
 function renderizarDetalleReparacion(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
 
@@ -369,7 +508,6 @@ function renderizarDetalleReparacion(pedido) {
     `;
 }
 
-// detalle de una compra de la tienda
 function renderizarDetalleCompra(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
 
@@ -451,6 +589,29 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modalDetalle.classList.contains('modal-visible')) {
         cerrarModalDetalle();
     }
+});
+
+// EVENTOS
+
+buscador.addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    aplicarFiltros();
+});
+
+btnLimpiar.addEventListener('click', () => {
+    textoBusqueda = '';
+    buscador.value = '';
+    tipoFiltroActivo = 'Todos';
+    estadoFiltroActivo = 'Todos';
+
+    filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.tipo === 'Todos');
+    });
+    filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.estado === 'Todos');
+    });
+
+    aplicarFiltros();
 });
 
 // INICIO
