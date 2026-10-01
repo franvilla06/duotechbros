@@ -71,109 +71,142 @@
 
         <!-- ESTADÍSTICAS PRINCIPALES -->
         <section class="stats-grid" id="stats-principales">
+          <!-- REPARACIONES -->
           <div class="stat-card">
             <div class="stat-icon stat-icon-blue">
-              <i class="fas fa-clipboard-list"></i>
+              <i class="fas fa-tools"></i>
             </div>
             <div class="stat-info">
-              <span class="stat-numero" id="total-pedidos">—</span>
-              <span class="stat-label">Pedidos totales</span>
+              <span class="stat-numero" id="total-reparaciones">—</span>
+              <span class="stat-label">Pedidos de reparación</span>
+              <span class="stat-sub" id="sub-reparaciones">—</span>
             </div>
           </div>
 
+          <!-- COMPRAS -->
           <div class="stat-card">
             <div class="stat-icon stat-icon-green">
+              <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-numero" id="total-compras">—</span>
+              <span class="stat-label">Compras de tienda</span>
+              <span class="stat-sub" id="sub-compras">—</span>
+            </div>
+          </div>
+
+          <!-- PRODUCTOS -->
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-teal">
               <i class="fas fa-box"></i>
             </div>
             <div class="stat-info">
               <span class="stat-numero" id="total-productos">—</span>
               <span class="stat-label">Productos en tienda</span>
+              <span class="stat-sub" id="sub-productos">—</span>
             </div>
           </div>
 
+          <!-- PORTAFOLIO -->
           <div class="stat-card">
-            <div class="stat-icon stat-icon-teal">
+            <div class="stat-icon stat-icon-amber">
               <i class="fas fa-briefcase"></i>
             </div>
             <div class="stat-info">
               <span class="stat-numero" id="total-portafolio">—</span>
               <span class="stat-label">Trabajos publicados</span>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon stat-icon-amber">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="stat-info">
-              <span class="stat-numero" id="total-stock-bajo">—</span>
-              <span class="stat-label">Productos con stock bajo</span>
+              <span class="stat-sub" id="sub-portafolio">—</span>
             </div>
           </div>
         </section>
 
-        <!-- ESTADOS DE PEDIDOS -->
-        <section class="admin-card" style="margin-top: 30px">
-          <h2><i class="fas fa-chart-pie"></i> Pedidos por estado</h2>
+        <!-- ESTADOS POR TIPO -->
+        <div class="dashboard-estados-grid">
+          <!-- REPARACIONES -->
+          <section class="admin-card">
+            <h2><i class="fas fa-tools"></i> Estados de Reparaciones</h2>
 
-          <div class="estados-grid">
-            <div class="estado-card estado-pendiente">
-              <i class="fas fa-clock"></i>
-              <span class="estado-numero" id="pedidos-pendiente">—</span>
-              <span class="estado-label">Pendientes</span>
+            <div class="estados-grid">
+              <div class="estado-card estado-pendiente">
+                <i class="fas fa-clock"></i>
+                <span class="estado-numero" id="rep-pendiente">—</span>
+                <span class="estado-label">Pendientes</span>
+              </div>
+              <div class="estado-card estado-en-proceso">
+                <i class="fas fa-wrench"></i>
+                <span class="estado-numero" id="rep-en-proceso">—</span>
+                <span class="estado-label">En proceso</span>
+              </div>
+              <div class="estado-card estado-completado">
+                <i class="fas fa-check-circle"></i>
+                <span class="estado-numero" id="rep-completado">—</span>
+                <span class="estado-label">Completados</span>
+              </div>
+              <div class="estado-card estado-cancelado">
+                <i class="fas fa-times-circle"></i>
+                <span class="estado-numero" id="rep-cancelado">—</span>
+                <span class="estado-label">Cancelados</span>
+              </div>
             </div>
+          </section>
 
-            <div class="estado-card estado-en-proceso">
-              <i class="fas fa-tools"></i>
-              <span class="estado-numero" id="pedidos-en-proceso">—</span>
-              <span class="estado-label">En proceso</span>
+          <!-- COMPRAS -->
+          <section class="admin-card">
+            <h2><i class="fas fa-shopping-bag"></i> Estados de Compras</h2>
+
+            <div class="estados-grid">
+              <div class="estado-card estado-pendiente">
+                <i class="fas fa-clock"></i>
+                <span class="estado-numero" id="comp-pendiente">—</span>
+                <span class="estado-label">Pendientes</span>
+              </div>
+              <div class="estado-card estado-en-proceso">
+                <i class="fas fa-truck"></i>
+                <span class="estado-numero" id="comp-en-proceso">—</span>
+                <span class="estado-label">En proceso</span>
+              </div>
+              <div class="estado-card estado-completado">
+                <i class="fas fa-check-circle"></i>
+                <span class="estado-numero" id="comp-completado">—</span>
+                <span class="estado-label">Completadas</span>
+              </div>
+              <div class="estado-card estado-cancelado">
+                <i class="fas fa-times-circle"></i>
+                <span class="estado-numero" id="comp-cancelado">—</span>
+                <span class="estado-label">Canceladas</span>
+              </div>
             </div>
+          </section>
+        </div>
 
-            <div class="estado-card estado-completado">
-              <i class="fas fa-check-circle"></i>
-              <span class="estado-numero" id="pedidos-completado">—</span>
-              <span class="estado-label">Completados</span>
-            </div>
-
-            <div class="estado-card estado-cancelado">
-              <i class="fas fa-times-circle"></i>
-              <span class="estado-numero" id="pedidos-cancelado">—</span>
-              <span class="estado-label">Cancelados</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- ÚLTIMOS PEDIDOS -->
-        <section
-          class="admin-card"
-          style="margin-top: 30px; padding: 0; overflow: hidden"
-        >
+        <!-- ÚLTIMOS MOVIMIENTOS -->
+        <section class="admin-card" style="padding: 0; overflow: hidden">
           <div class="table-header">
-            <h2><i class="fas fa-history"></i> Últimos pedidos recibidos</h2>
-            <a href="pedidos.html" class="btn-secondary">
-              Ver todos <i class="fas fa-arrow-right"></i>
-            </a>
+            <h2><i class="fas fa-history"></i> Últimos movimientos</h2>
+            <span class="table-counter" id="contador-movimientos">0 movimientos</span>
           </div>
 
           <div class="table-wrapper">
-            <table class="admin-table" id="tabla-ultimos">
+            <table class="admin-table" id="tabla-movimientos">
               <thead>
                 <tr>
+                  <th>Tipo</th>
+                  <th>Nro.</th>
                   <th>Cliente</th>
-                  <th>Modelo</th>
+                  <th>Detalle</th>
                   <th>Fecha</th>
                   <th>Estado</th>
                 </tr>
               </thead>
-              <tbody id="tbody-ultimos">
-                <!-- se carga dinámicamente -->
+              <tbody id="tbody-movimientos">
+                <!-- se carga dinamicamente -->
               </tbody>
             </table>
           </div>
 
           <div class="table-empty" id="estado-vacio" style="display: none">
             <i class="fas fa-inbox"></i>
-            <p>Aún no hay pedidos recibidos</p>
+            <p>Aún no hay movimientos</p>
             <small>Cuando un cliente envíe una solicitud aparecerá aquí.</small>
           </div>
         </section>
@@ -192,19 +225,19 @@
             <a href="portafolio.html" class="dashboard-card">
               <i class="fas fa-briefcase"></i>
               <h3>Gestionar Portafolio</h3>
-              <p>
-                Publicá nuevos trabajos realizados o retirá los que ya no
-                quieras mostrar.
-              </p>
+              <p>Publicá nuevos trabajos realizados o retirá los que ya no quieras mostrar.</p>
             </a>
 
             <a href="pedidos.html" class="dashboard-card">
-              <i class="fas fa-clipboard-list"></i>
-              <h3>Ver Pedidos</h3>
-              <p>
-                Revisá todas las solicitudes de reparación enviadas por los
-                clientes.
-              </p>
+              <i class="fas fa-tools"></i>
+              <h3>Pedidos de Reparación</h3>
+              <p>Revisá todas las solicitudes de reparación enviadas por los clientes.</p>
+            </a>
+
+            <a href="compras.html" class="dashboard-card">
+              <i class="fas fa-shopping-bag"></i>
+              <h3>Compras de Tienda</h3>
+              <p>Consultá los pedidos realizados desde el carrito de la tienda.</p>
             </a>
           </div>
         </section>
