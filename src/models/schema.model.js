@@ -62,30 +62,40 @@ function inicializar(db) {
 
     // migraciones: agregar columnas nuevas a tablas existentes sin perder datos
 
+    // migraciones de pedidos
     const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
 
-    const tieneNotas = columnasPedidos.some((col) => col.name === 'notas');
-    if (!tieneNotas) {
+    if (!columnasPedidos.some((col) => col.name === 'notas')) {
         db.exec('ALTER TABLE pedidos ADD COLUMN notas TEXT');
         console.log('Migracion aplicada: columna notas agregada a pedidos');
     }
 
-    const tieneUsuarioId = columnasPedidos.some((col) => col.name === 'usuario_id');
-    if (!tieneUsuarioId) {
+    if (!columnasPedidos.some((col) => col.name === 'usuario_id')) {
         db.exec('ALTER TABLE pedidos ADD COLUMN usuario_id INTEGER');
         console.log('Migracion aplicada: columna usuario_id agregada a pedidos');
     }
 
-    const tieneTipo = columnasPedidos.some((col) => col.name === 'tipo');
-    if (!tieneTipo) {
+    if (!columnasPedidos.some((col) => col.name === 'tipo')) {
         db.exec("ALTER TABLE pedidos ADD COLUMN tipo TEXT DEFAULT 'reparacion'");
         console.log('Migracion aplicada: columna tipo agregada a pedidos');
     }
 
-    const tienePresupuesto = columnasPedidos.some((col) => col.name === 'presupuesto');
-    if (!tienePresupuesto) {
+    if (!columnasPedidos.some((col) => col.name === 'presupuesto')) {
         db.exec('ALTER TABLE pedidos ADD COLUMN presupuesto DECIMAL(10,2)');
         console.log('Migracion aplicada: columna presupuesto agregada a pedidos');
+    }
+
+    // migraciones de portafolio
+    const columnasPortafolio = db.prepare('PRAGMA table_info(portafolio)').all();
+
+    if (!columnasPortafolio.some((col) => col.name === 'fecha_inicio')) {
+        db.exec('ALTER TABLE portafolio ADD COLUMN fecha_inicio DATE');
+        console.log('Migracion aplicada: columna fecha_inicio agregada a portafolio');
+    }
+
+    if (!columnasPortafolio.some((col) => col.name === 'fecha_fin')) {
+        db.exec('ALTER TABLE portafolio ADD COLUMN fecha_fin DATE');
+        console.log('Migracion aplicada: columna fecha_fin agregada a portafolio');
     }
 }
 

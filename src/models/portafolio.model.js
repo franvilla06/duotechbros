@@ -6,11 +6,20 @@ function crear(db, trabajo) {
     return db
         .prepare(
             `
-            INSERT INTO portafolio (titulo, descripcion, imagen_url, tipo_reparacion)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO portafolio (
+                titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
         `
         )
-        .run(trabajo.titulo, trabajo.descripcion, trabajo.imagen_url, trabajo.tipo_reparacion);
+        .run(
+            trabajo.titulo,
+            trabajo.descripcion,
+            trabajo.imagen_url,
+            trabajo.tipo_reparacion,
+            trabajo.fecha_inicio,
+            trabajo.fecha_fin
+        );
 }
 
 function actualizar(db, id, trabajo) {
@@ -18,11 +27,20 @@ function actualizar(db, id, trabajo) {
         .prepare(
             `
             UPDATE portafolio
-            SET titulo = ?, descripcion = ?, imagen_url = ?, tipo_reparacion = ?
+            SET titulo = ?, descripcion = ?, imagen_url = ?, tipo_reparacion = ?,
+                fecha_inicio = ?, fecha_fin = ?
             WHERE id = ?
         `
         )
-        .run(trabajo.titulo, trabajo.descripcion, trabajo.imagen_url, trabajo.tipo_reparacion, id);
+        .run(
+            trabajo.titulo,
+            trabajo.descripcion,
+            trabajo.imagen_url,
+            trabajo.tipo_reparacion,
+            trabajo.fecha_inicio,
+            trabajo.fecha_fin,
+            id
+        );
 }
 
 function eliminar(db, id) {
