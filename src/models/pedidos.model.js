@@ -1,6 +1,4 @@
 // crea un pedido de reparacion o de producto
-// si no se pasa usuario_id, se guarda como null (compatibilidad con formularios anonimos)
-// el tipo por defecto es 'reparacion'
 function crear(db, pedido) {
     return db
         .prepare(
@@ -28,8 +26,6 @@ function crear(db, pedido) {
         );
 }
 
-// listar los pedidos, con la opcion de filtrar por tipo
-// tipo puede ser "reparacion", "producto" o null (todos)
 function listar(db, tipo = null) {
     if (tipo) {
         return db
@@ -45,6 +41,10 @@ function actualizarEstado(db, id, estado) {
 
 function actualizarNotas(db, id, notas) {
     return db.prepare('UPDATE pedidos SET notas = ? WHERE id = ?').run(notas, id);
+}
+
+function actualizarPresupuesto(db, id, presupuesto) {
+    return db.prepare('UPDATE pedidos SET presupuesto = ? WHERE id = ?').run(presupuesto, id);
 }
 
 function eliminar(db, id) {
@@ -116,6 +116,10 @@ function listarPorUsuario(db, usuarioId) {
                 p.estado,
                 p.creado_en,
                 p.notas,
+                p.tipo,
+                p.modelo_celular,
+                p.descripcion_problema,
+                p.presupuesto,
                 COUNT(pi.id) AS total_items,
                 COALESCE(SUM(pi.cantidad), 0) AS total_unidades,
                 COALESCE(SUM(pi.subtotal), 0) AS total_precio
@@ -133,7 +137,18 @@ function obtenerPedidoDeUsuario(db, pedidoId, usuarioId) {
     return db
         .prepare(
             `
-            SELECT id, estado, creado_en, notas
+            SELECT
+                id,
+                estado,
+                creado_en,
+                notas,
+                tipo,
+                modelo_celular,
+                descripcion_problema,
+                presupuesto,
+                nombre_cliente,
+                telefono,
+                email
             FROM pedidos
             WHERE id = ? AND usuario_id = ?
         `
@@ -176,6 +191,7 @@ function obtenerPedidoConItems(db, pedidoId) {
                 p.estado,
                 p.creado_en,
                 p.notas,
+                p.presupuesto,
                 p.usuario_id,
                 p.tipo,
                 u.usuario AS usuario_nombre
@@ -202,11 +218,54 @@ function obtenerPedidoConItems(db, pedidoId) {
     };
 }
 
+// CANCELAR UN PEDIDO DEL USUARIO
+// solo se puede cancelar si esta en estado pendiente
+// si es una compra, se devuelve el stock de cada producto. todo se hace en una transaccion para no dejar datos inconsistentes
+
+function cancelarPedidoDeUsuario(db, pedidoId, usuarioId) {
+    const pedido = db
+        .prepare('SELECT id, tipo, estado FROM pedidos WHERE id = ? AND usuario_id = ?')
+        .get(pedidoId, usuarioId);
+
+    if (!pedido) {
+        return { error: 'Pedido no encontrado.' };
+    }
+
+    const estadoActual = (pedido.estado || 'pendiente').toLowerCase().trim();
+    if (estadoActual !== 'pendiente') {
+        return { error: 'Solo se pueden cancelar pedidos en estado pendiente.' };
+    }
+
+    const ejecutarCancelacion = db.transaction(() => {
+        // si es una compra, restaurar el stock de cada producto
+        if (pedido.tipo === 'producto') {
+            const items = db
+                .prepare('SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?')
+                .all(pedidoId);
+
+            const updateStock = db.prepare('UPDATE productos SET stock = stock + ? WHERE id = ?');
+            for (const item of items) {
+                if (item.producto_id) {
+                    updateStock.run(item.cantidad, item.producto_id);
+                }
+            }
+        }
+
+        // cambiar el estado del pedido a cancelado
+        db.prepare("UPDATE pedidos SET estado = 'cancelado' WHERE id = ?").run(pedidoId);
+
+        return { success: true };
+    });
+
+    return ejecutarCancelacion();
+}
+
 module.exports = {
     crear,
     listar,
     actualizarEstado,
     actualizarNotas,
+    actualizarPresupuesto,
     eliminar,
     crearPedidoDeUsuario,
     insertarItem,
@@ -214,4 +273,5 @@ module.exports = {
     obtenerPedidoDeUsuario,
     listarItemsDePedido,
     obtenerPedidoConItems,
+    cancelarPedidoDeUsuario,
 };

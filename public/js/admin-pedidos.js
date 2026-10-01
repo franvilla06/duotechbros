@@ -1,6 +1,6 @@
-// LÓGICA DE LA PÁGINA "VER PEDIDOS" - DUOTECHBROS ADMIN
-// incluye: ver, cambiar estado, notas internas, buscar, filtrar,
-// ordenar, paginar y exportar csv
+// LOGICA DE LA PAGINA "PEDIDOS DE REPARACION" - DUOTECHBROS ADMIN
+// incluye: ver, cambiar estado, notas internas, presupuesto, buscar,
+// filtrar, ordenar, paginar y exportar csv
 
 const API_PEDIDOS = '/api/pedidos';
 const API_ADMIN_PEDIDOS = '/api/admin/pedidos';
@@ -17,26 +17,24 @@ const buscador = document.getElementById('buscador-pedidos');
 const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
-// MODAL DE NOTAS
+// modal de notas + presupuesto
 const modalNotas = document.getElementById('modal-notas');
 const modalNotasClose = document.getElementById('modal-notas-close');
 const notasInfo = document.getElementById('notas-info');
 const editNotas = document.getElementById('edit-notas');
+const editPresupuesto = document.getElementById('edit-presupuesto');
 const btnNotasCancelar = document.getElementById('btn-notas-cancelar');
 const btnNotasGuardar = document.getElementById('btn-notas-guardar');
 
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 const POR_PAGINA = 10;
 
-// ESTADO LOCAL
 let pedidosOriginales = [];
 let pedidosFiltrados = [];
 let estadoFiltroActivo = 'Todos';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
-
-// pedido actualmente abierto en el modal de notas
 let pedidoNotasActual = null;
 
 // UTILIDADES
@@ -52,6 +50,12 @@ function formatearFecha(fechaISO) {
     const horas = String(fecha.getHours()).padStart(2, '0');
     const minutos = String(fecha.getMinutes()).padStart(2, '0');
     return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
+}
+
+function formatearPrecio(precio) {
+    const num = Number(precio);
+    if (isNaN(num)) return '$0.00';
+    return `$${num.toFixed(2)}`;
 }
 
 function escapar(texto) {
@@ -128,6 +132,7 @@ function exportarCSV() {
         'Modelo del celular',
         'Descripción del problema',
         'Estado',
+        'Presupuesto',
         'Notas internas',
         'Fecha de creación',
     ];
@@ -140,6 +145,7 @@ function exportarCSV() {
         p.modelo_celular,
         p.descripcion_problema,
         capitalizar(p.estado || 'pendiente'),
+        p.presupuesto !== null && p.presupuesto !== undefined ? formatearPrecio(p.presupuesto) : '',
         p.notas || '',
         formatearFecha(p.creado_en),
     ]);
@@ -166,7 +172,7 @@ function exportarCSV() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    mostrarToast(`✅ Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+    mostrarToast(`Se exportaron ${pedidosFiltrados.length} pedido${pedidosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
 }
 
 // FILTROS
@@ -221,14 +227,23 @@ function renderizarPedidos(pedidos) {
     itemsPagina.forEach((p) => {
         const estadoActual = p.estado || 'pendiente';
         const tieneNotas = p.notas && p.notas.trim() !== '';
+        const tienePresupuesto = p.presupuesto !== null && p.presupuesto !== undefined;
 
         const opciones = ESTADOS.map(
             (e) => `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
         ).join('');
 
-        const claseBotonNotas = tieneNotas ? 'btn-notas tiene-notas' : 'btn-notas';
-        const tituloBotonNotas = tieneNotas ? 'Ver/editar notas (tiene notas)' : 'Agregar notas';
-        const iconoNotas = tieneNotas ? 'fa-solid fa-note-sticky' : 'fa-regular fa-note-sticky';
+        // clases del boton de notas (indica si hay notas o presupuesto)
+        let claseBotonNotas = 'btn-notas';
+        if (tieneNotas || tienePresupuesto) claseBotonNotas += ' tiene-notas';
+
+        const tituloBotonNotas = tieneNotas || tienePresupuesto
+            ? 'Ver/editar notas y presupuesto'
+            : 'Agregar notas o presupuesto';
+
+        const iconoNotas = tieneNotas || tienePresupuesto
+            ? 'fa-solid fa-note-sticky'
+            : 'fa-regular fa-note-sticky';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -261,7 +276,6 @@ function renderizarPedidos(pedidos) {
         tbody.appendChild(tr);
     });
 
-    // EVENTOS DE LOS SELECTS DE ESTADO
     tbody.querySelectorAll('.estado-select').forEach((select) => {
         select.addEventListener('change', () => {
             const id = select.dataset.id;
@@ -272,7 +286,6 @@ function renderizarPedidos(pedidos) {
         });
     });
 
-    // EVENTOS DE LOS BOTONES DE NOTAS
     tbody.querySelectorAll('.btn-notas').forEach((btn) => {
         btn.addEventListener('click', () => {
             const id = btn.dataset.id;
@@ -281,7 +294,7 @@ function renderizarPedidos(pedidos) {
     });
 }
 
-// APLICAR FILTROS + ORDEN + PAGINACIÓN
+// APLICAR FILTROS
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -383,9 +396,9 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
             const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
             if (pedido) pedido.estado = nuevoEstado;
 
-            mostrarToast(`✅ Estado actualizado a "${capitalizar(nuevoEstado)}"`);
+            mostrarToast(`Estado actualizado a "${capitalizar(nuevoEstado)}"`);
 
-            // volver a renderizar sin resetear la página
+            // volver a renderizar sin resetear la pagina
             let filtrados = [...pedidosOriginales];
             if (estadoFiltroActivo !== 'Todos') {
                 filtrados = filtrados.filter(
@@ -408,18 +421,18 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
             renderizarPedidos(pedidosFiltrados);
         } else {
             selectElement.value = estadoAnterior;
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar'}`, true);
         }
     } catch (error) {
         console.error('Error al cambiar estado:', error);
         selectElement.value = estadoAnterior;
-        mostrarToast('❌ No se pudo conectar con el servidor', true);
+        mostrarToast('No se pudo conectar con el servidor', true);
     } finally {
         selectElement.disabled = false;
     }
 }
 
-// MODAL: NOTAS INTERNAS
+// MODAL: NOTAS + PRESUPUESTO
 
 function abrirModalNotas(id) {
     const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
@@ -452,64 +465,87 @@ function abrirModalNotas(id) {
         </div>
     `;
 
-    // rellenar el textarea con la nota actual
+    // rellenar campos
     editNotas.value = pedido.notas || '';
+    editPresupuesto.value = pedido.presupuesto !== null && pedido.presupuesto !== undefined
+        ? Number(pedido.presupuesto).toFixed(2)
+        : '';
 
-    // mostrar el modal
     modalNotas.classList.add('modal-visible');
-    editNotas.focus();
+    editPresupuesto.focus();
 }
 
 function cerrarModalNotas() {
     modalNotas.classList.remove('modal-visible');
     editNotas.value = '';
+    editPresupuesto.value = '';
     pedidoNotasActual = null;
 }
 
-async function guardarNotas() {
+async function guardarNotasYPresupuesto() {
     if (!pedidoNotasActual) return;
 
     const id = pedidoNotasActual.id;
     const notas = editNotas.value.trim();
+    const presupuestoTexto = editPresupuesto.value.trim();
+
+    // validar presupuesto si se cargo
+    let presupuestoValor = null;
+    if (presupuestoTexto !== '') {
+        const num = Number(presupuestoTexto);
+        if (isNaN(num) || num < 0) {
+            mostrarToast('El presupuesto debe ser un número mayor o igual a 0.', true);
+            return;
+        }
+        presupuestoValor = Number(num.toFixed(2));
+    }
 
     btnNotasGuardar.disabled = true;
     btnNotasGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
     try {
-        const respuesta = await fetchAdmin(`${API_ADMIN_PEDIDOS}/${id}/notas`, {
-            method: 'PUT',
-            body: JSON.stringify({ notas }),
-        });
+        // guardar presupuesto y notas en paralelo
+        const [resPresupuesto, resNotas] = await Promise.all([
+            fetchAdmin(`${API_ADMIN_PEDIDOS}/${id}/presupuesto`, {
+                method: 'PUT',
+                body: JSON.stringify({ presupuesto: presupuestoValor }),
+            }),
+            fetchAdmin(`${API_ADMIN_PEDIDOS}/${id}/notas`, {
+                method: 'PUT',
+                body: JSON.stringify({ notas }),
+            }),
+        ]);
 
-        const resultado = await respuesta.json();
+        const resultadoPresupuesto = await resPresupuesto.json();
+        const resultadoNotas = await resNotas.json();
 
-        if (resultado.success) {
+        if (resultadoPresupuesto.success && resultadoNotas.success) {
             // actualizar el pedido en el estado local
-            pedidoNotasActual.notas = resultado.notas;
+            pedidoNotasActual.notas = resultadoNotas.notas;
+            pedidoNotasActual.presupuesto = resultadoPresupuesto.presupuesto;
 
-            const mensaje = resultado.notas
-                ? '✅ Nota guardada correctamente.'
-                : '✅ Nota eliminada.';
-            mostrarToast(mensaje);
+            mostrarToast('Cambios guardados correctamente.');
 
             cerrarModalNotas();
             renderizarPedidos(pedidosFiltrados);
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar la nota.'}`, true);
+            const error = resultadoPresupuesto.error || resultadoNotas.error || 'No se pudo guardar.';
+            mostrarToast(`Error: ${error}`, true);
         }
     } catch (error) {
-        console.error('Error al guardar notas:', error);
-        mostrarToast('❌ No se pudo conectar con el servidor', true);
+        console.error('Error al guardar:', error);
+        mostrarToast('No se pudo conectar con el servidor', true);
     } finally {
         btnNotasGuardar.disabled = false;
-        btnNotasGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar Nota';
+        btnNotasGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar';
     }
 }
 
-// EVENTOS DEL MODAL DE NOTAS
+// EVENTOS DEL MODAL
+
 modalNotasClose.addEventListener('click', cerrarModalNotas);
 btnNotasCancelar.addEventListener('click', cerrarModalNotas);
-btnNotasGuardar.addEventListener('click', guardarNotas);
+btnNotasGuardar.addEventListener('click', guardarNotasYPresupuesto);
 
 modalNotas.addEventListener('click', (e) => {
     if (e.target === modalNotas) cerrarModalNotas();

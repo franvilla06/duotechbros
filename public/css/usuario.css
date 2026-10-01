@@ -2048,3 +2048,519 @@
         font-size: 1rem;
     }
 }
+
+/* TIPO DE PEDIDO (BADGE) */
+
+.pedido-tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.pedido-tipo-reparacion {
+    background-color: #e8f4ff;
+    color: #0b4a62;
+    border: 1px solid #c1e8ff;
+}
+
+.pedido-tipo-compra {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #a3cfbb;
+}
+
+/* CABECERA DE LA TARJETA SEGUN TIPO */
+
+.pedido-card-header-reparacion {
+    background: linear-gradient(135deg, #f7feff 0%, #e0eaf0 100%);
+}
+
+.pedido-card-header-compra {
+    background: linear-gradient(135deg, #f7feff 0%, #e8f4ff 100%);
+}
+
+/* DESCRIPCION DEL PEDIDO DE REPARACION EN LA TARJETA */
+
+.pedido-card-descripcion {
+    margin: 0;
+    color: #666;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    flex: 1;
+    min-width: 200px;
+    padding-left: 4px;
+    border-left: 3px solid #e0eaf0;
+    padding: 8px 12px;
+    background-color: #f7fafe;
+    border-radius: 6px;
+}
+
+/* DETALLE DEL PEDIDO DE REPARACION EN EL MODAL */
+
+.pedido-reparacion-bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 0;
+}
+
+.pedido-reparacion-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f4f8;
+}
+
+.pedido-reparacion-linea:last-child {
+    border-bottom: none;
+}
+
+.pedido-reparacion-label {
+    color: #777;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pedido-reparacion-valor {
+    color: #0b4a62;
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-align: right;
+}
+
+.pedido-reparacion-linea-descripcion {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pedido-reparacion-texto {
+    margin: 0;
+    color: #333;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    background-color: #f7feff;
+    border: 1px solid #d0e6ea;
+    border-radius: 8px;
+    padding: 12px 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ACLARACION EN EL MODAL */
+
+.pedido-modal-sin-precio {
+    color: #f59e0b !important;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.pedido-modal-aclaracion {
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+    color: #777;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pedido-modal-aclaracion i {
+    color: #0a9396;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .pedido-reparacion-linea {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .pedido-reparacion-valor {
+        text-align: left;
+    }
+
+    .pedido-card-descripcion {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
+/* TOOLBAR DE PEDIDOS DEL USUARIO (FILTROS + BUSCADOR) */
+
+.pedidos-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(11, 74, 98, 0.08);
+    padding: 20px 24px;
+}
+
+/* BUSCADOR */
+
+.pedidos-buscador {
+    position: relative;
+    width: 100%;
+}
+
+.pedidos-buscador i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+.pedidos-buscador input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid #d0e6ea;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    background-color: #f7feff;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    color: #333;
+}
+
+.pedidos-buscador input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* FILTROS */
+
+.pedidos-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.filtro-grupo:not(:last-child)::after {
+    content: "";
+    width: 1px;
+    height: 20px;
+    background-color: #e0eaf0;
+    margin-left: 4px;
+}
+
+.filtro-chip {
+    background-color: #f0f4f8;
+    color: #0b4a62;
+    border: 1px solid transparent;
+    padding: 7px 15px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s, color 0.2s, transform 0.15s,
+        box-shadow 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filtro-chip i {
+    font-size: 0.72rem;
+}
+
+.filtro-chip:hover {
+    background-color: #e0e8ef;
+    transform: translateY(-1px);
+}
+
+.filtro-chip.active {
+    background: linear-gradient(135deg, #007bff 0%, #0a9396 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
+}
+
+/* BOTON LIMPIAR */
+
+.btn-limpiar {
+    background-color: transparent;
+    border: 1px solid #d0e6ea;
+    color: #0b4a62;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.btn-limpiar:hover:not(:disabled) {
+    background-color: #f0f4f8;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.btn-limpiar:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-limpiar i {
+    font-size: 0.72rem;
+}
+
+/* CONTADOR DE PEDIDOS */
+
+.pedidos-contador {
+    color: #0b4a62;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding-left: 4px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+    .pedidos-toolbar {
+        padding: 16px;
+    }
+
+    .pedidos-filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtro-grupo {
+        justify-content: flex-start;
+    }
+
+    .filtro-grupo:not(:last-child)::after {
+        display: none;
+    }
+
+    .btn-limpiar {
+        margin-left: 0;
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+/* PRESUPUESTO EN LA TARJETA DE REPARACION */
+
+.pedido-card-presupuesto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0f9ff;
+    border: 1px solid #c1e8ff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    gap: 12px;
+}
+
+.pedido-card-presupuesto-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0b4a62;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pedido-card-presupuesto-valor {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #007bff;
+    letter-spacing: -0.01em;
+}
+
+/* ACCIONES DEL MODAL (BOTON CANCELAR) */
+
+.pedido-modal-acciones {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eef3f6;
+}
+
+.pedido-btn-cancelar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 8px 20px rgba(220, 53, 69, 0.25);
+}
+
+.pedido-btn-cancelar:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(220, 53, 69, 0.35);
+}
+
+.pedido-btn-cancelar:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.pedido-btn-cancelar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* BOTONES DE ACCION DEL MODAL (REPETIR + CANCELAR) */
+
+.pedido-modal-botones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* BOTON "VOLVER A PEDIR" EN EL MODAL */
+
+.pedido-btn-repetir {
+    flex: 1;
+    min-width: 160px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    background: linear-gradient(135deg, #007bff 0%, #0a9396 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.25);
+}
+
+.pedido-btn-repetir:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(0, 123, 255, 0.35);
+}
+
+.pedido-btn-repetir:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.pedido-btn-repetir:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ajustar el boton cancelar cuando esta al lado del repetir */
+.pedido-modal-botones .pedido-btn-cancelar {
+    flex: 1;
+    min-width: 160px;
+    width: auto;
+}
+
+/* BOTON "VOLVER A PEDIR" EN LA TARJETA DE LA COMPRA */
+
+.pedido-btn-repetir-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #e8f4ff;
+    color: #007bff;
+    border: 1px solid #c1e8ff;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s;
+    margin-right: 8px;
+}
+
+.pedido-btn-repetir-card:hover:not(:disabled) {
+    background-color: #007bff;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.pedido-btn-repetir-card:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.pedido-btn-repetir-card:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* la tarjeta de la compra tiene 2 botones en el footer: alineacion horizontal */
+
+.pedido-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .pedido-modal-botones {
+        flex-direction: column;
+    }
+
+    .pedido-btn-repetir,
+    .pedido-modal-botones .pedido-btn-cancelar {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .pedido-card-footer {
+        justify-content: stretch;
+    }
+
+    .pedido-btn-repetir-card,
+    .pedido-card-footer .pedido-btn-detalle {
+        flex: 1;
+        justify-content: center;
+        margin-right: 0;
+    }
+}

@@ -1,11 +1,11 @@
-// LÓGICA COMÚN DEL PANEL DE ADMINISTRACIÓN - DUOTECHBROS
+// LOGICA COMUN DEL PANEL DE ADMINISTRACION - DUOTECHBROS
 
 const API_BASE = '/api';
 
 const INTERVALO_NOTIFICACIONES = 30000;
 let intervalNotificaciones = null;
 
-// UTILIDADES DE SESIÓN
+// UTILIDADES DE SESION
 
 function guardarSesion(usuario, token) {
     sessionStorage.setItem('adminLogueado', 'true');
@@ -113,15 +113,8 @@ function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden,
     });
 }
 
-// PAGINACIÓN
+// PAGINACION
 
-/**
- * crea un paginador con estado propio.
- * @param {string} contenedorId - id del div donde se dibujan los controles.
- * @param {number} porPagina - cantidad de items por página.
- * @param {Function} onCambiarPagina - callback que se ejecuta al cambiar de página.
- * @returns objeto con métodos para actualizar el total, resetear, y paginar.
- */
 function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
     let paginaActual = 1;
     let totalItems = 0;
@@ -133,9 +126,6 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
         return Math.max(1, Math.ceil(totalItems / porPagina));
     }
 
-    /**
-    * genera la lista de botones a mostrar con elipsis si hay muchas páginas.
-     */
     function generarBotones(pag) {
         const total = getTotalPaginas();
         const botones = [];
@@ -195,7 +185,6 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
             </div>
         `;
 
-        // NÚMEROS DE PÁGINA
         contenedor.querySelectorAll('.pag-num').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const num = parseInt(btn.dataset.pagina);
@@ -207,7 +196,6 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
             });
         });
 
-        // BOTONES PREV/NEXT
         const btnPrev = contenedor.querySelector('.pag-prev');
         const btnNext = contenedor.querySelector('.pag-next');
 
@@ -233,7 +221,6 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
     }
 
     return {
-        /** actualiza el total de items. si resetPagina=true, vuelve a la página 1. */
         actualizar(nuevoTotal, resetPagina = false) {
             totalItems = nuevoTotal;
             if (resetPagina) paginaActual = 1;
@@ -244,11 +231,9 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
 
             render();
         },
-        /** devuelve el slice de items correspondiente a la página actual. */
         getItems(items) {
             return items.slice((paginaActual - 1) * porPagina, paginaActual * porPagina);
         },
-        /** devuelve la página actual. */
         getPaginaActual() {
             return paginaActual;
         },
@@ -256,24 +241,42 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
 }
 
 // NOTIFICACIONES DE PEDIDOS PENDIENTES
+// inserta dos badges: uno en reparaciones y otro en compras del sidebar
 
-function insertarBadgeNotificacion() {
-    const linkPedidos = document.querySelector('.admin-nav a[href="pedidos.html"]');
-    if (!linkPedidos) return;
-    if (linkPedidos.querySelector('.notif-badge')) return;
+// configura un badge para el link indicado
+function configurarBadge(tipo) {
+    // tipo puede ser "reparacion" o "producto"
+    const href = tipo === 'reparacion' ? 'pedidos.html' : 'compras.html';
+    const badgeId = `notif-badge-${tipo}`;
+
+    const link = document.querySelector(`.admin-nav a[href="${href}"]`);
+    if (!link) return;
+
+    // evitar duplicados
+    if (link.querySelector('.notif-badge')) return;
 
     const badge = document.createElement('span');
     badge.className = 'notif-badge';
-    badge.id = 'notif-badge';
+    badge.id = badgeId;
     badge.style.display = 'none';
     badge.textContent = '0';
 
-    linkPedidos.appendChild(badge);
+    link.appendChild(badge);
 }
 
+// inserta ambos badges en el sidebar
+function insertarBadgesNotificacion() {
+    configurarBadge('reparacion');
+    configurarBadge('producto');
+}
+
+// actualiza los dos badges consultando la api de pedidos
 async function actualizarNotificaciones() {
-    const badge = document.getElementById('notif-badge');
-    if (!badge) return;
+    const badgeReparacion = document.getElementById('notif-badge-reparacion');
+    const badgeProducto = document.getElementById('notif-badge-producto');
+
+    // si ninguna pagina tiene los badges, no hace nada
+    if (!badgeReparacion && !badgeProducto) return;
 
     try {
         const respuesta = await fetch(`${API_BASE}/pedidos`);
@@ -281,16 +284,42 @@ async function actualizarNotificaciones() {
 
         const pedidos = await respuesta.json();
 
-        const pendientes = pedidos.filter(
-            (p) => (p.estado || 'pendiente').toLowerCase().trim() === 'pendiente'
-        ).length;
+        // contar pendientes por tipo
+        let pendientesReparacion = 0;
+        let pendientesProducto = 0;
 
-        if (pendientes > 0) {
-            badge.textContent = pendientes > 99 ? '99+' : String(pendientes);
-            badge.style.display = 'inline-flex';
-            badge.title = `${pendientes} pedido${pendientes !== 1 ? 's' : ''} pendiente${pendientes !== 1 ? 's' : ''}`;
-        } else {
-            badge.style.display = 'none';
+        pedidos.forEach((p) => {
+            const estado = (p.estado || 'pendiente').toLowerCase().trim();
+            if (estado !== 'pendiente') return;
+
+            const tipo = p.tipo || 'reparacion';
+            if (tipo === 'reparacion') {
+                pendientesReparacion++;
+            } else if (tipo === 'producto') {
+                pendientesProducto++;
+            }
+        });
+
+        // actualizar badge de reparaciones
+        if (badgeReparacion) {
+            if (pendientesReparacion > 0) {
+                badgeReparacion.textContent = pendientesReparacion > 99 ? '99+' : String(pendientesReparacion);
+                badgeReparacion.style.display = 'inline-flex';
+                badgeReparacion.title = `${pendientesReparacion} reparacion${pendientesReparacion !== 1 ? 'es' : ''} pendiente${pendientesReparacion !== 1 ? 's' : ''}`;
+            } else {
+                badgeReparacion.style.display = 'none';
+            }
+        }
+
+        // actualizar badge de compras
+        if (badgeProducto) {
+            if (pendientesProducto > 0) {
+                badgeProducto.textContent = pendientesProducto > 99 ? '99+' : String(pendientesProducto);
+                badgeProducto.style.display = 'inline-flex';
+                badgeProducto.title = `${pendientesProducto} compra${pendientesProducto !== 1 ? 's' : ''} pendiente${pendientesProducto !== 1 ? 's' : ''}`;
+            } else {
+                badgeProducto.style.display = 'none';
+            }
         }
     } catch (error) {
         console.warn('No se pudieron cargar las notificaciones:', error.message);
@@ -298,14 +327,14 @@ async function actualizarNotificaciones() {
 }
 
 function iniciarNotificaciones() {
-    insertarBadgeNotificacion();
+    insertarBadgesNotificacion();
     actualizarNotificaciones();
 
     if (intervalNotificaciones) clearInterval(intervalNotificaciones);
     intervalNotificaciones = setInterval(actualizarNotificaciones, INTERVALO_NOTIFICACIONES);
 }
 
-// PROTECCIÓN DE PÁGINAS + INICIALIZACIÓN
+// PROTECCION DE PAGINAS + INICIALIZACION
 
 function protegerPagina() {
     if (!estaLogueado()) {
@@ -330,7 +359,7 @@ function protegerPagina() {
     iniciarNotificaciones();
 }
 
-// LÓGICA DE LOGIN
+// LOGICA DE LOGIN
 
 const formLogin = document.getElementById('form-login');
 
@@ -395,7 +424,7 @@ if (formLogin) {
     }
 }
 
-// PROTECCIÓN AUTOMÁTICA DE PÁGINAS INTERNAS
+// PROTECCION AUTOMATICA DE PAGINAS INTERNAS
 
 document.addEventListener('DOMContentLoaded', () => {
     if (document.body.dataset.adminProtected === 'true') {

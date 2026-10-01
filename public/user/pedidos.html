@@ -12,7 +12,6 @@
     <title>Mis Pedidos - DuotechBros</title>
   </head>
   <body class="pedidos-user-page">
-    <!-- HEADER -->
     <header class="perfil-header">
       <div class="perfil-header-inner">
         <a href="/index.html" class="perfil-brand">
@@ -30,15 +29,33 @@
       </div>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="perfil-main">
       <div class="perfil-contenedor">
         <div class="perfil-titulo">
           <h1><i class="fas fa-box"></i> Mis Pedidos</h1>
-          <p>Historial de todos los pedidos que enviaste desde tu carrito.</p>
+          <p>Historial de todos los pedidos que enviaste desde tu carrito y las reparaciones solicitadas.</p>
         </div>
 
-        <!-- ESTADO: CARGANDO -->
+        <div class="pedidos-toolbar" id="pedidos-toolbar" style="display: none">
+          <div class="pedidos-buscador">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              id="buscador-pedidos"
+              placeholder="Buscar por numero, modelo o descripcion..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="pedidos-filtros">
+            <div class="filtro-grupo" id="filtros-tipo"></div>
+            <div class="filtro-grupo" id="filtros-estado"></div>
+            <button class="btn-limpiar" id="btn-limpiar" disabled>
+              <i class="fas fa-times"></i> Limpiar
+            </button>
+          </div>
+        </div>
+
         <div class="perfil-seccion" id="estado-cargando">
           <div class="pedidos-estado">
             <i class="fas fa-spinner fa-spin"></i>
@@ -46,19 +63,25 @@
           </div>
         </div>
 
-        <!-- ESTADO: VACIO -->
         <div class="perfil-seccion" id="estado-vacio" style="display: none">
           <div class="pedidos-estado">
             <i class="fas fa-box-open"></i>
             <p>Todavia no hiciste ningun pedido</p>
-            <small>Cuando envíes un pedido desde tu carrito, va a aparecer aca.</small>
+            <small>Cuando envies un pedido desde tu carrito o solicites una reparacion, va a aparecer aca.</small>
             <a href="/tienda.html" class="pedidos-btn-ir">
               <i class="fas fa-shopping-bag"></i> Ir a la tienda
             </a>
           </div>
         </div>
 
-        <!-- ESTADO: ERROR -->
+        <div class="perfil-seccion" id="estado-sin-resultados" style="display: none">
+          <div class="pedidos-estado">
+            <i class="fas fa-search"></i>
+            <p>No se encontraron pedidos</p>
+            <small>Proba con otro termino de busqueda o quita los filtros.</small>
+          </div>
+        </div>
+
         <div class="perfil-seccion" id="estado-error" style="display: none">
           <div class="pedidos-estado">
             <i class="fas fa-exclamation-triangle"></i>
@@ -67,14 +90,14 @@
           </div>
         </div>
 
-        <!-- LISTA DE PEDIDOS -->
-        <div class="pedidos-lista" id="pedidos-lista" style="display: none">
-          <!-- se llena dinamicamente -->
+        <div class="pedidos-contador" id="pedidos-contador" style="display: none">
+          <span id="contador-texto">0 pedidos</span>
         </div>
+
+        <div class="pedidos-lista" id="pedidos-lista" style="display: none"></div>
       </div>
     </main>
 
-    <!-- MODAL: DETALLE DEL PEDIDO -->
     <div class="modal-overlay" id="modal-detalle">
       <div class="modal-card pedido-modal">
         <div class="modal-header">
@@ -87,17 +110,12 @@
           </button>
         </div>
 
-        <div class="pedido-modal-info" id="modal-info">
-          <!-- se llena dinamicamente -->
-        </div>
+        <div class="pedido-modal-info" id="modal-info"></div>
+        <div class="pedido-modal-items" id="modal-items"></div>
+        <div class="pedido-modal-total" id="modal-total"></div>
 
-        <div class="pedido-modal-items" id="modal-items">
-          <!-- se llena dinamicamente -->
-        </div>
-
-        <div class="pedido-modal-total" id="modal-total">
-          <!-- se llena dinamicamente -->
-        </div>
+        <!-- ACCIONES: boton de cancelar (solo si esta pendiente) -->
+        <div class="pedido-modal-acciones" id="modal-acciones"></div>
       </div>
     </div>
 

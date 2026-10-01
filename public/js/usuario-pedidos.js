@@ -1,12 +1,22 @@
 // LOGICA DE LA PAGINA DE MIS PEDIDOS DEL USUARIO
+// muestra reparaciones y compras, con filtros, buscador, cancelacion y repeticion
 
 const API_PEDIDOS_USUARIO = '/api/usuarios/pedidos';
 
-// referencias a los elementos del dom
 const usuarioSpan = document.getElementById('pedidos-usuario');
+
+const pedidosToolbar = document.getElementById('pedidos-toolbar');
+const buscador = document.getElementById('buscador-pedidos');
+const filtrosTipo = document.getElementById('filtros-tipo');
+const filtrosEstado = document.getElementById('filtros-estado');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+const pedidosContador = document.getElementById('pedidos-contador');
+const contadorTexto = document.getElementById('contador-texto');
 
 const estadoCargando = document.getElementById('estado-cargando');
 const estadoVacio = document.getElementById('estado-vacio');
+const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoError = document.getElementById('estado-error');
 const pedidosLista = document.getElementById('pedidos-lista');
 
@@ -17,9 +27,16 @@ const modalPedidoId = document.getElementById('modal-pedido-id');
 const modalInfo = document.getElementById('modal-info');
 const modalItems = document.getElementById('modal-items');
 const modalTotal = document.getElementById('modal-total');
+const modalAcciones = document.getElementById('modal-acciones');
 
-// estado local
+const TIPOS = ['Todos', 'Reparacion', 'Compra'];
+const ESTADOS = ['Todos', 'pendiente', 'en proceso', 'completado', 'cancelado'];
+
 let pedidosActuales = [];
+let tipoFiltroActivo = 'Todos';
+let estadoFiltroActivo = 'Todos';
+let textoBusqueda = '';
+let pedidoDetalleActual = null;
 
 // UTILIDADES DE SESION
 
@@ -87,78 +104,285 @@ function capitalizar(texto) {
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+function esReparacion(pedido) {
+    return (pedido.tipo || 'reparacion') === 'reparacion';
+}
+
+function mostrarToast(mensaje, tipo = 'exito') {
+    const anterior = document.getElementById('toast-publico');
+    if (anterior) anterior.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-publico';
+    toast.className = `toast-publico toast-${tipo}`;
+    toast.innerHTML = `<span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// FILTROS
+
+function construirFiltrosTipo() {
+    filtrosTipo.innerHTML = '';
+
+    TIPOS.forEach((tipo) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (tipo === tipoFiltroActivo ? ' active' : '');
+        chip.dataset.tipo = tipo;
+
+        let icono = '';
+        if (tipo === 'Reparacion') icono = '<i class="fas fa-tools"></i> ';
+        else if (tipo === 'Compra') icono = '<i class="fas fa-shopping-bag"></i> ';
+        chip.innerHTML = icono + tipo;
+
+        chip.addEventListener('click', () => {
+            tipoFiltroActivo = tipo;
+            filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.tipo === tipo);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosTipo.appendChild(chip);
+    });
+}
+
+function construirFiltrosEstado() {
+    filtrosEstado.innerHTML = '';
+
+    ESTADOS.forEach((estado) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'filtro-chip' + (estado === estadoFiltroActivo ? ' active' : '');
+        chip.dataset.estado = estado;
+        chip.textContent = estado === 'Todos' ? 'Todos los estados' : capitalizar(estado);
+
+        chip.addEventListener('click', () => {
+            estadoFiltroActivo = estado;
+            filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+                c.classList.toggle('active', c.dataset.estado === estado);
+            });
+            aplicarFiltros();
+        });
+
+        filtrosEstado.appendChild(chip);
+    });
+}
+
+function actualizarBotonLimpiar() {
+    const hayFiltro =
+        tipoFiltroActivo !== 'Todos' ||
+        estadoFiltroActivo !== 'Todos' ||
+        textoBusqueda.trim() !== '';
+    btnLimpiar.disabled = !hayFiltro;
+}
+
+function aplicarFiltros() {
+    estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
+    estadoError.style.display = 'none';
+
+    let filtrados = [...pedidosActuales];
+
+    if (tipoFiltroActivo === 'Reparacion') {
+        filtrados = filtrados.filter((p) => esReparacion(p));
+    } else if (tipoFiltroActivo === 'Compra') {
+        filtrados = filtrados.filter((p) => !esReparacion(p));
+    }
+
+    if (estadoFiltroActivo !== 'Todos') {
+        filtrados = filtrados.filter(
+            (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
+        );
+    }
+
+    if (textoBusqueda.trim() !== '') {
+        const q = textoBusqueda.trim().toLowerCase();
+        filtrados = filtrados.filter((p) => {
+            const numero = String(p.id).padStart(4, '0');
+            const modelo = (p.modelo_celular || '').toLowerCase();
+            const descripcion = (p.descripcion_problema || '').toLowerCase();
+            return numero.includes(q) || modelo.includes(q) || descripcion.includes(q);
+        });
+    }
+
+    if (pedidosActuales.length === 0) {
+        estadoVacio.style.display = 'block';
+        pedidosLista.style.display = 'none';
+        pedidosContador.style.display = 'none';
+        actualizarBotonLimpiar();
+        return;
+    }
+
+    if (filtrados.length === 0) {
+        estadoSinResultados.style.display = 'block';
+        pedidosLista.style.display = 'none';
+        pedidosContador.style.display = 'none';
+        actualizarBotonLimpiar();
+        return;
+    }
+
+    pedidosLista.style.display = 'flex';
+    pedidosContador.style.display = 'block';
+    actualizarContador(filtrados.length);
+
+    renderizarPedidos(filtrados);
+    actualizarBotonLimpiar();
+}
+
+function actualizarContador(cantidad) {
+    contadorTexto.textContent = `${cantidad} pedido${cantidad !== 1 ? 's' : ''}`;
+}
+
 // RENDERIZADO
 
 function renderizarPedidos(pedidos) {
     pedidosLista.innerHTML = '';
 
-    if (!pedidos || pedidos.length === 0) {
-        estadoVacio.style.display = 'block';
-        pedidosLista.style.display = 'none';
-        return;
-    }
-
-    estadoVacio.style.display = 'none';
-    pedidosLista.style.display = 'flex';
-
     pedidos.forEach((pedido) => {
-        const estadoActual = pedido.estado || 'pendiente';
-        const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
-        const totalItems = Number(pedido.total_items) || 0;
-        const totalUnidades = Number(pedido.total_unidades) || 0;
-
         const card = document.createElement('article');
         card.className = 'pedido-card';
+        card.dataset.tipo = esReparacion(pedido) ? 'reparacion' : 'compra';
 
-        card.innerHTML = `
-            <div class="pedido-card-header">
-                <div class="pedido-card-id">
-                    <i class="fas fa-receipt"></i>
-                    <strong>Pedido ${pedidoIdFormateado}</strong>
-                </div>
-                <span class="badge ${claseBadgeEstado(estadoActual)}">
-                    ${capitalizar(estadoActual)}
-                </span>
-            </div>
-
-            <div class="pedido-card-body">
-                <div class="pedido-card-info">
-                    <div class="pedido-card-info-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>${formatearFecha(pedido.creado_en)}</span>
-                    </div>
-                    <div class="pedido-card-info-item">
-                        <i class="fas fa-box"></i>
-                        <span>${totalItems} producto${totalItems !== 1 ? 's' : ''}</span>
-                    </div>
-                    <div class="pedido-card-info-item">
-                        <i class="fas fa-cubes"></i>
-                        <span>${totalUnidades} unidad${totalUnidades !== 1 ? 'es' : ''}</span>
-                    </div>
-                </div>
-
-                <div class="pedido-card-total">
-                    <span class="pedido-card-total-label">Total</span>
-                    <span class="pedido-card-total-valor">${formatearPrecio(pedido.total_precio)}</span>
-                </div>
-            </div>
-
-            <div class="pedido-card-footer">
-                <button type="button" class="pedido-btn-detalle" data-id="${pedido.id}">
-                    <i class="fas fa-eye"></i> Ver detalle
-                </button>
-            </div>
-        `;
+        card.innerHTML = esReparacion(pedido)
+            ? generarCardReparacion(pedido)
+            : generarCardCompra(pedido);
 
         pedidosLista.appendChild(card);
     });
 
-    // asignar eventos a los botones
     pedidosLista.querySelectorAll('.pedido-btn-detalle').forEach((btn) => {
         btn.addEventListener('click', () => {
             abrirModalDetalle(btn.dataset.id);
         });
     });
+
+    // boton "repetir" directo en la tarjeta (solo para compras no canceladas)
+    pedidosLista.querySelectorAll('.pedido-btn-repetir-card').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            repetirPedido(btn.dataset.id);
+        });
+    });
+}
+
+function generarCardReparacion(pedido) {
+    const estadoActual = pedido.estado || 'pendiente';
+    const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
+    const modelo = pedido.modelo_celular || '—';
+    const descripcion = pedido.descripcion_problema || 'Sin descripcion';
+
+    const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
+    const presupuestoHTML = tienePresupuesto
+        ? `<div class="pedido-card-presupuesto">
+               <span class="pedido-card-presupuesto-label">Presupuesto</span>
+               <span class="pedido-card-presupuesto-valor">${formatearPrecio(pedido.presupuesto)}</span>
+           </div>`
+        : '';
+
+    return `
+        <div class="pedido-card-header pedido-card-header-reparacion">
+            <div class="pedido-card-id">
+                <i class="fas fa-tools"></i>
+                <strong>Pedido de Reparacion ${pedidoIdFormateado}</strong>
+                <span class="pedido-tipo-badge pedido-tipo-reparacion">
+                    <i class="fas fa-tools"></i> Reparacion
+                </span>
+            </div>
+            <span class="badge ${claseBadgeEstado(estadoActual)}">
+                ${capitalizar(estadoActual)}
+            </span>
+        </div>
+
+        <div class="pedido-card-body">
+            <div class="pedido-card-info">
+                <div class="pedido-card-info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>${formatearFecha(pedido.creado_en)}</span>
+                </div>
+                <div class="pedido-card-info-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>${escapar(modelo)}</span>
+                </div>
+            </div>
+
+            <p class="pedido-card-descripcion">
+                ${escapar(descripcion)}
+            </p>
+
+            ${presupuestoHTML}
+        </div>
+
+        <div class="pedido-card-footer">
+            <button type="button" class="pedido-btn-detalle" data-id="${pedido.id}">
+                <i class="fas fa-eye"></i> Ver detalle
+            </button>
+        </div>
+    `;
+}
+
+function generarCardCompra(pedido) {
+    const estadoActual = pedido.estado || 'pendiente';
+    const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
+    const totalItems = Number(pedido.total_items) || 0;
+    const totalUnidades = Number(pedido.total_unidades) || 0;
+
+    // mostrar "repetir" si no esta cancelado
+    const mostrarRepetir = estadoActual.toLowerCase() !== 'cancelado';
+    const botonRepetir = mostrarRepetir
+        ? `<button type="button" class="pedido-btn-repetir-card" data-id="${pedido.id}">
+               <i class="fas fa-redo"></i> Volver a pedir
+           </button>`
+        : '';
+
+    return `
+        <div class="pedido-card-header pedido-card-header-compra">
+            <div class="pedido-card-id">
+                <i class="fas fa-shopping-bag"></i>
+                <strong>Compra ${pedidoIdFormateado}</strong>
+                <span class="pedido-tipo-badge pedido-tipo-compra">
+                    <i class="fas fa-shopping-bag"></i> Compra
+                </span>
+            </div>
+            <span class="badge ${claseBadgeEstado(estadoActual)}">
+                ${capitalizar(estadoActual)}
+            </span>
+        </div>
+
+        <div class="pedido-card-body">
+            <div class="pedido-card-info">
+                <div class="pedido-card-info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>${formatearFecha(pedido.creado_en)}</span>
+                </div>
+                <div class="pedido-card-info-item">
+                    <i class="fas fa-box"></i>
+                    <span>${totalItems} producto${totalItems !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="pedido-card-info-item">
+                    <i class="fas fa-cubes"></i>
+                    <span>${totalUnidades} unidad${totalUnidades !== 1 ? 'es' : ''}</span>
+                </div>
+            </div>
+
+            <div class="pedido-card-total">
+                <span class="pedido-card-total-label">Total</span>
+                <span class="pedido-card-total-valor">${formatearPrecio(pedido.total_precio)}</span>
+            </div>
+        </div>
+
+        <div class="pedido-card-footer">
+            ${botonRepetir}
+            <button type="button" class="pedido-btn-detalle" data-id="${pedido.id}">
+                <i class="fas fa-eye"></i> Ver detalle
+            </button>
+        </div>
+    `;
 }
 
 // CARGAR PEDIDOS
@@ -166,8 +390,11 @@ function renderizarPedidos(pedidos) {
 async function cargarPedidos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
+    estadoSinResultados.style.display = 'none';
     estadoError.style.display = 'none';
     pedidosLista.style.display = 'none';
+    pedidosToolbar.style.display = 'none';
+    pedidosContador.style.display = 'none';
 
     try {
         const respuesta = await fetch(API_PEDIDOS_USUARIO, {
@@ -187,7 +414,13 @@ async function cargarPedidos() {
         const data = await respuesta.json();
         pedidosActuales = data.pedidos || [];
 
-        renderizarPedidos(pedidosActuales);
+        construirFiltrosTipo();
+        construirFiltrosEstado();
+        aplicarFiltros();
+
+        if (pedidosActuales.length > 0) {
+            pedidosToolbar.style.display = 'flex';
+        }
     } catch (error) {
         console.error('Error al cargar pedidos:', error);
         estadoError.style.display = 'block';
@@ -199,11 +432,12 @@ async function cargarPedidos() {
 // MODAL DE DETALLE
 
 async function abrirModalDetalle(pedidoId) {
-    // mostrar el modal con estado de carga
     modalPedidoId.textContent = `#${String(pedidoId).padStart(4, '0')}`;
     modalInfo.innerHTML = '<p class="pedido-modal-cargando"><i class="fas fa-spinner fa-spin"></i> Cargando...</p>';
     modalItems.innerHTML = '';
     modalTotal.innerHTML = '';
+    modalAcciones.innerHTML = '';
+    pedidoDetalleActual = null;
     modalDetalle.classList.add('modal-visible');
 
     try {
@@ -228,18 +462,163 @@ async function abrirModalDetalle(pedidoId) {
             return;
         }
 
-        renderizarDetalle(data.pedido);
+        pedidoDetalleActual = data.pedido;
+
+        if (esReparacion(data.pedido)) {
+            renderizarDetalleReparacion(data.pedido);
+        } else {
+            renderizarDetalleCompra(data.pedido);
+        }
+
+        renderizarAccionesPedido(data.pedido);
     } catch (error) {
         console.error('Error al cargar detalle:', error);
         modalInfo.innerHTML = '<p class="pedido-modal-error">No se pudo conectar con el servidor.</p>';
     }
 }
 
-function renderizarDetalle(pedido) {
+// renderiza los botones de accion del modal
+// "Cancelar" solo si esta pendiente
+// "Volver a pedir" solo si es compra y no esta cancelado
+function renderizarAccionesPedido(pedido) {
+    const estado = (pedido.estado || 'pendiente').toLowerCase().trim();
+    const botones = [];
+
+    // boton repetir (solo compras no canceladas)
+    if (!esReparacion(pedido) && estado !== 'cancelado') {
+        botones.push(`
+            <button type="button" class="pedido-btn-repetir" id="btn-repetir-pedido">
+                <i class="fas fa-redo"></i> Volver a pedir
+            </button>
+        `);
+    }
+
+    // boton cancelar (solo si esta pendiente)
+    if (estado === 'pendiente') {
+        botones.push(`
+            <button type="button" class="pedido-btn-cancelar" id="btn-cancelar-pedido">
+                <i class="fas fa-times-circle"></i> Cancelar pedido
+            </button>
+        `);
+    }
+
+    // mensaje explicativo segun el caso
+    let aclaracion = '';
+    if (estado === 'pendiente' && !esReparacion(pedido)) {
+        aclaracion = 'Podes cancelar el pedido o volver a pedir los mismos productos.';
+    } else if (estado === 'pendiente') {
+        aclaracion = 'Podes cancelar el pedido mientras este pendiente.';
+    } else if (!esReparacion(pedido) && estado !== 'cancelado') {
+        aclaracion = 'Podes volver a pedir los mismos productos.';
+    }
+
+    if (botones.length === 0) {
+        modalAcciones.innerHTML = '';
+        return;
+    }
+
+    modalAcciones.innerHTML = `
+        <div class="pedido-modal-botones">
+            ${botones.join('')}
+        </div>
+        ${aclaracion ? `<p class="pedido-modal-aclaracion"><i class="fas fa-info-circle"></i> ${aclaracion}</p>` : ''}
+    `;
+
+    // asignar eventos
+    const btnRepetir = document.getElementById('btn-repetir-pedido');
+    if (btnRepetir) {
+        btnRepetir.addEventListener('click', () => repetirPedido(pedido.id));
+    }
+
+    const btnCancelar = document.getElementById('btn-cancelar-pedido');
+    if (btnCancelar) {
+        btnCancelar.addEventListener('click', () => cancelarPedido(pedido.id));
+    }
+}
+
+function renderizarDetalleReparacion(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
 
-    // info general
     modalInfo.innerHTML = `
+        <div class="pedido-modal-info-linea">
+            <span class="pedido-modal-info-label">Tipo</span>
+            <span class="pedido-tipo-badge pedido-tipo-reparacion">
+                <i class="fas fa-tools"></i> Reparacion
+            </span>
+        </div>
+        <div class="pedido-modal-info-linea">
+            <span class="pedido-modal-info-label">Fecha</span>
+            <span class="pedido-modal-info-valor">${formatearFecha(pedido.creado_en)}</span>
+        </div>
+        <div class="pedido-modal-info-linea">
+            <span class="pedido-modal-info-label">Estado</span>
+            <span class="badge ${claseBadgeEstado(estadoActual)}">
+                ${capitalizar(estadoActual)}
+            </span>
+        </div>
+        <div class="pedido-modal-info-linea">
+            <span class="pedido-modal-info-label">Cliente</span>
+            <span class="pedido-modal-info-valor">${escapar(pedido.nombre_cliente)}</span>
+        </div>
+        <div class="pedido-modal-info-linea">
+            <span class="pedido-modal-info-label">Contacto</span>
+            <span class="pedido-modal-info-valor">${escapar(pedido.telefono || pedido.email)}</span>
+        </div>
+    `;
+
+    modalItems.innerHTML = `
+        <h3 class="pedido-modal-items-titulo">
+            <i class="fas fa-mobile-alt"></i> Detalle del equipo
+        </h3>
+        <div class="pedido-reparacion-bloque">
+            <div class="pedido-reparacion-linea">
+                <span class="pedido-reparacion-label">Modelo</span>
+                <span class="pedido-reparacion-valor">${escapar(pedido.modelo_celular || '—')}</span>
+            </div>
+            <div class="pedido-reparacion-linea pedido-reparacion-linea-descripcion">
+                <span class="pedido-reparacion-label">Descripcion del problema</span>
+                <p class="pedido-reparacion-texto">${escapar(pedido.descripcion_problema || 'Sin descripcion')}</p>
+            </div>
+        </div>
+    `;
+
+    const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
+
+    if (tienePresupuesto) {
+        modalTotal.innerHTML = `
+            <div class="pedido-modal-total-linea pedido-modal-total-final">
+                <span>Presupuesto</span>
+                <strong>${formatearPrecio(pedido.presupuesto)}</strong>
+            </div>
+            <p class="pedido-modal-aclaracion">
+                <i class="fas fa-info-circle"></i>
+                Este es el monto estimado para la reparacion. Puede variar segun la revision final.
+            </p>
+        `;
+    } else {
+        modalTotal.innerHTML = `
+            <div class="pedido-modal-total-linea">
+                <span>Presupuesto</span>
+                <strong class="pedido-modal-sin-precio">A confirmar</strong>
+            </div>
+            <p class="pedido-modal-aclaracion">
+                <i class="fas fa-info-circle"></i>
+                El presupuesto se confirma una vez que revisamos el equipo.
+            </p>
+        `;
+    }
+}
+
+function renderizarDetalleCompra(pedido) {
+    const estadoActual = pedido.estado || 'pendiente';
+
+    modalInfo.innerHTML = `
+        <div class="pedido-modal-info-linea">
+            <span class="pedido-modal-info-label">Tipo</span>
+            <span class="pedido-tipo-badge pedido-tipo-compra">
+                <i class="fas fa-shopping-bag"></i> Compra
+            </span>
+        </div>
         <div class="pedido-modal-info-linea">
             <span class="pedido-modal-info-label">Fecha</span>
             <span class="pedido-modal-info-valor">${formatearFecha(pedido.creado_en)}</span>
@@ -256,7 +635,6 @@ function renderizarDetalle(pedido) {
         </div>
     `;
 
-    // items
     if (!pedido.items || pedido.items.length === 0) {
         modalItems.innerHTML = '<p class="pedido-modal-vacio">Este pedido no tiene items registrados.</p>';
     } else {
@@ -282,7 +660,6 @@ function renderizarDetalle(pedido) {
         `;
     }
 
-    // total
     modalTotal.innerHTML = `
         <div class="pedido-modal-total-linea">
             <span>Productos</span>
@@ -301,7 +678,142 @@ function renderizarDetalle(pedido) {
 
 function cerrarModalDetalle() {
     modalDetalle.classList.remove('modal-visible');
+    pedidoDetalleActual = null;
 }
+
+// CANCELAR PEDIDO
+
+async function cancelarPedido(pedidoId) {
+    const confirmar = confirm(
+        'Estas seguro de que queres cancelar este pedido?\n\n' +
+            'Esta accion no se puede revertir.'
+    );
+    if (!confirmar) return;
+
+    const btnCancelar = document.getElementById('btn-cancelar-pedido');
+    if (btnCancelar) {
+        btnCancelar.disabled = true;
+        btnCancelar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelando...';
+    }
+
+    try {
+        const respuesta = await fetch(`${API_PEDIDOS_USUARIO}/${pedidoId}/cancelar`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${obtenerTokenUsuario()}`,
+            },
+        });
+
+        if (respuesta.status === 401) {
+            cerrarSesionUsuario();
+            window.location.href = '/user/login.html';
+            return;
+        }
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarToast('Pedido cancelado correctamente.', 'exito');
+            cerrarModalDetalle();
+            cargarPedidos();
+        } else {
+            mostrarToast(resultado.error || 'No se pudo cancelar el pedido.', 'error');
+            if (btnCancelar) {
+                btnCancelar.disabled = false;
+                btnCancelar.innerHTML = '<i class="fas fa-times-circle"></i> Cancelar pedido';
+            }
+        }
+    } catch (error) {
+        console.error('Error al cancelar pedido:', error);
+        mostrarToast('No se pudo conectar con el servidor.', 'error');
+        if (btnCancelar) {
+            btnCancelar.disabled = false;
+            btnCancelar.innerHTML = '<i class="fas fa-times-circle"></i> Cancelar pedido';
+        }
+    }
+}
+
+// REPETIR PEDIDO
+
+async function repetirPedido(pedidoId) {
+    // identificar el boton que disparo la accion (puede estar en la tarjeta o en el modal)
+    const btnModal = document.getElementById('btn-repetir-pedido');
+    const btnCard = document.querySelector(`.pedido-btn-repetir-card[data-id="${pedidoId}"]`);
+
+    // guardar el contenido original de cada boton para restaurarlo despues
+    const contenidoModal = btnModal ? btnModal.innerHTML : null;
+    const contenidoCard = btnCard ? btnCard.innerHTML : null;
+
+    if (btnModal) {
+        btnModal.disabled = true;
+        btnModal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+    }
+    if (btnCard) {
+        btnCard.disabled = true;
+        btnCard.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+
+    try {
+        const respuesta = await fetch(`${API_PEDIDOS_USUARIO}/${pedidoId}/repetir`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${obtenerTokenUsuario()}`,
+            },
+        });
+
+        if (respuesta.status === 401) {
+            cerrarSesionUsuario();
+            window.location.href = '/user/login.html';
+            return;
+        }
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            // cerrar el modal si estaba abierto
+            cerrarModalDetalle();
+
+            // armar mensaje
+            const cantidad = resultado.agregados || 0;
+            let mensaje = `Se agregaron ${cantidad} producto${cantidad !== 1 ? 's' : ''} al carrito.`;
+
+            if (resultado.omitidos && resultado.omitidos.length > 0) {
+                mensaje += '\n\nProductos omitidos:\n- ' + resultado.omitidos.join('\n- ');
+            }
+
+            mensaje += '\n\nQueres ir al carrito ahora?';
+
+            const irAlCarrito = confirm(mensaje);
+            if (irAlCarrito) {
+                window.location.href = '/user/carrito.html';
+                return;
+            }
+
+            mostrarToast('Productos agregados al carrito.', 'exito');
+        } else {
+            // si el error trae detalle de omitidos, lo mostramos
+            let mensaje = resultado.error || 'No se pudo repetir el pedido.';
+            if (resultado.omitidos && resultado.omitidos.length > 0) {
+                mensaje += '\n\n' + resultado.omitidos.join('\n');
+            }
+            alert(mensaje);
+        }
+    } catch (error) {
+        console.error('Error al repetir pedido:', error);
+        mostrarToast('No se pudo conectar con el servidor.', 'error');
+    } finally {
+        if (btnModal) {
+            btnModal.disabled = false;
+            btnModal.innerHTML = contenidoModal;
+        }
+        if (btnCard) {
+            btnCard.disabled = false;
+            btnCard.innerHTML = contenidoCard;
+        }
+    }
+}
+
+// EVENTOS DEL MODAL
 
 modalClose.addEventListener('click', cerrarModalDetalle);
 
@@ -313,6 +825,29 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modalDetalle.classList.contains('modal-visible')) {
         cerrarModalDetalle();
     }
+});
+
+// EVENTOS
+
+buscador.addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    aplicarFiltros();
+});
+
+btnLimpiar.addEventListener('click', () => {
+    textoBusqueda = '';
+    buscador.value = '';
+    tipoFiltroActivo = 'Todos';
+    estadoFiltroActivo = 'Todos';
+
+    filtrosTipo.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.tipo === 'Todos');
+    });
+    filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.estado === 'Todos');
+    });
+
+    aplicarFiltros();
 });
 
 // INICIO
