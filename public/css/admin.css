@@ -2534,3 +2534,236 @@ table.admin-table th.th-ordenable.activo {
         justify-content: center;
     }
 }
+
+/* GRID DE GRAFICOS */
+
+.graficos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.grafico-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.grafico-card-full {
+    margin-top: 20px;
+}
+
+.grafico-wrapper {
+    position: relative;
+    height: 280px;
+    width: 100%;
+    margin: 12px 0;
+}
+
+.grafico-wrapper-barras {
+    height: 400px;
+}
+
+.grafico-nota {
+    margin: 12px 0 0;
+    font-size: 0.8rem;
+    color: #888;
+    text-align: center;
+    font-weight: 600;
+    padding-top: 10px;
+    border-top: 1px solid #eef3f6;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1024px) {
+    .graficos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grafico-wrapper {
+        height: 260px;
+    }
+
+    .grafico-wrapper-barras {
+        height: 380px;
+    }
+}
+
+@media (max-width: 600px) {
+    .grafico-wrapper {
+        height: 240px;
+    }
+
+    .grafico-wrapper-barras {
+        height: 420px;
+    }
+
+    .grafico-nota {
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================================
+   AJUSTES DE COMPACIDAD DEL DASHBOARD
+   ============================================================ */
+
+/* reducir el padding de las cards del dashboard */
+.admin-main .admin-card {
+    padding: 18px 22px;
+}
+
+.admin-main .admin-card h2 {
+    font-size: 1.05rem;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+}
+
+/* reducir el espacio entre bloques del dashboard */
+.admin-main .stats-grid {
+    gap: 16px;
+}
+
+.admin-main .graficos-grid {
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.admin-main .grafico-card-full {
+    margin-top: 16px;
+}
+
+/* altura de los graficos mas compacta */
+.grafico-wrapper {
+    height: 220px;
+    margin: 8px 0 4px;
+}
+
+.grafico-wrapper-barras {
+    height: 320px;
+}
+
+/* nota del grafico mas compacta */
+.grafico-nota {
+    margin: 8px 0 0;
+    padding-top: 8px;
+    font-size: 0.75rem;
+}
+
+/* tablas y grids del dashboard mas compactos */
+.admin-main .stats-grid .stat-card {
+    padding: 16px 18px;
+}
+
+.admin-main .stats-grid .stat-icon {
+    width: 46px;
+    height: 46px;
+}
+
+.admin-main .stats-grid .stat-icon i {
+    font-size: 1.15rem;
+}
+
+.admin-main .stats-grid .stat-numero {
+    font-size: 1.6rem;
+}
+
+.admin-main .stats-grid .stat-label {
+    font-size: 0.78rem;
+}
+
+.admin-main .stats-grid .stat-sub {
+    font-size: 0.68rem;
+    margin-top: 4px;
+}
+
+/* tabla de movimientos mas compacta */
+.admin-main table.admin-table th {
+    padding: 10px 16px;
+    font-size: 0.7rem;
+}
+
+.admin-main table.admin-table td {
+    padding: 11px 16px;
+    font-size: 0.85rem;
+}
+
+.admin-main .table-header {
+    padding: 14px 22px;
+}
+
+.admin-main .table-header h2 {
+    font-size: 1.05rem;
+}
+
+/* margen general entre secciones mas ajustado */
+.admin-main > .admin-card + .admin-card {
+    margin-top: 20px;
+}
+
+.admin-main > .graficos-grid + .admin-card {
+    margin-top: 16px;
+}
+
+/* accesos rapidos mas compactos */
+.dashboard-grid {
+    gap: 14px;
+}
+
+.dashboard-card {
+    padding: 18px;
+}
+
+.dashboard-card i {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+
+.dashboard-card h3 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.dashboard-card p {
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+/* responsive */
+@media (max-width: 1200px) {
+    .grafico-wrapper {
+        height: 200px;
+    }
+
+    .grafico-wrapper-barras {
+        height: 300px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .grafico-wrapper {
+        height: 210px;
+    }
+
+    .grafico-wrapper-barras {
+        height: 340px;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-main .admin-card {
+        padding: 16px 18px;
+    }
+
+    .grafico-wrapper {
+        height: 200px;
+    }
+
+    .grafico-wrapper-barras {
+        height: 380px;
+    }
+
+    .grafico-nota {
+        font-size: 0.7rem;
+    }
+}
