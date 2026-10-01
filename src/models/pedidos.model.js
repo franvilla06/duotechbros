@@ -1,6 +1,4 @@
 // crea un pedido de reparacion o de producto
-// si no se pasa usuario_id, se guarda como null (compatibilidad con formularios anonimos)
-// el tipo por defecto es 'reparacion'
 function crear(db, pedido) {
     return db
         .prepare(
@@ -28,7 +26,6 @@ function crear(db, pedido) {
         );
 }
 
-// listar los pedidos, con la opcion de filtrar por tipo
 function listar(db, tipo = null) {
     if (tipo) {
         return db
@@ -44,6 +41,12 @@ function actualizarEstado(db, id, estado) {
 
 function actualizarNotas(db, id, notas) {
     return db.prepare('UPDATE pedidos SET notas = ? WHERE id = ?').run(notas, id);
+}
+
+// actualizar el presupuesto estimado de una reparacion
+// si el valor es null, se borra el presupuesto cargado
+function actualizarPresupuesto(db, id, presupuesto) {
+    return db.prepare('UPDATE pedidos SET presupuesto = ? WHERE id = ?').run(presupuesto, id);
 }
 
 function eliminar(db, id) {
@@ -106,9 +109,6 @@ function insertarItem(db, item) {
 
 // HISTORIAL DEL USUARIO
 
-// listar todos los pedidos del usuario (reparaciones y compras)
-// incluye el tipo, el modelo del celular y la descripcion del problema
-// para poder mostrar la informacion correcta segun el caso
 function listarPorUsuario(db, usuarioId) {
     return db
         .prepare(
@@ -121,6 +121,7 @@ function listarPorUsuario(db, usuarioId) {
                 p.tipo,
                 p.modelo_celular,
                 p.descripcion_problema,
+                p.presupuesto,
                 COUNT(pi.id) AS total_items,
                 COALESCE(SUM(pi.cantidad), 0) AS total_unidades,
                 COALESCE(SUM(pi.subtotal), 0) AS total_precio
@@ -146,6 +147,7 @@ function obtenerPedidoDeUsuario(db, pedidoId, usuarioId) {
                 tipo,
                 modelo_celular,
                 descripcion_problema,
+                presupuesto,
                 nombre_cliente,
                 telefono,
                 email
@@ -191,6 +193,7 @@ function obtenerPedidoConItems(db, pedidoId) {
                 p.estado,
                 p.creado_en,
                 p.notas,
+                p.presupuesto,
                 p.usuario_id,
                 p.tipo,
                 u.usuario AS usuario_nombre
@@ -222,6 +225,7 @@ module.exports = {
     listar,
     actualizarEstado,
     actualizarNotas,
+    actualizarPresupuesto,
     eliminar,
     crearPedidoDeUsuario,
     insertarItem,

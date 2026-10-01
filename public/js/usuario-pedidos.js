@@ -28,11 +28,9 @@ const modalInfo = document.getElementById('modal-info');
 const modalItems = document.getElementById('modal-items');
 const modalTotal = document.getElementById('modal-total');
 
-// tipos y estados disponibles
 const TIPOS = ['Todos', 'Reparacion', 'Compra'];
 const ESTADOS = ['Todos', 'pendiente', 'en proceso', 'completado', 'cancelado'];
 
-// estado local
 let pedidosActuales = [];
 let tipoFiltroActivo = 'Todos';
 let estadoFiltroActivo = 'Todos';
@@ -104,8 +102,6 @@ function capitalizar(texto) {
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-// TIPO DE PEDIDO
-
 function esReparacion(pedido) {
     return (pedido.tipo || 'reparacion') === 'reparacion';
 }
@@ -121,7 +117,6 @@ function construirFiltrosTipo() {
         chip.className = 'filtro-chip' + (tipo === tipoFiltroActivo ? ' active' : '');
         chip.dataset.tipo = tipo;
 
-        // texto e icono segun el tipo
         let icono = '';
         if (tipo === 'Reparacion') icono = '<i class="fas fa-tools"></i> ';
         else if (tipo === 'Compra') icono = '<i class="fas fa-shopping-bag"></i> ';
@@ -169,47 +164,35 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// APLICAR FILTROS
-
 function aplicarFiltros() {
-    // ocultar todos los estados
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
     estadoError.style.display = 'none';
 
     let filtrados = [...pedidosActuales];
 
-    // filtro por tipo
     if (tipoFiltroActivo === 'Reparacion') {
         filtrados = filtrados.filter((p) => esReparacion(p));
     } else if (tipoFiltroActivo === 'Compra') {
         filtrados = filtrados.filter((p) => !esReparacion(p));
     }
 
-    // filtro por estado
     if (estadoFiltroActivo !== 'Todos') {
         filtrados = filtrados.filter(
             (p) => (p.estado || 'pendiente').toLowerCase() === estadoFiltroActivo.toLowerCase()
         );
     }
 
-    // busqueda por texto
     if (textoBusqueda.trim() !== '') {
         const q = textoBusqueda.trim().toLowerCase();
         filtrados = filtrados.filter((p) => {
             const numero = String(p.id).padStart(4, '0');
             const modelo = (p.modelo_celular || '').toLowerCase();
             const descripcion = (p.descripcion_problema || '').toLowerCase();
-
-            return (
-                numero.includes(q) ||
-                modelo.includes(q) ||
-                descripcion.includes(q)
-            );
+            return numero.includes(q) || modelo.includes(q) || descripcion.includes(q);
         });
     }
 
-    // si no hay pedidos originales, mostrar vacio
     if (pedidosActuales.length === 0) {
         estadoVacio.style.display = 'block';
         pedidosLista.style.display = 'none';
@@ -218,7 +201,6 @@ function aplicarFiltros() {
         return;
     }
 
-    // hay pedidos originales pero los filtros no devolvieron nada
     if (filtrados.length === 0) {
         estadoSinResultados.style.display = 'block';
         pedidosLista.style.display = 'none';
@@ -227,7 +209,6 @@ function aplicarFiltros() {
         return;
     }
 
-    // mostrar lista
     pedidosLista.style.display = 'flex';
     pedidosContador.style.display = 'block';
     actualizarContador(filtrados.length);
@@ -257,7 +238,6 @@ function renderizarPedidos(pedidos) {
         pedidosLista.appendChild(card);
     });
 
-    // asignar eventos a los botones
     pedidosLista.querySelectorAll('.pedido-btn-detalle').forEach((btn) => {
         btn.addEventListener('click', () => {
             abrirModalDetalle(btn.dataset.id);
@@ -270,6 +250,15 @@ function generarCardReparacion(pedido) {
     const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
     const modelo = pedido.modelo_celular || '—';
     const descripcion = pedido.descripcion_problema || 'Sin descripcion';
+
+    // mostrar presupuesto si existe
+    const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
+    const presupuestoHTML = tienePresupuesto
+        ? `<div class="pedido-card-presupuesto">
+               <span class="pedido-card-presupuesto-label">Presupuesto</span>
+               <span class="pedido-card-presupuesto-valor">${formatearPrecio(pedido.presupuesto)}</span>
+           </div>`
+        : '';
 
     return `
         <div class="pedido-card-header pedido-card-header-reparacion">
@@ -300,6 +289,8 @@ function generarCardReparacion(pedido) {
             <p class="pedido-card-descripcion">
                 ${escapar(descripcion)}
             </p>
+
+            ${presupuestoHTML}
         </div>
 
         <div class="pedido-card-footer">
@@ -389,14 +380,10 @@ async function cargarPedidos() {
         const data = await respuesta.json();
         pedidosActuales = data.pedidos || [];
 
-        // construir los filtros la primera vez
         construirFiltrosTipo();
         construirFiltrosEstado();
-
-        // aplicar filtros y renderizar
         aplicarFiltros();
 
-        // mostrar la toolbar solo si hay pedidos
         if (pedidosActuales.length > 0) {
             pedidosToolbar.style.display = 'flex';
         }
@@ -496,16 +483,32 @@ function renderizarDetalleReparacion(pedido) {
         </div>
     `;
 
-    modalTotal.innerHTML = `
-        <div class="pedido-modal-total-linea">
-            <span>Presupuesto</span>
-            <strong class="pedido-modal-sin-precio">A confirmar</strong>
-        </div>
-        <p class="pedido-modal-aclaracion">
-            <i class="fas fa-info-circle"></i>
-            El presupuesto se confirma una vez que revisamos el equipo.
-        </p>
-    `;
+    // si hay presupuesto, mostrarlo; si no, mostrar "a confirmar"
+    const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
+
+    if (tienePresupuesto) {
+        modalTotal.innerHTML = `
+            <div class="pedido-modal-total-linea pedido-modal-total-final">
+                <span>Presupuesto</span>
+                <strong>${formatearPrecio(pedido.presupuesto)}</strong>
+            </div>
+            <p class="pedido-modal-aclaracion">
+                <i class="fas fa-info-circle"></i>
+                Este es el monto estimado para la reparacion. Puede variar segun la revision final.
+            </p>
+        `;
+    } else {
+        modalTotal.innerHTML = `
+            <div class="pedido-modal-total-linea">
+                <span>Presupuesto</span>
+                <strong class="pedido-modal-sin-precio">A confirmar</strong>
+            </div>
+            <p class="pedido-modal-aclaracion">
+                <i class="fas fa-info-circle"></i>
+                El presupuesto se confirma una vez que revisamos el equipo.
+            </p>
+        `;
+    }
 }
 
 function renderizarDetalleCompra(pedido) {

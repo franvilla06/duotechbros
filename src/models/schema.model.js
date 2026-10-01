@@ -60,7 +60,10 @@ function inicializar(db) {
         );
     `);
 
+    // migraciones: agregar columnas nuevas a tablas existentes sin perder datos
+
     const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
+
     const tieneNotas = columnasPedidos.some((col) => col.name === 'notas');
     if (!tieneNotas) {
         db.exec('ALTER TABLE pedidos ADD COLUMN notas TEXT');
@@ -77,6 +80,12 @@ function inicializar(db) {
     if (!tieneTipo) {
         db.exec("ALTER TABLE pedidos ADD COLUMN tipo TEXT DEFAULT 'reparacion'");
         console.log('Migracion aplicada: columna tipo agregada a pedidos');
+    }
+
+    const tienePresupuesto = columnasPedidos.some((col) => col.name === 'presupuesto');
+    if (!tienePresupuesto) {
+        db.exec('ALTER TABLE pedidos ADD COLUMN presupuesto DECIMAL(10,2)');
+        console.log('Migracion aplicada: columna presupuesto agregada a pedidos');
     }
 }
 

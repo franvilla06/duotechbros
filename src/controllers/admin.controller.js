@@ -1,4 +1,4 @@
-// GESTIÓN DE PRODUCTOS
+// GESTION DE PRODUCTOS
 
 const productosModel = require('../models/productos.model');
 const portafolioModel = require('../models/portafolio.model');
@@ -67,7 +67,7 @@ function eliminarProducto(req, res) {
     }
 }
 
-// GESTIÓN DE PORTAFOLIO
+// GESTION DE PORTAFOLIO
 
 function crearTrabajo(req, res) {
     const { titulo, descripcion, imagen_url, tipo_reparacion } = req.body;
@@ -128,7 +128,7 @@ function eliminarTrabajo(req, res) {
     }
 }
 
-// GESTIÓN DE PEDIDOS
+// GESTION DE PEDIDOS
 
 const ESTADOS_VALIDOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 
@@ -160,7 +160,6 @@ function actualizarNotasPedido(req, res) {
     const { id } = req.params;
     const { notas } = req.body;
 
-    // normalizar: string vacío o solo espacios → null (borrar la nota)
     let notasValor = null;
     if (notas !== undefined && notas !== null) {
         const texto = String(notas).trim();
@@ -175,6 +174,42 @@ function actualizarNotasPedido(req, res) {
         }
 
         return res.json({ success: true, message: 'Notas actualizadas', notas: notasValor });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// actualizar el presupuesto estimado de una reparacion
+// acepta un numero mayor o igual a 0, o null para borrar
+function actualizarPresupuestoPedido(req, res) {
+    const { id } = req.params;
+    const { presupuesto } = req.body;
+
+    let presupuestoValor = null;
+
+    if (presupuesto !== undefined && presupuesto !== null && presupuesto !== '') {
+        const num = Number(presupuesto);
+        if (isNaN(num) || num < 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'El presupuesto debe ser un numero mayor o igual a 0.',
+            });
+        }
+        presupuestoValor = Number(num.toFixed(2));
+    }
+
+    try {
+        const info = pedidosModel.actualizarPresupuesto(req.app.locals.db, id, presupuestoValor);
+
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Presupuesto actualizado',
+            presupuesto: presupuestoValor,
+        });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -202,5 +237,6 @@ module.exports = {
     eliminarTrabajo,
     actualizarEstadoPedido,
     actualizarNotasPedido,
+    actualizarPresupuestoPedido,
     eliminarPedido,
 };

@@ -2373,3 +2373,32 @@
         width: 100%;
     }
 }
+
+/* PRESUPUESTO EN LA TARJETA DE REPARACION */
+
+.pedido-card-presupuesto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0f9ff;
+    border: 1px solid #c1e8ff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    gap: 12px;
+}
+
+.pedido-card-presupuesto-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0b4a62;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pedido-card-presupuesto-valor {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #007bff;
+    letter-spacing: -0.01em;
+}

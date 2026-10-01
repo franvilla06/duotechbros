@@ -20,6 +20,7 @@ router.delete('/portafolio/:id', adminController.eliminarTrabajo);
 // PEDIDOS
 router.put('/pedidos/:id', adminController.actualizarEstadoPedido);
 router.put('/pedidos/:id/notas', adminController.actualizarNotasPedido);
+router.put('/pedidos/:id/presupuesto', adminController.actualizarPresupuestoPedido);
 router.delete('/pedidos/:id', adminController.eliminarPedido);
 
 module.exports = router;
