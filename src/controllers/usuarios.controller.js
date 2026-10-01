@@ -1,4 +1,5 @@
 const authService = require('../services/auth.service');
+const carritoService = require('../services/carrito.service');
 const usuariosModel = require('../models/usuarios.model');
 const pedidosModel = require('../models/pedidos.model');
 
@@ -292,6 +293,21 @@ function cancelarPedido(req, res) {
     }
 }
 
+// REPETIR PEDIDO
+// agrega los items de una compra anterior al carrito actual
+
+function repetirPedido(req, res) {
+    const { id } = req.params;
+
+    try {
+        const resultado = carritoService.repetirPedido(req.app.locals.db, req.usuario, id);
+        return res.status(resultado.status).json(resultado.body);
+    } catch (error) {
+        console.error('Error al repetir pedido:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 module.exports = {
     registrar,
     iniciarSesion,
@@ -301,4 +317,5 @@ module.exports = {
     listarMisPedidos,
     obtenerDetallePedido,
     cancelarPedido,
+    repetirPedido,
 };

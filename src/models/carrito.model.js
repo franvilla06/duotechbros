@@ -7,6 +7,11 @@ function obtenerProducto(db, productoId) {
     return db.prepare('SELECT id, stock FROM productos WHERE id = ?').get(productoId);
 }
 
+// devuelve el producto con su nombre para mensajes al usuario
+function obtenerProductoConNombre(db, productoId) {
+    return db.prepare('SELECT id, nombre, stock FROM productos WHERE id = ?').get(productoId);
+}
+
 function buscarItem(db, usuarioId, productoId) {
     return db
         .prepare('SELECT id, cantidad FROM carrito WHERE usuario_id = ? AND producto_id = ?')
@@ -87,6 +92,7 @@ function listarItemsParaPedido(db, usuarioId) {
 module.exports = {
     obtenerUsuarioId,
     obtenerProducto,
+    obtenerProductoConNombre,
     buscarItem,
     actualizarCantidad,
     insertarItem,

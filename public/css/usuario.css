@@ -2444,3 +2444,123 @@
     cursor: not-allowed;
     transform: none;
 }
+
+/* BOTONES DE ACCION DEL MODAL (REPETIR + CANCELAR) */
+
+.pedido-modal-botones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* BOTON "VOLVER A PEDIR" EN EL MODAL */
+
+.pedido-btn-repetir {
+    flex: 1;
+    min-width: 160px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    background: linear-gradient(135deg, #007bff 0%, #0a9396 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.25);
+}
+
+.pedido-btn-repetir:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(0, 123, 255, 0.35);
+}
+
+.pedido-btn-repetir:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.pedido-btn-repetir:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ajustar el boton cancelar cuando esta al lado del repetir */
+.pedido-modal-botones .pedido-btn-cancelar {
+    flex: 1;
+    min-width: 160px;
+    width: auto;
+}
+
+/* BOTON "VOLVER A PEDIR" EN LA TARJETA DE LA COMPRA */
+
+.pedido-btn-repetir-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #e8f4ff;
+    color: #007bff;
+    border: 1px solid #c1e8ff;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s;
+    margin-right: 8px;
+}
+
+.pedido-btn-repetir-card:hover:not(:disabled) {
+    background-color: #007bff;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.pedido-btn-repetir-card:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.pedido-btn-repetir-card:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* la tarjeta de la compra tiene 2 botones en el footer: alineacion horizontal */
+
+.pedido-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .pedido-modal-botones {
+        flex-direction: column;
+    }
+
+    .pedido-btn-repetir,
+    .pedido-modal-botones .pedido-btn-cancelar {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .pedido-card-footer {
+        justify-content: stretch;
+    }
+
+    .pedido-btn-repetir-card,
+    .pedido-card-footer .pedido-btn-detalle {
+        flex: 1;
+        justify-content: center;
+        margin-right: 0;
+    }
+}

@@ -1,5 +1,5 @@
 // LOGICA DE LA PAGINA DE MIS PEDIDOS DEL USUARIO
-// muestra reparaciones y compras, con filtros, buscador y cancelacion
+// muestra reparaciones y compras, con filtros, buscador, cancelacion y repeticion
 
 const API_PEDIDOS_USUARIO = '/api/usuarios/pedidos';
 
@@ -108,7 +108,6 @@ function esReparacion(pedido) {
     return (pedido.tipo || 'reparacion') === 'reparacion';
 }
 
-// mostrar un toast flotante para mensajes rapidos
 function mostrarToast(mensaje, tipo = 'exito') {
     const anterior = document.getElementById('toast-publico');
     if (anterior) anterior.remove();
@@ -263,6 +262,13 @@ function renderizarPedidos(pedidos) {
             abrirModalDetalle(btn.dataset.id);
         });
     });
+
+    // boton "repetir" directo en la tarjeta (solo para compras no canceladas)
+    pedidosLista.querySelectorAll('.pedido-btn-repetir-card').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            repetirPedido(btn.dataset.id);
+        });
+    });
 }
 
 function generarCardReparacion(pedido) {
@@ -326,6 +332,14 @@ function generarCardCompra(pedido) {
     const totalItems = Number(pedido.total_items) || 0;
     const totalUnidades = Number(pedido.total_unidades) || 0;
 
+    // mostrar "repetir" si no esta cancelado
+    const mostrarRepetir = estadoActual.toLowerCase() !== 'cancelado';
+    const botonRepetir = mostrarRepetir
+        ? `<button type="button" class="pedido-btn-repetir-card" data-id="${pedido.id}">
+               <i class="fas fa-redo"></i> Volver a pedir
+           </button>`
+        : '';
+
     return `
         <div class="pedido-card-header pedido-card-header-compra">
             <div class="pedido-card-id">
@@ -363,6 +377,7 @@ function generarCardCompra(pedido) {
         </div>
 
         <div class="pedido-card-footer">
+            ${botonRepetir}
             <button type="button" class="pedido-btn-detalle" data-id="${pedido.id}">
                 <i class="fas fa-eye"></i> Ver detalle
             </button>
@@ -455,7 +470,6 @@ async function abrirModalDetalle(pedidoId) {
             renderizarDetalleCompra(data.pedido);
         }
 
-        // renderizar boton de cancelar si esta pendiente
         renderizarAccionesPedido(data.pedido);
     } catch (error) {
         console.error('Error al cargar detalle:', error);
@@ -463,29 +477,63 @@ async function abrirModalDetalle(pedidoId) {
     }
 }
 
-// renderiza las acciones disponibles al final del modal
-// solo se puede cancelar si el estado es pendiente
+// renderiza los botones de accion del modal
+// "Cancelar" solo si esta pendiente
+// "Volver a pedir" solo si es compra y no esta cancelado
 function renderizarAccionesPedido(pedido) {
     const estado = (pedido.estado || 'pendiente').toLowerCase().trim();
+    const botones = [];
 
-    if (estado !== 'pendiente') {
+    // boton repetir (solo compras no canceladas)
+    if (!esReparacion(pedido) && estado !== 'cancelado') {
+        botones.push(`
+            <button type="button" class="pedido-btn-repetir" id="btn-repetir-pedido">
+                <i class="fas fa-redo"></i> Volver a pedir
+            </button>
+        `);
+    }
+
+    // boton cancelar (solo si esta pendiente)
+    if (estado === 'pendiente') {
+        botones.push(`
+            <button type="button" class="pedido-btn-cancelar" id="btn-cancelar-pedido">
+                <i class="fas fa-times-circle"></i> Cancelar pedido
+            </button>
+        `);
+    }
+
+    // mensaje explicativo segun el caso
+    let aclaracion = '';
+    if (estado === 'pendiente' && !esReparacion(pedido)) {
+        aclaracion = 'Podes cancelar el pedido o volver a pedir los mismos productos.';
+    } else if (estado === 'pendiente') {
+        aclaracion = 'Podes cancelar el pedido mientras este pendiente.';
+    } else if (!esReparacion(pedido) && estado !== 'cancelado') {
+        aclaracion = 'Podes volver a pedir los mismos productos.';
+    }
+
+    if (botones.length === 0) {
         modalAcciones.innerHTML = '';
         return;
     }
 
     modalAcciones.innerHTML = `
-        <button type="button" class="pedido-btn-cancelar" id="btn-cancelar-pedido">
-            <i class="fas fa-times-circle"></i> Cancelar pedido
-        </button>
-        <p class="pedido-modal-aclaracion">
-            <i class="fas fa-info-circle"></i>
-            Si cancelas el pedido, no se podra revertir. Si era una compra, los productos vuelven al stock.
-        </p>
+        <div class="pedido-modal-botones">
+            ${botones.join('')}
+        </div>
+        ${aclaracion ? `<p class="pedido-modal-aclaracion"><i class="fas fa-info-circle"></i> ${aclaracion}</p>` : ''}
     `;
 
-    document.getElementById('btn-cancelar-pedido').addEventListener('click', () => {
-        cancelarPedido(pedido.id);
-    });
+    // asignar eventos
+    const btnRepetir = document.getElementById('btn-repetir-pedido');
+    if (btnRepetir) {
+        btnRepetir.addEventListener('click', () => repetirPedido(pedido.id));
+    }
+
+    const btnCancelar = document.getElementById('btn-cancelar-pedido');
+    if (btnCancelar) {
+        btnCancelar.addEventListener('click', () => cancelarPedido(pedido.id));
+    }
 }
 
 function renderizarDetalleReparacion(pedido) {
@@ -681,6 +729,86 @@ async function cancelarPedido(pedidoId) {
         if (btnCancelar) {
             btnCancelar.disabled = false;
             btnCancelar.innerHTML = '<i class="fas fa-times-circle"></i> Cancelar pedido';
+        }
+    }
+}
+
+// REPETIR PEDIDO
+
+async function repetirPedido(pedidoId) {
+    // identificar el boton que disparo la accion (puede estar en la tarjeta o en el modal)
+    const btnModal = document.getElementById('btn-repetir-pedido');
+    const btnCard = document.querySelector(`.pedido-btn-repetir-card[data-id="${pedidoId}"]`);
+
+    // guardar el contenido original de cada boton para restaurarlo despues
+    const contenidoModal = btnModal ? btnModal.innerHTML : null;
+    const contenidoCard = btnCard ? btnCard.innerHTML : null;
+
+    if (btnModal) {
+        btnModal.disabled = true;
+        btnModal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+    }
+    if (btnCard) {
+        btnCard.disabled = true;
+        btnCard.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+
+    try {
+        const respuesta = await fetch(`${API_PEDIDOS_USUARIO}/${pedidoId}/repetir`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${obtenerTokenUsuario()}`,
+            },
+        });
+
+        if (respuesta.status === 401) {
+            cerrarSesionUsuario();
+            window.location.href = '/user/login.html';
+            return;
+        }
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            // cerrar el modal si estaba abierto
+            cerrarModalDetalle();
+
+            // armar mensaje
+            const cantidad = resultado.agregados || 0;
+            let mensaje = `Se agregaron ${cantidad} producto${cantidad !== 1 ? 's' : ''} al carrito.`;
+
+            if (resultado.omitidos && resultado.omitidos.length > 0) {
+                mensaje += '\n\nProductos omitidos:\n- ' + resultado.omitidos.join('\n- ');
+            }
+
+            mensaje += '\n\nQueres ir al carrito ahora?';
+
+            const irAlCarrito = confirm(mensaje);
+            if (irAlCarrito) {
+                window.location.href = '/user/carrito.html';
+                return;
+            }
+
+            mostrarToast('Productos agregados al carrito.', 'exito');
+        } else {
+            // si el error trae detalle de omitidos, lo mostramos
+            let mensaje = resultado.error || 'No se pudo repetir el pedido.';
+            if (resultado.omitidos && resultado.omitidos.length > 0) {
+                mensaje += '\n\n' + resultado.omitidos.join('\n');
+            }
+            alert(mensaje);
+        }
+    } catch (error) {
+        console.error('Error al repetir pedido:', error);
+        mostrarToast('No se pudo conectar con el servidor.', 'error');
+    } finally {
+        if (btnModal) {
+            btnModal.disabled = false;
+            btnModal.innerHTML = contenidoModal;
+        }
+        if (btnCard) {
+            btnCard.disabled = false;
+            btnCard.innerHTML = contenidoCard;
         }
     }
 }
