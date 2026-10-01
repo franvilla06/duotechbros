@@ -17,6 +17,7 @@ router.delete('/perfil', requiereAuthUsuario, usuariosController.darDeBajaUsuari
 // historial de pedidos
 router.get('/pedidos', requiereAuthUsuario, usuariosController.listarMisPedidos);
 router.get('/pedidos/:id', requiereAuthUsuario, usuariosController.obtenerDetallePedido);
+router.put('/pedidos/:id/cancelar', requiereAuthUsuario, usuariosController.cancelarPedido);
 
 // rutas del carrito
 router.post('/carrito/agregar', requiereAuthUsuario, carritoController.agregarAlCarrito);

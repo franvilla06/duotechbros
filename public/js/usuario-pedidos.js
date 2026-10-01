@@ -1,5 +1,5 @@
 // LOGICA DE LA PAGINA DE MIS PEDIDOS DEL USUARIO
-// muestra reparaciones y compras, con filtros y buscador
+// muestra reparaciones y compras, con filtros, buscador y cancelacion
 
 const API_PEDIDOS_USUARIO = '/api/usuarios/pedidos';
 
@@ -27,6 +27,7 @@ const modalPedidoId = document.getElementById('modal-pedido-id');
 const modalInfo = document.getElementById('modal-info');
 const modalItems = document.getElementById('modal-items');
 const modalTotal = document.getElementById('modal-total');
+const modalAcciones = document.getElementById('modal-acciones');
 
 const TIPOS = ['Todos', 'Reparacion', 'Compra'];
 const ESTADOS = ['Todos', 'pendiente', 'en proceso', 'completado', 'cancelado'];
@@ -35,6 +36,7 @@ let pedidosActuales = [];
 let tipoFiltroActivo = 'Todos';
 let estadoFiltroActivo = 'Todos';
 let textoBusqueda = '';
+let pedidoDetalleActual = null;
 
 // UTILIDADES DE SESION
 
@@ -104,6 +106,24 @@ function capitalizar(texto) {
 
 function esReparacion(pedido) {
     return (pedido.tipo || 'reparacion') === 'reparacion';
+}
+
+// mostrar un toast flotante para mensajes rapidos
+function mostrarToast(mensaje, tipo = 'exito') {
+    const anterior = document.getElementById('toast-publico');
+    if (anterior) anterior.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-publico';
+    toast.className = `toast-publico toast-${tipo}`;
+    toast.innerHTML = `<span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // FILTROS
@@ -251,7 +271,6 @@ function generarCardReparacion(pedido) {
     const modelo = pedido.modelo_celular || '—';
     const descripcion = pedido.descripcion_problema || 'Sin descripcion';
 
-    // mostrar presupuesto si existe
     const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
     const presupuestoHTML = tienePresupuesto
         ? `<div class="pedido-card-presupuesto">
@@ -402,6 +421,8 @@ async function abrirModalDetalle(pedidoId) {
     modalInfo.innerHTML = '<p class="pedido-modal-cargando"><i class="fas fa-spinner fa-spin"></i> Cargando...</p>';
     modalItems.innerHTML = '';
     modalTotal.innerHTML = '';
+    modalAcciones.innerHTML = '';
+    pedidoDetalleActual = null;
     modalDetalle.classList.add('modal-visible');
 
     try {
@@ -426,15 +447,45 @@ async function abrirModalDetalle(pedidoId) {
             return;
         }
 
+        pedidoDetalleActual = data.pedido;
+
         if (esReparacion(data.pedido)) {
             renderizarDetalleReparacion(data.pedido);
         } else {
             renderizarDetalleCompra(data.pedido);
         }
+
+        // renderizar boton de cancelar si esta pendiente
+        renderizarAccionesPedido(data.pedido);
     } catch (error) {
         console.error('Error al cargar detalle:', error);
         modalInfo.innerHTML = '<p class="pedido-modal-error">No se pudo conectar con el servidor.</p>';
     }
+}
+
+// renderiza las acciones disponibles al final del modal
+// solo se puede cancelar si el estado es pendiente
+function renderizarAccionesPedido(pedido) {
+    const estado = (pedido.estado || 'pendiente').toLowerCase().trim();
+
+    if (estado !== 'pendiente') {
+        modalAcciones.innerHTML = '';
+        return;
+    }
+
+    modalAcciones.innerHTML = `
+        <button type="button" class="pedido-btn-cancelar" id="btn-cancelar-pedido">
+            <i class="fas fa-times-circle"></i> Cancelar pedido
+        </button>
+        <p class="pedido-modal-aclaracion">
+            <i class="fas fa-info-circle"></i>
+            Si cancelas el pedido, no se podra revertir. Si era una compra, los productos vuelven al stock.
+        </p>
+    `;
+
+    document.getElementById('btn-cancelar-pedido').addEventListener('click', () => {
+        cancelarPedido(pedido.id);
+    });
 }
 
 function renderizarDetalleReparacion(pedido) {
@@ -483,7 +534,6 @@ function renderizarDetalleReparacion(pedido) {
         </div>
     `;
 
-    // si hay presupuesto, mostrarlo; si no, mostrar "a confirmar"
     const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
 
     if (tienePresupuesto) {
@@ -580,7 +630,62 @@ function renderizarDetalleCompra(pedido) {
 
 function cerrarModalDetalle() {
     modalDetalle.classList.remove('modal-visible');
+    pedidoDetalleActual = null;
 }
+
+// CANCELAR PEDIDO
+
+async function cancelarPedido(pedidoId) {
+    const confirmar = confirm(
+        'Estas seguro de que queres cancelar este pedido?\n\n' +
+            'Esta accion no se puede revertir.'
+    );
+    if (!confirmar) return;
+
+    const btnCancelar = document.getElementById('btn-cancelar-pedido');
+    if (btnCancelar) {
+        btnCancelar.disabled = true;
+        btnCancelar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelando...';
+    }
+
+    try {
+        const respuesta = await fetch(`${API_PEDIDOS_USUARIO}/${pedidoId}/cancelar`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${obtenerTokenUsuario()}`,
+            },
+        });
+
+        if (respuesta.status === 401) {
+            cerrarSesionUsuario();
+            window.location.href = '/user/login.html';
+            return;
+        }
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarToast('Pedido cancelado correctamente.', 'exito');
+            cerrarModalDetalle();
+            cargarPedidos();
+        } else {
+            mostrarToast(resultado.error || 'No se pudo cancelar el pedido.', 'error');
+            if (btnCancelar) {
+                btnCancelar.disabled = false;
+                btnCancelar.innerHTML = '<i class="fas fa-times-circle"></i> Cancelar pedido';
+            }
+        }
+    } catch (error) {
+        console.error('Error al cancelar pedido:', error);
+        mostrarToast('No se pudo conectar con el servidor.', 'error');
+        if (btnCancelar) {
+            btnCancelar.disabled = false;
+            btnCancelar.innerHTML = '<i class="fas fa-times-circle"></i> Cancelar pedido';
+        }
+    }
+}
+
+// EVENTOS DEL MODAL
 
 modalClose.addEventListener('click', cerrarModalDetalle);
 

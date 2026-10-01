@@ -43,8 +43,6 @@ function actualizarNotas(db, id, notas) {
     return db.prepare('UPDATE pedidos SET notas = ? WHERE id = ?').run(notas, id);
 }
 
-// actualizar el presupuesto estimado de una reparacion
-// si el valor es null, se borra el presupuesto cargado
 function actualizarPresupuesto(db, id, presupuesto) {
     return db.prepare('UPDATE pedidos SET presupuesto = ? WHERE id = ?').run(presupuesto, id);
 }
@@ -220,6 +218,48 @@ function obtenerPedidoConItems(db, pedidoId) {
     };
 }
 
+// CANCELAR UN PEDIDO DEL USUARIO
+// solo se puede cancelar si esta en estado pendiente
+// si es una compra, se devuelve el stock de cada producto. todo se hace en una transaccion para no dejar datos inconsistentes
+
+function cancelarPedidoDeUsuario(db, pedidoId, usuarioId) {
+    const pedido = db
+        .prepare('SELECT id, tipo, estado FROM pedidos WHERE id = ? AND usuario_id = ?')
+        .get(pedidoId, usuarioId);
+
+    if (!pedido) {
+        return { error: 'Pedido no encontrado.' };
+    }
+
+    const estadoActual = (pedido.estado || 'pendiente').toLowerCase().trim();
+    if (estadoActual !== 'pendiente') {
+        return { error: 'Solo se pueden cancelar pedidos en estado pendiente.' };
+    }
+
+    const ejecutarCancelacion = db.transaction(() => {
+        // si es una compra, restaurar el stock de cada producto
+        if (pedido.tipo === 'producto') {
+            const items = db
+                .prepare('SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?')
+                .all(pedidoId);
+
+            const updateStock = db.prepare('UPDATE productos SET stock = stock + ? WHERE id = ?');
+            for (const item of items) {
+                if (item.producto_id) {
+                    updateStock.run(item.cantidad, item.producto_id);
+                }
+            }
+        }
+
+        // cambiar el estado del pedido a cancelado
+        db.prepare("UPDATE pedidos SET estado = 'cancelado' WHERE id = ?").run(pedidoId);
+
+        return { success: true };
+    });
+
+    return ejecutarCancelacion();
+}
+
 module.exports = {
     crear,
     listar,
@@ -233,4 +273,5 @@ module.exports = {
     obtenerPedidoDeUsuario,
     listarItemsDePedido,
     obtenerPedidoConItems,
+    cancelarPedidoDeUsuario,
 };

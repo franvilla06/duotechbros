@@ -12,7 +12,6 @@
     <title>Mis Pedidos - DuotechBros</title>
   </head>
   <body class="pedidos-user-page">
-    <!-- HEADER -->
     <header class="perfil-header">
       <div class="perfil-header-inner">
         <a href="/index.html" class="perfil-brand">
@@ -30,7 +29,6 @@
       </div>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="perfil-main">
       <div class="perfil-contenedor">
         <div class="perfil-titulo">
@@ -38,7 +36,6 @@
           <p>Historial de todos los pedidos que enviaste desde tu carrito y las reparaciones solicitadas.</p>
         </div>
 
-        <!-- TOOLBAR: BUSCADOR + FILTROS -->
         <div class="pedidos-toolbar" id="pedidos-toolbar" style="display: none">
           <div class="pedidos-buscador">
             <i class="fas fa-search"></i>
@@ -59,7 +56,6 @@
           </div>
         </div>
 
-        <!-- ESTADO: CARGANDO -->
         <div class="perfil-seccion" id="estado-cargando">
           <div class="pedidos-estado">
             <i class="fas fa-spinner fa-spin"></i>
@@ -67,7 +63,6 @@
           </div>
         </div>
 
-        <!-- ESTADO: VACIO (sin pedidos) -->
         <div class="perfil-seccion" id="estado-vacio" style="display: none">
           <div class="pedidos-estado">
             <i class="fas fa-box-open"></i>
@@ -79,7 +74,6 @@
           </div>
         </div>
 
-        <!-- ESTADO: SIN RESULTADOS (por filtros) -->
         <div class="perfil-seccion" id="estado-sin-resultados" style="display: none">
           <div class="pedidos-estado">
             <i class="fas fa-search"></i>
@@ -88,7 +82,6 @@
           </div>
         </div>
 
-        <!-- ESTADO: ERROR -->
         <div class="perfil-seccion" id="estado-error" style="display: none">
           <div class="pedidos-estado">
             <i class="fas fa-exclamation-triangle"></i>
@@ -97,19 +90,14 @@
           </div>
         </div>
 
-        <!-- CONTADOR -->
         <div class="pedidos-contador" id="pedidos-contador" style="display: none">
           <span id="contador-texto">0 pedidos</span>
         </div>
 
-        <!-- LISTA DE PEDIDOS -->
-        <div class="pedidos-lista" id="pedidos-lista" style="display: none">
-          <!-- se llena dinamicamente -->
-        </div>
+        <div class="pedidos-lista" id="pedidos-lista" style="display: none"></div>
       </div>
     </main>
 
-    <!-- MODAL: DETALLE DEL PEDIDO -->
     <div class="modal-overlay" id="modal-detalle">
       <div class="modal-card pedido-modal">
         <div class="modal-header">
@@ -125,6 +113,9 @@
         <div class="pedido-modal-info" id="modal-info"></div>
         <div class="pedido-modal-items" id="modal-items"></div>
         <div class="pedido-modal-total" id="modal-total"></div>
+
+        <!-- ACCIONES: boton de cancelar (solo si esta pendiente) -->
+        <div class="pedido-modal-acciones" id="modal-acciones"></div>
       </div>
     </div>
 

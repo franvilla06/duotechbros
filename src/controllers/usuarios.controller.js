@@ -186,7 +186,6 @@ function darDeBajaUsuario(req, res) {
 
 // HISTORIAL DE PEDIDOS DEL USUARIO
 
-// listar todos los pedidos hechos por el usuario (reparaciones y compras)
 function listarMisPedidos(req, res) {
     try {
         const usuarioId = usuariosModel.obtenerId(req.app.locals.db, req.usuario);
@@ -210,8 +209,6 @@ function listarMisPedidos(req, res) {
     }
 }
 
-// obtener el detalle de un pedido especifico del usuario
-// incluye todos los campos necesarios para reparaciones y compras
 function obtenerDetallePedido(req, res) {
     const { id } = req.params;
 
@@ -242,7 +239,6 @@ function obtenerDetallePedido(req, res) {
         const totalPrecio = itemsNormalizados.reduce((acc, item) => acc + item.subtotal, 0);
         const totalUnidades = itemsNormalizados.reduce((acc, item) => acc + item.cantidad, 0);
 
-        // devolver todos los campos necesarios para ambos tipos de pedido
         return res.json({
             success: true,
             pedido: {
@@ -251,18 +247,45 @@ function obtenerDetallePedido(req, res) {
                 estado: pedido.estado,
                 creado_en: pedido.creado_en,
                 notas: pedido.notas,
-                // campos de reparacion
+                presupuesto: pedido.presupuesto,
                 modelo_celular: pedido.modelo_celular,
                 descripcion_problema: pedido.descripcion_problema,
                 nombre_cliente: pedido.nombre_cliente,
                 telefono: pedido.telefono,
                 email: pedido.email,
-                // campos de compra
                 items: itemsNormalizados,
                 total_items: itemsNormalizados.length,
                 total_unidades: totalUnidades,
                 total_precio: Number(totalPrecio.toFixed(2)),
             },
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// CANCELAR UN PEDIDO DEL USUARIO
+
+function cancelarPedido(req, res) {
+    const { id } = req.params;
+
+    try {
+        const db = req.app.locals.db;
+
+        const usuarioId = usuariosModel.obtenerId(db, req.usuario);
+        if (!usuarioId) {
+            return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+        }
+
+        const resultado = pedidosModel.cancelarPedidoDeUsuario(db, id, usuarioId);
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Pedido cancelado correctamente.',
         });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -277,4 +300,5 @@ module.exports = {
     darDeBajaUsuario,
     listarMisPedidos,
     obtenerDetallePedido,
+    cancelarPedido,
 };
