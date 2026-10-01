@@ -23,26 +23,26 @@
         </div>
 
         <nav class="admin-nav">
-          <a href="dashboard.html">
-            <i class="fas fa-tachometer-alt"></i>
-            <span>Dashboard</span>
-          </a>
-          <a href="productos.html">
-            <i class="fas fa-box"></i>
-            <span>Gestionar Productos</span>
-          </a>
-          <a href="portafolio.html" class="active">
-            <i class="fas fa-briefcase"></i>
-            <span>Gestionar Portafolio</span>
-          </a>
-          <a href="pedidos.html">
-            <i class="fas fa-tools"></i>
-            <span>Pedidos de Reparación</span>
-          </a>
-          <a href="compras.html">
-            <i class="fas fa-shopping-bag"></i>
-            <span>Compras de Tienda</span>
-          </a>
+          <a href="dashboard.html"
+            ><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a
+          >
+          <a href="productos.html"
+            ><i class="fas fa-box"></i><span>Gestionar Productos</span></a
+          >
+          <a href="portafolio.html" class="active"
+            ><i class="fas fa-briefcase"></i
+            ><span>Gestionar Portafolio</span></a
+          >
+          <a href="pedidos.html"
+            ><i class="fas fa-tools"></i><span>Pedidos de Reparación</span></a
+          >
+          <a href="compras.html"
+            ><i class="fas fa-shopping-bag"></i
+            ><span>Compras de Tienda</span></a
+          >
+          <a href="configuracion.html"
+            ><i class="fas fa-cog"></i><span>Configuración</span></a
+          >
         </nav>
 
         <div class="admin-sidebar-footer">
@@ -106,6 +106,17 @@
                 </select>
               </div>
 
+              <div class="admin-form-row">
+                <div class="admin-form-group">
+                  <label for="fecha_inicio">Fecha de inicio</label>
+                  <input type="date" id="fecha_inicio" name="fecha_inicio" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="fecha_fin">Fecha de finalización</label>
+                  <input type="date" id="fecha_fin" name="fecha_fin" />
+                </div>
+              </div>
+
               <div class="admin-form-group">
                 <label for="imagen_url">URL de la imagen</label>
                 <input
@@ -156,7 +167,8 @@
                     <th>Título</th>
                     <th>Descripción</th>
                     <th>Tipo</th>
-                    <th>Fecha</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
                     <th style="text-align: right">Acciones</th>
                   </tr>
                 </thead>
@@ -235,6 +247,17 @@
               <option value="Cámara">Cámara</option>
               <option value="Otro">Otro</option>
             </select>
+          </div>
+
+          <div class="admin-form-row">
+            <div class="admin-form-group">
+              <label for="edit-fecha_inicio">Fecha de inicio</label>
+              <input type="date" id="edit-fecha_inicio" />
+            </div>
+            <div class="admin-form-group">
+              <label for="edit-fecha_fin">Fecha de finalización</label>
+              <input type="date" id="edit-fecha_fin" />
+            </div>
           </div>
 
           <div class="admin-form-group">

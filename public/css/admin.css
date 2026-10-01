@@ -2392,3 +2392,145 @@ table.admin-table th.th-ordenable.activo {
     margin-top: 6px;
     line-height: 1.4;
 }
+
+/* SUBTITULO EN LAS TARJETAS DE ESTADISTICAS */
+
+.stat-sub {
+    font-size: 0.72rem;
+    color: #888;
+    font-weight: 600;
+    margin-top: 6px;
+    display: block;
+    line-height: 1.3;
+}
+
+.stat-sub .sub-destacado {
+    color: #007bff;
+    font-weight: 800;
+}
+
+.stat-sub .sub-alerta {
+    color: #dc3545;
+    font-weight: 800;
+}
+
+/* GRID DE ESTADOS POR TIPO (2 bloques lado a lado) */
+
+.dashboard-estados-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-estados-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* BADGE DE TIPO EN LA TABLA DE MOVIMIENTOS */
+
+.mov-tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.mov-tipo-badge i {
+    font-size: 0.68rem;
+}
+
+.mov-tipo-reparacion {
+    background-color: #e8f4ff;
+    color: #0b4a62;
+    border: 1px solid #c1e8ff;
+}
+
+.mov-tipo-compra {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #a3cfbb;
+}
+
+/* GRID DE ACCESOS RAPIDOS CON 4 TARJETAS */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+/* RESPONSIVE DEL DASHBOARD */
+
+@media (max-width: 768px) {
+    .stat-sub {
+        font-size: 0.68rem;
+    }
+}
+
+/* FORMULARIO DE CONFIGURACION */
+
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.config-ayuda {
+    display: block;
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+/* icono de redes sociales en las etiquetas */
+.config-form .admin-form-group label i {
+    margin-right: 6px;
+    color: #0a9396;
+}
+
+/* acciones del formulario (fijas abajo) */
+.config-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 0 10px;
+    border-top: 1px solid #eef3f6;
+    position: sticky;
+    bottom: 0;
+    background-color: #f0f4f8;
+    padding-top: 20px;
+    z-index: 10;
+}
+
+.config-acciones .btn-primary {
+    width: auto;
+    padding: 12px 24px;
+}
+
+.config-acciones .btn-secondary {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+}
+
+/* responsive */
+@media (max-width: 600px) {
+    .config-acciones {
+        flex-direction: column-reverse;
+    }
+
+    .config-acciones .btn-primary,
+    .config-acciones .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -23,11 +23,26 @@
         </div>
 
         <nav class="admin-nav">
-          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
-          <a href="productos.html"><i class="fas fa-box"></i><span>Gestionar Productos</span></a>
-          <a href="portafolio.html"><i class="fas fa-briefcase"></i><span>Gestionar Portafolio</span></a>
-          <a href="pedidos.html"><i class="fas fa-tools"></i><span>Pedidos de Reparación</span></a>
-          <a href="compras.html" class="active"><i class="fas fa-shopping-bag"></i><span>Compras de Tienda</span></a>
+          <a href="dashboard.html"
+            ><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a
+          >
+          <a href="productos.html"
+            ><i class="fas fa-box"></i><span>Gestionar Productos</span></a
+          >
+          <a href="portafolio.html"
+            ><i class="fas fa-briefcase"></i
+            ><span>Gestionar Portafolio</span></a
+          >
+          <a href="pedidos.html"
+            ><i class="fas fa-tools"></i><span>Pedidos de Reparación</span></a
+          >
+          <a href="compras.html" class="active"
+            ><i class="fas fa-shopping-bag"></i
+            ><span>Compras de Tienda</span></a
+          >
+          <a href="configuracion.html"
+            ><i class="fas fa-cog"></i><span>Configuración</span></a
+          >
         </nav>
 
         <div class="admin-sidebar-footer">
@@ -45,7 +60,9 @@
         <header class="admin-header">
           <div>
             <h1>Compras de Tienda</h1>
-            <p>Pedidos realizados por los usuarios desde el carrito de la tienda.</p>
+            <p>
+              Pedidos realizados por los usuarios desde el carrito de la tienda.
+            </p>
           </div>
           <button class="btn-refresh" id="btn-refresh">
             <i class="fas fa-sync-alt"></i> Actualizar
@@ -92,18 +109,31 @@
             </table>
           </div>
 
-          <div class="paginacion" id="paginacion-compras" style="display: none"></div>
+          <div
+            class="paginacion"
+            id="paginacion-compras"
+            style="display: none"
+          ></div>
 
           <div class="table-empty" id="estado-vacio" style="display: none">
             <i class="fas fa-shopping-bag"></i>
             <p>No hay compras registradas</p>
-            <small>Cuando un usuario envie un pedido desde el carrito, aparecera aca.</small>
+            <small
+              >Cuando un usuario envie un pedido desde el carrito, aparecera
+              aca.</small
+            >
           </div>
 
-          <div class="table-sin-filtros" id="estado-sin-resultados" style="display: none">
+          <div
+            class="table-sin-filtros"
+            id="estado-sin-resultados"
+            style="display: none"
+          >
             <i class="fas fa-search"></i>
             <p>No se encontraron compras</p>
-            <small>Proba con otro termino de busqueda o quita los filtros.</small>
+            <small
+              >Proba con otro termino de busqueda o quita los filtros.</small
+            >
           </div>
 
           <div class="table-empty" id="estado-cargando">

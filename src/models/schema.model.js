@@ -58,35 +58,73 @@ function inicializar(db) {
             subtotal DECIMAL(10,2) NOT NULL,
             FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE
         );
+        CREATE TABLE IF NOT EXISTS configuracion (
+            clave TEXT PRIMARY KEY,
+            valor TEXT
+        );
     `);
 
     // migraciones: agregar columnas nuevas a tablas existentes sin perder datos
 
+    // migraciones de pedidos
     const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
 
-    const tieneNotas = columnasPedidos.some((col) => col.name === 'notas');
-    if (!tieneNotas) {
+    if (!columnasPedidos.some((col) => col.name === 'notas')) {
         db.exec('ALTER TABLE pedidos ADD COLUMN notas TEXT');
         console.log('Migracion aplicada: columna notas agregada a pedidos');
     }
 
-    const tieneUsuarioId = columnasPedidos.some((col) => col.name === 'usuario_id');
-    if (!tieneUsuarioId) {
+    if (!columnasPedidos.some((col) => col.name === 'usuario_id')) {
         db.exec('ALTER TABLE pedidos ADD COLUMN usuario_id INTEGER');
         console.log('Migracion aplicada: columna usuario_id agregada a pedidos');
     }
 
-    const tieneTipo = columnasPedidos.some((col) => col.name === 'tipo');
-    if (!tieneTipo) {
+    if (!columnasPedidos.some((col) => col.name === 'tipo')) {
         db.exec("ALTER TABLE pedidos ADD COLUMN tipo TEXT DEFAULT 'reparacion'");
         console.log('Migracion aplicada: columna tipo agregada a pedidos');
     }
 
-    const tienePresupuesto = columnasPedidos.some((col) => col.name === 'presupuesto');
-    if (!tienePresupuesto) {
+    if (!columnasPedidos.some((col) => col.name === 'presupuesto')) {
         db.exec('ALTER TABLE pedidos ADD COLUMN presupuesto DECIMAL(10,2)');
         console.log('Migracion aplicada: columna presupuesto agregada a pedidos');
     }
+
+    // migraciones de portafolio
+    const columnasPortafolio = db.prepare('PRAGMA table_info(portafolio)').all();
+
+    if (!columnasPortafolio.some((col) => col.name === 'fecha_inicio')) {
+        db.exec('ALTER TABLE portafolio ADD COLUMN fecha_inicio DATE');
+        console.log('Migracion aplicada: columna fecha_inicio agregada a portafolio');
+    }
+
+    if (!columnasPortafolio.some((col) => col.name === 'fecha_fin')) {
+        db.exec('ALTER TABLE portafolio ADD COLUMN fecha_fin DATE');
+        console.log('Migracion aplicada: columna fecha_fin agregada a portafolio');
+    }
+
+    // valores por defecto de configuracion
+    // solo se insertan si no existen (no sobrescriben valores guardados)
+    const valoresIniciales = {
+        marca_nombre: 'DuotechBros',
+        contacto_email: 'contacto@duotechbros.com',
+        contacto_telefono: '+54 376 123-4567',
+        contacto_whatsapp: '+54 376 123-4567',
+        contacto_direccion: 'Posadas, Misiones',
+        redes_instagram: '',
+        redes_facebook: '',
+        redes_tiktok: '',
+        footer_terminos_url: '',
+        footer_privacidad_url: '',
+        aviso_general: '',
+    };
+
+    const insertarConfig = db.prepare(
+        'INSERT OR IGNORE INTO configuracion (clave, valor) VALUES (?, ?)'
+    );
+
+    Object.entries(valoresIniciales).forEach(([clave, valor]) => {
+        insertarConfig.run(clave, valor);
+    });
 }
 
 module.exports = { inicializar };

@@ -8,9 +8,9 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="css/normalize.css" />
-    <link rel="stylesheet" href="css/pie_encabezado.css" />
-    <link rel="stylesheet" href="css/inicio.css" />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/pie_encabezado.css" />
+    <link rel="stylesheet" href="/css/inicio.css" />
     <title>Inicio - DuotechBros</title>
   </head>
   <body>
@@ -28,18 +28,21 @@
         <div class="nav-usuario" id="nav-usuario"></div>
       </nav>
     </header>
+
     <!-- HERO -->
     <section class="hero">
       <div class="contenido-hero">
         <h1>DuotechBros</h1>
-        <p class="subtitulo">
-          Soluciones tecnológicas para tus dispositivos móviles
-        </p>
+        <p class="subtitulo">Soluciones tecnológicas para tus dispositivos móviles</p>
+
         <div class="ubicacion">
           <i class="fas fa-map-marker-alt"></i>
           <p>Posadas - Misiones</p>
         </div>
-        <a href="pedidos.html" class="btn-hero">Solicitar reparación</a>
+
+        <a href="pedidos.html" class="btn-hero">
+          <i class="fas fa-tools"></i> Solicitar reparación
+        </a>
       </div>
     </section>
 
@@ -47,7 +50,11 @@
     <main class="contenedor">
       <!-- SECCIÓN: ¿QUIÉNES SOMOS? -->
       <section class="nosotros">
-        <h2>¿Quiénes somos?</h2>
+        <div class="seccion-header">
+          <h2>¿Quiénes somos?</h2>
+          <span class="seccion-barra"></span>
+        </div>
+
         <div class="nosotros-grid">
           <div class="nosotros-texto">
             <p>
@@ -61,18 +68,20 @@
               con los mejores accesorios del mercado.
             </p>
           </div>
+
           <div class="nosotros-imagen">
-            <img
-              src="/assets/Equipo duotechbros.jpg"
-              alt="Equipo DuotechBros"
-            />
+            <img src="/assets/Equipo duotechbros.jpg" alt="Equipo DuotechBros" />
           </div>
         </div>
       </section>
 
       <!-- SECCIÓN: SERVICIOS -->
       <section class="servicios">
-        <h2>Nuestros Servicios</h2>
+        <div class="seccion-header seccion-header-centrado">
+          <h2>Nuestros Servicios</h2>
+          <span class="seccion-barra"></span>
+        </div>
+
         <div class="servicios-grid">
           <div class="servicio">
             <div class="icono-servicio">
@@ -84,6 +93,7 @@
               Diagnóstico rápido y garantía en todos nuestros trabajos.
             </p>
           </div>
+
           <div class="servicio">
             <div class="icono-servicio">
               <i class="fas fa-headphones"></i>
@@ -94,6 +104,7 @@
               que necesitás para cuidar tu dispositivo.
             </p>
           </div>
+
           <div class="servicio">
             <div class="icono-servicio">
               <i class="fas fa-tools"></i>
@@ -129,54 +140,73 @@
 
       <!-- SECCIÓN: ¿POR QUÉ ELEGIRNOS? -->
       <section class="por-que-elegirnos">
-        <h2>¿Por qué elegir DuotechBros?</h2>
+        <div class="seccion-header seccion-header-centrado">
+          <h2>¿Por qué elegir DuotechBros?</h2>
+          <span class="seccion-barra"></span>
+        </div>
+
         <div class="beneficios-grid">
           <div class="beneficio">
-            <i class="fas fa-shield-alt"></i>
+            <div class="icono-beneficio">
+              <i class="fas fa-shield-alt"></i>
+            </div>
             <h3>Garantía</h3>
-            <p>
-              Todos nuestros trabajos tienen garantía de 3 meses por defecto.
-            </p>
+            <p>Todos nuestros trabajos tienen garantía de 3 meses por defecto.</p>
           </div>
+
           <div class="beneficio">
-            <i class="fas fa-clock"></i>
+            <div class="icono-beneficio">
+              <i class="fas fa-clock"></i>
+            </div>
             <h3>Rapidez</h3>
-            <p>
-              La mayoría de las reparaciones se realizan en menos de 24 horas.
-            </p>
+            <p>La mayoría de las reparaciones se realizan en menos de 24 horas.</p>
           </div>
+
           <div class="beneficio">
-            <i class="fas fa-hand-holding-heart"></i>
+            <div class="icono-beneficio">
+              <i class="fas fa-hand-holding-heart"></i>
+            </div>
             <h3>Atención personalizada</h3>
-            <p>
-              Te asesoramos paso a paso y te explicamos el estado de tu
-              dispositivo.
-            </p>
+            <p>Te asesoramos paso a paso y te explicamos el estado de tu dispositivo.</p>
           </div>
         </div>
       </section>
 
       <!-- SECCIÓN: LLAMADA A LA ACCIÓN -->
       <section class="cta">
-        <h2>¿Necesitas reparar tu celular?</h2>
-        <p>Completá nuestro formulario y te contactaremos a la brevedad.</p>
-        <a href="pedidos.html" class="btn-cta">Solicitar reparación</a>
+        <div class="cta-contenido">
+          <h2>¿Necesitas reparar tu celular?</h2>
+          <p>Completá nuestro formulario y te contactaremos a la brevedad.</p>
+          <a href="pedidos.html" class="btn-cta">
+            <i class="fas fa-tools"></i> Solicitar reparación
+          </a>
+        </div>
       </section>
     </main>
 
     <!-- FOOTER -->
+        <!-- AVISO GENERAL (solo se ve si esta configurado) -->
+    <div class="aviso-general" id="aviso-general">
+      <i class="fas fa-bullhorn"></i>
+      <p id="aviso-general-texto"></p>
+    </div>
+
+    <!-- FOOTER -->
     <footer>
-      <p>© 2024 DuotechBros. Todos los derechos reservados.</p>
-      <div class="footer-social">
-        <a href="#"><i class="fab fa-whatsapp"></i></a>
-        <a href="#"><i class="fas fa-envelope"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
+      <div class="footer-contenido">
+        <div class="footer-marca" id="footer-marca">DuotechBros</div>
+        <p class="footer-copy" id="footer-copy">
+          © 2024 DuotechBros. Todos los derechos reservados.
+        </p>
+        <div class="footer-links" id="footer-links"></div>
+        <div class="footer-social" id="footer-social"></div>
+        <a class="footer-admin" href="admin/login.html">
+          <i class="fas fa-lock"></i> Acceso Admin
+        </a>
       </div>
-      <a class="footer-admin" href="admin/login.html">
-        <i class="fas fa-lock"></i> Acceso Admin
-      </a>
     </footer>
 
+    <script src="/js/sitio-config.js"></script>
     <script src="/js/usuario-header.js"></script>
   </body>
 </html>

@@ -1,93 +1,179 @@
-/* HERO (BIENVENIDA) */
+/* ============================================================
+   ESTILOS DE LA PAGINA DE INICIO - DUOTECHBROS
+   ============================================================ */
+
+/* BASE */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #CCEBED;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
 .hero {
-    background-image: url(../assets/Bienvenida.svg);
-    background-repeat: no-repeat;
-    background-size: cover;
-    height: 410px;
+    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    padding: 70px 20px;
+    text-align: center;
+    color: white;
+    border-radius: 0 0 40px 40px;
+    margin-bottom: 40px;
     position: relative;
-    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+/* patron de puntos decorativo en el hero */
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
 }
 
 .contenido-hero {
-    position: absolute;
-    background-color: rgb(0 0 0 / 20%);
-    width: 100%;
-    height: 100%;
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 14px;
 }
 
 .contenido-hero h1 {
-    font-size: 4.5rem;
+    font-size: 3rem;
     margin: 0;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .contenido-hero .subtitulo {
-    font-size: 1.8rem;
-    margin: 10px 0 20px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin: 0;
+    opacity: 0.95;
+    max-width: 640px;
 }
 
 .ubicacion {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 8px 18px;
+    border-radius: 999px;
+    margin-top: 6px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .ubicacion i {
-    font-size: 1.5rem;
     color: #FFD700;
+    font-size: 1rem;
 }
 
 .ubicacion p {
-    font-size: 1.2rem;
     margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
 .btn-hero {
-    background-color: #007BFF;
-    color: white;
-    padding: 14px 40px;
-    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #ffffff;
+    color: #0b4a62;
+    padding: 14px 36px;
+    font-size: 1rem;
     text-decoration: none;
     text-transform: uppercase;
-    font-weight: bold;
-    border-radius: 50px;
-    transition: background 0.3s, transform 0.2s;
-    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    border-radius: 999px;
+    margin-top: 12px;
+    transition: transform 0.2s, box-shadow 0.3s, background-color 0.2s;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .btn-hero:hover {
-    background-color: #005b9f;
-    transform: scale(1.05);
+    background-color: #f0f4f8;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
 }
 
-/* CONTENEDOR GENERAL */
+.btn-hero i {
+    font-size: 1rem;
+}
+
+/* ============================================================
+   CONTENEDOR GENERAL
+   ============================================================ */
+
 .contenedor {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px 40px;
+    padding: 0 20px 60px;
 }
 
-/* SECCIÓN NOSOTROS */
+/* ============================================================
+   ENCABEZADOS DE SECCION
+   ============================================================ */
+
+.seccion-header {
+    margin-bottom: 30px;
+}
+
+.seccion-header h2 {
+    color: #0b4a62;
+    font-size: 2rem;
+    margin: 0;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.seccion-barra {
+    display: block;
+    width: 60px;
+    height: 4px;
+    background-color: #0a9396;
+    border-radius: 999px;
+    margin-top: 6px;
+}
+
+.seccion-header-centrado {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.seccion-header-centrado .seccion-barra {
+    margin-top: 8px;
+}
+
+/* SECCION NOSOTROS */
+
 .nosotros {
-    background-color: white;
+    background-color: #ffffff;
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 25px rgba(11, 74, 98, 0.08);
     margin-bottom: 40px;
-}
-
-.nosotros h2 {
-    color: #0b4a62;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 30px;
 }
 
 .nosotros-grid {
@@ -98,116 +184,156 @@
 }
 
 .nosotros-texto p {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     line-height: 1.8;
-    color: #333;
+    color: #555;
+    margin: 0 0 16px;
+}
+
+.nosotros-texto p:last-child {
+    margin-bottom: 0;
+}
+
+.nosotros-texto strong {
+    color: #0b4a62;
+}
+
+.nosotros-imagen {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(11, 74, 98, 0.12);
 }
 
 .nosotros-imagen img {
     width: 100%;
-    border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    height: auto;
+    display: block;
+    transition: transform 0.4s ease;
 }
 
-/* SERVICIOS */
+.nosotros-imagen:hover img {
+    transform: scale(1.03);
+}
+
+/* SECCION SERVICIOS */
+
 .servicios {
     margin-bottom: 40px;
-}
-
-.servicios h2 {
-    color: #0b4a62;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 30px;
 }
 
 .servicios-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
+    gap: 26px;
 }
 
 .servicio {
-    background-color: white;
-    padding: 30px 20px;
-    border-radius: 20px;
+    background-color: #ffffff;
+    padding: 34px 24px;
+    border-radius: 16px;
     text-align: center;
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 20px rgba(11, 74, 98, 0.08);
     transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
 .servicio:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(11, 74, 98, 0.15);
 }
 
 .icono-servicio {
-    background: linear-gradient(135deg, #0b4a62, #0a9396);
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
+    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
+    box-shadow: 0 8px 20px rgba(11, 74, 98, 0.25);
+    margin-bottom: 4px;
 }
 
 .icono-servicio i {
-    font-size: 2.5rem;
-    color: white;
+    color: #ffffff;
+    font-size: 1.8rem;
 }
 
 .servicio h3 {
     color: #0b4a62;
-    font-size: 1.4rem;
-    margin-bottom: 15px;
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 700;
 }
 
 .servicio p {
-    color: #555;
+    color: #666;
     line-height: 1.6;
+    font-size: 0.92rem;
+    margin: 0;
 }
 
-/* ESTADÍSTICAS */
+/* SECCION ESTADISTICAS */
+
 .estadisticas {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    background: linear-gradient(135deg, #0b4a62, #0a9396);
+    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
     padding: 40px 30px;
     border-radius: 20px;
     margin-bottom: 40px;
     color: white;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(11, 74, 98, 0.2);
+}
+
+.estadisticas::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+}
+
+.estadistica {
+    position: relative;
+    z-index: 1;
 }
 
 .estadistica .numero {
-    font-size: 3rem;
-    font-weight: 700;
+    font-size: 2.8rem;
+    font-weight: 800;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
+    line-height: 1;
+    letter-spacing: -0.02em;
 }
 
 .estadistica p {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     margin: 0;
     opacity: 0.9;
+    font-weight: 500;
 }
 
-/* POR QUÉ ELEGIRNOS */
+/* SECCION POR QUE ELEGIRNOS */
+
 .por-que-elegirnos {
-    background-color: white;
+    background-color: #ffffff;
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 25px rgba(11, 74, 98, 0.08);
     margin-bottom: 40px;
-}
-
-.por-que-elegirnos h2 {
-    color: #0b4a62;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 30px;
 }
 
 .beneficios-grid {
@@ -218,112 +344,209 @@
 
 .beneficio {
     text-align: center;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
-.beneficio i {
-    font-size: 3rem;
+.icono-beneficio {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background-color: rgba(10, 147, 150, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.beneficio:hover .icono-beneficio {
+    background-color: rgba(10, 147, 150, 0.2);
+    transform: translateY(-3px);
+}
+
+.icono-beneficio i {
+    font-size: 1.8rem;
     color: #0a9396;
-    margin-bottom: 15px;
 }
 
 .beneficio h3 {
     color: #0b4a62;
-    font-size: 1.3rem;
-    margin-bottom: 10px;
+    font-size: 1.15rem;
+    margin: 0;
+    font-weight: 700;
 }
 
 .beneficio p {
-    color: #555;
+    color: #666;
     line-height: 1.6;
+    font-size: 0.92rem;
+    margin: 0;
 }
 
-/* LLAMADA A LA ACCIÓN (CTA) */
+/* SECCION CTA (LLAMADA A LA ACCION) */
+
 .cta {
-    background: linear-gradient(135deg, #0b4a62, #0a9396);
+    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
     padding: 50px 30px;
     border-radius: 20px;
     text-align: center;
     color: white;
+    box-shadow: 0 10px 30px rgba(11, 74, 98, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.cta::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+}
+
+.cta-contenido {
+    position: relative;
+    z-index: 1;
 }
 
 .cta h2 {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
+    font-size: 2rem;
+    margin: 0 0 12px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
 .cta p {
-    font-size: 1.2rem;
-    margin-bottom: 25px;
-    opacity: 0.9;
+    font-size: 1.05rem;
+    margin: 0 0 26px;
+    opacity: 0.92;
 }
 
 .btn-cta {
-    background-color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #ffffff;
     color: #0b4a62;
-    padding: 14px 40px;
-    font-size: 1.2rem;
+    padding: 14px 36px;
+    font-size: 1rem;
     text-decoration: none;
     text-transform: uppercase;
-    font-weight: bold;
-    border-radius: 50px;
-    transition: background 0.3s, transform 0.2s;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    border-radius: 999px;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    display: inline-block;
 }
 
 .btn-cta:hover {
-    background-color: #f0f0f0;
-    transform: scale(1.05);
+    background-color: #f0f4f8;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
-    .hero {
-        height: 350px;
-    }
 
+@media (max-width: 900px) {
     .contenido-hero h1 {
-        font-size: 2.8rem;
-    }
-
-    .contenido-hero .subtitulo {
-        font-size: 1.2rem;
+        font-size: 2.4rem;
     }
 
     .nosotros-grid {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
 
     .servicios-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
 
     .estadisticas {
         grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
+        gap: 24px;
     }
 
     .beneficios-grid {
         grid-template-columns: 1fr;
-    }
-
-    .estadistica .numero {
-        font-size: 2.2rem;
+        gap: 24px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .hero {
-        height: 300px;
+        padding: 50px 16px;
+        border-radius: 0 0 24px 24px;
+        margin-bottom: 30px;
     }
 
     .contenido-hero h1 {
-        font-size: 2rem;
+        font-size: 1.9rem;
+    }
+
+    .contenido-hero .subtitulo {
+        font-size: 1rem;
     }
 
     .btn-hero {
-        padding: 10px 25px;
-        font-size: 1rem;
+        padding: 12px 28px;
+        font-size: 0.9rem;
+    }
+
+    .contenedor {
+        padding: 0 14px 40px;
+    }
+
+    .nosotros,
+    .por-que-elegirnos {
+        padding: 26px 20px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+    }
+
+    .seccion-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .servicio {
+        padding: 26px 20px;
+    }
+
+    .estadisticas {
+        padding: 30px 20px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+    }
+
+    .estadistica .numero {
+        font-size: 2rem;
+    }
+
+    .estadistica p {
+        font-size: 0.85rem;
+    }
+
+    .cta {
+        padding: 40px 22px;
+        border-radius: 16px;
+    }
+
+    .cta h2 {
+        font-size: 1.5rem;
+    }
+
+    .cta p {
+        font-size: 0.95rem;
+    }
+
+    .btn-cta {
+        padding: 12px 28px;
+        font-size: 0.9rem;
     }
 }

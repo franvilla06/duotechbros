@@ -1,6 +1,4 @@
-// ============================================================
-// LÓGICA DE LA PÁGINA "GESTIONAR PORTAFOLIO" - DuotechBros Admin
-// ============================================================
+// LOGICA DE LA PAGINA "GESTIONAR PORTAFOLIO" - DUOTECHBROS ADMIN
 
 const API_PORTAFOLIO = '/api/portafolio';
 const API_ADMIN_PORTAFOLIO = '/api/admin/portafolio';
@@ -26,15 +24,14 @@ const btnActualizar = document.getElementById('btn-actualizar');
 
 const POR_PAGINA = 10;
 
-// Estado local
 let trabajosOriginales = [];
-let trabajosFiltrados = [];   // ← nuevo
+let trabajosFiltrados = [];
 let tipoFiltroActivo = 'Todos';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
 
-// ----- UTILIDADES -----
+// UTILIDADES
 
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
@@ -43,6 +40,8 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// formatea una fecha al estilo dd/mm/yyyy
+// si es null o vacia, devuelve un guion
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -89,7 +88,7 @@ function aplicarOrdenamiento(array) {
     });
 }
 
-// ----- EXPORTAR A CSV -----
+// EXPORTAR A CSV
 
 function escaparCSV(valor) {
     if (valor === null || valor === undefined) return '';
@@ -106,14 +105,22 @@ function exportarCSV() {
         return;
     }
 
-    const encabezados = ['ID', 'Título', 'Descripción', 'Tipo de reparación', 'Fecha'];
+    const encabezados = [
+        'ID',
+        'Título',
+        'Descripción',
+        'Tipo de reparación',
+        'Fecha de inicio',
+        'Fecha de finalización',
+    ];
 
     const filas = trabajosFiltrados.map((t) => [
         t.id,
         t.titulo,
         t.descripcion,
         t.tipo_reparacion,
-        formatearFecha(t.fecha),
+        formatearFecha(t.fecha_inicio),
+        formatearFecha(t.fecha_fin),
     ]);
 
     const lineas = [
@@ -138,10 +145,10 @@ function exportarCSV() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    mostrarToast(`✅ Se exportaron ${trabajosFiltrados.length} trabajo${trabajosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
+    mostrarToast(`Se exportaron ${trabajosFiltrados.length} trabajo${trabajosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
 }
 
-// ----- FILTROS -----
+// FILTROS
 
 function construirFiltrosTipo() {
     const tipos = ['Todos'];
@@ -177,7 +184,7 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// ----- RENDERIZADO -----
+// RENDERIZADO
 
 function renderizarTrabajos(trabajos) {
     tbody.innerHTML = '';
@@ -216,7 +223,8 @@ function renderizarTrabajos(trabajos) {
                     ${escapar(t.tipo_reparacion || 'Sin categoría')}
                 </span>
             </td>
-            <td><span class="cell-fecha">${formatearFecha(t.fecha)}</span></td>
+            <td><span class="cell-fecha">${formatearFecha(t.fecha_inicio)}</span></td>
+            <td><span class="cell-fecha">${formatearFecha(t.fecha_fin)}</span></td>
             <td style="text-align: right">
                 <button class="btn-editar" title="Editar" data-id="${t.id}">
                     <i class="fas fa-edit"></i>
@@ -240,7 +248,7 @@ function renderizarTrabajos(trabajos) {
     });
 }
 
-// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
+// APLICAR FILTROS
 
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
@@ -264,7 +272,7 @@ function aplicarFiltros() {
 
     filtrados = aplicarOrdenamiento(filtrados);
 
-    trabajosFiltrados = filtrados;   // ← guardar para exportar
+    trabajosFiltrados = filtrados;
 
     if (paginador) paginador.actualizar(filtrados.length, true);
 
@@ -272,7 +280,7 @@ function aplicarFiltros() {
     renderizarTrabajos(filtrados);
 }
 
-// ----- CARGA DE DATOS -----
+// CARGA DE DATOS
 
 async function cargarTrabajos() {
     estadoCargando.style.display = 'block';
@@ -311,7 +319,7 @@ async function cargarTrabajos() {
     }
 }
 
-// ----- CREAR TRABAJO -----
+// CREAR TRABAJO
 
 formTrabajo.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -320,6 +328,8 @@ formTrabajo.addEventListener('submit', async (e) => {
         titulo: document.getElementById('titulo').value.trim(),
         descripcion: document.getElementById('descripcion').value.trim() || null,
         tipo_reparacion: document.getElementById('tipo_reparacion').value || null,
+        fecha_inicio: document.getElementById('fecha_inicio').value || null,
+        fecha_fin: document.getElementById('fecha_fin').value || null,
         imagen_url: document.getElementById('imagen_url').value.trim() || null,
     };
 
@@ -340,11 +350,11 @@ formTrabajo.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Trabajo publicado correctamente.');
+            mostrarToast('Trabajo publicado correctamente.');
             formTrabajo.reset();
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo guardar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
         console.error('Error al crear trabajo:', error);
@@ -354,7 +364,7 @@ formTrabajo.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- MODAL -----
+// MODAL
 
 function abrirModalEdicion(id) {
     const trabajo = trabajosOriginales.find((t) => String(t.id) === String(id));
@@ -367,6 +377,8 @@ function abrirModalEdicion(id) {
     document.getElementById('edit-titulo').value = trabajo.titulo || '';
     document.getElementById('edit-descripcion').value = trabajo.descripcion || '';
     document.getElementById('edit-tipo_reparacion').value = trabajo.tipo_reparacion || '';
+    document.getElementById('edit-fecha_inicio').value = trabajo.fecha_inicio || '';
+    document.getElementById('edit-fecha_fin').value = trabajo.fecha_fin || '';
     document.getElementById('edit-imagen_url').value = trabajo.imagen_url || '';
 
     modalEditar.classList.add('modal-visible');
@@ -390,7 +402,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ----- GUARDAR CAMBIOS -----
+// GUARDAR CAMBIOS
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -401,6 +413,8 @@ formEditar.addEventListener('submit', async (e) => {
         titulo: document.getElementById('edit-titulo').value.trim(),
         descripcion: document.getElementById('edit-descripcion').value.trim() || null,
         tipo_reparacion: document.getElementById('edit-tipo_reparacion').value || null,
+        fecha_inicio: document.getElementById('edit-fecha_inicio').value || null,
+        fecha_fin: document.getElementById('edit-fecha_fin').value || null,
         imagen_url: document.getElementById('edit-imagen_url').value.trim() || null,
     };
 
@@ -421,11 +435,11 @@ formEditar.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Trabajo actualizado correctamente.');
+            mostrarToast('Trabajo actualizado correctamente.');
             cerrarModalEdicion();
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo actualizar.'}`, true);
         }
     } catch (error) {
         console.error('Error al actualizar trabajo:', error);
@@ -435,7 +449,7 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- ELIMINAR -----
+// ELIMINAR
 
 async function eliminarTrabajo(id, titulo) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
@@ -449,17 +463,17 @@ async function eliminarTrabajo(id, titulo) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarToast('✅ Trabajo eliminado.');
+            mostrarToast('Trabajo eliminado.');
             cargarTrabajos();
         } else {
-            mostrarToast(`❌ Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
+            mostrarToast(`Error: ${resultado.error || 'No se pudo eliminar.'}`, true);
         }
     } catch (error) {
         console.error('Error al eliminar trabajo:', error);
     }
 }
 
-// ----- EVENTOS -----
+// EVENTOS
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;
@@ -478,7 +492,7 @@ btnLimpiar.addEventListener('click', () => {
 
 btnExportar.addEventListener('click', exportarCSV);
 
-// ----- INICIO -----
+// INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
     paginador = crearPaginador('paginacion-trabajos', POR_PAGINA, () => {
@@ -505,7 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
             1: { campo: 'titulo', tipo: 'string' },
             2: { campo: 'descripcion', tipo: 'string' },
             3: { campo: 'tipo_reparacion', tipo: 'string' },
-            4: { campo: 'fecha', tipo: 'fecha' },
+            4: { campo: 'fecha_inicio', tipo: 'fecha' },
+            5: { campo: 'fecha_fin', tipo: 'fecha' },
         },
         () => ordenActual,
         (nuevo) => { ordenActual = nuevo; },
@@ -513,4 +528,4 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     setTimeout(cargarTrabajos, 100);
-});
+}); 

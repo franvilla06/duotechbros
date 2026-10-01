@@ -69,8 +69,19 @@ function eliminarProducto(req, res) {
 
 // GESTION DE PORTAFOLIO
 
+// normaliza una fecha a formato YYYY-MM-DD o null
+// acepta string vacio, null o undefined como null
+function normalizarFecha(valor) {
+    if (valor === undefined || valor === null || valor === '') return null;
+    const texto = String(valor).trim();
+    if (texto === '') return null;
+    // validar formato YYYY-MM-DD
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return null;
+    return texto;
+}
+
 function crearTrabajo(req, res) {
-    const { titulo, descripcion, imagen_url, tipo_reparacion } = req.body;
+    const { titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin } = req.body;
 
     if (!titulo) {
         return res.status(400).json({ success: false, error: 'El título es obligatorio' });
@@ -82,6 +93,8 @@ function crearTrabajo(req, res) {
             descripcion: descripcion || null,
             imagen_url: imagen_url || null,
             tipo_reparacion: tipo_reparacion || null,
+            fecha_inicio: normalizarFecha(fecha_inicio),
+            fecha_fin: normalizarFecha(fecha_fin),
         });
         return res.json({ success: true, id: info.lastInsertRowid });
     } catch (error) {
@@ -91,7 +104,7 @@ function crearTrabajo(req, res) {
 
 function actualizarTrabajo(req, res) {
     const { id } = req.params;
-    const { titulo, descripcion, imagen_url, tipo_reparacion } = req.body;
+    const { titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin } = req.body;
 
     if (!titulo) {
         return res.status(400).json({ success: false, error: 'El título es obligatorio' });
@@ -103,6 +116,8 @@ function actualizarTrabajo(req, res) {
             descripcion: descripcion || null,
             imagen_url: imagen_url || null,
             tipo_reparacion: tipo_reparacion || null,
+            fecha_inicio: normalizarFecha(fecha_inicio),
+            fecha_fin: normalizarFecha(fecha_fin),
         });
 
         if (info.changes === 0) {
@@ -179,8 +194,6 @@ function actualizarNotasPedido(req, res) {
     }
 }
 
-// actualizar el presupuesto estimado de una reparacion
-// acepta un numero mayor o igual a 0, o null para borrar
 function actualizarPresupuestoPedido(req, res) {
     const { id } = req.params;
     const { presupuesto } = req.body;

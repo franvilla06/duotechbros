@@ -1,4 +1,4 @@
-// LÓGICA DEL PORTAFOLIO PÚBLICO - DUOTECHBROS
+// LOGICA DEL PORTAFOLIO PUBLICO - DUOTECHBROS
 // consume get /api/portafolio y renderiza las tarjetas
 
 const API_PORTAFOLIO = '/api/portafolio';
@@ -18,7 +18,8 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
-function formatearFecha(fechaISO) {
+// formatea una fecha a "Mes Año" (ej. "Septiembre 2026")
+function formatearMesAnio(fechaISO) {
     if (!fechaISO) return '';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
     if (isNaN(fecha)) return fechaISO;
@@ -28,6 +29,18 @@ function formatearFecha(fechaISO) {
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
     ];
     return `${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
+}
+
+// formatea una fecha corta (ej. "15/09/2026")
+function formatearFechaCorta(fechaISO) {
+    if (!fechaISO) return '';
+    const fecha = new Date(fechaISO.replace(' ', 'T'));
+    if (isNaN(fecha)) return fechaISO;
+
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
 }
 
 function claseTipoBadge(tipo) {
@@ -40,6 +53,31 @@ function claseTipoBadge(tipo) {
     if (t.includes('carga') || t.includes('módulo')) return 'tipo-carga';
     if (t.includes('cámara') || t.includes('camara')) return 'tipo-camara';
     return 'tipo-default';
+}
+
+// genera el texto de fechas segun los datos disponibles
+function generarTextoFechas(trabajo) {
+    const inicio = trabajo.fecha_inicio;
+    const fin = trabajo.fecha_fin;
+
+    if (inicio && fin) {
+        return `<i class="fas fa-calendar-check"></i>
+                <span>${formatearFechaCorta(inicio)} — ${formatearFechaCorta(fin)}</span>`;
+    }
+    if (inicio) {
+        return `<i class="fas fa-calendar-alt"></i>
+                <span>Iniciado el ${formatearFechaCorta(inicio)}</span>`;
+    }
+    if (fin) {
+        return `<i class="fas fa-calendar-check"></i>
+                <span>Finalizado el ${formatearFechaCorta(fin)}</span>`;
+    }
+    // fallback: usar la fecha de publicacion
+    if (trabajo.fecha) {
+        return `<i class="fas fa-calendar-alt"></i>
+                <span>${formatearMesAnio(trabajo.fecha)}</span>`;
+    }
+    return '';
 }
 
 // RENDERIZADO
@@ -76,10 +114,9 @@ function renderizarTrabajos(trabajos) {
                </span>`
             : '';
 
-        const fechaHTML = t.fecha
-            ? `<span class="project-fecha">
-                 <i class="fas fa-calendar-alt"></i> ${formatearFecha(t.fecha)}
-               </span>`
+        const textoFechas = generarTextoFechas(t);
+        const fechasHTML = textoFechas
+            ? `<span class="project-fecha">${textoFechas}</span>`
             : '';
 
         card.innerHTML = `
@@ -90,7 +127,7 @@ function renderizarTrabajos(trabajos) {
             <div class="project-info">
                 <h3 class="project-titulo">${escapar(t.titulo)}</h3>
                 <p class="project-descripcion">${escapar(t.descripcion) || 'Sin descripción.'}</p>
-                ${fechaHTML}
+                ${fechasHTML}
             </div>
         `;
 
