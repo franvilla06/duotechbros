@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const adminController = require('../controllers/admin.controller');
+const configuracionController = require('../controllers/configuracion.controller');
 const { requiereAuth } = require('../middlewares/auth.middleware');
 
 // todas las rutas de este router están protegidas por el middleware
@@ -22,5 +23,8 @@ router.put('/pedidos/:id', adminController.actualizarEstadoPedido);
 router.put('/pedidos/:id/notas', adminController.actualizarNotasPedido);
 router.put('/pedidos/:id/presupuesto', adminController.actualizarPresupuestoPedido);
 router.delete('/pedidos/:id', adminController.eliminarPedido);
+
+// CONFIGURACION
+router.put('/configuracion', configuracionController.actualizarConfiguracion);
 
 module.exports = router;

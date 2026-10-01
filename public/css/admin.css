@@ -2475,3 +2475,62 @@ table.admin-table th.th-ordenable.activo {
         font-size: 0.68rem;
     }
 }
+
+/* FORMULARIO DE CONFIGURACION */
+
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.config-ayuda {
+    display: block;
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+/* icono de redes sociales en las etiquetas */
+.config-form .admin-form-group label i {
+    margin-right: 6px;
+    color: #0a9396;
+}
+
+/* acciones del formulario (fijas abajo) */
+.config-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 0 10px;
+    border-top: 1px solid #eef3f6;
+    position: sticky;
+    bottom: 0;
+    background-color: #f0f4f8;
+    padding-top: 20px;
+    z-index: 10;
+}
+
+.config-acciones .btn-primary {
+    width: auto;
+    padding: 12px 24px;
+}
+
+.config-acciones .btn-secondary {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+}
+
+/* responsive */
+@media (max-width: 600px) {
+    .config-acciones {
+        flex-direction: column-reverse;
+    }
+
+    .config-acciones .btn-primary,
+    .config-acciones .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}

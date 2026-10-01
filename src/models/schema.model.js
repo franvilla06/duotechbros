@@ -58,6 +58,10 @@ function inicializar(db) {
             subtotal DECIMAL(10,2) NOT NULL,
             FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE
         );
+        CREATE TABLE IF NOT EXISTS configuracion (
+            clave TEXT PRIMARY KEY,
+            valor TEXT
+        );
     `);
 
     // migraciones: agregar columnas nuevas a tablas existentes sin perder datos
@@ -97,6 +101,30 @@ function inicializar(db) {
         db.exec('ALTER TABLE portafolio ADD COLUMN fecha_fin DATE');
         console.log('Migracion aplicada: columna fecha_fin agregada a portafolio');
     }
+
+    // valores por defecto de configuracion
+    // solo se insertan si no existen (no sobrescriben valores guardados)
+    const valoresIniciales = {
+        marca_nombre: 'DuotechBros',
+        contacto_email: 'contacto@duotechbros.com',
+        contacto_telefono: '+54 376 123-4567',
+        contacto_whatsapp: '+54 376 123-4567',
+        contacto_direccion: 'Posadas, Misiones',
+        redes_instagram: '',
+        redes_facebook: '',
+        redes_tiktok: '',
+        footer_terminos_url: '',
+        footer_privacidad_url: '',
+        aviso_general: '',
+    };
+
+    const insertarConfig = db.prepare(
+        'INSERT OR IGNORE INTO configuracion (clave, valor) VALUES (?, ?)'
+    );
+
+    Object.entries(valoresIniciales).forEach(([clave, valor]) => {
+        insertarConfig.run(clave, valor);
+    });
 }
 
 module.exports = { inicializar };

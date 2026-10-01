@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+    <title>Configuración del Sitio - DuotechBros Admin</title>
+  </head>
+  <body data-admin-protected="true">
+    <div class="admin-layout">
+      <!-- SIDEBAR -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-brand">
+          <i class="fas fa-tools"></i>
+          <div>
+            <h2>DuotechBros</h2>
+            <span>Panel Interno</span>
+          </div>
+        </div>
+
+        <nav class="admin-nav">
+          <a href="dashboard.html">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="productos.html">
+            <i class="fas fa-box"></i>
+            <span>Gestionar Productos</span>
+          </a>
+          <a href="portafolio.html">
+            <i class="fas fa-briefcase"></i>
+            <span>Gestionar Portafolio</span>
+          </a>
+          <a href="pedidos.html">
+            <i class="fas fa-tools"></i>
+            <span>Pedidos de Reparación</span>
+          </a>
+          <a href="compras.html">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Compras de Tienda</span>
+          </a>
+          <a href="configuracion.html" class="active">
+            <i class="fas fa-cog"></i>
+            <span>Configuración</span>
+          </a>
+        </nav>
+
+        <div class="admin-sidebar-footer">
+          <div class="admin-user">
+            <i class="fas fa-user-circle"></i>
+            <span id="nombre-usuario">Admin</span>
+          </div>
+          <button class="logout-btn" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+          </button>
+        </div>
+      </aside>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <h1>Configuración del Sitio</h1>
+            <p>Personalizá los datos que se muestran en el sitio público.</p>
+          </div>
+          <button class="btn-refresh" id="btn-refresh">
+            <i class="fas fa-sync-alt"></i> Recargar
+          </button>
+        </header>
+
+        <!-- ESTADO: CARGANDO -->
+        <div class="table-empty" id="estado-cargando">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Cargando configuración...</p>
+        </div>
+
+        <!-- FORMULARIO DE CONFIGURACION -->
+        <form id="form-config" class="config-form" style="display: none">
+          <!-- SECCION: MARCA -->
+          <section class="admin-card">
+            <h2><i class="fas fa-tag"></i> Información de la marca</h2>
+            <div class="admin-form-group">
+              <label for="marca_nombre">Nombre del negocio</label>
+              <input type="text" id="marca_nombre" name="marca_nombre" placeholder="Ej: DuotechBros" />
+              <small class="config-ayuda">Aparece en el header, footer y emails.</small>
+            </div>
+          </section>
+
+          <!-- SECCION: CONTACTO -->
+          <section class="admin-card">
+            <h2><i class="fas fa-address-book"></i> Datos de contacto</h2>
+
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label for="contacto_email">Email de contacto</label>
+                <input type="email" id="contacto_email" name="contacto_email" placeholder="contacto@ejemplo.com" />
+              </div>
+              <div class="admin-form-group">
+                <label for="contacto_telefono">Teléfono</label>
+                <input type="text" id="contacto_telefono" name="contacto_telefono" placeholder="+54 376 123-4567" />
+              </div>
+            </div>
+
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label for="contacto_whatsapp">WhatsApp</label>
+                <input type="text" id="contacto_whatsapp" name="contacto_whatsapp" placeholder="+54 376 123-4567" />
+              </div>
+              <div class="admin-form-group">
+                <label for="contacto_direccion">Dirección</label>
+                <input type="text" id="contacto_direccion" name="contacto_direccion" placeholder="Posadas, Misiones" />
+              </div>
+            </div>
+          </section>
+
+          <!-- SECCION: REDES SOCIALES -->
+          <section class="admin-card">
+            <h2><i class="fas fa-share-alt"></i> Redes sociales</h2>
+
+            <div class="admin-form-group">
+              <label for="redes_instagram">
+                <i class="fab fa-instagram"></i> Instagram (URL)
+              </label>
+              <input
+                type="url"
+                id="redes_instagram"
+                name="redes_instagram"
+                placeholder="https://instagram.com/tu-usuario"
+              />
+            </div>
+
+            <div class="admin-form-group">
+              <label for="redes_facebook">
+                <i class="fab fa-facebook"></i> Facebook (URL)
+              </label>
+              <input
+                type="url"
+                id="redes_facebook"
+                name="redes_facebook"
+                placeholder="https://facebook.com/tu-pagina"
+              />
+            </div>
+
+            <div class="admin-form-group">
+              <label for="redes_tiktok">
+                <i class="fab fa-tiktok"></i> TikTok (URL)
+              </label>
+              <input
+                type="url"
+                id="redes_tiktok"
+                name="redes_tiktok"
+                placeholder="https://tiktok.com/@tu-usuario"
+              />
+            </div>
+          </section>
+
+          <!-- SECCION: ENLACES LEGALES -->
+          <section class="admin-card">
+            <h2><i class="fas fa-gavel"></i> Enlaces legales</h2>
+
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label for="footer_terminos_url">Términos y condiciones (URL)</label>
+                <input
+                  type="url"
+                  id="footer_terminos_url"
+                  name="footer_terminos_url"
+                  placeholder="https://ejemplo.com/terminos"
+                />
+              </div>
+              <div class="admin-form-group">
+                <label for="footer_privacidad_url">Política de privacidad (URL)</label>
+                <input
+                  type="url"
+                  id="footer_privacidad_url"
+                  name="footer_privacidad_url"
+                  placeholder="https://ejemplo.com/privacidad"
+                />
+              </div>
+            </div>
+
+            <small class="config-ayuda">
+              Si los dejás vacíos, no se muestran en el footer del sitio.
+            </small>
+          </section>
+
+          <!-- SECCION: AVISO GENERAL -->
+          <section class="admin-card">
+            <h2><i class="fas fa-bullhorn"></i> Aviso general</h2>
+
+            <div class="admin-form-group">
+              <label for="aviso_general">Mensaje destacado (opcional)</label>
+              <textarea
+                id="aviso_general"
+                name="aviso_general"
+                rows="3"
+                placeholder="Ej: Cerrado por vacaciones del 15 al 22 de enero. Volvemos pronto."
+              ></textarea>
+              <small class="config-ayuda">
+                Si cargás un mensaje, se muestra en una banda destacada arriba del footer del sitio público.
+                Dejalo vacío para ocultarlo.
+              </small>
+            </div>
+          </section>
+
+          <!-- BOTONES DE ACCION -->
+          <div class="config-acciones">
+            <button type="button" class="btn-secondary" id="btn-cancelar">
+              <i class="fas fa-undo"></i> Descartar cambios
+            </button>
+            <button type="submit" class="btn-primary" id="btn-guardar">
+              <i class="fas fa-save"></i> Guardar cambios
+            </button>
+          </div>
+        </form>
+
+        <!-- ESTADO: ERROR -->
+        <div class="table-empty" id="estado-error" style="display: none">
+          <i class="fas fa-exclamation-triangle" style="color:#d9534f"></i>
+          <p>No se pudo cargar la configuración</p>
+          <small>Verificá que el servidor esté corriendo e intentá de nuevo.</small>
+        </div>
+      </main>
+    </div>
+
+    <script src="/js/admin.js"></script>
+    <script src="/js/admin-configuracion.js"></script>
+  </body>
+</html>
