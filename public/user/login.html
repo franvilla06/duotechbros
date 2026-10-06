@@ -19,8 +19,21 @@
         <p class="usuario-subtitulo">DuotechBros</p>
       </div>
 
-      <!-- tabs para cambiar entre ingresar y registrarme -->
-      <div class="usuario-tabs">
+      <!-- INDICADOR DE PASOS -->
+      <div class="registro-pasos" id="registro-pasos" style="display: none">
+        <div class="registro-paso active" data-paso="1">
+          <span class="registro-paso-numero">1</span>
+          <span class="registro-paso-label">Datos</span>
+        </div>
+        <div class="registro-paso-sep"></div>
+        <div class="registro-paso" data-paso="2">
+          <span class="registro-paso-numero">2</span>
+          <span class="registro-paso-label">Verificación</span>
+        </div>
+      </div>
+
+      <!-- TABS (solo se ven en el paso inicial) -->
+      <div class="usuario-tabs" id="usuario-tabs">
         <button type="button" class="usuario-tab active" data-tab="login">
           <i class="fas fa-sign-in-alt"></i> Ingresar
         </button>
@@ -29,7 +42,7 @@
         </button>
       </div>
 
-      <!-- formulario de ingreso -->
+      <!-- VISTA: LOGIN -->
       <form class="usuario-form" id="form-login">
         <div class="usuario-form-grupo">
           <label for="login-usuario">Usuario</label>
@@ -43,12 +56,12 @@
         </div>
 
         <div class="usuario-form-grupo">
-          <label for="login-password">Contrasenia</label>
+          <label for="login-password">Contraseña</label>
           <input
             type="password"
             id="login-password"
             autocomplete="current-password"
-            placeholder="Tu contrasenia"
+            placeholder="Tu contraseña"
             required
           />
         </div>
@@ -58,7 +71,7 @@
         </button>
       </form>
 
-      <!-- formulario de registro -->
+      <!-- VISTA: REGISTRO (paso 1) -->
       <form class="usuario-form" id="form-registro" style="display: none">
         <div class="usuario-form-grupo">
           <label for="registro-usuario">Usuario</label>
@@ -66,44 +79,104 @@
             type="text"
             id="registro-usuario"
             autocomplete="username"
-            placeholder="Elegi un nombre de usuario"
+            placeholder="Elegí un nombre de usuario"
             minlength="3"
             maxlength="30"
             required
           />
           <small class="usuario-ayuda">
-            Minimo 3 caracteres. Solo letras, numeros y guion bajo.
+            Mínimo 3 caracteres. Solo letras, números y guión bajo.
           </small>
         </div>
 
         <div class="usuario-form-grupo">
-          <label for="registro-password">Contrasenia</label>
+          <label for="registro-email">Correo electrónico</label>
+          <input
+            type="email"
+            id="registro-email"
+            autocomplete="email"
+            placeholder="tu@email.com"
+            maxlength="100"
+            required
+          />
+          <small class="usuario-ayuda">
+            Te enviaremos un código de verificación a este correo.
+          </small>
+        </div>
+
+        <div class="usuario-form-grupo">
+          <label for="registro-password">Contraseña</label>
           <input
             type="password"
             id="registro-password"
             autocomplete="new-password"
-            placeholder="Minimo 6 caracteres"
+            placeholder="Mínimo 6 caracteres"
             minlength="6"
             required
           />
         </div>
 
         <div class="usuario-form-grupo">
-          <label for="registro-password-confirm">Confirmar contrasenia</label>
+          <label for="registro-password-confirm">Confirmar contraseña</label>
           <input
             type="password"
             id="registro-password-confirm"
             autocomplete="new-password"
-            placeholder="Repeti la contrasenia"
+            placeholder="Repetí la contraseña"
             minlength="6"
             required
           />
         </div>
 
         <button type="submit" class="usuario-btn" id="btn-registro">
-          <i class="fas fa-user-plus"></i> Crear cuenta
+          <i class="fas fa-paper-plane"></i> Enviar código de verificación
         </button>
       </form>
+
+      <!-- VISTA: VERIFICACION (paso 2) -->
+      <div class="usuario-verificacion" id="vista-verificacion" style="display: none">
+        <div class="verificacion-icono">
+          <i class="fas fa-envelope-open-text"></i>
+        </div>
+
+        <h2 class="verificacion-titulo">Revisá tu correo</h2>
+        <p class="verificacion-texto">
+          Te enviamos un código de 6 dígitos a
+          <strong id="verificacion-email">tu@email.com</strong>
+        </p>
+
+        <div class="verificacion-codigo-grupo">
+          <label for="verificacion-codigo">Código de verificación</label>
+          <input
+            type="text"
+            id="verificacion-codigo"
+            inputmode="numeric"
+            pattern="\d*"
+            maxlength="6"
+            placeholder="000000"
+            autocomplete="one-time-code"
+            autofocus
+          />
+        </div>
+
+        <button type="button" class="usuario-btn" id="btn-verificar">
+          <i class="fas fa-check-circle"></i> Verificar código
+        </button>
+
+        <div class="verificacion-acciones">
+          <button type="button" class="verificacion-link" id="btn-reenviar">
+            <i class="fas fa-redo"></i> Reenviar código
+          </button>
+          <span class="verificacion-sep">·</span>
+          <button type="button" class="verificacion-link" id="btn-volver">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
+        </div>
+
+        <p class="verificacion-ayuda">
+          El código expira en 10 minutos. Si no lo recibís, revisá tu carpeta de spam.
+        </p>
+      </div>
 
       <div id="mensaje" class="usuario-mensaje"></div>
 

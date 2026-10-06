@@ -2564,3 +2564,257 @@
         margin-right: 0;
     }
 }
+
+/* INDICADOR DE PASOS DEL REGISTRO */
+
+.registro-pasos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 0 10px;
+}
+
+.registro-paso {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background-color: #f0f4f8;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.registro-paso-numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    color: #888;
+    font-size: 0.75rem;
+    font-weight: 800;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.registro-paso-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: color 0.3s;
+}
+
+.registro-paso.active {
+    background: linear-gradient(135deg, #007bff 0%, #0a9396 100%);
+}
+
+.registro-paso.active .registro-paso-numero {
+    background-color: #ffffff;
+    color: #007bff;
+}
+
+.registro-paso.active .registro-paso-label {
+    color: #ffffff;
+}
+
+.registro-paso-sep {
+    width: 24px;
+    height: 2px;
+    background-color: #e0eaf0;
+    border-radius: 999px;
+}
+
+/* VISTA DE VERIFICACION */
+
+.usuario-verificacion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    animation: usuario-aparecer 0.3s ease;
+}
+
+.verificacion-icono {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff 0%, #0a9396 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.3);
+    margin-bottom: 4px;
+    animation: verificacion-pop 0.5s ease;
+}
+
+@keyframes verificacion-pop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.verificacion-icono i {
+    font-size: 1.9rem;
+    color: #ffffff;
+}
+
+.verificacion-titulo {
+    font-size: 1.35rem;
+    color: #0b4a62;
+    margin: 0;
+    font-weight: 700;
+    text-align: center;
+}
+
+.verificacion-texto {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+    line-height: 1.55;
+    margin: 0 0 8px;
+}
+
+.verificacion-texto strong {
+    color: #007bff;
+    word-break: break-all;
+}
+
+/* INPUT DEL CODIGO */
+
+.verificacion-codigo-grupo {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.verificacion-codigo-grupo label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0b4a62;
+    text-align: center;
+}
+
+#verificacion-codigo {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #d0e6ea;
+    border-radius: 12px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 10px;
+    text-align: center;
+    color: #0b4a62;
+    background-color: #f7feff;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    box-sizing: border-box;
+}
+
+#verificacion-codigo:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+}
+
+#verificacion-codigo:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ACCIONES DE VERIFICACION */
+
+.verificacion-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.verificacion-link {
+    background-color: transparent;
+    border: none;
+    color: #007bff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.verificacion-link:hover:not(:disabled) {
+    background-color: #e8f4ff;
+    color: #005b9f;
+}
+
+.verificacion-link:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.verificacion-link i {
+    font-size: 0.75rem;
+}
+
+.verificacion-sep {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.verificacion-ayuda {
+    font-size: 0.75rem;
+    color: #999;
+    text-align: center;
+    line-height: 1.55;
+    margin: 8px 0 0;
+    max-width: 320px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 480px) {
+    .verificacion-icono {
+        width: 60px;
+        height: 60px;
+    }
+
+    .verificacion-icono i {
+        font-size: 1.5rem;
+    }
+
+    .verificacion-titulo {
+        font-size: 1.2rem;
+    }
+
+    #verificacion-codigo {
+        font-size: 1.5rem;
+        letter-spacing: 8px;
+        padding: 14px;
+    }
+
+    .registro-paso-label {
+        font-size: 0.7rem;
+    }
+}
