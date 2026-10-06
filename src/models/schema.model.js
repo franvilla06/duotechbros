@@ -120,9 +120,39 @@ function inicializar(db) {
         console.log('Migracion aplicada: columna email agregada a usuarios');
     }
 
-    // migracion de codigos_verificacion: agregar columna tipo si no existe
+    // MIGRACION ESPECIAL: recrear codigos_verificacion si tiene NOT NULL en password_hash
+    // sqlite no permite quitar el NOT NULL con ALTER TABLE
+    // necesitamos recrear la tabla desde cero
     const columnasCodigos = db.prepare('PRAGMA table_info(codigos_verificacion)').all();
-    if (!columnasCodigos.some((col) => col.name === 'tipo')) {
+    const colPassword = columnasCodigos.find((c) => c.name === 'password_hash');
+
+    // notnull === 1 significa que la columna tiene el constraint NOT NULL
+    if (colPassword && colPassword.notnull === 1) {
+        console.log('Migracion: recreando tabla codigos_verificacion sin NOT NULL en password_hash');
+
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS codigos_verificacion_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario TEXT NOT NULL,
+                email TEXT NOT NULL,
+                password_hash TEXT,
+                codigo TEXT NOT NULL,
+                tipo TEXT DEFAULT 'registro',
+                intentos INTEGER DEFAULT 0,
+                usado INTEGER DEFAULT 0,
+                creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+                expira_en DATETIME NOT NULL
+            );
+        `);
+
+        // no copiamos datos viejos porque son codigos temporales que expiran
+        db.exec('DROP TABLE codigos_verificacion');
+        db.exec('ALTER TABLE codigos_verificacion_new RENAME TO codigos_verificacion');
+
+        console.log('Migracion completada: codigos_verificacion recreada');
+    }
+    // si la columna tipo no existe, agregarla (para el caso en que la tabla ya sea nueva pero sin tipo)
+    else if (!columnasCodigos.some((col) => col.name === 'tipo')) {
         db.exec("ALTER TABLE codigos_verificacion ADD COLUMN tipo TEXT DEFAULT 'registro'");
         console.log('Migracion aplicada: columna tipo agregada a codigos_verificacion');
     }
