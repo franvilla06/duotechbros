@@ -15,20 +15,33 @@ function validarUsuario(usuario) {
     return null;
 }
 
+function validarEmail(email) {
+    if (!email) return 'El email es obligatorio.';
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) return 'El email no es valido.';
+    if (email.length > 100) return 'El email es demasiado largo.';
+    return null;
+}
+
 function validarPassword(password) {
     if (!password) return 'La contrasenia es obligatoria.';
     if (password.length < 6) return 'La contrasenia debe tener al menos 6 caracteres.';
     return null;
 }
 
-// REGISTRO Y LOGIN
+// REGISTRO CON VERIFICACION POR EMAIL
 
-function registrar(req, res) {
-    const { usuario, password } = req.body;
+async function iniciarRegistro(req, res) {
+    const { usuario, email, password } = req.body;
 
     const errorUsuario = validarUsuario(usuario);
     if (errorUsuario) {
         return res.status(400).json({ success: false, error: errorUsuario });
+    }
+
+    const errorEmail = validarEmail(email);
+    if (errorEmail) {
+        return res.status(400).json({ success: false, error: errorEmail });
     }
 
     const errorPassword = validarPassword(password);
@@ -37,42 +50,197 @@ function registrar(req, res) {
     }
 
     try {
-        const resultado = authService.registrarUsuario(req.app.locals.db, usuario, password);
-        if (resultado.existe) {
-            return res.status(409).json({
-                success: false,
-                error: 'Ese nombre de usuario ya esta en uso.',
-            });
+        const resultado = await authService.iniciarRegistro(
+            req.app.locals.db,
+            usuario,
+            email,
+            password
+        );
+
+        if (resultado.error) {
+            return res.status(409).json({ success: false, error: resultado.error });
         }
 
         return res.json({
             success: true,
-            message: 'Usuario registrado correctamente',
-            usuario: usuario,
-            id: resultado.id,
-            token: resultado.token,
+            message: 'Codigo enviado al email.',
+            email: resultado.email,
         });
     } catch (error) {
+        console.error('Error en iniciarRegistro:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function iniciarSesion(req, res) {
-    const { usuario, password } = req.body;
+function verificarCodigo(req, res) {
+    const { email, codigo } = req.body;
 
-    if (!usuario || !password) {
+    if (!email || !codigo) {
         return res.status(400).json({
             success: false,
-            error: 'Usuario y contrasenia son obligatorios.',
+            error: 'Email y codigo son obligatorios.',
+        });
+    }
+
+    if (!/^\d{6}$/.test(codigo)) {
+        return res.status(400).json({
+            success: false,
+            error: 'El codigo debe tener 6 digitos.',
         });
     }
 
     try {
-        const user = authService.autenticarUsuario(req.app.locals.db, usuario, password);
+        const resultado = authService.verificarCodigo(req.app.locals.db, email, codigo);
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Usuario registrado correctamente.',
+            usuario: resultado.usuario,
+            id: resultado.id,
+            token: resultado.token,
+        });
+    } catch (error) {
+        console.error('Error en verificarCodigo:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+async function reenviarCodigo(req, res) {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ success: false, error: 'El email es obligatorio.' });
+    }
+
+    try {
+        const resultado = await authService.reenviarCodigo(req.app.locals.db, email);
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Codigo reenviado correctamente.',
+        });
+    } catch (error) {
+        console.error('Error en reenviarCodigo:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// RECUPERACION DE CONTRASENIA
+
+// paso 1: el usuario envia su email
+// se genera un codigo y se envia por correo
+async function recuperarPassword(req, res) {
+    const { email } = req.body;
+
+    const errorEmail = validarEmail(email);
+    if (errorEmail) {
+        return res.status(400).json({ success: false, error: errorEmail });
+    }
+
+    try {
+        const resultado = await authService.iniciarRecuperacion(req.app.locals.db, email);
+
+        // por seguridad, no revelamos si el email esta registrado o no
+        // siempre devolvemos exito
+        return res.json({
+            success: true,
+            message: 'Si el email esta registrado, vas a recibir un codigo de recuperacion.',
+        });
+    } catch (error) {
+        console.error('Error en recuperarPassword:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// paso 2: el usuario envia email + codigo + nueva contrasenia
+function restablecerPassword(req, res) {
+    const { email, codigo, password_nueva, password_confirmar } = req.body;
+
+    if (!email || !codigo || !password_nueva || !password_confirmar) {
+        return res.status(400).json({
+            success: false,
+            error: 'Completa todos los campos.',
+        });
+    }
+
+    if (!/^\d{6}$/.test(codigo)) {
+        return res.status(400).json({
+            success: false,
+            error: 'El codigo debe tener 6 digitos.',
+        });
+    }
+
+    if (password_nueva !== password_confirmar) {
+        return res.status(400).json({
+            success: false,
+            error: 'Las contrasenias no coinciden.',
+        });
+    }
+
+    const errorPassword = validarPassword(password_nueva);
+    if (errorPassword) {
+        return res.status(400).json({ success: false, error: errorPassword });
+    }
+
+    try {
+        const resultado = authService.restablecerPassword(
+            req.app.locals.db,
+            email,
+            codigo,
+            password_nueva
+        );
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Contrasenia restablecida correctamente. Ya podes iniciar sesion.',
+        });
+    } catch (error) {
+        console.error('Error en restablecerPassword:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// LOGIN
+
+// inicia sesion con email y contrasenia
+// el nombre de usuario sigue existiendo, pero el login se hace con email
+function iniciarSesion(req, res) {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({
+            success: false,
+            error: 'Email y contrasenia son obligatorios.',
+        });
+    }
+
+    const errorEmail = validarEmail(email);
+    if (errorEmail) {
+        return res.status(400).json({ success: false, error: errorEmail });
+    }
+
+    try {
+        const user = authService.autenticarUsuario(
+            req.app.locals.db,
+            email.toLowerCase().trim(),
+            password
+        );
         if (!user) {
             return res.status(401).json({
                 success: false,
-                error: 'Usuario o contrasenia incorrectos.',
+                error: 'Email o contrasenia incorrectos.',
             });
         }
 
@@ -80,6 +248,7 @@ function iniciarSesion(req, res) {
             success: true,
             message: 'Login exitoso',
             usuario: user.usuario,
+            email: user.email,
             id: user.id,
             token: user.token,
         });
@@ -185,7 +354,7 @@ function darDeBajaUsuario(req, res) {
     }
 }
 
-// HISTORIAL DE PEDIDOS DEL USUARIO
+// HISTORIAL DE PEDIDOS
 
 function listarMisPedidos(req, res) {
     try {
@@ -265,8 +434,6 @@ function obtenerDetallePedido(req, res) {
     }
 }
 
-// CANCELAR UN PEDIDO DEL USUARIO
-
 function cancelarPedido(req, res) {
     const { id } = req.params;
 
@@ -293,9 +460,6 @@ function cancelarPedido(req, res) {
     }
 }
 
-// REPETIR PEDIDO
-// agrega los items de una compra anterior al carrito actual
-
 function repetirPedido(req, res) {
     const { id } = req.params;
 
@@ -309,7 +473,11 @@ function repetirPedido(req, res) {
 }
 
 module.exports = {
-    registrar,
+    iniciarRegistro,
+    verificarCodigo,
+    reenviarCodigo,
+    recuperarPassword,
+    restablecerPassword,
     iniciarSesion,
     obtenerPerfil,
     cambiarPassword,

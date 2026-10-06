@@ -35,6 +35,7 @@ function inicializar(db) {
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuario TEXT UNIQUE NOT NULL,
+            email TEXT,
             password_hash TEXT NOT NULL,
             creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -62,9 +63,19 @@ function inicializar(db) {
             clave TEXT PRIMARY KEY,
             valor TEXT
         );
+        CREATE TABLE IF NOT EXISTS codigos_verificacion (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario TEXT NOT NULL,
+            email TEXT NOT NULL,
+            password_hash TEXT,
+            codigo TEXT NOT NULL,
+            tipo TEXT DEFAULT 'registro',
+            intentos INTEGER DEFAULT 0,
+            usado INTEGER DEFAULT 0,
+            creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+            expira_en DATETIME NOT NULL
+        );
     `);
-
-    // migraciones: agregar columnas nuevas a tablas existentes sin perder datos
 
     // migraciones de pedidos
     const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
@@ -102,8 +113,51 @@ function inicializar(db) {
         console.log('Migracion aplicada: columna fecha_fin agregada a portafolio');
     }
 
+    // migracion de usuarios: agregar columna email si no existe
+    const columnasUsuarios = db.prepare('PRAGMA table_info(usuarios)').all();
+    if (!columnasUsuarios.some((col) => col.name === 'email')) {
+        db.exec('ALTER TABLE usuarios ADD COLUMN email TEXT');
+        console.log('Migracion aplicada: columna email agregada a usuarios');
+    }
+
+    // MIGRACION ESPECIAL: recrear codigos_verificacion si tiene NOT NULL en password_hash
+    // sqlite no permite quitar el NOT NULL con ALTER TABLE
+    // necesitamos recrear la tabla desde cero
+    const columnasCodigos = db.prepare('PRAGMA table_info(codigos_verificacion)').all();
+    const colPassword = columnasCodigos.find((c) => c.name === 'password_hash');
+
+    // notnull === 1 significa que la columna tiene el constraint NOT NULL
+    if (colPassword && colPassword.notnull === 1) {
+        console.log('Migracion: recreando tabla codigos_verificacion sin NOT NULL en password_hash');
+
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS codigos_verificacion_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario TEXT NOT NULL,
+                email TEXT NOT NULL,
+                password_hash TEXT,
+                codigo TEXT NOT NULL,
+                tipo TEXT DEFAULT 'registro',
+                intentos INTEGER DEFAULT 0,
+                usado INTEGER DEFAULT 0,
+                creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+                expira_en DATETIME NOT NULL
+            );
+        `);
+
+        // no copiamos datos viejos porque son codigos temporales que expiran
+        db.exec('DROP TABLE codigos_verificacion');
+        db.exec('ALTER TABLE codigos_verificacion_new RENAME TO codigos_verificacion');
+
+        console.log('Migracion completada: codigos_verificacion recreada');
+    }
+    // si la columna tipo no existe, agregarla (para el caso en que la tabla ya sea nueva pero sin tipo)
+    else if (!columnasCodigos.some((col) => col.name === 'tipo')) {
+        db.exec("ALTER TABLE codigos_verificacion ADD COLUMN tipo TEXT DEFAULT 'registro'");
+        console.log('Migracion aplicada: columna tipo agregada a codigos_verificacion');
+    }
+
     // valores por defecto de configuracion
-    // solo se insertan si no existen (no sobrescriben valores guardados)
     const valoresIniciales = {
         marca_nombre: 'DuotechBros',
         contacto_email: 'contacto@duotechbros.com',

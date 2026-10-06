@@ -3,6 +3,7 @@ const router = express.Router();
 
 const adminController = require('../controllers/admin.controller');
 const configuracionController = require('../controllers/configuracion.controller');
+const estadisticasController = require('../controllers/estadisticas.controller');
 const { requiereAuth } = require('../middlewares/auth.middleware');
 
 // todas las rutas de este router están protegidas por el middleware
@@ -26,5 +27,8 @@ router.delete('/pedidos/:id', adminController.eliminarPedido);
 
 // CONFIGURACION
 router.put('/configuracion', configuracionController.actualizarConfiguracion);
+
+// ESTADISTICAS DEL DASHBOARD
+router.get('/estadisticas', estadisticasController.obtenerEstadisticas);
 
 module.exports = router;

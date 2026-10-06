@@ -13,7 +13,6 @@
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
-      <!-- SIDEBAR -->
       <aside class="admin-sidebar">
         <div class="admin-sidebar-brand">
           <i class="fas fa-tools"></i>
@@ -28,26 +27,23 @@
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
           </a>
-          <a href="productos.html">
-            <i class="fas fa-box"></i>
-            <span>Gestionar Productos</span>
-          </a>
-          <a href="portafolio.html">
-            <i class="fas fa-briefcase"></i>
-            <span>Gestionar Portafolio</span>
-          </a>
-          <a href="pedidos.html">
-            <i class="fas fa-tools"></i>
-            <span>Pedidos de Reparación</span>
-          </a>
-          <a href="compras.html">
-            <i class="fas fa-shopping-bag"></i>
-            <span>Compras de Tienda</span>
-          </a>
-          <a href="configuracion.html">
-            <i class="fas fa-cog"></i>
-            <span>Configuración</span>
-          </a>
+          <a href="productos.html"
+            ><i class="fas fa-box"></i><span>Gestionar Productos</span></a
+          >
+          <a href="portafolio.html"
+            ><i class="fas fa-briefcase"></i
+            ><span>Gestionar Portafolio</span></a
+          >
+          <a href="pedidos.html"
+            ><i class="fas fa-tools"></i><span>Pedidos de Reparación</span></a
+          >
+          <a href="compras.html"
+            ><i class="fas fa-shopping-bag"></i
+            ><span>Compras de Tienda</span></a
+          >
+          <a href="configuracion.html"
+            ><i class="fas fa-cog"></i><span>Configuración</span></a
+          >
         </nav>
 
         <div class="admin-sidebar-footer">
@@ -61,7 +57,6 @@
         </div>
       </aside>
 
-      <!-- CONTENIDO PRINCIPAL -->
       <main class="admin-main">
         <header class="admin-header">
           <div>
@@ -73,9 +68,8 @@
           </button>
         </header>
 
-        <!-- ESTADÍSTICAS PRINCIPALES -->
+        <!-- ESTADISTICAS PRINCIPALES -->
         <section class="stats-grid" id="stats-principales">
-          <!-- REPARACIONES -->
           <div class="stat-card">
             <div class="stat-icon stat-icon-blue">
               <i class="fas fa-tools"></i>
@@ -87,7 +81,6 @@
             </div>
           </div>
 
-          <!-- COMPRAS -->
           <div class="stat-card">
             <div class="stat-icon stat-icon-green">
               <i class="fas fa-shopping-bag"></i>
@@ -99,7 +92,6 @@
             </div>
           </div>
 
-          <!-- PRODUCTOS -->
           <div class="stat-card">
             <div class="stat-icon stat-icon-teal">
               <i class="fas fa-box"></i>
@@ -111,7 +103,6 @@
             </div>
           </div>
 
-          <!-- PORTAFOLIO -->
           <div class="stat-card">
             <div class="stat-icon stat-icon-amber">
               <i class="fas fa-briefcase"></i>
@@ -124,67 +115,43 @@
           </div>
         </section>
 
-        <!-- ESTADOS POR TIPO -->
-        <div class="dashboard-estados-grid">
-          <!-- REPARACIONES -->
-          <section class="admin-card">
-            <h2><i class="fas fa-tools"></i> Estados de Reparaciones</h2>
-
-            <div class="estados-grid">
-              <div class="estado-card estado-pendiente">
-                <i class="fas fa-clock"></i>
-                <span class="estado-numero" id="rep-pendiente">—</span>
-                <span class="estado-label">Pendientes</span>
-              </div>
-              <div class="estado-card estado-en-proceso">
-                <i class="fas fa-wrench"></i>
-                <span class="estado-numero" id="rep-en-proceso">—</span>
-                <span class="estado-label">En proceso</span>
-              </div>
-              <div class="estado-card estado-completado">
-                <i class="fas fa-check-circle"></i>
-                <span class="estado-numero" id="rep-completado">—</span>
-                <span class="estado-label">Completados</span>
-              </div>
-              <div class="estado-card estado-cancelado">
-                <i class="fas fa-times-circle"></i>
-                <span class="estado-numero" id="rep-cancelado">—</span>
-                <span class="estado-label">Cancelados</span>
-              </div>
+        <!-- GRAFICOS -->
+        <section class="graficos-grid">
+          <!-- GRAFICO: pedidos por estado -->
+          <div class="admin-card grafico-card">
+            <h2><i class="fas fa-chart-pie"></i> Distribución de pedidos</h2>
+            <div class="grafico-wrapper">
+              <canvas id="grafico-estados"></canvas>
             </div>
-          </section>
+            <p class="grafico-nota" id="grafico-estados-nota"></p>
+          </div>
 
-          <!-- COMPRAS -->
-          <section class="admin-card">
-            <h2><i class="fas fa-shopping-bag"></i> Estados de Compras</h2>
-
-            <div class="estados-grid">
-              <div class="estado-card estado-pendiente">
-                <i class="fas fa-clock"></i>
-                <span class="estado-numero" id="comp-pendiente">—</span>
-                <span class="estado-label">Pendientes</span>
-              </div>
-              <div class="estado-card estado-en-proceso">
-                <i class="fas fa-truck"></i>
-                <span class="estado-numero" id="comp-en-proceso">—</span>
-                <span class="estado-label">En proceso</span>
-              </div>
-              <div class="estado-card estado-completado">
-                <i class="fas fa-check-circle"></i>
-                <span class="estado-numero" id="comp-completado">—</span>
-                <span class="estado-label">Completadas</span>
-              </div>
-              <div class="estado-card estado-cancelado">
-                <i class="fas fa-times-circle"></i>
-                <span class="estado-numero" id="comp-cancelado">—</span>
-                <span class="estado-label">Canceladas</span>
-              </div>
+          <!-- GRAFICO: ventas por mes -->
+          <div class="admin-card grafico-card">
+            <h2>
+              <i class="fas fa-chart-line"></i> Ventas de los últimos 6 meses
+            </h2>
+            <div class="grafico-wrapper">
+              <canvas id="grafico-ventas"></canvas>
             </div>
-          </section>
-        </div>
+            <p class="grafico-nota" id="grafico-ventas-nota"></p>
+          </div>
+        </section>
 
-        <!-- ÚLTIMOS MOVIMIENTOS -->
-        <section class="admin-card" style="padding: 0; overflow: hidden">
+        <!-- GRAFICO: productos mas vendidos -->
+        <section class="admin-card grafico-card grafico-card-full">
+          <h2><i class="fas fa-trophy"></i> Top 10 productos más vendidos</h2>
+          <div class="grafico-wrapper grafico-wrapper-barras">
+            <canvas id="grafico-productos"></canvas>
+          </div>
+          <p class="grafico-nota" id="grafico-productos-nota"></p>
+        </section>
+
+        <!-- ULTIMOS MOVIMIENTOS -->
+        <section
+          class="admin-card"
+          style="padding: 0; overflow: hidden; margin-top: 16px"
+        >
           <div class="table-header">
             <h2><i class="fas fa-history"></i> Últimos movimientos</h2>
             <span class="table-counter" id="contador-movimientos"
@@ -204,9 +171,7 @@
                   <th>Estado</th>
                 </tr>
               </thead>
-              <tbody id="tbody-movimientos">
-                <!-- se carga dinamicamente -->
-              </tbody>
+              <tbody id="tbody-movimientos"></tbody>
             </table>
           </div>
 
@@ -217,8 +182,8 @@
           </div>
         </section>
 
-        <!-- ACCESOS RÁPIDOS -->
-        <section class="admin-card" style="margin-top: 30px">
+        <!-- ACCESOS RAPIDOS -->
+        <section class="admin-card" style="margin-top: 16px">
           <h2><i class="fas fa-bolt"></i> Accesos rápidos</h2>
 
           <div class="dashboard-grid">
@@ -257,6 +222,9 @@
         </section>
       </main>
     </div>
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script src="/js/admin.js"></script>
     <script src="/js/admin-dashboard.js"></script>
