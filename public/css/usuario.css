@@ -2818,3 +2818,64 @@
         font-size: 0.7rem;
     }
 }
+
+/* LINK "OLVIDE MI CONTRASEÑA" */
+
+.usuario-link-olvide {
+    background-color: transparent;
+    border: none;
+    color: #007bff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 10px 8px 4px;
+    text-align: center;
+    transition: color 0.2s, text-decoration 0.2s;
+    align-self: center;
+}
+
+.usuario-link-olvide:hover {
+    color: #005b9f;
+    text-decoration: underline;
+}
+
+/* ICONO DE RECUPERACION (variante azul) */
+
+.verificacion-icono-azul {
+    background: linear-gradient(135deg, #0b4a62 0%, #007bff 100%);
+    box-shadow: 0 10px 25px rgba(11, 74, 98, 0.3);
+}
+
+/* GRUPO DE NUEVAS CONTRASEÑAS EN RECUPERACION */
+
+.recuperar-passwords {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 8px 0;
+}
+
+.recuperar-passwords .usuario-form-grupo {
+    margin: 0;
+}
+
+/* el input de email en recuperacion no debe tener el estilo monospace del codigo */
+
+#recuperar-email {
+    font-weight: 500;
+    color: #333;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 480px) {
+    .usuario-link-olvide {
+        font-size: 0.8rem;
+    }
+
+    .recuperar-passwords {
+        gap: 12px;
+    }
+}

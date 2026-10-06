@@ -19,16 +19,16 @@
         <p class="usuario-subtitulo">DuotechBros</p>
       </div>
 
-      <!-- INDICADOR DE PASOS -->
+      <!-- INDICADOR DE PASOS (registro / recuperacion) -->
       <div class="registro-pasos" id="registro-pasos" style="display: none">
         <div class="registro-paso active" data-paso="1">
           <span class="registro-paso-numero">1</span>
-          <span class="registro-paso-label">Datos</span>
+          <span class="registro-paso-label" id="paso-1-label">Datos</span>
         </div>
         <div class="registro-paso-sep"></div>
         <div class="registro-paso" data-paso="2">
           <span class="registro-paso-numero">2</span>
-          <span class="registro-paso-label">Verificación</span>
+          <span class="registro-paso-label" id="paso-2-label">Verificación</span>
         </div>
       </div>
 
@@ -68,6 +68,10 @@
 
         <button type="submit" class="usuario-btn" id="btn-login">
           <i class="fas fa-sign-in-alt"></i> Ingresar
+        </button>
+
+        <button type="button" class="usuario-link-olvide" id="btn-olvide">
+          ¿Olvidaste tu contraseña?
         </button>
       </form>
 
@@ -133,7 +137,7 @@
         </button>
       </form>
 
-      <!-- VISTA: VERIFICACION (paso 2) -->
+      <!-- VISTA: VERIFICACION DE REGISTRO (paso 2) -->
       <div class="usuario-verificacion" id="vista-verificacion" style="display: none">
         <div class="verificacion-icono">
           <i class="fas fa-envelope-open-text"></i>
@@ -155,7 +159,6 @@
             maxlength="6"
             placeholder="000000"
             autocomplete="one-time-code"
-            autofocus
           />
         </div>
 
@@ -175,6 +178,109 @@
 
         <p class="verificacion-ayuda">
           El código expira en 10 minutos. Si no lo recibís, revisá tu carpeta de spam.
+        </p>
+      </div>
+
+      <!-- VISTA: RECUPERACION - PASO 1 (email) -->
+      <div class="usuario-verificacion" id="vista-recuperacion-email" style="display: none">
+        <div class="verificacion-icono verificacion-icono-azul">
+          <i class="fas fa-key"></i>
+        </div>
+
+        <h2 class="verificacion-titulo">Recuperar contraseña</h2>
+        <p class="verificacion-texto">
+          Ingresá el correo con el que te registraste. Te enviaremos un código para
+          restablecer tu contraseña.
+        </p>
+
+        <div class="verificacion-codigo-grupo">
+          <label for="recuperar-email">Correo electrónico</label>
+          <input
+            type="email"
+            id="recuperar-email"
+            placeholder="tu@email.com"
+            autocomplete="email"
+            maxlength="100"
+            style="font-size: 1rem; letter-spacing: normal; font-family: inherit; padding: 14px;"
+          />
+        </div>
+
+        <button type="button" class="usuario-btn" id="btn-enviar-recuperacion">
+          <i class="fas fa-paper-plane"></i> Enviar código
+        </button>
+
+        <div class="verificacion-acciones">
+          <button type="button" class="verificacion-link" id="btn-cancelar-recuperacion">
+            <i class="fas fa-arrow-left"></i> Volver al login
+          </button>
+        </div>
+      </div>
+
+      <!-- VISTA: RECUPERACION - PASO 2 (codigo + nueva contrasenia) -->
+      <div class="usuario-verificacion" id="vista-recuperacion-codigo" style="display: none">
+        <div class="verificacion-icono verificacion-icono-azul">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <h2 class="verificacion-titulo">Restablecer contraseña</h2>
+        <p class="verificacion-texto">
+          Te enviamos un código a <strong id="recuperar-email-mostrado">tu@email.com</strong>.
+          Ingresalo junto con tu nueva contraseña.
+        </p>
+
+        <div class="verificacion-codigo-grupo">
+          <label for="recuperar-codigo">Código de verificación</label>
+          <input
+            type="text"
+            id="recuperar-codigo"
+            inputmode="numeric"
+            pattern="\d*"
+            maxlength="6"
+            placeholder="000000"
+            autocomplete="one-time-code"
+          />
+        </div>
+
+        <div class="recuperar-passwords">
+          <div class="usuario-form-grupo">
+            <label for="recuperar-password-nueva">Nueva contraseña</label>
+            <input
+              type="password"
+              id="recuperar-password-nueva"
+              placeholder="Mínimo 6 caracteres"
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="usuario-form-grupo">
+            <label for="recuperar-password-confirmar">Confirmar contraseña</label>
+            <input
+              type="password"
+              id="recuperar-password-confirmar"
+              placeholder="Repetí la contraseña"
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
+        </div>
+
+        <button type="button" class="usuario-btn" id="btn-restablecer">
+          <i class="fas fa-check-circle"></i> Restablecer contraseña
+        </button>
+
+        <div class="verificacion-acciones">
+          <button type="button" class="verificacion-link" id="btn-reenviar-recuperacion">
+            <i class="fas fa-redo"></i> Reenviar código
+          </button>
+          <span class="verificacion-sep">·</span>
+          <button type="button" class="verificacion-link" id="btn-volver-recuperacion">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
+        </div>
+
+        <p class="verificacion-ayuda">
+          El código expira en 10 minutos.
         </p>
       </div>
 

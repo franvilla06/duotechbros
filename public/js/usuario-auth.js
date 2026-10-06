@@ -1,5 +1,5 @@
 // LOGICA DE LA PAGINA DE LOGIN Y REGISTRO DE USUARIOS
-// incluye el flujo de verificacion por email en dos pasos
+// incluye flujo de verificacion por email en 2 pasos y recuperacion de contrasenia
 
 const API_USUARIOS = '/api/usuarios';
 
@@ -8,23 +8,42 @@ const tabs = document.querySelectorAll('.usuario-tab');
 const tabsContainer = document.getElementById('usuario-tabs');
 const pasosContainer = document.getElementById('registro-pasos');
 const pasos = document.querySelectorAll('.registro-paso');
+const paso1Label = document.getElementById('paso-1-label');
+const paso2Label = document.getElementById('paso-2-label');
 
 const formLogin = document.getElementById('form-login');
 const formRegistro = document.getElementById('form-registro');
 const vistaVerificacion = document.getElementById('vista-verificacion');
+const vistaRecuperacionEmail = document.getElementById('vista-recuperacion-email');
+const vistaRecuperacionCodigo = document.getElementById('vista-recuperacion-codigo');
 
 const mensajeDiv = document.getElementById('mensaje');
+
 const btnLogin = document.getElementById('btn-login');
 const btnRegistro = document.getElementById('btn-registro');
 const btnVerificar = document.getElementById('btn-verificar');
 const btnReenviar = document.getElementById('btn-reenviar');
 const btnVolver = document.getElementById('btn-volver');
 
+const btnOlvide = document.getElementById('btn-olvide');
+const btnEnviarRecuperacion = document.getElementById('btn-enviar-recuperacion');
+const btnCancelarRecuperacion = document.getElementById('btn-cancelar-recuperacion');
+const btnRestablecer = document.getElementById('btn-restablecer');
+const btnReenviarRecuperacion = document.getElementById('btn-reenviar-recuperacion');
+const btnVolverRecuperacion = document.getElementById('btn-volver-recuperacion');
+
 const inputCodigo = document.getElementById('verificacion-codigo');
 const textoEmail = document.getElementById('verificacion-email');
 
-// guardamos el email que estamos verificando
+const inputRecuperarEmail = document.getElementById('recuperar-email');
+const inputRecuperarCodigo = document.getElementById('recuperar-codigo');
+const inputRecuperarPassword = document.getElementById('recuperar-password-nueva');
+const inputRecuperarPasswordConfirmar = document.getElementById('recuperar-password-confirmar');
+const textoRecuperarEmailMostrado = document.getElementById('recuperar-email-mostrado');
+
+// estado local
 let emailEnVerificacion = '';
+let emailEnRecuperacion = '';
 
 // REDIRECCION POST LOGIN
 
@@ -32,7 +51,6 @@ function obtenerUrlRedireccion() {
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
 
-    // validar que sea una url interna (empieza con /)
     if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
         return redirect;
     }
@@ -66,7 +84,6 @@ function mostrarMensaje(texto, tipo) {
     mensajeDiv.textContent = texto;
     mensajeDiv.className = `usuario-mensaje ${tipo}`;
 
-    // autoocultar despues de 6 segundos
     setTimeout(() => {
         if (mensajeDiv.textContent === texto) {
             limpiarMensaje();
@@ -79,6 +96,17 @@ function limpiarMensaje() {
     mensajeDiv.className = 'usuario-mensaje';
 }
 
+// OCULTAR TODAS LAS VISTAS
+function ocultarTodasLasVistas() {
+    formLogin.style.display = 'none';
+    formRegistro.style.display = 'none';
+    vistaVerificacion.style.display = 'none';
+    vistaRecuperacionEmail.style.display = 'none';
+    vistaRecuperacionCodigo.style.display = 'none';
+    tabsContainer.style.display = 'none';
+    pasosContainer.style.display = 'none';
+}
+
 // VISTAS
 
 function activarTab(nombreTab) {
@@ -86,30 +114,30 @@ function activarTab(nombreTab) {
         tab.classList.toggle('active', tab.dataset.tab === nombreTab);
     });
 
+    ocultarTodasLasVistas();
+    tabsContainer.style.display = 'flex';
+
     if (nombreTab === 'login') {
         formLogin.style.display = 'flex';
-        formRegistro.style.display = 'none';
     } else {
-        formLogin.style.display = 'none';
         formRegistro.style.display = 'flex';
     }
 
-    vistaVerificacion.style.display = 'none';
     limpiarMensaje();
 }
 
-// cambia la vista a la pantalla de verificacion
+// vista de verificacion (registro)
 function mostrarVistaVerificacion(email) {
     emailEnVerificacion = email;
     textoEmail.textContent = email;
 
-    tabsContainer.style.display = 'none';
+    ocultarTodasLasVistas();
     pasosContainer.style.display = 'flex';
-    formLogin.style.display = 'none';
-    formRegistro.style.display = 'none';
     vistaVerificacion.style.display = 'flex';
 
-    // marcar el paso 2 como activo
+    paso1Label.textContent = 'Datos';
+    paso2Label.textContent = 'Verificación';
+
     pasos.forEach((p) => {
         p.classList.toggle('active', p.dataset.paso === '2');
     });
@@ -119,24 +147,54 @@ function mostrarVistaVerificacion(email) {
     limpiarMensaje();
 }
 
-// vuelve a la vista de registro
-function volverAlRegistro() {
-    tabsContainer.style.display = 'flex';
-    pasosContainer.style.display = 'none';
-    vistaVerificacion.style.display = 'none';
-    formRegistro.style.display = 'flex';
+// vista de recuperacion - paso 1 (email)
+function mostrarVistaRecuperacionEmail() {
+    ocultarTodasLasVistas();
+    pasosContainer.style.display = 'flex';
+    vistaRecuperacionEmail.style.display = 'flex';
 
-    // reactivar el tab de registro
-    tabs.forEach((tab) => {
-        tab.classList.toggle('active', tab.dataset.tab === 'registro');
-    });
+    paso1Label.textContent = 'Email';
+    paso2Label.textContent = 'Código';
 
     pasos.forEach((p) => {
         p.classList.toggle('active', p.dataset.paso === '1');
     });
 
-    inputCodigo.value = '';
+    inputRecuperarEmail.value = '';
+    inputRecuperarEmail.focus();
     limpiarMensaje();
+}
+
+// vista de recuperacion - paso 2 (codigo + nueva contrasenia)
+function mostrarVistaRecuperacionCodigo(email) {
+    emailEnRecuperacion = email;
+    textoRecuperarEmailMostrado.textContent = email;
+
+    ocultarTodasLasVistas();
+    pasosContainer.style.display = 'flex';
+    vistaRecuperacionCodigo.style.display = 'flex';
+
+    paso1Label.textContent = 'Email';
+    paso2Label.textContent = 'Código';
+
+    pasos.forEach((p) => {
+        p.classList.toggle('active', p.dataset.paso === '2');
+    });
+
+    inputRecuperarCodigo.value = '';
+    inputRecuperarPassword.value = '';
+    inputRecuperarPasswordConfirmar.value = '';
+    inputRecuperarCodigo.focus();
+    limpiarMensaje();
+}
+
+// vuelve a la vista de registro
+function volverAlRegistro() {
+    activarTab('registro');
+    pasos.forEach((p) => {
+        p.classList.toggle('active', p.dataset.paso === '1');
+    });
+    inputCodigo.value = '';
 }
 
 tabs.forEach((tab) => {
@@ -217,27 +275,23 @@ formRegistro.addEventListener('submit', async (e) => {
     const password = document.getElementById('registro-password').value;
     const passwordConfirm = document.getElementById('registro-password-confirm').value;
 
-    // validar el usuario
     const errorUsuario = validarUsuarioFrontend(usuario);
     if (errorUsuario) {
         mostrarMensaje(errorUsuario, 'error');
         return;
     }
 
-    // validar el email
     const errorEmail = validarEmailFrontend(email);
     if (errorEmail) {
         mostrarMensaje(errorEmail, 'error');
         return;
     }
 
-    // validar la contrasenia
     if (!password || password.length < 6) {
         mostrarMensaje('La contraseña debe tener al menos 6 caracteres.', 'error');
         return;
     }
 
-    // verificar que coincidan
     if (password !== passwordConfirm) {
         mostrarMensaje('Las contraseñas no coinciden.', 'error');
         return;
@@ -270,24 +324,20 @@ formRegistro.addEventListener('submit', async (e) => {
     }
 });
 
-// VERIFICACION DE CODIGO (PASO 2)
+// VERIFICACION DE CODIGO (PASO 2 DEL REGISTRO)
 
-// formatea el codigo: solo numeros y hasta 6 digitos
 inputCodigo.addEventListener('input', (e) => {
     let valor = e.target.value.replace(/\D/g, '');
     if (valor.length > 6) valor = valor.slice(0, 6);
     e.target.value = valor;
 
-    // si llego a 6 digitos, hacemos la verificacion automatica
     if (valor.length === 6) {
-        // pequeño delay para que se vea el ultimo digito
         setTimeout(() => {
             verificarCodigo();
         }, 150);
     }
 });
 
-// permitir enviar con enter
 inputCodigo.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -341,7 +391,7 @@ async function verificarCodigo() {
     }
 }
 
-// REENVIAR CODIGO
+// REENVIAR CODIGO (REGISTRO)
 
 btnReenviar.addEventListener('click', async () => {
     if (!emailEnVerificacion) {
@@ -384,11 +434,196 @@ btnVolver.addEventListener('click', () => {
     volverAlRegistro();
 });
 
+// ============================================================
+// RECUPERACION DE CONTRASENIA
+// ============================================================
+
+// abrir la vista de recuperacion desde el link "Olvidé mi contraseña"
+btnOlvide.addEventListener('click', () => {
+    mostrarVistaRecuperacionEmail();
+});
+
+// cancelar y volver al login
+btnCancelarRecuperacion.addEventListener('click', () => {
+    activarTab('login');
+});
+
+// paso 1: enviar el email para recibir el codigo
+btnEnviarRecuperacion.addEventListener('click', async () => {
+    const email = inputRecuperarEmail.value.trim().toLowerCase();
+
+    const errorEmail = validarEmailFrontend(email);
+    if (errorEmail) {
+        mostrarMensaje(errorEmail, 'error');
+        return;
+    }
+
+    btnEnviarRecuperacion.disabled = true;
+    btnEnviarRecuperacion.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    try {
+        const respuesta = await fetch(`${API_USUARIOS}/recuperar-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarVistaRecuperacionCodigo(email);
+            mostrarMensaje('Si el email está registrado, vas a recibir un código.', 'exito');
+        } else {
+            mostrarMensaje(resultado.error || 'No se pudo enviar el código.', 'error');
+        }
+    } catch (error) {
+        console.error('Error de conexión:', error);
+        mostrarMensaje('No se pudo conectar con el servidor.', 'error');
+    } finally {
+        btnEnviarRecuperacion.disabled = false;
+        btnEnviarRecuperacion.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar código';
+    }
+});
+
+// permitir enviar con Enter en el input de email
+inputRecuperarEmail.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        btnEnviarRecuperacion.click();
+    }
+});
+
+// formatear el codigo de recuperacion (solo numeros)
+inputRecuperarCodigo.addEventListener('input', (e) => {
+    let valor = e.target.value.replace(/\D/g, '');
+    if (valor.length > 6) valor = valor.slice(0, 6);
+    e.target.value = valor;
+});
+
+// paso 2: restablecer la contrasenia
+btnRestablecer.addEventListener('click', async () => {
+    const codigo = inputRecuperarCodigo.value.trim();
+    const passwordNueva = inputRecuperarPassword.value;
+    const passwordConfirmar = inputRecuperarPasswordConfirmar.value;
+
+    if (!codigo || codigo.length !== 6) {
+        mostrarMensaje('El código debe tener 6 dígitos.', 'error');
+        return;
+    }
+
+    if (!passwordNueva || passwordNueva.length < 6) {
+        mostrarMensaje('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+        return;
+    }
+
+    if (passwordNueva !== passwordConfirmar) {
+        mostrarMensaje('Las contraseñas no coinciden.', 'error');
+        return;
+    }
+
+    btnRestablecer.disabled = true;
+    btnRestablecer.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restableciendo...';
+
+    try {
+        const respuesta = await fetch(`${API_USUARIOS}/restablecer-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: emailEnRecuperacion,
+                codigo,
+                password_nueva: passwordNueva,
+                password_confirmar: passwordConfirmar,
+            }),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarMensaje('Contraseña restablecida. Redirigiendo al login...', 'exito');
+
+            setTimeout(() => {
+                // limpiar el formulario de login y volver
+                document.getElementById('login-usuario').value = resultado.usuario || '';
+                document.getElementById('login-password').value = '';
+                activarTab('login');
+                mostrarMensaje('Ya podés iniciar sesión con tu nueva contraseña.', 'exito');
+                document.getElementById('login-password').focus();
+            }, 1500);
+        } else {
+            mostrarMensaje(resultado.error || 'No se pudo restablecer la contraseña.', 'error');
+        }
+    } catch (error) {
+        console.error('Error de conexión:', error);
+        mostrarMensaje('No se pudo conectar con el servidor.', 'error');
+    } finally {
+        btnRestablecer.disabled = false;
+        btnRestablecer.innerHTML = '<i class="fas fa-check-circle"></i> Restablecer contraseña';
+    }
+});
+
+// permitir enviar con Enter en el input de codigo
+inputRecuperarCodigo.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        inputRecuperarPassword.focus();
+    }
+});
+
+inputRecuperarPasswordConfirmar.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        btnRestablecer.click();
+    }
+});
+
+// reenviar codigo de recuperacion
+btnReenviarRecuperacion.addEventListener('click', async () => {
+    if (!emailEnRecuperacion) {
+        mostrarMensaje('No hay un email pendiente de recuperación.', 'error');
+        return;
+    }
+
+    btnReenviarRecuperacion.disabled = true;
+    const contenidoOriginal = btnReenviarRecuperacion.innerHTML;
+    btnReenviarRecuperacion.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reenviando...';
+
+    try {
+        const respuesta = await fetch(`${API_USUARIOS}/recuperar-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailEnRecuperacion }),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarMensaje('Código reenviado. Revisá tu correo.', 'exito');
+            inputRecuperarCodigo.value = '';
+            inputRecuperarCodigo.focus();
+        } else {
+            mostrarMensaje(resultado.error || 'No se pudo reenviar el código.', 'error');
+        }
+    } catch (error) {
+        console.error('Error de conexión:', error);
+        mostrarMensaje('No se pudo conectar con el servidor.', 'error');
+    } finally {
+        btnReenviarRecuperacion.disabled = false;
+        btnReenviarRecuperacion.innerHTML = contenidoOriginal;
+    }
+});
+
+// volver al paso 1 de recuperacion
+btnVolverRecuperacion.addEventListener('click', () => {
+    mostrarVistaRecuperacionEmail();
+    inputRecuperarEmail.value = emailEnRecuperacion;
+});
+
 // INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
-    // si la url tiene ?logout=1, cerrar la sesion y quedarse en el login
     const params = new URLSearchParams(window.location.search);
+
+    // si la url tiene ?logout=1, cerrar la sesion
     if (params.get('logout') === '1') {
         cerrarSesionUsuario();
         mostrarMensaje('Sesión cerrada correctamente.', 'exito');
