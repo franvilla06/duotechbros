@@ -214,22 +214,33 @@ function restablecerPassword(req, res) {
 
 // LOGIN
 
+// inicia sesion con email y contrasenia
+// el nombre de usuario sigue existiendo, pero el login se hace con email
 function iniciarSesion(req, res) {
-    const { usuario, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!usuario || !password) {
+    if (!email || !password) {
         return res.status(400).json({
             success: false,
-            error: 'Usuario y contrasenia son obligatorios.',
+            error: 'Email y contrasenia son obligatorios.',
         });
     }
 
+    const errorEmail = validarEmail(email);
+    if (errorEmail) {
+        return res.status(400).json({ success: false, error: errorEmail });
+    }
+
     try {
-        const user = authService.autenticarUsuario(req.app.locals.db, usuario, password);
+        const user = authService.autenticarUsuario(
+            req.app.locals.db,
+            email.toLowerCase().trim(),
+            password
+        );
         if (!user) {
             return res.status(401).json({
                 success: false,
-                error: 'Usuario o contrasenia incorrectos.',
+                error: 'Email o contrasenia incorrectos.',
             });
         }
 
@@ -237,6 +248,7 @@ function iniciarSesion(req, res) {
             success: true,
             message: 'Login exitoso',
             usuario: user.usuario,
+            email: user.email,
             id: user.id,
             token: user.token,
         });

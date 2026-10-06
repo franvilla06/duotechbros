@@ -6,13 +6,18 @@ function buscarPorUsuario(db, usuario) {
     return db.prepare('SELECT * FROM usuarios WHERE usuario = ?').get(usuario);
 }
 
+// busca un usuario por su email
+// se usa para el login
+function buscarPorEmail(db, email) {
+    return db.prepare('SELECT * FROM usuarios WHERE email = ?').get(email);
+}
+
 function crear(db, usuario, passwordHash) {
     return db
         .prepare('INSERT INTO usuarios (usuario, password_hash) VALUES (?, ?)')
         .run(usuario, passwordHash);
 }
 
-// crea un usuario incluyendo el email (usado tras verificar el codigo)
 function crearConEmail(db, usuario, email, passwordHash) {
     return db
         .prepare('INSERT INTO usuarios (usuario, email, password_hash) VALUES (?, ?, ?)')
@@ -43,6 +48,7 @@ function eliminar(db, usuario) {
 module.exports = {
     contarPorUsuario,
     buscarPorUsuario,
+    buscarPorEmail,
     crear,
     crearConEmail,
     obtenerId,

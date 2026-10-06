@@ -184,12 +184,15 @@ function restablecerPassword(db, email, codigo, passwordNueva) {
 
 // LOGIN
 
-function autenticarUsuario(db, usuario, password) {
-    const user = usuariosModel.buscarPorUsuario(db, usuario);
+// autentica un usuario por email (el email es unico)
+// el login se hace con email, no con nombre de usuario
+function autenticarUsuario(db, email, password) {
+    const user = usuariosModel.buscarPorEmail(db, email);
     if (!user || !bcrypt.compareSync(password, user.password_hash)) return null;
 
     return {
         usuario: user.usuario,
+        email: user.email,
         id: user.id,
         token: generarToken('usuario', user.usuario),
     };

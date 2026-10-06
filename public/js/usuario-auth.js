@@ -1,5 +1,5 @@
 // LOGICA DE LA PAGINA DE LOGIN Y REGISTRO DE USUARIOS
-// incluye flujo de verificacion por email en 2 pasos y recuperacion de contrasenia
+// login con email, registro con verificacion y recuperacion de contrasenia
 
 const API_USUARIOS = '/api/usuarios';
 
@@ -31,6 +31,9 @@ const btnCancelarRecuperacion = document.getElementById('btn-cancelar-recuperaci
 const btnRestablecer = document.getElementById('btn-restablecer');
 const btnReenviarRecuperacion = document.getElementById('btn-reenviar-recuperacion');
 const btnVolverRecuperacion = document.getElementById('btn-volver-recuperacion');
+
+const inputLoginEmail = document.getElementById('login-email');
+const inputLoginPassword = document.getElementById('login-password');
 
 const inputCodigo = document.getElementById('verificacion-codigo');
 const textoEmail = document.getElementById('verificacion-email');
@@ -126,7 +129,6 @@ function activarTab(nombreTab) {
     limpiarMensaje();
 }
 
-// vista de verificacion (registro)
 function mostrarVistaVerificacion(email) {
     emailEnVerificacion = email;
     textoEmail.textContent = email;
@@ -147,7 +149,6 @@ function mostrarVistaVerificacion(email) {
     limpiarMensaje();
 }
 
-// vista de recuperacion - paso 1 (email)
 function mostrarVistaRecuperacionEmail() {
     ocultarTodasLasVistas();
     pasosContainer.style.display = 'flex';
@@ -165,7 +166,6 @@ function mostrarVistaRecuperacionEmail() {
     limpiarMensaje();
 }
 
-// vista de recuperacion - paso 2 (codigo + nueva contrasenia)
 function mostrarVistaRecuperacionCodigo(email) {
     emailEnRecuperacion = email;
     textoRecuperarEmailMostrado.textContent = email;
@@ -188,7 +188,6 @@ function mostrarVistaRecuperacionCodigo(email) {
     limpiarMensaje();
 }
 
-// vuelve a la vista de registro
 function volverAlRegistro() {
     activarTab('registro');
     pasos.forEach((p) => {
@@ -222,16 +221,22 @@ function validarEmailFrontend(email) {
     return null;
 }
 
-// LOGIN
+// LOGIN (con email)
 
 formLogin.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const usuario = document.getElementById('login-usuario').value.trim();
-    const password = document.getElementById('login-password').value;
+    const email = inputLoginEmail.value.trim().toLowerCase();
+    const password = inputLoginPassword.value;
 
-    if (!usuario || !password) {
-        mostrarMensaje('Completá todos los campos.', 'error');
+    const errorEmail = validarEmailFrontend(email);
+    if (errorEmail) {
+        mostrarMensaje(errorEmail, 'error');
+        return;
+    }
+
+    if (!password) {
+        mostrarMensaje('Ingresá tu contraseña.', 'error');
         return;
     }
 
@@ -242,7 +247,7 @@ formLogin.addEventListener('submit', async (e) => {
         const respuesta = await fetch(`${API_USUARIOS}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ usuario, password }),
+            body: JSON.stringify({ email, password }),
         });
 
         const resultado = await respuesta.json();
@@ -254,7 +259,7 @@ formLogin.addEventListener('submit', async (e) => {
                 window.location.href = obtenerUrlRedireccion();
             }, 800);
         } else {
-            mostrarMensaje(resultado.error || 'Usuario o contraseña incorrectos.', 'error');
+            mostrarMensaje(resultado.error || 'Email o contraseña incorrectos.', 'error');
         }
     } catch (error) {
         console.error('Error de conexión:', error);
@@ -438,17 +443,14 @@ btnVolver.addEventListener('click', () => {
 // RECUPERACION DE CONTRASENIA
 // ============================================================
 
-// abrir la vista de recuperacion desde el link "Olvidé mi contraseña"
 btnOlvide.addEventListener('click', () => {
     mostrarVistaRecuperacionEmail();
 });
 
-// cancelar y volver al login
 btnCancelarRecuperacion.addEventListener('click', () => {
     activarTab('login');
 });
 
-// paso 1: enviar el email para recibir el codigo
 btnEnviarRecuperacion.addEventListener('click', async () => {
     const email = inputRecuperarEmail.value.trim().toLowerCase();
 
@@ -485,7 +487,6 @@ btnEnviarRecuperacion.addEventListener('click', async () => {
     }
 });
 
-// permitir enviar con Enter en el input de email
 inputRecuperarEmail.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -493,14 +494,12 @@ inputRecuperarEmail.addEventListener('keydown', (e) => {
     }
 });
 
-// formatear el codigo de recuperacion (solo numeros)
 inputRecuperarCodigo.addEventListener('input', (e) => {
     let valor = e.target.value.replace(/\D/g, '');
     if (valor.length > 6) valor = valor.slice(0, 6);
     e.target.value = valor;
 });
 
-// paso 2: restablecer la contrasenia
 btnRestablecer.addEventListener('click', async () => {
     const codigo = inputRecuperarCodigo.value.trim();
     const passwordNueva = inputRecuperarPassword.value;
@@ -542,12 +541,12 @@ btnRestablecer.addEventListener('click', async () => {
             mostrarMensaje('Contraseña restablecida. Redirigiendo al login...', 'exito');
 
             setTimeout(() => {
-                // limpiar el formulario de login y volver
-                document.getElementById('login-usuario').value = resultado.usuario || '';
-                document.getElementById('login-password').value = '';
+                // volver al login y autocompletar el email
+                inputLoginEmail.value = emailEnRecuperacion;
+                inputLoginPassword.value = '';
                 activarTab('login');
                 mostrarMensaje('Ya podés iniciar sesión con tu nueva contraseña.', 'exito');
-                document.getElementById('login-password').focus();
+                inputLoginPassword.focus();
             }, 1500);
         } else {
             mostrarMensaje(resultado.error || 'No se pudo restablecer la contraseña.', 'error');
@@ -561,7 +560,6 @@ btnRestablecer.addEventListener('click', async () => {
     }
 });
 
-// permitir enviar con Enter en el input de codigo
 inputRecuperarCodigo.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -576,7 +574,6 @@ inputRecuperarPasswordConfirmar.addEventListener('keydown', (e) => {
     }
 });
 
-// reenviar codigo de recuperacion
 btnReenviarRecuperacion.addEventListener('click', async () => {
     if (!emailEnRecuperacion) {
         mostrarMensaje('No hay un email pendiente de recuperación.', 'error');
@@ -612,7 +609,6 @@ btnReenviarRecuperacion.addEventListener('click', async () => {
     }
 });
 
-// volver al paso 1 de recuperacion
 btnVolverRecuperacion.addEventListener('click', () => {
     mostrarVistaRecuperacionEmail();
     inputRecuperarEmail.value = emailEnRecuperacion;
@@ -623,7 +619,6 @@ btnVolverRecuperacion.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
 
-    // si la url tiene ?logout=1, cerrar la sesion
     if (params.get('logout') === '1') {
         cerrarSesionUsuario();
         mostrarMensaje('Sesión cerrada correctamente.', 'exito');
@@ -631,7 +626,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // si el usuario ya esta logueado, redirigir
     if (estaLogueadoUsuario()) {
         window.location.href = obtenerUrlRedireccion();
     }
