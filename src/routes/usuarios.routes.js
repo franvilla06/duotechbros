@@ -10,6 +10,10 @@ router.post('/registro', usuariosController.iniciarRegistro);
 router.post('/verificar-codigo', usuariosController.verificarCodigo);
 router.post('/reenviar-codigo', usuariosController.reenviarCodigo);
 
+// RECUPERACION DE CONTRASENIA
+router.post('/recuperar-password', usuariosController.recuperarPassword);
+router.post('/restablecer-password', usuariosController.restablecerPassword);
+
 // LOGIN
 router.post('/login', usuariosController.iniciarSesion);
 

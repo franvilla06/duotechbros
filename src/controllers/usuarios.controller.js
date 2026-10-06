@@ -31,8 +31,6 @@ function validarPassword(password) {
 
 // REGISTRO CON VERIFICACION POR EMAIL
 
-// paso 1: el usuario envia usuario, email y password
-// se envia un codigo al email y NO se crea el usuario todavia
 async function iniciarRegistro(req, res) {
     const { usuario, email, password } = req.body;
 
@@ -74,8 +72,6 @@ async function iniciarRegistro(req, res) {
     }
 }
 
-// paso 2: el usuario envia email y codigo
-// si es correcto, se crea el usuario y se devuelve el token
 function verificarCodigo(req, res) {
     const { email, codigo } = req.body;
 
@@ -113,7 +109,6 @@ function verificarCodigo(req, res) {
     }
 }
 
-// reenviar codigo (si el usuario no lo recibio)
 async function reenviarCodigo(req, res) {
     const { email } = req.body;
 
@@ -134,6 +129,85 @@ async function reenviarCodigo(req, res) {
         });
     } catch (error) {
         console.error('Error en reenviarCodigo:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// RECUPERACION DE CONTRASENIA
+
+// paso 1: el usuario envia su email
+// se genera un codigo y se envia por correo
+async function recuperarPassword(req, res) {
+    const { email } = req.body;
+
+    const errorEmail = validarEmail(email);
+    if (errorEmail) {
+        return res.status(400).json({ success: false, error: errorEmail });
+    }
+
+    try {
+        const resultado = await authService.iniciarRecuperacion(req.app.locals.db, email);
+
+        // por seguridad, no revelamos si el email esta registrado o no
+        // siempre devolvemos exito
+        return res.json({
+            success: true,
+            message: 'Si el email esta registrado, vas a recibir un codigo de recuperacion.',
+        });
+    } catch (error) {
+        console.error('Error en recuperarPassword:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// paso 2: el usuario envia email + codigo + nueva contrasenia
+function restablecerPassword(req, res) {
+    const { email, codigo, password_nueva, password_confirmar } = req.body;
+
+    if (!email || !codigo || !password_nueva || !password_confirmar) {
+        return res.status(400).json({
+            success: false,
+            error: 'Completa todos los campos.',
+        });
+    }
+
+    if (!/^\d{6}$/.test(codigo)) {
+        return res.status(400).json({
+            success: false,
+            error: 'El codigo debe tener 6 digitos.',
+        });
+    }
+
+    if (password_nueva !== password_confirmar) {
+        return res.status(400).json({
+            success: false,
+            error: 'Las contrasenias no coinciden.',
+        });
+    }
+
+    const errorPassword = validarPassword(password_nueva);
+    if (errorPassword) {
+        return res.status(400).json({ success: false, error: errorPassword });
+    }
+
+    try {
+        const resultado = authService.restablecerPassword(
+            req.app.locals.db,
+            email,
+            codigo,
+            password_nueva
+        );
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Contrasenia restablecida correctamente. Ya podes iniciar sesion.',
+        });
+    } catch (error) {
+        console.error('Error en restablecerPassword:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
@@ -390,6 +464,8 @@ module.exports = {
     iniciarRegistro,
     verificarCodigo,
     reenviarCodigo,
+    recuperarPassword,
+    restablecerPassword,
     iniciarSesion,
     obtenerPerfil,
     cambiarPassword,

@@ -8,18 +8,12 @@ const { generarToken } = require('../utils/token.util');
 
 // REGISTRO CON VERIFICACION POR EMAIL
 
-// inicia el proceso de registro
-// valida que el usuario y email no existan, hashea la password,
-// genera un codigo y lo envia por email
-// NO crea el usuario todavia
 async function iniciarRegistro(db, usuario, email, password) {
-    // validar que el usuario no exista
     const existeUsuario = usuariosModel.contarPorUsuario(db, usuario);
     if (existeUsuario.count > 0) {
         return { error: 'Ese nombre de usuario ya esta en uso.' };
     }
 
-    // validar que el email no este registrado
     const emailExistente = db
         .prepare('SELECT COUNT(*) as count FROM usuarios WHERE email = ?')
         .get(email);
@@ -27,16 +21,10 @@ async function iniciarRegistro(db, usuario, email, password) {
         return { error: 'Ese email ya esta registrado.' };
     }
 
-    // hashear la password antes de guardarla
     const hash = bcrypt.hashSync(password, 10);
-
-    // generar codigo de 6 digitos (criptograficamente seguro)
     const codigo = crypto.randomInt(100000, 999999).toString();
-
-    // expiracion: 10 minutos
     const expiraEn = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-    // guardar el codigo en la tabla temporal
     verificacionModel.crear(db, {
         usuario,
         email,
@@ -45,24 +33,20 @@ async function iniciarRegistro(db, usuario, email, password) {
         expira_en: expiraEn,
     });
 
-    // enviar el email
     await emailService.enviarCodigoVerificacion(email, usuario, codigo);
 
     return { exito: true, email };
 }
 
-// verifica el codigo y crea el usuario definitivo
 function verificarCodigo(db, email, codigo) {
-    // limpiar codigos vencidos
     verificacionModel.limpiarVencidos(db);
 
-    const registro = verificacionModel.buscarPorEmail(db, email);
+    const registro = verificacionModel.buscarPorEmail(db, email, 'registro');
 
     if (!registro) {
         return { error: 'No hay un codigo activo para este email. Solicita uno nuevo.' };
     }
 
-    // verificar expiracion
     const ahora = new Date();
     const expira = new Date(registro.expira_en);
     if (ahora > expira) {
@@ -70,21 +54,17 @@ function verificarCodigo(db, email, codigo) {
         return { error: 'El codigo expiro. Solicita uno nuevo.' };
     }
 
-    // verificar intentos (maximo 5)
     if (registro.intentos >= 5) {
         verificacionModel.eliminar(db, registro.id);
         return { error: 'Se superaron los intentos permitidos. Solicita un nuevo codigo.' };
     }
 
-    // verificar que el codigo coincida
     if (registro.codigo !== codigo) {
         verificacionModel.incrementarIntentos(db, registro.id);
         const restantes = 5 - (registro.intentos + 1);
         return { error: `Codigo incorrecto. Intentos restantes: ${restantes}.` };
     }
 
-    // codigo correcto: crear el usuario definitivo
-    // usamos transaccion para no dejar el codigo usado sin crear el usuario
     const crearUsuario = db.transaction(() => {
         const info = usuariosModel.crearConEmail(
             db,
@@ -108,27 +88,98 @@ function verificarCodigo(db, email, codigo) {
     };
 }
 
-// reenvia el codigo al email (si ya existe un registro pendiente)
 async function reenviarCodigo(db, email) {
-    const registro = verificacionModel.buscarPorEmail(db, email);
+    const registro = verificacionModel.buscarPorEmail(db, email, 'registro');
 
     if (!registro) {
         return { error: 'No hay un registro pendiente para este email. Volve a registrarte.' };
     }
 
-    // generar un nuevo codigo
     const nuevoCodigo = crypto.randomInt(100000, 999999).toString();
     const nuevaExpiracion = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-    // actualizar el codigo existente
     db.prepare(
         'UPDATE codigos_verificacion SET codigo = ?, expira_en = ?, intentos = 0 WHERE id = ?'
     ).run(nuevoCodigo, nuevaExpiracion, registro.id);
 
-    // enviar el email
     await emailService.enviarCodigoVerificacion(email, registro.usuario, nuevoCodigo);
 
     return { exito: true };
+}
+
+// RECUPERACION DE CONTRASENIA
+
+// paso 1: el usuario envia su email
+// se genera un codigo y se envia por email
+// por seguridad, siempre devolvemos exito (aunque el email no exista)
+// para no filtrar que emails estan registrados
+async function iniciarRecuperacion(db, email) {
+    const usuario = db.prepare('SELECT usuario, email FROM usuarios WHERE email = ?').get(email);
+
+    // si el email no existe, igual devolvemos exito (no revelamos si esta registrado)
+    if (!usuario) {
+        return { exito: true, existe: false };
+    }
+
+    const codigo = crypto.randomInt(100000, 999999).toString();
+    const expiraEn = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+    verificacionModel.crearRecuperacion(db, {
+        usuario: usuario.usuario,
+        email: usuario.email,
+        codigo,
+        expira_en: expiraEn,
+    });
+
+    await emailService.enviarCodigoRecuperacion(email, usuario.usuario, codigo);
+
+    return { exito: true, existe: true };
+}
+
+// paso 2: el usuario envia email + codigo + nueva contrasenia
+function restablecerPassword(db, email, codigo, passwordNueva) {
+    verificacionModel.limpiarVencidos(db);
+
+    const registro = verificacionModel.buscarPorEmail(db, email, 'recuperacion');
+
+    if (!registro) {
+        return { error: 'No hay una solicitud de recuperacion activa. Pedi un nuevo codigo.' };
+    }
+
+    const ahora = new Date();
+    const expira = new Date(registro.expira_en);
+    if (ahora > expira) {
+        verificacionModel.eliminar(db, registro.id);
+        return { error: 'El codigo expiro. Pedi uno nuevo.' };
+    }
+
+    if (registro.intentos >= 5) {
+        verificacionModel.eliminar(db, registro.id);
+        return { error: 'Se superaron los intentos permitidos. Pedi un nuevo codigo.' };
+    }
+
+    if (registro.codigo !== codigo) {
+        verificacionModel.incrementarIntentos(db, registro.id);
+        const restantes = 5 - (registro.intentos + 1);
+        return { error: `Codigo incorrecto. Intentos restantes: ${restantes}.` };
+    }
+
+    // verificar que el usuario exista
+    const user = usuariosModel.buscarPorUsuario(db, registro.usuario);
+    if (!user) {
+        return { error: 'Usuario no encontrado.' };
+    }
+
+    // actualizar la contrasenia y marcar el codigo como usado
+    const ejecutar = db.transaction(() => {
+        const nuevoHash = bcrypt.hashSync(passwordNueva, 10);
+        usuariosModel.actualizarPassword(db, registro.usuario, nuevoHash);
+        verificacionModel.marcarUsado(db, registro.id);
+    });
+
+    ejecutar();
+
+    return { exito: true, usuario: registro.usuario };
 }
 
 // LOGIN
@@ -187,6 +238,8 @@ module.exports = {
     iniciarRegistro,
     verificarCodigo,
     reenviarCodigo,
+    iniciarRecuperacion,
+    restablecerPassword,
     autenticarUsuario,
     autenticarAdministrador,
     cambiarPassword,

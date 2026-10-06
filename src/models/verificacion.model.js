@@ -1,32 +1,49 @@
-// crea un nuevo codigo de verificacion
+// crea un nuevo codigo de verificacion (registro)
 // limpia los codigos previos del mismo email o usuario
 function crear(db, { usuario, email, password_hash, codigo, expira_en }) {
-    // borrar codigos anteriores del mismo usuario o email (evita acumulacion)
-    db.prepare('DELETE FROM codigos_verificacion WHERE usuario = ? OR email = ?').run(usuario, email);
+    db.prepare(
+        "DELETE FROM codigos_verificacion WHERE (usuario = ? OR email = ?) AND tipo = 'registro'"
+    ).run(usuario, email);
 
     return db
         .prepare(
             `
-            INSERT INTO codigos_verificacion (usuario, email, password_hash, codigo, expira_en)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO codigos_verificacion (usuario, email, password_hash, codigo, tipo, expira_en)
+            VALUES (?, ?, ?, ?, 'registro', ?)
         `
         )
         .run(usuario, email, password_hash, codigo, expira_en);
 }
 
-// busca el codigo activo de un email
-// devuelve null si no existe
-function buscarPorEmail(db, email) {
+// crea un codigo de recuperacion de contrasenia
+// limpia los codigos previos del mismo email de tipo recuperacion
+function crearRecuperacion(db, { usuario, email, codigo, expira_en }) {
+    db.prepare(
+        "DELETE FROM codigos_verificacion WHERE email = ? AND tipo = 'recuperacion'"
+    ).run(email);
+
+    return db
+        .prepare(
+            `
+            INSERT INTO codigos_verificacion (usuario, email, codigo, tipo, expira_en)
+            VALUES (?, ?, ?, 'recuperacion', ?)
+        `
+        )
+        .run(usuario, email, codigo, expira_en);
+}
+
+// busca el codigo activo de un email por tipo
+function buscarPorEmail(db, email, tipo = 'registro') {
     return db
         .prepare(
             `
             SELECT * FROM codigos_verificacion
-            WHERE email = ? AND usado = 0
+            WHERE email = ? AND tipo = ? AND usado = 0
             ORDER BY id DESC
             LIMIT 1
         `
         )
-        .get(email);
+        .get(email, tipo);
 }
 
 // incrementa el contador de intentos
@@ -47,7 +64,6 @@ function eliminar(db, id) {
 }
 
 // limpia codigos vencidos o usados
-// se usa datetime con comillas simples porque sqlite lo interpreta como string
 function limpiarVencidos(db) {
     return db
         .prepare("DELETE FROM codigos_verificacion WHERE expira_en < datetime('now') OR usado = 1")
@@ -56,6 +72,7 @@ function limpiarVencidos(db) {
 
 module.exports = {
     crear,
+    crearRecuperacion,
     buscarPorEmail,
     incrementarIntentos,
     marcarUsado,

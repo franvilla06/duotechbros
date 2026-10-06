@@ -67,8 +67,9 @@ function inicializar(db) {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuario TEXT NOT NULL,
             email TEXT NOT NULL,
-            password_hash TEXT NOT NULL,
+            password_hash TEXT,
             codigo TEXT NOT NULL,
+            tipo TEXT DEFAULT 'registro',
             intentos INTEGER DEFAULT 0,
             usado INTEGER DEFAULT 0,
             creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -117,6 +118,13 @@ function inicializar(db) {
     if (!columnasUsuarios.some((col) => col.name === 'email')) {
         db.exec('ALTER TABLE usuarios ADD COLUMN email TEXT');
         console.log('Migracion aplicada: columna email agregada a usuarios');
+    }
+
+    // migracion de codigos_verificacion: agregar columna tipo si no existe
+    const columnasCodigos = db.prepare('PRAGMA table_info(codigos_verificacion)').all();
+    if (!columnasCodigos.some((col) => col.name === 'tipo')) {
+        db.exec("ALTER TABLE codigos_verificacion ADD COLUMN tipo TEXT DEFAULT 'registro'");
+        console.log('Migracion aplicada: columna tipo agregada a codigos_verificacion');
     }
 
     // valores por defecto de configuracion
