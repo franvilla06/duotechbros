@@ -15,20 +15,35 @@ function validarUsuario(usuario) {
     return null;
 }
 
+function validarEmail(email) {
+    if (!email) return 'El email es obligatorio.';
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) return 'El email no es valido.';
+    if (email.length > 100) return 'El email es demasiado largo.';
+    return null;
+}
+
 function validarPassword(password) {
     if (!password) return 'La contrasenia es obligatoria.';
     if (password.length < 6) return 'La contrasenia debe tener al menos 6 caracteres.';
     return null;
 }
 
-// REGISTRO Y LOGIN
+// REGISTRO CON VERIFICACION POR EMAIL
 
-function registrar(req, res) {
-    const { usuario, password } = req.body;
+// paso 1: el usuario envia usuario, email y password
+// se envia un codigo al email y NO se crea el usuario todavia
+async function iniciarRegistro(req, res) {
+    const { usuario, email, password } = req.body;
 
     const errorUsuario = validarUsuario(usuario);
     if (errorUsuario) {
         return res.status(400).json({ success: false, error: errorUsuario });
+    }
+
+    const errorEmail = validarEmail(email);
+    if (errorEmail) {
+        return res.status(400).json({ success: false, error: errorEmail });
     }
 
     const errorPassword = validarPassword(password);
@@ -37,25 +52,93 @@ function registrar(req, res) {
     }
 
     try {
-        const resultado = authService.registrarUsuario(req.app.locals.db, usuario, password);
-        if (resultado.existe) {
-            return res.status(409).json({
-                success: false,
-                error: 'Ese nombre de usuario ya esta en uso.',
-            });
+        const resultado = await authService.iniciarRegistro(
+            req.app.locals.db,
+            usuario,
+            email,
+            password
+        );
+
+        if (resultado.error) {
+            return res.status(409).json({ success: false, error: resultado.error });
         }
 
         return res.json({
             success: true,
-            message: 'Usuario registrado correctamente',
-            usuario: usuario,
+            message: 'Codigo enviado al email.',
+            email: resultado.email,
+        });
+    } catch (error) {
+        console.error('Error en iniciarRegistro:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// paso 2: el usuario envia email y codigo
+// si es correcto, se crea el usuario y se devuelve el token
+function verificarCodigo(req, res) {
+    const { email, codigo } = req.body;
+
+    if (!email || !codigo) {
+        return res.status(400).json({
+            success: false,
+            error: 'Email y codigo son obligatorios.',
+        });
+    }
+
+    if (!/^\d{6}$/.test(codigo)) {
+        return res.status(400).json({
+            success: false,
+            error: 'El codigo debe tener 6 digitos.',
+        });
+    }
+
+    try {
+        const resultado = authService.verificarCodigo(req.app.locals.db, email, codigo);
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Usuario registrado correctamente.',
+            usuario: resultado.usuario,
             id: resultado.id,
             token: resultado.token,
         });
     } catch (error) {
+        console.error('Error en verificarCodigo:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
+
+// reenviar codigo (si el usuario no lo recibio)
+async function reenviarCodigo(req, res) {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ success: false, error: 'El email es obligatorio.' });
+    }
+
+    try {
+        const resultado = await authService.reenviarCodigo(req.app.locals.db, email);
+
+        if (resultado.error) {
+            return res.status(400).json({ success: false, error: resultado.error });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Codigo reenviado correctamente.',
+        });
+    } catch (error) {
+        console.error('Error en reenviarCodigo:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// LOGIN
 
 function iniciarSesion(req, res) {
     const { usuario, password } = req.body;
@@ -185,7 +268,7 @@ function darDeBajaUsuario(req, res) {
     }
 }
 
-// HISTORIAL DE PEDIDOS DEL USUARIO
+// HISTORIAL DE PEDIDOS
 
 function listarMisPedidos(req, res) {
     try {
@@ -265,8 +348,6 @@ function obtenerDetallePedido(req, res) {
     }
 }
 
-// CANCELAR UN PEDIDO DEL USUARIO
-
 function cancelarPedido(req, res) {
     const { id } = req.params;
 
@@ -293,9 +374,6 @@ function cancelarPedido(req, res) {
     }
 }
 
-// REPETIR PEDIDO
-// agrega los items de una compra anterior al carrito actual
-
 function repetirPedido(req, res) {
     const { id } = req.params;
 
@@ -309,7 +387,9 @@ function repetirPedido(req, res) {
 }
 
 module.exports = {
-    registrar,
+    iniciarRegistro,
+    verificarCodigo,
+    reenviarCodigo,
     iniciarSesion,
     obtenerPerfil,
     cambiarPassword,

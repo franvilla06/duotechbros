@@ -35,6 +35,7 @@ function inicializar(db) {
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuario TEXT UNIQUE NOT NULL,
+            email TEXT,
             password_hash TEXT NOT NULL,
             creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -62,9 +63,18 @@ function inicializar(db) {
             clave TEXT PRIMARY KEY,
             valor TEXT
         );
+        CREATE TABLE IF NOT EXISTS codigos_verificacion (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario TEXT NOT NULL,
+            email TEXT NOT NULL,
+            password_hash TEXT NOT NULL,
+            codigo TEXT NOT NULL,
+            intentos INTEGER DEFAULT 0,
+            usado INTEGER DEFAULT 0,
+            creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+            expira_en DATETIME NOT NULL
+        );
     `);
-
-    // migraciones: agregar columnas nuevas a tablas existentes sin perder datos
 
     // migraciones de pedidos
     const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
@@ -102,8 +112,14 @@ function inicializar(db) {
         console.log('Migracion aplicada: columna fecha_fin agregada a portafolio');
     }
 
+    // migracion de usuarios: agregar columna email si no existe
+    const columnasUsuarios = db.prepare('PRAGMA table_info(usuarios)').all();
+    if (!columnasUsuarios.some((col) => col.name === 'email')) {
+        db.exec('ALTER TABLE usuarios ADD COLUMN email TEXT');
+        console.log('Migracion aplicada: columna email agregada a usuarios');
+    }
+
     // valores por defecto de configuracion
-    // solo se insertan si no existen (no sobrescriben valores guardados)
     const valoresIniciales = {
         marca_nombre: 'DuotechBros',
         contacto_email: 'contacto@duotechbros.com',

@@ -12,24 +12,30 @@ function crear(db, usuario, passwordHash) {
         .run(usuario, passwordHash);
 }
 
+// crea un usuario incluyendo el email (usado tras verificar el codigo)
+function crearConEmail(db, usuario, email, passwordHash) {
+    return db
+        .prepare('INSERT INTO usuarios (usuario, email, password_hash) VALUES (?, ?, ?)')
+        .run(usuario, email, passwordHash);
+}
+
 function obtenerId(db, usuario) {
     const user = db.prepare('SELECT id FROM usuarios WHERE usuario = ?').get(usuario);
     return user ? user.id : null;
 }
 
 function obtenerPerfil(db, usuario) {
-    return db.prepare('SELECT id, usuario, creado_en FROM usuarios WHERE usuario = ?').get(usuario);
+    return db
+        .prepare('SELECT id, usuario, email, creado_en FROM usuarios WHERE usuario = ?')
+        .get(usuario);
 }
 
-// actualizar la contrasenia de un usuario
 function actualizarPassword(db, usuario, passwordHash) {
     return db
         .prepare('UPDATE usuarios SET password_hash = ? WHERE usuario = ?')
         .run(passwordHash, usuario);
 }
 
-// eliminar la cuenta del usuario
-// los pedidos historicos se mantienen porque la tabla pedidos no tiene fk hacia usuarios
 function eliminar(db, usuario) {
     return db.prepare('DELETE FROM usuarios WHERE usuario = ?').run(usuario);
 }
@@ -38,6 +44,7 @@ module.exports = {
     contarPorUsuario,
     buscarPorUsuario,
     crear,
+    crearConEmail,
     obtenerId,
     obtenerPerfil,
     actualizarPassword,
