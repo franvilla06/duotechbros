@@ -1,22 +1,13 @@
-// controlador del carrito de compras
-// todas las funciones asumen que el usuario esta autenticado
-// el middleware requiereAuthUsuario agrega req.usuario (nombre de usuario)
-
 const carritoModel = require('../models/carrito.model');
 const carritoService = require('../services/carrito.service');
 
-// FUNCIONES AUXILIARES
-
-// obtener el id del usuario a partir del nombre de usuario
-function obtenerUsuarioId(db, nombreUsuario) {
-    return carritoModel.obtenerUsuarioId(db, nombreUsuario);
+function obtenerUsuarioId(pool, nombreUsuario) {
+    return carritoModel.obtenerUsuarioId(pool, nombreUsuario);
 }
 
 // AGREGAR AL CARRITO
 
-// agrega un producto al carrito
-// si ya existe, suma la cantidad
-function agregarAlCarrito(req, res) {
+async function agregarAlCarrito(req, res) {
     const { producto_id, cantidad } = req.body;
 
     if (!producto_id) {
@@ -29,28 +20,28 @@ function agregarAlCarrito(req, res) {
     }
 
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        const usuarioId = obtenerUsuarioId(db, req.usuario);
+        const usuarioId = await obtenerUsuarioId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        // verificar que el producto exista y tenga stock
-        const producto = carritoModel.obtenerProducto(db, producto_id);
+        const producto = await carritoModel.obtenerProducto(pool, producto_id);
         if (!producto) {
             return res.status(404).json({ success: false, error: 'Producto no encontrado.' });
         }
         if (Number(producto.stock) <= 0) {
-            return res.status(400).json({ success: false, error: 'El producto no tiene stock disponible.' });
+            return res
+                .status(400)
+                .json({ success: false, error: 'El producto no tiene stock disponible.' });
         }
 
-        // verificar si el producto ya esta en el carrito
-        const existente = carritoModel.buscarItem(db, usuarioId, producto_id);
+        const existente = await carritoModel.buscarItem(pool, usuarioId, producto_id);
 
         if (existente) {
             const nuevaCantidad = existente.cantidad + cantidadFinal;
-            carritoModel.actualizarCantidad(db, existente.id, nuevaCantidad);
+            await carritoModel.actualizarCantidad(pool, existente.id, nuevaCantidad);
             return res.json({
                 success: true,
                 message: 'Cantidad actualizada en el carrito.',
@@ -59,12 +50,12 @@ function agregarAlCarrito(req, res) {
             });
         }
 
-        const info = carritoModel.insertarItem(db, usuarioId, producto_id, cantidadFinal);
+        const info = await carritoModel.insertarItem(pool, usuarioId, producto_id, cantidadFinal);
 
         return res.json({
             success: true,
             message: 'Producto agregado al carrito.',
-            id: info.lastInsertRowid,
+            id: info.insertId,
             cantidad: cantidadFinal,
         });
     } catch (error) {
@@ -74,16 +65,16 @@ function agregarAlCarrito(req, res) {
 
 // LISTAR EL CARRITO
 
-function listarCarrito(req, res) {
+async function listarCarrito(req, res) {
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        const usuarioId = obtenerUsuarioId(db, req.usuario);
+        const usuarioId = await obtenerUsuarioId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const items = carritoModel.listarItems(db, usuarioId);
+        const items = await carritoModel.listarItems(pool, usuarioId);
 
         const itemsConSubtotal = items.map((item) => ({
             ...item,
@@ -107,9 +98,9 @@ function listarCarrito(req, res) {
     }
 }
 
-// CAMBIAR CANTIDAD DE UN ITEM
+// CAMBIAR CANTIDAD
 
-function cambiarCantidad(req, res) {
+async function cambiarCantidad(req, res) {
     const { id } = req.params;
     const { cantidad } = req.body;
 
@@ -119,47 +110,55 @@ function cambiarCantidad(req, res) {
     }
 
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        const usuarioId = obtenerUsuarioId(db, req.usuario);
+        const usuarioId = await obtenerUsuarioId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const item = carritoModel.buscarItemDeUsuario(db, id, usuarioId);
+        const item = await carritoModel.buscarItemDeUsuario(pool, id, usuarioId);
         if (!item) {
-            return res.status(404).json({ success: false, error: 'Item no encontrado en tu carrito.' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Item no encontrado en tu carrito.' });
         }
 
         if (cantidadFinal === 0) {
-            carritoModel.eliminarItem(db, id);
-            return res.json({ success: true, message: 'Item eliminado del carrito.', eliminado: true });
+            await carritoModel.eliminarItem(pool, id);
+            return res.json({
+                success: true,
+                message: 'Item eliminado del carrito.',
+                eliminado: true,
+            });
         }
 
-        carritoModel.actualizarCantidad(db, id, cantidadFinal);
+        await carritoModel.actualizarCantidad(pool, id, cantidadFinal);
         return res.json({ success: true, message: 'Cantidad actualizada.', cantidad: cantidadFinal });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-// ELIMINAR UN ITEM
+// ELIMINAR ITEM
 
-function eliminarItem(req, res) {
+async function eliminarItem(req, res) {
     const { id } = req.params;
 
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        const usuarioId = obtenerUsuarioId(db, req.usuario);
+        const usuarioId = await obtenerUsuarioId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const info = carritoModel.eliminarItemDeUsuario(db, id, usuarioId);
+        const info = await carritoModel.eliminarItemDeUsuario(pool, id, usuarioId);
 
-        if (info.changes === 0) {
-            return res.status(404).json({ success: false, error: 'Item no encontrado en tu carrito.' });
+        if (info.affectedRows === 0) {
+            return res
+                .status(404)
+                .json({ success: false, error: 'Item no encontrado en tu carrito.' });
         }
 
         return res.json({ success: true, message: 'Item eliminado del carrito.' });
@@ -168,23 +167,23 @@ function eliminarItem(req, res) {
     }
 }
 
-// VACIAR EL CARRITO
+// VACIAR CARRITO
 
-function vaciarCarrito(req, res) {
+async function vaciarCarrito(req, res) {
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        const usuarioId = obtenerUsuarioId(db, req.usuario);
+        const usuarioId = await obtenerUsuarioId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const info = carritoModel.vaciar(db, usuarioId);
+        const info = await carritoModel.vaciar(pool, usuarioId);
 
         return res.json({
             success: true,
             message: 'Carrito vaciado.',
-            items_eliminados: info.changes,
+            items_eliminados: info.affectedRows,
         });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -193,19 +192,9 @@ function vaciarCarrito(req, res) {
 
 // ENVIAR PEDIDO
 
-// convierte el carrito en un pedido real
-// esta operacion es atomica (transaccion): si algo falla, no se modifica nada
-// pasos:
-// 1. verificar que el carrito tenga items
-// 2. verificar stock de cada producto
-// 3. crear el registro en pedidos
-// 4. guardar el detalle en pedido_items
-// 5. descontar stock de cada producto
-// 6. vaciar el carrito
-function enviarPedido(req, res) {
+async function enviarPedido(req, res) {
     try {
-        const db = req.app.locals.db;
-        const resultado = carritoService.enviarPedido(db, req.usuario);
+        const resultado = await carritoService.enviarPedido(req.app.locals.pool, req.usuario);
         return res.status(resultado.status).json(resultado.body);
     } catch (error) {
         console.error('Error al enviar pedido:', error);

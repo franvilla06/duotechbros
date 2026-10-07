@@ -29,29 +29,23 @@ function validarPassword(password) {
     return null;
 }
 
-// REGISTRO CON VERIFICACION POR EMAIL
+// REGISTRO
 
 async function iniciarRegistro(req, res) {
     const { usuario, email, password } = req.body;
 
     const errorUsuario = validarUsuario(usuario);
-    if (errorUsuario) {
-        return res.status(400).json({ success: false, error: errorUsuario });
-    }
+    if (errorUsuario) return res.status(400).json({ success: false, error: errorUsuario });
 
     const errorEmail = validarEmail(email);
-    if (errorEmail) {
-        return res.status(400).json({ success: false, error: errorEmail });
-    }
+    if (errorEmail) return res.status(400).json({ success: false, error: errorEmail });
 
     const errorPassword = validarPassword(password);
-    if (errorPassword) {
-        return res.status(400).json({ success: false, error: errorPassword });
-    }
+    if (errorPassword) return res.status(400).json({ success: false, error: errorPassword });
 
     try {
         const resultado = await authService.iniciarRegistro(
-            req.app.locals.db,
+            req.app.locals.pool,
             usuario,
             email,
             password
@@ -72,25 +66,19 @@ async function iniciarRegistro(req, res) {
     }
 }
 
-function verificarCodigo(req, res) {
+async function verificarCodigo(req, res) {
     const { email, codigo } = req.body;
 
     if (!email || !codigo) {
-        return res.status(400).json({
-            success: false,
-            error: 'Email y codigo son obligatorios.',
-        });
+        return res.status(400).json({ success: false, error: 'Email y codigo son obligatorios.' });
     }
 
     if (!/^\d{6}$/.test(codigo)) {
-        return res.status(400).json({
-            success: false,
-            error: 'El codigo debe tener 6 digitos.',
-        });
+        return res.status(400).json({ success: false, error: 'El codigo debe tener 6 digitos.' });
     }
 
     try {
-        const resultado = authService.verificarCodigo(req.app.locals.db, email, codigo);
+        const resultado = await authService.verificarCodigo(req.app.locals.pool, email, codigo);
 
         if (resultado.error) {
             return res.status(400).json({ success: false, error: resultado.error });
@@ -117,39 +105,30 @@ async function reenviarCodigo(req, res) {
     }
 
     try {
-        const resultado = await authService.reenviarCodigo(req.app.locals.db, email);
+        const resultado = await authService.reenviarCodigo(req.app.locals.pool, email);
 
         if (resultado.error) {
             return res.status(400).json({ success: false, error: resultado.error });
         }
 
-        return res.json({
-            success: true,
-            message: 'Codigo reenviado correctamente.',
-        });
+        return res.json({ success: true, message: 'Codigo reenviado correctamente.' });
     } catch (error) {
         console.error('Error en reenviarCodigo:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-// RECUPERACION DE CONTRASENIA
+// RECUPERACION
 
-// paso 1: el usuario envia su email
-// se genera un codigo y se envia por correo
 async function recuperarPassword(req, res) {
     const { email } = req.body;
 
     const errorEmail = validarEmail(email);
-    if (errorEmail) {
-        return res.status(400).json({ success: false, error: errorEmail });
-    }
+    if (errorEmail) return res.status(400).json({ success: false, error: errorEmail });
 
     try {
-        const resultado = await authService.iniciarRecuperacion(req.app.locals.db, email);
+        await authService.iniciarRecuperacion(req.app.locals.pool, email);
 
-        // por seguridad, no revelamos si el email esta registrado o no
-        // siempre devolvemos exito
         return res.json({
             success: true,
             message: 'Si el email esta registrado, vas a recibir un codigo de recuperacion.',
@@ -160,39 +139,27 @@ async function recuperarPassword(req, res) {
     }
 }
 
-// paso 2: el usuario envia email + codigo + nueva contrasenia
-function restablecerPassword(req, res) {
+async function restablecerPassword(req, res) {
     const { email, codigo, password_nueva, password_confirmar } = req.body;
 
     if (!email || !codigo || !password_nueva || !password_confirmar) {
-        return res.status(400).json({
-            success: false,
-            error: 'Completa todos los campos.',
-        });
+        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
     }
 
     if (!/^\d{6}$/.test(codigo)) {
-        return res.status(400).json({
-            success: false,
-            error: 'El codigo debe tener 6 digitos.',
-        });
+        return res.status(400).json({ success: false, error: 'El codigo debe tener 6 digitos.' });
     }
 
     if (password_nueva !== password_confirmar) {
-        return res.status(400).json({
-            success: false,
-            error: 'Las contrasenias no coinciden.',
-        });
+        return res.status(400).json({ success: false, error: 'Las contrasenias no coinciden.' });
     }
 
     const errorPassword = validarPassword(password_nueva);
-    if (errorPassword) {
-        return res.status(400).json({ success: false, error: errorPassword });
-    }
+    if (errorPassword) return res.status(400).json({ success: false, error: errorPassword });
 
     try {
-        const resultado = authService.restablecerPassword(
-            req.app.locals.db,
+        const resultado = await authService.restablecerPassword(
+            req.app.locals.pool,
             email,
             codigo,
             password_nueva
@@ -214,34 +181,28 @@ function restablecerPassword(req, res) {
 
 // LOGIN
 
-// inicia sesion con email y contrasenia
-// el nombre de usuario sigue existiendo, pero el login se hace con email
-function iniciarSesion(req, res) {
+async function iniciarSesion(req, res) {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({
-            success: false,
-            error: 'Email y contrasenia son obligatorios.',
-        });
+        return res
+            .status(400)
+            .json({ success: false, error: 'Email y contrasenia son obligatorios.' });
     }
 
     const errorEmail = validarEmail(email);
-    if (errorEmail) {
-        return res.status(400).json({ success: false, error: errorEmail });
-    }
+    if (errorEmail) return res.status(400).json({ success: false, error: errorEmail });
 
     try {
-        const user = authService.autenticarUsuario(
-            req.app.locals.db,
+        const user = await authService.autenticarUsuario(
+            req.app.locals.pool,
             email.toLowerCase().trim(),
             password
         );
         if (!user) {
-            return res.status(401).json({
-                success: false,
-                error: 'Email o contrasenia incorrectos.',
-            });
+            return res
+                .status(401)
+                .json({ success: false, error: 'Email o contrasenia incorrectos.' });
         }
 
         return res.json({
@@ -259,9 +220,9 @@ function iniciarSesion(req, res) {
 
 // PERFIL
 
-function obtenerPerfil(req, res) {
+async function obtenerPerfil(req, res) {
     try {
-        const user = usuariosModel.obtenerPerfil(req.app.locals.db, req.usuario);
+        const user = await usuariosModel.obtenerPerfil(req.app.locals.pool, req.usuario);
         if (!user) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
@@ -271,38 +232,29 @@ function obtenerPerfil(req, res) {
     }
 }
 
-function cambiarPassword(req, res) {
+async function cambiarPassword(req, res) {
     const { password_actual, password_nueva, password_confirmar } = req.body;
 
     if (!password_actual || !password_nueva || !password_confirmar) {
-        return res.status(400).json({
-            success: false,
-            error: 'Completa todos los campos.',
-        });
+        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
     }
 
     if (password_nueva !== password_confirmar) {
-        return res.status(400).json({
-            success: false,
-            error: 'Las contrasenias nuevas no coinciden.',
-        });
+        return res.status(400).json({ success: false, error: 'Las contrasenias nuevas no coinciden.' });
     }
 
     const errorPassword = validarPassword(password_nueva);
-    if (errorPassword) {
-        return res.status(400).json({ success: false, error: errorPassword });
-    }
+    if (errorPassword) return res.status(400).json({ success: false, error: errorPassword });
 
     if (password_nueva === password_actual) {
-        return res.status(400).json({
-            success: false,
-            error: 'La nueva contrasenia debe ser distinta a la actual.',
-        });
+        return res
+            .status(400)
+            .json({ success: false, error: 'La nueva contrasenia debe ser distinta a la actual.' });
     }
 
     try {
-        const resultado = authService.cambiarPassword(
-            req.app.locals.db,
+        const resultado = await authService.cambiarPassword(
+            req.app.locals.pool,
             req.usuario,
             password_actual,
             password_nueva
@@ -312,43 +264,46 @@ function cambiarPassword(req, res) {
             return res.status(400).json({ success: false, error: resultado.error });
         }
 
-        return res.json({
-            success: true,
-            message: 'Contrasenia actualizada correctamente.',
-        });
+        return res.json({ success: true, message: 'Contrasenia actualizada correctamente.' });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function darDeBajaUsuario(req, res) {
+async function darDeBajaUsuario(req, res) {
     const { password } = req.body;
 
     if (!password) {
-        return res.status(400).json({
-            success: false,
-            error: 'Ingresa tu contrasenia para confirmar.',
-        });
+        return res
+            .status(400)
+            .json({ success: false, error: 'Ingresa tu contrasenia para confirmar.' });
     }
 
     try {
-        const user = authService.autenticarUsuario(req.app.locals.db, req.usuario, password);
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                error: 'Contrasenia incorrecta.',
-            });
+        const user = await authService.autenticarUsuario(
+            req.app.locals.pool,
+            req.usuario,
+            password
+        );
+
+        // el autenticarUsuario espera email, pero aca tenemos usuario
+        // usamos el modelo directamente
+        const usuarioReal = await usuariosModel.buscarPorUsuario(req.app.locals.pool, req.usuario);
+        if (!usuarioReal) {
+            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
         }
 
-        const resultado = authService.darDeBaja(req.app.locals.db, req.usuario);
+        const bcrypt = require('bcryptjs');
+        if (!bcrypt.compareSync(password, usuarioReal.password_hash)) {
+            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
+        }
+
+        const resultado = await authService.darDeBaja(req.app.locals.pool, req.usuario);
         if (resultado.error) {
             return res.status(400).json({ success: false, error: resultado.error });
         }
 
-        return res.json({
-            success: true,
-            message: 'Cuenta eliminada correctamente.',
-        });
+        return res.json({ success: true, message: 'Cuenta eliminada correctamente.' });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -356,49 +311,45 @@ function darDeBajaUsuario(req, res) {
 
 // HISTORIAL DE PEDIDOS
 
-function listarMisPedidos(req, res) {
+async function listarMisPedidos(req, res) {
     try {
-        const usuarioId = usuariosModel.obtenerId(req.app.locals.db, req.usuario);
+        const usuarioId = await usuariosModel.obtenerId(req.app.locals.pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const pedidos = pedidosModel.listarPorUsuario(req.app.locals.db, usuarioId);
+        const pedidos = await pedidosModel.listarPorUsuario(req.app.locals.pool, usuarioId);
 
         const pedidosNormalizados = pedidos.map((p) => ({
             ...p,
             total_precio: Number(Number(p.total_precio).toFixed(2)),
         }));
 
-        return res.json({
-            success: true,
-            pedidos: pedidosNormalizados,
-        });
+        return res.json({ success: true, pedidos: pedidosNormalizados });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function obtenerDetallePedido(req, res) {
+async function obtenerDetallePedido(req, res) {
     const { id } = req.params;
 
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        const usuarioId = usuariosModel.obtenerId(db, req.usuario);
+        const usuarioId = await usuariosModel.obtenerId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const pedido = pedidosModel.obtenerPedidoDeUsuario(db, id, usuarioId);
+        const pedido = await pedidosModel.obtenerPedidoDeUsuario(pool, id, usuarioId);
         if (!pedido) {
-            return res.status(404).json({
-                success: false,
-                error: 'Pedido no encontrado o no pertenece a tu cuenta.',
-            });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Pedido no encontrado o no pertenece a tu cuenta.' });
         }
 
-        const items = pedidosModel.listarItemsDePedido(db, id);
+        const items = await pedidosModel.listarItemsDePedido(pool, id);
 
         const itemsNormalizados = items.map((item) => ({
             ...item,
@@ -434,37 +385,38 @@ function obtenerDetallePedido(req, res) {
     }
 }
 
-function cancelarPedido(req, res) {
+async function cancelarPedido(req, res) {
     const { id } = req.params;
 
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        const usuarioId = usuariosModel.obtenerId(db, req.usuario);
+        const usuarioId = await usuariosModel.obtenerId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const resultado = pedidosModel.cancelarPedidoDeUsuario(db, id, usuarioId);
+        const resultado = await pedidosModel.cancelarPedidoDeUsuario(pool, id, usuarioId);
 
         if (resultado.error) {
             return res.status(400).json({ success: false, error: resultado.error });
         }
 
-        return res.json({
-            success: true,
-            message: 'Pedido cancelado correctamente.',
-        });
+        return res.json({ success: true, message: 'Pedido cancelado correctamente.' });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function repetirPedido(req, res) {
+async function repetirPedido(req, res) {
     const { id } = req.params;
 
     try {
-        const resultado = carritoService.repetirPedido(req.app.locals.db, req.usuario, id);
+        const resultado = await carritoService.repetirPedido(
+            req.app.locals.pool,
+            req.usuario,
+            id
+        );
         return res.status(resultado.status).json(resultado.body);
     } catch (error) {
         console.error('Error al repetir pedido:', error);

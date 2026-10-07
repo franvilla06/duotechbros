@@ -8,6 +8,11 @@ async function pedidosPorEstado(pool) {
 }
 
 async function productosMasVendidos(pool, limite = 10) {
+    // validar y convertir el limite a entero (evita inyeccion sql)
+    const limiteSeguro = Math.max(1, Math.min(100, parseInt(limite) || 10));
+
+    // el LIMIT no puede ir como parametro con mysql2 porque lo envia como string
+    // y MySQL no acepta string en LIMIT. Se inyecta directamente el numero ya validado.
     const [rows] = await pool.query(
         `SELECT
             pi.producto_id,
@@ -19,8 +24,7 @@ async function productosMasVendidos(pool, limite = 10) {
          WHERE p.tipo = 'producto' AND p.estado != 'cancelado'
          GROUP BY pi.producto_id, pi.nombre_producto
          ORDER BY total_vendido DESC
-         LIMIT ?`,
-        [String(limite)]
+         LIMIT ${limiteSeguro}`
     );
     return rows;
 }

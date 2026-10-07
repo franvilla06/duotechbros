@@ -1,18 +1,20 @@
-// GESTION DE PRODUCTOS
-
 const productosModel = require('../models/productos.model');
 const portafolioModel = require('../models/portafolio.model');
 const pedidosModel = require('../models/pedidos.model');
 
-function crearProducto(req, res) {
+// PRODUCTOS
+
+async function crearProducto(req, res) {
     const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
 
     if (!nombre || precio === undefined) {
-        return res.status(400).json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
+        return res
+            .status(400)
+            .json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
     }
 
     try {
-        const info = productosModel.crear(req.app.locals.db, {
+        const info = await productosModel.crear(req.app.locals.pool, {
             nombre,
             descripcion: descripcion || null,
             precio,
@@ -20,22 +22,24 @@ function crearProducto(req, res) {
             categoria: categoria || null,
             stock: stock || 0,
         });
-        return res.json({ success: true, id: info.lastInsertRowid });
+        return res.json({ success: true, id: info.insertId });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function actualizarProducto(req, res) {
+async function actualizarProducto(req, res) {
     const { id } = req.params;
     const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
 
     if (!nombre || precio === undefined) {
-        return res.status(400).json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
+        return res
+            .status(400)
+            .json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
     }
 
     try {
-        const info = productosModel.actualizar(req.app.locals.db, id, {
+        const info = await productosModel.actualizar(req.app.locals.pool, id, {
             nombre,
             descripcion: descripcion || null,
             precio,
@@ -44,7 +48,7 @@ function actualizarProducto(req, res) {
             stock: stock || 0,
         });
 
-        if (info.changes === 0) {
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
 
@@ -54,11 +58,11 @@ function actualizarProducto(req, res) {
     }
 }
 
-function eliminarProducto(req, res) {
+async function eliminarProducto(req, res) {
     const { id } = req.params;
     try {
-        const info = productosModel.eliminar(req.app.locals.db, id);
-        if (info.changes === 0) {
+        const info = await productosModel.eliminar(req.app.locals.pool, id);
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
         return res.json({ success: true, message: 'Producto eliminado' });
@@ -67,20 +71,17 @@ function eliminarProducto(req, res) {
     }
 }
 
-// GESTION DE PORTAFOLIO
+// PORTAFOLIO
 
-// normaliza una fecha a formato YYYY-MM-DD o null
-// acepta string vacio, null o undefined como null
 function normalizarFecha(valor) {
     if (valor === undefined || valor === null || valor === '') return null;
     const texto = String(valor).trim();
     if (texto === '') return null;
-    // validar formato YYYY-MM-DD
     if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return null;
     return texto;
 }
 
-function crearTrabajo(req, res) {
+async function crearTrabajo(req, res) {
     const { titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin } = req.body;
 
     if (!titulo) {
@@ -88,7 +89,7 @@ function crearTrabajo(req, res) {
     }
 
     try {
-        const info = portafolioModel.crear(req.app.locals.db, {
+        const info = await portafolioModel.crear(req.app.locals.pool, {
             titulo,
             descripcion: descripcion || null,
             imagen_url: imagen_url || null,
@@ -96,13 +97,13 @@ function crearTrabajo(req, res) {
             fecha_inicio: normalizarFecha(fecha_inicio),
             fecha_fin: normalizarFecha(fecha_fin),
         });
-        return res.json({ success: true, id: info.lastInsertRowid });
+        return res.json({ success: true, id: info.insertId });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function actualizarTrabajo(req, res) {
+async function actualizarTrabajo(req, res) {
     const { id } = req.params;
     const { titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin } = req.body;
 
@@ -111,7 +112,7 @@ function actualizarTrabajo(req, res) {
     }
 
     try {
-        const info = portafolioModel.actualizar(req.app.locals.db, id, {
+        const info = await portafolioModel.actualizar(req.app.locals.pool, id, {
             titulo,
             descripcion: descripcion || null,
             imagen_url: imagen_url || null,
@@ -120,7 +121,7 @@ function actualizarTrabajo(req, res) {
             fecha_fin: normalizarFecha(fecha_fin),
         });
 
-        if (info.changes === 0) {
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Trabajo no encontrado' });
         }
 
@@ -130,11 +131,11 @@ function actualizarTrabajo(req, res) {
     }
 }
 
-function eliminarTrabajo(req, res) {
+async function eliminarTrabajo(req, res) {
     const { id } = req.params;
     try {
-        const info = portafolioModel.eliminar(req.app.locals.db, id);
-        if (info.changes === 0) {
+        const info = await portafolioModel.eliminar(req.app.locals.pool, id);
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Trabajo no encontrado' });
         }
         return res.json({ success: true, message: 'Trabajo eliminado' });
@@ -143,11 +144,11 @@ function eliminarTrabajo(req, res) {
     }
 }
 
-// GESTION DE PEDIDOS
+// PEDIDOS
 
 const ESTADOS_VALIDOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 
-function actualizarEstadoPedido(req, res) {
+async function actualizarEstadoPedido(req, res) {
     const { id } = req.params;
     const { estado } = req.body;
 
@@ -159,9 +160,9 @@ function actualizarEstadoPedido(req, res) {
     }
 
     try {
-        const info = pedidosModel.actualizarEstado(req.app.locals.db, id, estado);
+        const info = await pedidosModel.actualizarEstado(req.app.locals.pool, id, estado);
 
-        if (info.changes === 0) {
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }
 
@@ -171,7 +172,7 @@ function actualizarEstadoPedido(req, res) {
     }
 }
 
-function actualizarNotasPedido(req, res) {
+async function actualizarNotasPedido(req, res) {
     const { id } = req.params;
     const { notas } = req.body;
 
@@ -182,9 +183,9 @@ function actualizarNotasPedido(req, res) {
     }
 
     try {
-        const info = pedidosModel.actualizarNotas(req.app.locals.db, id, notasValor);
+        const info = await pedidosModel.actualizarNotas(req.app.locals.pool, id, notasValor);
 
-        if (info.changes === 0) {
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }
 
@@ -194,7 +195,7 @@ function actualizarNotasPedido(req, res) {
     }
 }
 
-function actualizarPresupuestoPedido(req, res) {
+async function actualizarPresupuestoPedido(req, res) {
     const { id } = req.params;
     const { presupuesto } = req.body;
 
@@ -212,9 +213,13 @@ function actualizarPresupuestoPedido(req, res) {
     }
 
     try {
-        const info = pedidosModel.actualizarPresupuesto(req.app.locals.db, id, presupuestoValor);
+        const info = await pedidosModel.actualizarPresupuesto(
+            req.app.locals.pool,
+            id,
+            presupuestoValor
+        );
 
-        if (info.changes === 0) {
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }
 
@@ -228,11 +233,11 @@ function actualizarPresupuestoPedido(req, res) {
     }
 }
 
-function eliminarPedido(req, res) {
+async function eliminarPedido(req, res) {
     const { id } = req.params;
     try {
-        const info = pedidosModel.eliminar(req.app.locals.db, id);
-        if (info.changes === 0) {
+        const info = await pedidosModel.eliminar(req.app.locals.pool, id);
+        if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }
         return res.json({ success: true, message: 'Pedido eliminado' });
