@@ -270,6 +270,58 @@ async function cambiarPassword(req, res) {
     }
 }
 
+// cambia el email del usuario
+// requiere la contrasenia actual como confirmacion
+async function cambiarEmail(req, res) {
+    const { email_nuevo, password } = req.body;
+
+    if (!email_nuevo || !password) {
+        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
+    }
+
+    const errorEmail = validarEmail(email_nuevo);
+    if (errorEmail) {
+        return res.status(400).json({ success: false, error: errorEmail });
+    }
+
+    try {
+        const pool = req.app.locals.pool;
+        const bcrypt = require('bcryptjs');
+
+        // verificar contrasenia
+        const usuario = await usuariosModel.buscarPorUsuario(pool, req.usuario);
+        if (!usuario) {
+            return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+        }
+
+        if (!bcrypt.compareSync(password, usuario.password_hash)) {
+            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
+        }
+
+        // verificar que el email no este en uso por otro usuario
+        const emailNormalizado = email_nuevo.toLowerCase().trim();
+        const existe = await usuariosModel.contarPorEmail(pool, emailNormalizado);
+        const emailActualNormalizado = (usuario.email || '').toLowerCase().trim();
+        if (existe.count > 0 && emailNormalizado !== emailActualNormalizado) {
+            return res
+                .status(409)
+                .json({ success: false, error: 'Ese email ya esta en uso por otra cuenta.' });
+        }
+
+        // actualizar
+        await usuariosModel.actualizarEmail(pool, req.usuario, emailNormalizado);
+
+        return res.json({
+            success: true,
+            message: 'Email actualizado correctamente.',
+            email: emailNormalizado,
+        });
+    } catch (error) {
+        console.error('Error en cambiarEmail:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 async function darDeBajaUsuario(req, res) {
     const { password } = req.body;
 
@@ -433,6 +485,7 @@ module.exports = {
     iniciarSesion,
     obtenerPerfil,
     cambiarPassword,
+    cambiarEmail,
     darDeBajaUsuario,
     listarMisPedidos,
     obtenerDetallePedido,

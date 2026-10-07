@@ -19,4 +19,28 @@ async function crear(pool, usuario, passwordHash) {
     return { insertId: result.insertId };
 }
 
-module.exports = { buscarPorUsuario, contarPorUsuario, crear };
+// actualiza el nombre de usuario del admin
+async function actualizarUsuario(pool, usuarioActual, usuarioNuevo) {
+    const [result] = await pool.query('UPDATE admin SET usuario = ? WHERE usuario = ?', [
+        usuarioNuevo,
+        usuarioActual,
+    ]);
+    return { affectedRows: result.affectedRows };
+}
+
+// actualiza la contrasenia del admin
+async function actualizarPassword(pool, usuario, passwordHash) {
+    const [result] = await pool.query('UPDATE admin SET password_hash = ? WHERE usuario = ?', [
+        passwordHash,
+        usuario,
+    ]);
+    return { affectedRows: result.affectedRows };
+}
+
+module.exports = {
+    buscarPorUsuario,
+    contarPorUsuario,
+    crear,
+    actualizarUsuario,
+    actualizarPassword,
+};

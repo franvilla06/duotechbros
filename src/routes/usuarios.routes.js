@@ -20,6 +20,7 @@ router.post('/login', usuariosController.iniciarSesion);
 // PERFIL
 router.get('/perfil', requiereAuthUsuario, usuariosController.obtenerPerfil);
 router.put('/perfil/password', requiereAuthUsuario, usuariosController.cambiarPassword);
+router.put('/perfil/email', requiereAuthUsuario, usuariosController.cambiarEmail);
 router.delete('/perfil', requiereAuthUsuario, usuariosController.darDeBajaUsuario);
 
 // HISTORIAL DE PEDIDOS

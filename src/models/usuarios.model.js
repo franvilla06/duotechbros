@@ -53,6 +53,24 @@ async function actualizarPassword(pool, usuario, passwordHash) {
     return { affectedRows: result.affectedRows };
 }
 
+// actualiza el email de un usuario
+async function actualizarEmail(pool, usuario, email) {
+    const [result] = await pool.query(
+        'UPDATE usuarios SET email = ? WHERE usuario = ?',
+        [email, usuario]
+    );
+    return { affectedRows: result.affectedRows };
+}
+
+// cuenta cuantos usuarios tienen un email (para validar duplicados)
+async function contarPorEmail(pool, email) {
+    const [rows] = await pool.query(
+        'SELECT COUNT(*) as count FROM usuarios WHERE email = ?',
+        [email]
+    );
+    return rows[0];
+}
+
 async function eliminar(pool, usuario) {
     const [result] = await pool.query('DELETE FROM usuarios WHERE usuario = ?', [usuario]);
     return { affectedRows: result.affectedRows };
@@ -60,6 +78,7 @@ async function eliminar(pool, usuario) {
 
 module.exports = {
     contarPorUsuario,
+    contarPorEmail,
     buscarPorUsuario,
     buscarPorEmail,
     crear,
@@ -67,5 +86,6 @@ module.exports = {
     obtenerId,
     obtenerPerfil,
     actualizarPassword,
+    actualizarEmail,
     eliminar,
 };

@@ -1,6 +1,9 @@
+const bcrypt = require('bcryptjs');
+const adminModel = require('../models/admin.model');
 const productosModel = require('../models/productos.model');
 const portafolioModel = require('../models/portafolio.model');
 const pedidosModel = require('../models/pedidos.model');
+const { generarToken } = require('../utils/token.util');
 
 // PRODUCTOS
 
@@ -246,6 +249,127 @@ async function eliminarPedido(req, res) {
     }
 }
 
+// PERFIL DEL ADMIN
+
+async function cambiarUsuarioAdmin(req, res) {
+    const usuarioNuevo = typeof req.body.usuario_nuevo === 'string'
+        ? req.body.usuario_nuevo.trim()
+        : '';
+    const { password } = req.body;
+
+    if (!usuarioNuevo || !password) {
+        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
+    }
+
+    if (usuarioNuevo.length < 3 || usuarioNuevo.length > 30) {
+        return res
+            .status(400)
+            .json({ success: false, error: 'El usuario debe tener entre 3 y 30 caracteres.' });
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(usuarioNuevo)) {
+        return res.status(400).json({
+            success: false,
+            error: 'El usuario solo puede contener letras, numeros y guion bajo.',
+        });
+    }
+
+    try {
+        const pool = req.app.locals.pool;
+        const admin = await adminModel.buscarPorUsuario(pool, req.usuario);
+        if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
+        }
+
+        if (usuarioNuevo !== req.usuario) {
+            const existe = await adminModel.contarPorUsuario(pool, usuarioNuevo);
+            if (existe.count > 0) {
+                return res
+                    .status(409)
+                    .json({ success: false, error: 'Ese nombre de usuario ya esta en uso.' });
+            }
+        }
+
+        const resultado = await adminModel.actualizarUsuario(pool, req.usuario, usuarioNuevo);
+        if (resultado.affectedRows === 0 && usuarioNuevo !== req.usuario) {
+            return res.status(404).json({ success: false, error: 'Admin no encontrado.' });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Usuario actualizado correctamente.',
+            usuario: usuarioNuevo,
+            token: generarToken('admin', usuarioNuevo),
+        });
+    } catch (error) {
+        console.error('Error en cambiarUsuarioAdmin:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+async function cambiarPasswordAdmin(req, res) {
+    const { password_actual, password_nueva, password_confirmar } = req.body;
+
+    if (!password_actual || !password_nueva || !password_confirmar) {
+        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
+    }
+
+    if (password_nueva.length < 6) {
+        return res
+            .status(400)
+            .json({ success: false, error: 'La contrasenia debe tener al menos 6 caracteres.' });
+    }
+
+    if (password_nueva !== password_confirmar) {
+        return res
+            .status(400)
+            .json({ success: false, error: 'Las contrasenias nuevas no coinciden.' });
+    }
+
+    if (password_nueva === password_actual) {
+        return res.status(400).json({
+            success: false,
+            error: 'La nueva contrasenia debe ser distinta a la actual.',
+        });
+    }
+
+    try {
+        const pool = req.app.locals.pool;
+        const admin = await adminModel.buscarPorUsuario(pool, req.usuario);
+        if (!admin || !bcrypt.compareSync(password_actual, admin.password_hash)) {
+            return res
+                .status(401)
+                .json({ success: false, error: 'Contrasenia actual incorrecta.' });
+        }
+
+        const nuevoHash = bcrypt.hashSync(password_nueva, 10);
+        await adminModel.actualizarPassword(pool, req.usuario, nuevoHash);
+
+        return res.json({ success: true, message: 'Contrasenia actualizada correctamente.' });
+    } catch (error) {
+        console.error('Error en cambiarPasswordAdmin:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+async function obtenerPerfilAdmin(req, res) {
+    try {
+        const admin = await adminModel.buscarPorUsuario(req.app.locals.pool, req.usuario);
+        if (!admin) {
+            return res.status(404).json({ success: false, error: 'Admin no encontrado.' });
+        }
+        return res.json({
+            success: true,
+            admin: {
+                id: admin.id,
+                usuario: admin.usuario,
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 module.exports = {
     crearProducto,
     actualizarProducto,
@@ -257,4 +381,7 @@ module.exports = {
     actualizarNotasPedido,
     actualizarPresupuestoPedido,
     eliminarPedido,
+    cambiarUsuarioAdmin,
+    cambiarPasswordAdmin,
+    obtenerPerfilAdmin,
 };

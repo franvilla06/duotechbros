@@ -338,6 +338,14 @@ formTrabajo.addEventListener('submit', async (e) => {
         return;
     }
 
+    // validar que la fecha de fin no sea anterior a la de inicio
+    if (datos.fecha_inicio && datos.fecha_fin) {
+        if (new Date(datos.fecha_fin) < new Date(datos.fecha_inicio)) {
+            mostrarToast('La fecha de finalización no puede ser anterior a la de inicio.', true);
+            return;
+        }
+    }
+
     btnGuardar.disabled = true;
     btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
@@ -421,6 +429,14 @@ formEditar.addEventListener('submit', async (e) => {
     if (!datos.titulo) {
         mostrarToast('El título del trabajo es obligatorio.', true);
         return;
+    }
+
+    // validar que la fecha de fin no sea anterior a la de inicio
+    if (datos.fecha_inicio && datos.fecha_fin) {
+        if (new Date(datos.fecha_fin) < new Date(datos.fecha_inicio)) {
+            mostrarToast('La fecha de finalización no puede ser anterior a la de inicio.', true);
+            return;
+        }
     }
 
     btnActualizar.disabled = true;

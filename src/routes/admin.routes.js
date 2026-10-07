@@ -31,4 +31,9 @@ router.put('/configuracion', configuracionController.actualizarConfiguracion);
 // ESTADISTICAS DEL DASHBOARD
 router.get('/estadisticas', estadisticasController.obtenerEstadisticas);
 
+// PERFIL DEL ADMIN
+router.get('/perfil', adminController.obtenerPerfilAdmin);
+router.put('/perfil/usuario', adminController.cambiarUsuarioAdmin);
+router.put('/perfil/password', adminController.cambiarPasswordAdmin);
+
 module.exports = router;

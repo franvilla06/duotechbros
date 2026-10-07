@@ -7,6 +7,7 @@ const usuarioSpan = document.getElementById('perfil-usuario');
 const tabs = document.querySelectorAll('.perfil-tab');
 const secciones = {
     info: document.getElementById('seccion-info'),
+    email: document.getElementById('seccion-email'),
     password: document.getElementById('seccion-password'),
     baja: document.getElementById('seccion-baja'),
 };
@@ -20,6 +21,14 @@ const infoId = document.getElementById('info-id');
 const formPassword = document.getElementById('form-password');
 const btnCambiar = document.getElementById('btn-cambiar');
 const mensajePassword = document.getElementById('mensaje-password');
+
+// form de cambio de email
+const formEmail = document.getElementById('form-email');
+const btnCambiarEmail = document.getElementById('btn-cambiar-email');
+const mensajeEmail = document.getElementById('mensaje-email');
+const inputEmailActual = document.getElementById('email-actual');
+const inputEmailNuevo = document.getElementById('email-nuevo');
+const inputEmailPassword = document.getElementById('email-password');
 
 // form de baja
 const formBaja = document.getElementById('form-baja');
@@ -72,6 +81,14 @@ function limpiarMensaje(elemento) {
     elemento.className = 'perfil-mensaje';
 }
 
+function validarEmailFrontend(email) {
+    if (!email) return 'El email es obligatorio.';
+    if (email.length > 100) return 'El email es demasiado largo.';
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) return 'El email no es válido.';
+    return null;
+}
+
 // TABS
 
 function activarTab(nombreTab) {
@@ -84,6 +101,7 @@ function activarTab(nombreTab) {
     });
 
     limpiarMensaje(mensajePassword);
+    limpiarMensaje(mensajeEmail);
     limpiarMensaje(mensajeBaja);
 }
 
@@ -116,6 +134,14 @@ async function cargarPerfil() {
         infoUsuario.textContent = data.usuario || '—';
         infoCreado.textContent = formatearFecha(data.creado_en);
         infoId.textContent = `#${String(data.id).padStart(4, '0')}`;
+
+        // rellenar el input de email actual
+        if (inputEmailActual) {
+            inputEmailActual.value = data.email || '';
+        }
+        if (inputEmailNuevo) {
+            inputEmailNuevo.value = '';
+        }
     } catch (error) {
         console.error('Error al cargar perfil:', error);
         infoUsuario.textContent = 'No se pudo cargar';
@@ -123,6 +149,69 @@ async function cargarPerfil() {
         infoId.textContent = '—';
     }
 }
+
+// CAMBIAR EMAIL
+
+formEmail.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const emailNuevo = inputEmailNuevo.value.trim().toLowerCase();
+    const password = inputEmailPassword.value;
+
+    if (!emailNuevo || !password) {
+        mostrarMensaje(mensajeEmail, 'Completa todos los campos.', 'error');
+        return;
+    }
+
+    const errorEmail = validarEmailFrontend(emailNuevo);
+    if (errorEmail) {
+        mostrarMensaje(mensajeEmail, errorEmail, 'error');
+        return;
+    }
+
+    const emailActual = inputEmailActual.value.trim().toLowerCase();
+    if (emailNuevo === emailActual) {
+        mostrarMensaje(mensajeEmail, 'El nuevo email debe ser distinto al actual.', 'error');
+        return;
+    }
+
+    btnCambiarEmail.disabled = true;
+    btnCambiarEmail.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+    try {
+        const respuesta = await fetch(`${API_PERFIL}/email`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${obtenerTokenUsuario()}`,
+            },
+            body: JSON.stringify({ email_nuevo: emailNuevo, password }),
+        });
+
+        const resultado = await respuesta.json();
+
+        if (respuesta.status === 401 && resultado.error !== 'Contrasenia incorrecta.') {
+            cerrarSesionUsuario();
+            window.location.href = '/user/login.html';
+            return;
+        }
+
+        if (resultado.success) {
+            inputEmailActual.value = resultado.email;
+            inputEmailNuevo.value = '';
+            inputEmailPassword.value = '';
+            mostrarMensaje(mensajeEmail, 'Email actualizado correctamente.', 'exito');
+        } else {
+            mostrarMensaje(mensajeEmail, resultado.error || 'No se pudo cambiar el email.', 'error');
+        }
+    } catch (error) {
+        console.error('Error al cambiar email:', error);
+        mostrarMensaje(mensajeEmail, 'No se pudo conectar con el servidor.', 'error');
+    } finally {
+        btnCambiarEmail.disabled = false;
+        btnCambiarEmail.innerHTML = '<i class="fas fa-save"></i> Guardar nuevo correo';
+    }
+});
 
 // CAMBIAR CONTRASENIA
 

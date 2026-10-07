@@ -315,10 +315,17 @@ footer p {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(11, 74, 98, 0.18);
     min-width: 220px;
+    max-width: 260px;
     padding: 8px;
     display: none;
     z-index: 200;
     border: 1px solid #e0eaf0;
+    /* evita que cualquier contenido se desborde del contenedor redondeado */
+    overflow: hidden;
+    /* fuerza a los hijos a respetar el border-radius */
+    isolation: isolate;
+    /* previene la aparicion de scroll horizontal */
+    overflow-x: hidden;
 }
 
 .usuario-menu.visible {
@@ -395,6 +402,23 @@ footer p {
 
 .usuario-menu-item.cerrar-sesion:hover i {
     color: #842029;
+}
+
+/* asegura que los items no sobresalgan del contenedor */
+.usuario-menu-item {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* evita que el header tenga overflow visible que muestre elementos extraños */
+header nav {
+    overflow: visible;
+}
+
+.nav-usuario {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 /* RESPONSIVE DEL USUARIO EN EL HEADER */
