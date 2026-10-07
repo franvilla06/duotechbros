@@ -1,92 +1,103 @@
-function obtenerUsuarioId(db, nombreUsuario) {
-    const user = db.prepare('SELECT id FROM usuarios WHERE usuario = ?').get(nombreUsuario);
-    return user ? user.id : null;
+async function obtenerUsuarioId(pool, nombreUsuario) {
+    const [rows] = await pool.query('SELECT id FROM usuarios WHERE usuario = ?', [nombreUsuario]);
+    return rows[0] ? rows[0].id : null;
 }
 
-function obtenerProducto(db, productoId) {
-    return db.prepare('SELECT id, stock FROM productos WHERE id = ?').get(productoId);
+async function obtenerProducto(pool, productoId) {
+    const [rows] = await pool.query('SELECT id, stock FROM productos WHERE id = ?', [productoId]);
+    return rows[0] || null;
 }
 
-// devuelve el producto con su nombre para mensajes al usuario
-function obtenerProductoConNombre(db, productoId) {
-    return db.prepare('SELECT id, nombre, stock FROM productos WHERE id = ?').get(productoId);
+async function obtenerProductoConNombre(pool, productoId) {
+    const [rows] = await pool.query(
+        'SELECT id, nombre, stock FROM productos WHERE id = ?',
+        [productoId]
+    );
+    return rows[0] || null;
 }
 
-function buscarItem(db, usuarioId, productoId) {
-    return db
-        .prepare('SELECT id, cantidad FROM carrito WHERE usuario_id = ? AND producto_id = ?')
-        .get(usuarioId, productoId);
+async function buscarItem(pool, usuarioId, productoId) {
+    const [rows] = await pool.query(
+        'SELECT id, cantidad FROM carrito WHERE usuario_id = ? AND producto_id = ?',
+        [usuarioId, productoId]
+    );
+    return rows[0] || null;
 }
 
-function actualizarCantidad(db, itemId, cantidad) {
-    return db.prepare('UPDATE carrito SET cantidad = ? WHERE id = ?').run(cantidad, itemId);
+async function actualizarCantidad(pool, itemId, cantidad) {
+    await pool.query('UPDATE carrito SET cantidad = ? WHERE id = ?', [cantidad, itemId]);
 }
 
-function insertarItem(db, usuarioId, productoId, cantidad) {
-    return db
-        .prepare('INSERT INTO carrito (usuario_id, producto_id, cantidad) VALUES (?, ?, ?)')
-        .run(usuarioId, productoId, cantidad);
+async function insertarItem(pool, usuarioId, productoId, cantidad) {
+    const [result] = await pool.query(
+        'INSERT INTO carrito (usuario_id, producto_id, cantidad) VALUES (?, ?, ?)',
+        [usuarioId, productoId, cantidad]
+    );
+    return { insertId: result.insertId };
 }
 
-function listarItems(db, usuarioId) {
-    return db
-        .prepare(
-            `
-            SELECT
-                c.id,
-                c.cantidad,
-                c.agregado_en,
-                p.id AS producto_id,
-                p.nombre,
-                p.descripcion,
-                p.precio,
-                p.imagen_url,
-                p.categoria,
-                p.stock
-            FROM carrito c
-            INNER JOIN productos p ON p.id = c.producto_id
-            WHERE c.usuario_id = ?
-            ORDER BY c.agregado_en DESC
-        `
-        )
-        .all(usuarioId);
+async function listarItems(pool, usuarioId) {
+    const [rows] = await pool.query(
+        `SELECT
+            c.id,
+            c.cantidad,
+            c.agregado_en,
+            p.id AS producto_id,
+            p.nombre,
+            p.descripcion,
+            p.precio,
+            p.imagen_url,
+            p.categoria,
+            p.stock
+         FROM carrito c
+         INNER JOIN productos p ON p.id = c.producto_id
+         WHERE c.usuario_id = ?
+         ORDER BY c.agregado_en DESC`,
+        [usuarioId]
+    );
+    return rows;
 }
 
-function buscarItemDeUsuario(db, itemId, usuarioId) {
-    return db.prepare('SELECT id FROM carrito WHERE id = ? AND usuario_id = ?').get(itemId, usuarioId);
+async function buscarItemDeUsuario(pool, itemId, usuarioId) {
+    const [rows] = await pool.query(
+        'SELECT id FROM carrito WHERE id = ? AND usuario_id = ?',
+        [itemId, usuarioId]
+    );
+    return rows[0] || null;
 }
 
-function eliminarItem(db, itemId) {
-    return db.prepare('DELETE FROM carrito WHERE id = ?').run(itemId);
+async function eliminarItem(pool, itemId) {
+    await pool.query('DELETE FROM carrito WHERE id = ?', [itemId]);
 }
 
-function eliminarItemDeUsuario(db, itemId, usuarioId) {
-    return db
-        .prepare('DELETE FROM carrito WHERE id = ? AND usuario_id = ?')
-        .run(itemId, usuarioId);
+async function eliminarItemDeUsuario(pool, itemId, usuarioId) {
+    const [result] = await pool.query(
+        'DELETE FROM carrito WHERE id = ? AND usuario_id = ?',
+        [itemId, usuarioId]
+    );
+    return { affectedRows: result.affectedRows };
 }
 
-function vaciar(db, usuarioId) {
-    return db.prepare('DELETE FROM carrito WHERE usuario_id = ?').run(usuarioId);
+async function vaciar(pool, usuarioId) {
+    const [result] = await pool.query('DELETE FROM carrito WHERE usuario_id = ?', [usuarioId]);
+    return { affectedRows: result.affectedRows };
 }
 
-function listarItemsParaPedido(db, usuarioId) {
-    return db
-        .prepare(
-            `
-            SELECT
-                c.id,
-                c.cantidad,
-                p.id AS producto_id,
-                p.nombre,
-                p.precio,
-                p.stock
-            FROM carrito c
-            INNER JOIN productos p ON p.id = c.producto_id
-            WHERE c.usuario_id = ?
-        `
-        )
-        .all(usuarioId);
+async function listarItemsParaPedido(pool, usuarioId) {
+    const [rows] = await pool.query(
+        `SELECT
+            c.id,
+            c.cantidad,
+            p.id AS producto_id,
+            p.nombre,
+            p.precio,
+            p.stock
+         FROM carrito c
+         INNER JOIN productos p ON p.id = c.producto_id
+         WHERE c.usuario_id = ?`,
+        [usuarioId]
+    );
+    return rows;
 }
 
 module.exports = {

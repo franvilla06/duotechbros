@@ -1,15 +1,22 @@
-function buscarPorUsuario(db, usuario) {
-    return db.prepare('SELECT * FROM admin WHERE usuario = ?').get(usuario);
+async function buscarPorUsuario(pool, usuario) {
+    const [rows] = await pool.query('SELECT * FROM admin WHERE usuario = ?', [usuario]);
+    return rows[0] || null;
 }
 
-function contarPorUsuario(db, usuario) {
-    return db.prepare('SELECT COUNT(*) as count FROM admin WHERE usuario = ?').get(usuario);
+async function contarPorUsuario(pool, usuario) {
+    const [rows] = await pool.query(
+        'SELECT COUNT(*) as count FROM admin WHERE usuario = ?',
+        [usuario]
+    );
+    return rows[0];
 }
 
-function crear(db, usuario, passwordHash) {
-    return db
-        .prepare('INSERT INTO admin (usuario, password_hash) VALUES (?, ?)')
-        .run(usuario, passwordHash);
+async function crear(pool, usuario, passwordHash) {
+    const [result] = await pool.query(
+        'INSERT INTO admin (usuario, password_hash) VALUES (?, ?)',
+        [usuario, passwordHash]
+    );
+    return { insertId: result.insertId };
 }
 
 module.exports = { buscarPorUsuario, contarPorUsuario, crear };
