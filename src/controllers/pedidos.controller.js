@@ -4,26 +4,22 @@ const portafolioModel = require('../models/portafolio.model');
 const usuariosModel = require('../models/usuarios.model');
 const authService = require('../services/auth.service');
 
-// crear un pedido de reparacion
-// requiere usuario autenticado
-// los datos del formulario pueden ser de otra persona (el usuario pide para alguien mas)
-// igualmente se guarda el usuario_id del que envio la solicitud
-function crearPedido(req, res) {
+// crear un pedido de reparacion (requiere usuario autenticado)
+async function crearPedido(req, res) {
     const { nombre_cliente, telefono, email, modelo_celular, descripcion_problema } = req.body;
     if (!nombre_cliente || !email || !modelo_celular || !descripcion_problema) {
         return res.status(400).json({ success: false, error: 'Faltan campos obligatorios' });
     }
 
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
 
-        // obtener el id del usuario autenticado
-        const usuarioId = usuariosModel.obtenerId(db, req.usuario);
+        const usuarioId = await usuariosModel.obtenerId(pool, req.usuario);
         if (!usuarioId) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
         }
 
-        const info = pedidosModel.crear(db, {
+        const info = await pedidosModel.crear(pool, {
             nombre_cliente,
             telefono,
             email,
@@ -33,46 +29,50 @@ function crearPedido(req, res) {
             tipo: 'reparacion',
         });
 
-        return res.json({ success: true, id: info.lastInsertRowid });
+        return res.json({ success: true, id: info.insertId });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-// listar pedidos, con filtro opcional por tipo
-// ?tipo=reparacion o ?tipo=producto
-function listarPedidos(req, res) {
+async function listarPedidos(req, res) {
     try {
         const tipo = req.query.tipo || null;
-        const pedidos = pedidosModel.listar(req.app.locals.db, tipo);
+        const pedidos = await pedidosModel.listar(req.app.locals.pool, tipo);
         return res.json(pedidos);
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function listarProductos(req, res) {
+async function listarProductos(req, res) {
     try {
-        return res.json(productosModel.listar(req.app.locals.db));
+        return res.json(await productosModel.listar(req.app.locals.pool));
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function listarPortafolio(req, res) {
+async function listarPortafolio(req, res) {
     try {
-        return res.json(portafolioModel.listar(req.app.locals.db));
+        return res.json(await portafolioModel.listar(req.app.locals.pool));
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-function iniciarSesion(req, res) {
+async function iniciarSesion(req, res) {
     const { usuario, password } = req.body;
     try {
-        const admin = authService.autenticarAdministrador(req.app.locals.db, usuario, password);
+        const admin = await authService.autenticarAdministrador(
+            req.app.locals.pool,
+            usuario,
+            password
+        );
         if (!admin) {
-            return res.status(401).json({ success: false, error: 'Usuario o contrasenia incorrectos' });
+            return res
+                .status(401)
+                .json({ success: false, error: 'Usuario o contrasenia incorrectos' });
         }
         return res.json({
             success: true,
@@ -85,10 +85,10 @@ function iniciarSesion(req, res) {
     }
 }
 
-function obtenerDetallePedidoAdmin(req, res) {
+async function obtenerDetallePedidoAdmin(req, res) {
     const { id } = req.params;
     try {
-        const pedido = pedidosModel.obtenerPedidoConItems(req.app.locals.db, id);
+        const pedido = await pedidosModel.obtenerPedidoConItems(req.app.locals.pool, id);
         if (!pedido) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }

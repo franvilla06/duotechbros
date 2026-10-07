@@ -1,210 +1,151 @@
-// crea un pedido de reparacion o de producto
-function crear(db, pedido) {
-    return db
-        .prepare(
-            `
-            INSERT INTO pedidos (
-                nombre_cliente,
-                telefono,
-                email,
-                modelo_celular,
-                descripcion_problema,
-                usuario_id,
-                tipo
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `
-        )
-        .run(
+async function crear(pool, pedido) {
+    const [result] = await pool.query(
+        `INSERT INTO pedidos (nombre_cliente, telefono, email, modelo_celular, descripcion_problema, usuario_id, tipo)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
             pedido.nombre_cliente,
             pedido.telefono,
             pedido.email,
             pedido.modelo_celular,
             pedido.descripcion_problema,
             pedido.usuario_id || null,
-            pedido.tipo || 'reparacion'
-        );
+            pedido.tipo || 'reparacion',
+        ]
+    );
+    return { insertId: result.insertId };
 }
 
-function listar(db, tipo = null) {
+async function listar(pool, tipo = null) {
     if (tipo) {
-        return db
-            .prepare('SELECT * FROM pedidos WHERE tipo = ? ORDER BY creado_en DESC')
-            .all(tipo);
+        const [rows] = await pool.query(
+            'SELECT * FROM pedidos WHERE tipo = ? ORDER BY creado_en DESC',
+            [tipo]
+        );
+        return rows;
     }
-    return db.prepare('SELECT * FROM pedidos ORDER BY creado_en DESC').all();
+    const [rows] = await pool.query('SELECT * FROM pedidos ORDER BY creado_en DESC');
+    return rows;
 }
 
-function actualizarEstado(db, id, estado) {
-    return db.prepare('UPDATE pedidos SET estado = ? WHERE id = ?').run(estado, id);
+async function actualizarEstado(pool, id, estado) {
+    const [result] = await pool.query('UPDATE pedidos SET estado = ? WHERE id = ?', [estado, id]);
+    return { affectedRows: result.affectedRows };
 }
 
-function actualizarNotas(db, id, notas) {
-    return db.prepare('UPDATE pedidos SET notas = ? WHERE id = ?').run(notas, id);
+async function actualizarNotas(pool, id, notas) {
+    const [result] = await pool.query('UPDATE pedidos SET notas = ? WHERE id = ?', [notas, id]);
+    return { affectedRows: result.affectedRows };
 }
 
-function actualizarPresupuesto(db, id, presupuesto) {
-    return db.prepare('UPDATE pedidos SET presupuesto = ? WHERE id = ?').run(presupuesto, id);
+async function actualizarPresupuesto(pool, id, presupuesto) {
+    const [result] = await pool.query(
+        'UPDATE pedidos SET presupuesto = ? WHERE id = ?',
+        [presupuesto, id]
+    );
+    return { affectedRows: result.affectedRows };
 }
 
-function eliminar(db, id) {
-    return db.prepare('DELETE FROM pedidos WHERE id = ?').run(id);
+async function eliminar(pool, id) {
+    const [result] = await pool.query('DELETE FROM pedidos WHERE id = ?', [id]);
+    return { affectedRows: result.affectedRows };
 }
 
-function crearPedidoDeUsuario(db, pedido) {
-    return db
-        .prepare(
-            `
-            INSERT INTO pedidos (
-                nombre_cliente,
-                telefono,
-                email,
-                modelo_celular,
-                descripcion_problema,
-                estado,
-                usuario_id,
-                tipo,
-                notas
-            )
-            VALUES (?, ?, ?, ?, ?, 'pendiente', ?, 'producto', ?)
-        `
-        )
-        .run(
+async function crearPedidoDeUsuario(pool, pedido) {
+    const [result] = await pool.query(
+        `INSERT INTO pedidos (
+            nombre_cliente, telefono, email, modelo_celular, descripcion_problema,
+            estado, usuario_id, tipo, notas
+         )
+         VALUES (?, ?, ?, ?, ?, 'pendiente', ?, 'producto', ?)`,
+        [
             pedido.nombre_cliente,
             pedido.telefono,
             pedido.email,
             pedido.modelo_celular,
             pedido.descripcion_problema,
             pedido.usuario_id,
-            pedido.notas
-        );
+            pedido.notas,
+        ]
+    );
+    return { insertId: result.insertId };
 }
 
-function insertarItem(db, item) {
-    return db
-        .prepare(
-            `
-            INSERT INTO pedido_items (
-                pedido_id,
-                producto_id,
-                nombre_producto,
-                precio_unitario,
-                cantidad,
-                subtotal
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-        `
-        )
-        .run(
+async function insertarItem(pool, item) {
+    await pool.query(
+        `INSERT INTO pedido_items (pedido_id, producto_id, nombre_producto, precio_unitario, cantidad, subtotal)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
             item.pedido_id,
             item.producto_id,
             item.nombre_producto,
             item.precio_unitario,
             item.cantidad,
-            item.subtotal
-        );
+            item.subtotal,
+        ]
+    );
 }
 
 // HISTORIAL DEL USUARIO
 
-function listarPorUsuario(db, usuarioId) {
-    return db
-        .prepare(
-            `
-            SELECT
-                p.id,
-                p.estado,
-                p.creado_en,
-                p.notas,
-                p.tipo,
-                p.modelo_celular,
-                p.descripcion_problema,
-                p.presupuesto,
-                COUNT(pi.id) AS total_items,
-                COALESCE(SUM(pi.cantidad), 0) AS total_unidades,
-                COALESCE(SUM(pi.subtotal), 0) AS total_precio
-            FROM pedidos p
-            LEFT JOIN pedido_items pi ON pi.pedido_id = p.id
-            WHERE p.usuario_id = ?
-            GROUP BY p.id
-            ORDER BY p.creado_en DESC
-        `
-        )
-        .all(usuarioId);
+async function listarPorUsuario(pool, usuarioId) {
+    const [rows] = await pool.query(
+        `SELECT
+            p.id, p.estado, p.creado_en, p.notas, p.tipo,
+            p.modelo_celular, p.descripcion_problema, p.presupuesto,
+            COUNT(pi.id) AS total_items,
+            COALESCE(SUM(pi.cantidad), 0) AS total_unidades,
+            COALESCE(SUM(pi.subtotal), 0) AS total_precio
+         FROM pedidos p
+         LEFT JOIN pedido_items pi ON pi.pedido_id = p.id
+         WHERE p.usuario_id = ?
+         GROUP BY p.id
+         ORDER BY p.creado_en DESC`,
+        [usuarioId]
+    );
+    return rows;
 }
 
-function obtenerPedidoDeUsuario(db, pedidoId, usuarioId) {
-    return db
-        .prepare(
-            `
-            SELECT
-                id,
-                estado,
-                creado_en,
-                notas,
-                tipo,
-                modelo_celular,
-                descripcion_problema,
-                presupuesto,
-                nombre_cliente,
-                telefono,
-                email
-            FROM pedidos
-            WHERE id = ? AND usuario_id = ?
-        `
-        )
-        .get(pedidoId, usuarioId);
+async function obtenerPedidoDeUsuario(pool, pedidoId, usuarioId) {
+    const [rows] = await pool.query(
+        `SELECT id, estado, creado_en, notas, tipo, modelo_celular,
+                descripcion_problema, presupuesto, nombre_cliente, telefono, email
+         FROM pedidos
+         WHERE id = ? AND usuario_id = ?`,
+        [pedidoId, usuarioId]
+    );
+    return rows[0] || null;
 }
 
-function listarItemsDePedido(db, pedidoId) {
-    return db
-        .prepare(
-            `
-            SELECT
-                id,
-                producto_id,
-                nombre_producto,
-                precio_unitario,
-                cantidad,
-                subtotal
-            FROM pedido_items
-            WHERE pedido_id = ?
-            ORDER BY id ASC
-        `
-        )
-        .all(pedidoId);
+async function listarItemsDePedido(pool, pedidoId) {
+    const [rows] = await pool.query(
+        `SELECT id, producto_id, nombre_producto, precio_unitario, cantidad, subtotal
+         FROM pedido_items
+         WHERE pedido_id = ?
+         ORDER BY id ASC`,
+        [pedidoId]
+    );
+    return rows;
 }
 
-// DETALLE COMPLETO DE UNA COMPRA PARA EL ADMIN
+// DETALLE COMPLETO PARA EL ADMIN
 
-function obtenerPedidoConItems(db, pedidoId) {
-    const pedido = db
-        .prepare(
-            `
-            SELECT
-                p.id,
-                p.nombre_cliente,
-                p.telefono,
-                p.email,
-                p.modelo_celular,
-                p.descripcion_problema,
-                p.estado,
-                p.creado_en,
-                p.notas,
-                p.presupuesto,
-                p.usuario_id,
-                p.tipo,
-                u.usuario AS usuario_nombre
-            FROM pedidos p
-            LEFT JOIN usuarios u ON u.id = p.usuario_id
-            WHERE p.id = ?
-        `
-        )
-        .get(pedidoId);
+async function obtenerPedidoConItems(pool, pedidoId) {
+    const [rows] = await pool.query(
+        `SELECT
+            p.id, p.nombre_cliente, p.telefono, p.email, p.modelo_celular,
+            p.descripcion_problema, p.estado, p.creado_en, p.notas,
+            p.presupuesto, p.usuario_id, p.tipo,
+            u.usuario AS usuario_nombre
+         FROM pedidos p
+         LEFT JOIN usuarios u ON u.id = p.usuario_id
+         WHERE p.id = ?`,
+        [pedidoId]
+    );
 
+    const pedido = rows[0];
     if (!pedido) return null;
 
-    const items = listarItemsDePedido(db, pedidoId);
+    const items = await listarItemsDePedido(pool, pedidoId);
 
     const totalPrecio = items.reduce((acc, item) => acc + Number(item.subtotal), 0);
     const totalUnidades = items.reduce((acc, item) => acc + item.cantidad, 0);
@@ -218,46 +159,54 @@ function obtenerPedidoConItems(db, pedidoId) {
     };
 }
 
-// CANCELAR UN PEDIDO DEL USUARIO
-// solo se puede cancelar si esta en estado pendiente
-// si es una compra, se devuelve el stock de cada producto. todo se hace en una transaccion para no dejar datos inconsistentes
+// CANCELAR UN PEDIDO DEL USUARIO (con transaccion)
 
-function cancelarPedidoDeUsuario(db, pedidoId, usuarioId) {
-    const pedido = db
-        .prepare('SELECT id, tipo, estado FROM pedidos WHERE id = ? AND usuario_id = ?')
-        .get(pedidoId, usuarioId);
+async function cancelarPedidoDeUsuario(pool, pedidoId, usuarioId) {
+    const [rows] = await pool.query(
+        'SELECT id, tipo, estado FROM pedidos WHERE id = ? AND usuario_id = ?',
+        [pedidoId, usuarioId]
+    );
 
-    if (!pedido) {
-        return { error: 'Pedido no encontrado.' };
-    }
+    const pedido = rows[0];
+    if (!pedido) return { error: 'Pedido no encontrado.' };
 
     const estadoActual = (pedido.estado || 'pendiente').toLowerCase().trim();
     if (estadoActual !== 'pendiente') {
         return { error: 'Solo se pueden cancelar pedidos en estado pendiente.' };
     }
 
-    const ejecutarCancelacion = db.transaction(() => {
-        // si es una compra, restaurar el stock de cada producto
-        if (pedido.tipo === 'producto') {
-            const items = db
-                .prepare('SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?')
-                .all(pedidoId);
+    const conexion = await pool.getConnection();
+    try {
+        await conexion.beginTransaction();
 
-            const updateStock = db.prepare('UPDATE productos SET stock = stock + ? WHERE id = ?');
+        // si es compra, restaurar stock
+        if (pedido.tipo === 'producto') {
+            const [items] = await conexion.query(
+                'SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?',
+                [pedidoId]
+            );
+
             for (const item of items) {
                 if (item.producto_id) {
-                    updateStock.run(item.cantidad, item.producto_id);
+                    await conexion.query(
+                        'UPDATE productos SET stock = stock + ? WHERE id = ?',
+                        [item.cantidad, item.producto_id]
+                    );
                 }
             }
         }
 
-        // cambiar el estado del pedido a cancelado
-        db.prepare("UPDATE pedidos SET estado = 'cancelado' WHERE id = ?").run(pedidoId);
+        // cambiar estado
+        await conexion.query("UPDATE pedidos SET estado = 'cancelado' WHERE id = ?", [pedidoId]);
 
+        await conexion.commit();
         return { success: true };
-    });
-
-    return ejecutarCancelacion();
+    } catch (error) {
+        await conexion.rollback();
+        throw error;
+    } finally {
+        conexion.release();
+    }
 }
 
 module.exports = {

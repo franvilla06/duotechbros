@@ -1,52 +1,84 @@
-function contarPorUsuario(db, usuario) {
-    return db.prepare('SELECT COUNT(*) as count FROM usuarios WHERE usuario = ?').get(usuario);
+async function contarPorUsuario(pool, usuario) {
+    const [rows] = await pool.query(
+        'SELECT COUNT(*) as count FROM usuarios WHERE usuario = ?',
+        [usuario]
+    );
+    return rows[0];
 }
 
-function buscarPorUsuario(db, usuario) {
-    return db.prepare('SELECT * FROM usuarios WHERE usuario = ?').get(usuario);
+async function buscarPorUsuario(pool, usuario) {
+    const [rows] = await pool.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario]);
+    return rows[0] || null;
 }
 
-// busca un usuario por su email
-// se usa para el login
-function buscarPorEmail(db, email) {
-    return db.prepare('SELECT * FROM usuarios WHERE email = ?').get(email);
+async function buscarPorEmail(pool, email) {
+    const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    return rows[0] || null;
 }
 
-function crear(db, usuario, passwordHash) {
-    return db
-        .prepare('INSERT INTO usuarios (usuario, password_hash) VALUES (?, ?)')
-        .run(usuario, passwordHash);
+async function crear(pool, usuario, passwordHash) {
+    const [result] = await pool.query(
+        'INSERT INTO usuarios (usuario, password_hash) VALUES (?, ?)',
+        [usuario, passwordHash]
+    );
+    return { insertId: result.insertId };
 }
 
-function crearConEmail(db, usuario, email, passwordHash) {
-    return db
-        .prepare('INSERT INTO usuarios (usuario, email, password_hash) VALUES (?, ?, ?)')
-        .run(usuario, email, passwordHash);
+async function crearConEmail(pool, usuario, email, passwordHash) {
+    const [result] = await pool.query(
+        'INSERT INTO usuarios (usuario, email, password_hash) VALUES (?, ?, ?)',
+        [usuario, email, passwordHash]
+    );
+    return { insertId: result.insertId };
 }
 
-function obtenerId(db, usuario) {
-    const user = db.prepare('SELECT id FROM usuarios WHERE usuario = ?').get(usuario);
-    return user ? user.id : null;
+async function obtenerId(pool, usuario) {
+    const [rows] = await pool.query('SELECT id FROM usuarios WHERE usuario = ?', [usuario]);
+    return rows[0] ? rows[0].id : null;
 }
 
-function obtenerPerfil(db, usuario) {
-    return db
-        .prepare('SELECT id, usuario, email, creado_en FROM usuarios WHERE usuario = ?')
-        .get(usuario);
+async function obtenerPerfil(pool, usuario) {
+    const [rows] = await pool.query(
+        'SELECT id, usuario, email, creado_en FROM usuarios WHERE usuario = ?',
+        [usuario]
+    );
+    return rows[0] || null;
 }
 
-function actualizarPassword(db, usuario, passwordHash) {
-    return db
-        .prepare('UPDATE usuarios SET password_hash = ? WHERE usuario = ?')
-        .run(passwordHash, usuario);
+async function actualizarPassword(pool, usuario, passwordHash) {
+    const [result] = await pool.query(
+        'UPDATE usuarios SET password_hash = ? WHERE usuario = ?',
+        [passwordHash, usuario]
+    );
+    return { affectedRows: result.affectedRows };
 }
 
-function eliminar(db, usuario) {
-    return db.prepare('DELETE FROM usuarios WHERE usuario = ?').run(usuario);
+// actualiza el email de un usuario
+async function actualizarEmail(pool, usuario, email) {
+    const [result] = await pool.query(
+        'UPDATE usuarios SET email = ? WHERE usuario = ?',
+        [email, usuario]
+    );
+    return { affectedRows: result.affectedRows };
+}
+
+// cuenta cuantos usuarios tienen un email (para validar duplicados)
+async function contarPorEmail(pool, email) {
+    const [rows] = await pool.query(
+        'SELECT COUNT(*) as count FROM usuarios WHERE email = ?',
+        [email]
+    );
+    return rows[0];
+}
+
+async function eliminar(pool, usuario) {
+    const [result] = await pool.query('DELETE FROM usuarios WHERE usuario = ?', [usuario]);
+    return { affectedRows: result.affectedRows };
 }
 
 module.exports = {
     contarPorUsuario,
+    contarPorEmail,
     buscarPorUsuario,
     buscarPorEmail,
     crear,
@@ -54,5 +86,6 @@ module.exports = {
     obtenerId,
     obtenerPerfil,
     actualizarPassword,
+    actualizarEmail,
     eliminar,
 };

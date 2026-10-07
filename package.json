@@ -21,10 +21,10 @@
   "homepage": "https://github.com/PiruProgramer/Proyecto_DuotechBros#readme",
   "dependencies": {
     "bcryptjs": "3.0.3",
-    "better-sqlite3": "12.10.0",
     "cors": "2.8.6",
     "dotenv": "16.4.5",
     "express": "5.2.1",
-    "nodemailer": "10.0.15"
+    "mysql2": "3.24.5",
+    "nodemailer": "^10.0.15"
   }
 }

@@ -43,6 +43,9 @@
           <button type="button" class="perfil-tab active" data-tab="info">
             <i class="fas fa-user"></i> Mi perfil
           </button>
+          <button type="button" class="perfil-tab" data-tab="email">
+            <i class="fas fa-envelope"></i> Cambiar correo
+          </button>
           <button type="button" class="perfil-tab" data-tab="password">
             <i class="fas fa-lock"></i> Cambiar contrasenia
           </button>
@@ -74,9 +77,61 @@
             <i class="fas fa-info-circle"></i>
             <p>
               Para cambiar tu nombre de usuario, escribinos desde la seccion de
-              contacto. Por ahora, solo podes modificar tu contrasenia.
+              contacto. Por ahora, podes modificar tu correo y contrasenia.
             </p>
           </div>
+        </section>
+
+        <!-- SECCION: CAMBIAR CORREO -->
+        <section class="perfil-seccion" id="seccion-email" style="display: none">
+          <h2><i class="fas fa-envelope"></i> Cambiar correo electrónico</h2>
+
+          <form class="perfil-form" id="form-email">
+            <div class="perfil-form-grupo">
+              <label for="email-actual">Correo actual</label>
+              <input
+                type="email"
+                id="email-actual"
+                disabled
+                style="background-color: #f0f4f8; color: #888; cursor: not-allowed;"
+              />
+              <small class="perfil-ayuda">
+                Este es el correo con el que inicias sesión actualmente.
+              </small>
+            </div>
+
+            <div class="perfil-form-grupo">
+              <label for="email-nuevo">Nuevo correo electrónico *</label>
+              <input
+                type="email"
+                id="email-nuevo"
+                autocomplete="email"
+                maxlength="100"
+                placeholder="tucorreonuevo@email.com"
+                required
+              />
+            </div>
+
+            <div class="perfil-form-grupo">
+              <label for="email-password">Contraseña actual *</label>
+              <input
+                type="password"
+                id="email-password"
+                autocomplete="current-password"
+                placeholder="Ingresá tu contraseña para confirmar"
+                required
+              />
+              <small class="perfil-ayuda">
+                Por seguridad, confirmá el cambio con tu contraseña actual.
+              </small>
+            </div>
+
+            <button type="submit" class="perfil-btn-primario" id="btn-cambiar-email">
+              <i class="fas fa-save"></i> Guardar nuevo correo
+            </button>
+          </form>
+
+          <div class="perfil-mensaje" id="mensaje-email"></div>
         </section>
 
         <!-- SECCION: CAMBIAR CONTRASENIA -->

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+    <title>Mi Perfil - DuotechBros Admin</title>
+  </head>
+  <body data-admin-protected="true">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-brand">
+          <i class="fas fa-tools"></i>
+          <div>
+            <h2>DuotechBros</h2>
+            <span>Panel Interno</span>
+          </div>
+        </div>
+
+        <nav class="admin-nav">
+          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+          <a href="productos.html"><i class="fas fa-box"></i><span>Gestionar Productos</span></a>
+          <a href="portafolio.html"><i class="fas fa-briefcase"></i><span>Gestionar Portafolio</span></a>
+          <a href="pedidos.html"><i class="fas fa-tools"></i><span>Pedidos de Reparación</span></a>
+          <a href="compras.html"><i class="fas fa-shopping-bag"></i><span>Compras de Tienda</span></a>
+          <a href="configuracion.html"><i class="fas fa-cog"></i><span>Configuración</span></a>
+          <a href="perfil.html" class="active"><i class="fas fa-user-shield"></i><span>Mi Perfil</span></a>
+        </nav>
+
+        <div class="admin-sidebar-footer">
+          <div class="admin-user">
+            <i class="fas fa-user-circle"></i>
+            <span id="nombre-usuario">Admin</span>
+          </div>
+          <button class="logout-btn" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+          </button>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <h1>Mi Perfil</h1>
+            <p>Gestioná tus credenciales de acceso al panel administrativo.</p>
+          </div>
+        </header>
+
+        <div class="perfil-tabs">
+          <button type="button" class="perfil-tab active" data-tab="info">
+            <i class="fas fa-user"></i> Información
+          </button>
+          <button type="button" class="perfil-tab" data-tab="usuario">
+            <i class="fas fa-id-badge"></i> Cambiar usuario
+          </button>
+          <button type="button" class="perfil-tab" data-tab="password">
+            <i class="fas fa-lock"></i> Cambiar contraseña
+          </button>
+        </div>
+
+        <section class="admin-card" id="seccion-info">
+          <h2><i class="fas fa-user-shield"></i> Datos de la cuenta</h2>
+          <div class="perfil-info-grid">
+            <div class="perfil-info-item">
+              <span class="perfil-info-label">Usuario</span>
+              <span class="perfil-info-valor" id="info-usuario">—</span>
+            </div>
+            <div class="perfil-info-item">
+              <span class="perfil-info-label">Rol</span>
+              <span class="perfil-info-valor">Administrador</span>
+            </div>
+          </div>
+          <div class="perfil-info-note">
+            <i class="fas fa-info-circle"></i>
+            <p>
+              Este usuario es con el que inicias sesión en el panel. Por seguridad,
+              te recomendamos cambiar el usuario y la contraseña por defecto antes
+              de poner el sitio en producción.
+            </p>
+          </div>
+        </section>
+
+        <section class="admin-card" id="seccion-usuario" style="display: none">
+          <h2><i class="fas fa-id-badge"></i> Cambiar nombre de usuario</h2>
+          <form class="admin-form" id="form-usuario">
+            <div class="admin-form-group">
+              <label for="usuario-nuevo">Nuevo nombre de usuario *</label>
+              <input
+                type="text"
+                id="usuario-nuevo"
+                minlength="3"
+                maxlength="30"
+                placeholder="Ej: admin_duotechbros"
+                required
+              />
+              <small class="perfil-ayuda">
+                Entre 3 y 30 caracteres. Solo letras, números y guión bajo.
+              </small>
+            </div>
+            <div class="admin-form-group">
+              <label for="usuario-password">Contraseña actual *</label>
+              <input
+                type="password"
+                id="usuario-password"
+                placeholder="Ingresá tu contraseña para confirmar"
+                autocomplete="current-password"
+                required
+              />
+              <small class="perfil-ayuda">
+                Por seguridad, confirmá el cambio con tu contraseña actual.
+              </small>
+            </div>
+            <div class="admin-form-actions">
+              <button type="submit" class="btn-primary" id="btn-cambiar-usuario">
+                <i class="fas fa-save"></i> Guardar nuevo usuario
+              </button>
+            </div>
+          </form>
+          <div class="perfil-mensaje" id="mensaje-usuario"></div>
+        </section>
+
+        <section class="admin-card" id="seccion-password" style="display: none">
+          <h2><i class="fas fa-lock"></i> Cambiar contraseña</h2>
+          <form class="admin-form" id="form-password">
+            <div class="admin-form-group">
+              <label for="password-actual">Contraseña actual *</label>
+              <input
+                type="password"
+                id="password-actual"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+            <div class="admin-form-group">
+              <label for="password-nueva">Nueva contraseña *</label>
+              <input
+                type="password"
+                id="password-nueva"
+                minlength="6"
+                autocomplete="new-password"
+                required
+              />
+              <small class="perfil-ayuda">Mínimo 6 caracteres.</small>
+            </div>
+            <div class="admin-form-group">
+              <label for="password-confirmar">Confirmar nueva contraseña *</label>
+              <input
+                type="password"
+                id="password-confirmar"
+                minlength="6"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+            <div class="admin-form-actions">
+              <button type="submit" class="btn-primary" id="btn-cambiar-password">
+                <i class="fas fa-save"></i> Guardar nueva contraseña
+              </button>
+            </div>
+          </form>
+          <div class="perfil-mensaje" id="mensaje-password"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/admin.js"></script>
+    <script src="/js/admin-perfil.js"></script>
+  </body>
+</html>

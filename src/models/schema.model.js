@@ -1,160 +1,134 @@
-function inicializar(db) {
-    db.exec(`
-        CREATE TABLE IF NOT EXISTS pedidos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre_cliente TEXT NOT NULL,
-            telefono TEXT NOT NULL,
-            email TEXT NOT NULL,
-            modelo_celular TEXT,
-            descripcion_problema TEXT,
-            estado TEXT DEFAULT 'pendiente',
+// inicializa el esquema de la base de datos (MySQL)
+// crea todas las tablas si no existen
+// a diferencia de sqlite, mysql soporta IF NOT EXISTS de forma nativa
+async function inicializarEsquema(pool) {
+    const tablas = [
+        // usuarios del sitio publico
+        `CREATE TABLE IF NOT EXISTS usuarios (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario VARCHAR(30) UNIQUE NOT NULL,
+            email VARCHAR(100) UNIQUE,
+            password_hash VARCHAR(255) NOT NULL,
             creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS portafolio (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT NOT NULL,
-            descripcion TEXT,
-            imagen_url TEXT,
-            tipo_reparacion TEXT,
-            fecha DATE DEFAULT CURRENT_DATE
-        );
-        CREATE TABLE IF NOT EXISTS productos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // administradores del panel
+        `CREATE TABLE IF NOT EXISTS admin (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario VARCHAR(30) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // productos de la tienda
+        `CREATE TABLE IF NOT EXISTS productos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nombre VARCHAR(150) NOT NULL,
             descripcion TEXT,
             precio DECIMAL(10,2) NOT NULL,
-            imagen_url TEXT,
-            categoria TEXT,
-            stock INTEGER DEFAULT 0
-        );
-        CREATE TABLE IF NOT EXISTS admin (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT UNIQUE NOT NULL,
-            email TEXT,
-            password_hash TEXT NOT NULL,
-            creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS carrito (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id INTEGER NOT NULL,
-            producto_id INTEGER NOT NULL,
-            cantidad INTEGER NOT NULL DEFAULT 1,
+            imagen_url VARCHAR(500),
+            categoria VARCHAR(80),
+            stock INT DEFAULT 0
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // portafolio de trabajos realizados
+        `CREATE TABLE IF NOT EXISTS portafolio (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            titulo VARCHAR(200) NOT NULL,
+            descripcion TEXT,
+            imagen_url VARCHAR(500),
+            tipo_reparacion VARCHAR(80),
+            fecha DATE DEFAULT (CURRENT_DATE),
+            fecha_inicio DATE,
+            fecha_fin DATE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // pedidos (reparaciones y compras)
+        `CREATE TABLE IF NOT EXISTS pedidos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nombre_cliente VARCHAR(150) NOT NULL,
+            telefono VARCHAR(30) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            modelo_celular VARCHAR(120),
+            descripcion_problema TEXT,
+            estado VARCHAR(30) DEFAULT 'pendiente',
+            notas TEXT,
+            presupuesto DECIMAL(10,2),
+            usuario_id INT,
+            tipo VARCHAR(30) DEFAULT 'reparacion',
+            creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_tipo (tipo),
+            INDEX idx_estado (estado),
+            INDEX idx_usuario (usuario_id),
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // items de cada pedido (solo para compras)
+        `CREATE TABLE IF NOT EXISTS pedido_items (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            pedido_id INT NOT NULL,
+            producto_id INT,
+            nombre_producto VARCHAR(150) NOT NULL,
+            precio_unitario DECIMAL(10,2) NOT NULL,
+            cantidad INT NOT NULL,
+            subtotal DECIMAL(10,2) NOT NULL,
+            INDEX idx_pedido (pedido_id),
+            FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // carrito de compras
+        `CREATE TABLE IF NOT EXISTS carrito (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id INT NOT NULL,
+            producto_id INT NOT NULL,
+            cantidad INT NOT NULL DEFAULT 1,
             agregado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE (usuario_id, producto_id),
+            UNIQUE KEY uq_usuario_producto (usuario_id, producto_id),
+            INDEX idx_usuario (usuario_id),
             FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
             FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
-        );
-        CREATE TABLE IF NOT EXISTS pedido_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            pedido_id INTEGER NOT NULL,
-            producto_id INTEGER,
-            nombre_producto TEXT NOT NULL,
-            precio_unitario DECIMAL(10,2) NOT NULL,
-            cantidad INTEGER NOT NULL,
-            subtotal DECIMAL(10,2) NOT NULL,
-            FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE
-        );
-        CREATE TABLE IF NOT EXISTS configuracion (
-            clave TEXT PRIMARY KEY,
-            valor TEXT
-        );
-        CREATE TABLE IF NOT EXISTS codigos_verificacion (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT NOT NULL,
-            email TEXT NOT NULL,
-            password_hash TEXT,
-            codigo TEXT NOT NULL,
-            tipo TEXT DEFAULT 'registro',
-            intentos INTEGER DEFAULT 0,
-            usado INTEGER DEFAULT 0,
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // codigos de verificacion (registro y recuperacion)
+        `CREATE TABLE IF NOT EXISTS codigos_verificacion (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario VARCHAR(30) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            password_hash VARCHAR(255),
+            codigo VARCHAR(6) NOT NULL,
+            tipo VARCHAR(30) DEFAULT 'registro',
+            intentos INT DEFAULT 0,
+            usado TINYINT DEFAULT 0,
             creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
-            expira_en DATETIME NOT NULL
+            expira_en DATETIME NOT NULL,
+            INDEX idx_email_tipo (email, tipo)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        // configuracion del sitio
+        `CREATE TABLE IF NOT EXISTS configuracion (
+            clave VARCHAR(100) PRIMARY KEY,
+            valor TEXT
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+    ];
+
+    // crear cada tabla si no existe
+    for (const sql of tablas) {
+        await pool.query(sql);
+    }
+
+    // insertar el admin por defecto si no existe
+    const [admins] = await pool.query(
+        'SELECT COUNT(*) as count FROM admin WHERE usuario = ?',
+        ['admin']
+    );
+
+    if (admins[0].count === 0) {
+        const bcrypt = require('bcryptjs');
+        const hash = bcrypt.hashSync('admin123', 10);
+        await pool.query(
+            'INSERT INTO admin (usuario, password_hash) VALUES (?, ?)',
+            ['admin', hash]
         );
-    `);
-
-    // migraciones de pedidos
-    const columnasPedidos = db.prepare('PRAGMA table_info(pedidos)').all();
-
-    if (!columnasPedidos.some((col) => col.name === 'notas')) {
-        db.exec('ALTER TABLE pedidos ADD COLUMN notas TEXT');
-        console.log('Migracion aplicada: columna notas agregada a pedidos');
-    }
-
-    if (!columnasPedidos.some((col) => col.name === 'usuario_id')) {
-        db.exec('ALTER TABLE pedidos ADD COLUMN usuario_id INTEGER');
-        console.log('Migracion aplicada: columna usuario_id agregada a pedidos');
-    }
-
-    if (!columnasPedidos.some((col) => col.name === 'tipo')) {
-        db.exec("ALTER TABLE pedidos ADD COLUMN tipo TEXT DEFAULT 'reparacion'");
-        console.log('Migracion aplicada: columna tipo agregada a pedidos');
-    }
-
-    if (!columnasPedidos.some((col) => col.name === 'presupuesto')) {
-        db.exec('ALTER TABLE pedidos ADD COLUMN presupuesto DECIMAL(10,2)');
-        console.log('Migracion aplicada: columna presupuesto agregada a pedidos');
-    }
-
-    // migraciones de portafolio
-    const columnasPortafolio = db.prepare('PRAGMA table_info(portafolio)').all();
-
-    if (!columnasPortafolio.some((col) => col.name === 'fecha_inicio')) {
-        db.exec('ALTER TABLE portafolio ADD COLUMN fecha_inicio DATE');
-        console.log('Migracion aplicada: columna fecha_inicio agregada a portafolio');
-    }
-
-    if (!columnasPortafolio.some((col) => col.name === 'fecha_fin')) {
-        db.exec('ALTER TABLE portafolio ADD COLUMN fecha_fin DATE');
-        console.log('Migracion aplicada: columna fecha_fin agregada a portafolio');
-    }
-
-    // migracion de usuarios: agregar columna email si no existe
-    const columnasUsuarios = db.prepare('PRAGMA table_info(usuarios)').all();
-    if (!columnasUsuarios.some((col) => col.name === 'email')) {
-        db.exec('ALTER TABLE usuarios ADD COLUMN email TEXT');
-        console.log('Migracion aplicada: columna email agregada a usuarios');
-    }
-
-    // MIGRACION ESPECIAL: recrear codigos_verificacion si tiene NOT NULL en password_hash
-    // sqlite no permite quitar el NOT NULL con ALTER TABLE
-    // necesitamos recrear la tabla desde cero
-    const columnasCodigos = db.prepare('PRAGMA table_info(codigos_verificacion)').all();
-    const colPassword = columnasCodigos.find((c) => c.name === 'password_hash');
-
-    // notnull === 1 significa que la columna tiene el constraint NOT NULL
-    if (colPassword && colPassword.notnull === 1) {
-        console.log('Migracion: recreando tabla codigos_verificacion sin NOT NULL en password_hash');
-
-        db.exec(`
-            CREATE TABLE IF NOT EXISTS codigos_verificacion_new (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario TEXT NOT NULL,
-                email TEXT NOT NULL,
-                password_hash TEXT,
-                codigo TEXT NOT NULL,
-                tipo TEXT DEFAULT 'registro',
-                intentos INTEGER DEFAULT 0,
-                usado INTEGER DEFAULT 0,
-                creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
-                expira_en DATETIME NOT NULL
-            );
-        `);
-
-        // no copiamos datos viejos porque son codigos temporales que expiran
-        db.exec('DROP TABLE codigos_verificacion');
-        db.exec('ALTER TABLE codigos_verificacion_new RENAME TO codigos_verificacion');
-
-        console.log('Migracion completada: codigos_verificacion recreada');
-    }
-    // si la columna tipo no existe, agregarla (para el caso en que la tabla ya sea nueva pero sin tipo)
-    else if (!columnasCodigos.some((col) => col.name === 'tipo')) {
-        db.exec("ALTER TABLE codigos_verificacion ADD COLUMN tipo TEXT DEFAULT 'registro'");
-        console.log('Migracion aplicada: columna tipo agregada a codigos_verificacion');
+        console.log('Administrador creado: admin / admin123');
     }
 
     // valores por defecto de configuracion
@@ -172,13 +146,12 @@ function inicializar(db) {
         aviso_general: '',
     };
 
-    const insertarConfig = db.prepare(
-        'INSERT OR IGNORE INTO configuracion (clave, valor) VALUES (?, ?)'
-    );
-
-    Object.entries(valoresIniciales).forEach(([clave, valor]) => {
-        insertarConfig.run(clave, valor);
-    });
+    for (const [clave, valor] of Object.entries(valoresIniciales)) {
+        await pool.query(
+            'INSERT IGNORE INTO configuracion (clave, valor) VALUES (?, ?)',
+            [clave, valor]
+        );
+    }
 }
 
-module.exports = { inicializar };
+module.exports = inicializarEsquema;

@@ -1,50 +1,46 @@
-function listar(db) {
-    return db.prepare('SELECT * FROM portafolio ORDER BY fecha DESC').all();
+async function listar(pool) {
+    const [rows] = await pool.query('SELECT * FROM portafolio ORDER BY fecha DESC');
+    return rows;
 }
 
-function crear(db, trabajo) {
-    return db
-        .prepare(
-            `
-            INSERT INTO portafolio (
-                titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-        `
-        )
-        .run(
-            trabajo.titulo,
-            trabajo.descripcion,
-            trabajo.imagen_url,
-            trabajo.tipo_reparacion,
-            trabajo.fecha_inicio,
-            trabajo.fecha_fin
-        );
-}
-
-function actualizar(db, id, trabajo) {
-    return db
-        .prepare(
-            `
-            UPDATE portafolio
-            SET titulo = ?, descripcion = ?, imagen_url = ?, tipo_reparacion = ?,
-                fecha_inicio = ?, fecha_fin = ?
-            WHERE id = ?
-        `
-        )
-        .run(
+async function crear(pool, trabajo) {
+    const [result] = await pool.query(
+        `INSERT INTO portafolio (titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
             trabajo.titulo,
             trabajo.descripcion,
             trabajo.imagen_url,
             trabajo.tipo_reparacion,
             trabajo.fecha_inicio,
             trabajo.fecha_fin,
-            id
-        );
+        ]
+    );
+    return { insertId: result.insertId };
 }
 
-function eliminar(db, id) {
-    return db.prepare('DELETE FROM portafolio WHERE id = ?').run(id);
+async function actualizar(pool, id, trabajo) {
+    const [result] = await pool.query(
+        `UPDATE portafolio
+         SET titulo = ?, descripcion = ?, imagen_url = ?, tipo_reparacion = ?,
+             fecha_inicio = ?, fecha_fin = ?
+         WHERE id = ?`,
+        [
+            trabajo.titulo,
+            trabajo.descripcion,
+            trabajo.imagen_url,
+            trabajo.tipo_reparacion,
+            trabajo.fecha_inicio,
+            trabajo.fecha_fin,
+            id,
+        ]
+    );
+    return { affectedRows: result.affectedRows };
+}
+
+async function eliminar(pool, id) {
+    const [result] = await pool.query('DELETE FROM portafolio WHERE id = ?', [id]);
+    return { affectedRows: result.affectedRows };
 }
 
 module.exports = { listar, crear, actualizar, eliminar };

@@ -1,16 +1,17 @@
-// cargar variables de entorno antes de todo
-require('dotenv').config();
-
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const db = require('./config/database');
+const { obtenerPool } = require('./config/database');
+
 const pedidosRoutes = require('./routes/pedidos.routes');
 const adminRoutes = require('./routes/admin.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
 
 const app = express();
-app.locals.db = db;
+
+// exponer el pool de conexiones a todos los controllers
+// (los controllers lo van a usar como req.app.locals.pool)
+app.locals.pool = obtenerPool();
 
 app.use(cors());
 app.use(express.json());

@@ -1,16 +1,20 @@
 const estadisticasModel = require('../models/estadisticas.model');
 
-// devuelve todas las estadisticas que usa el dashboard
-// en una sola peticion para que el frontend no tenga que hacer varias
-function obtenerEstadisticas(req, res) {
+async function obtenerEstadisticas(req, res) {
     try {
-        const db = req.app.locals.db;
+        const pool = req.app.locals.pool;
+
+        const [pedidosPorEstado, productosMasVendidos, ventasPorMes] = await Promise.all([
+            estadisticasModel.pedidosPorEstado(pool),
+            estadisticasModel.productosMasVendidos(pool, 10),
+            estadisticasModel.ventasPorMes(pool, 6),
+        ]);
 
         return res.json({
             success: true,
-            pedidos_por_estado: estadisticasModel.pedidosPorEstado(db),
-            productos_mas_vendidos: estadisticasModel.productosMasVendidos(db, 10),
-            ventas_por_mes: estadisticasModel.ventasPorMes(db, 6),
+            pedidos_por_estado: pedidosPorEstado,
+            productos_mas_vendidos: productosMasVendidos,
+            ventas_por_mes: ventasPorMes,
         });
     } catch (error) {
         console.error('Error al obtener estadisticas:', error);
