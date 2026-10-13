@@ -26,6 +26,7 @@ async function inicializarEsquema(pool) {
             descripcion TEXT,
             precio DECIMAL(10,2) NOT NULL,
             imagen_url VARCHAR(500),
+            imagenes TEXT,
             categoria VARCHAR(80),
             stock INT DEFAULT 0
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
@@ -36,6 +37,7 @@ async function inicializarEsquema(pool) {
             titulo VARCHAR(200) NOT NULL,
             descripcion TEXT,
             imagen_url VARCHAR(500),
+            imagenes TEXT,
             tipo_reparacion VARCHAR(80),
             fecha DATE DEFAULT (CURRENT_DATE),
             fecha_inicio DATE,
@@ -115,6 +117,10 @@ async function inicializarEsquema(pool) {
         await pool.query(sql);
     }
 
+    // agregar las columnas en bases existentes sin afectar los datos actuales
+    await agregarColumnaSiNoExiste(pool, 'productos', 'imagenes', 'TEXT');
+    await agregarColumnaSiNoExiste(pool, 'portafolio', 'imagenes', 'TEXT');
+
     // insertar el admin por defecto si no existe
     const [admins] = await pool.query(
         'SELECT COUNT(*) as count FROM admin WHERE usuario = ?',
@@ -154,6 +160,14 @@ async function inicializarEsquema(pool) {
             'INSERT IGNORE INTO configuracion (clave, valor) VALUES (?, ?)',
             [clave, valor]
         );
+    }
+}
+
+async function agregarColumnaSiNoExiste(pool, tabla, columna, tipo) {
+    const [columnas] = await pool.query(`SHOW COLUMNS FROM \`${tabla}\` LIKE ?`, [columna]);
+    if (columnas.length === 0) {
+        await pool.query(`ALTER TABLE \`${tabla}\` ADD COLUMN \`${columna}\` ${tipo}`);
+        console.log(`Migracion aplicada: columna ${columna} agregada a ${tabla}`);
     }
 }
 

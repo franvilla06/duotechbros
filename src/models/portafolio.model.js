@@ -5,12 +5,13 @@ async function listar(pool) {
 
 async function crear(pool, trabajo) {
     const [result] = await pool.query(
-        `INSERT INTO portafolio (titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO portafolio (titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
             trabajo.titulo,
             trabajo.descripcion,
             trabajo.imagen_url,
+            trabajo.imagenes,
             trabajo.tipo_reparacion,
             trabajo.fecha_inicio,
             trabajo.fecha_fin,
@@ -20,20 +21,26 @@ async function crear(pool, trabajo) {
 }
 
 async function actualizar(pool, id, trabajo) {
+    const campoImagenes = trabajo.imagenes === undefined ? '' : ', imagenes = ?';
+    const valores = [
+        trabajo.titulo,
+        trabajo.descripcion,
+        trabajo.imagen_url,
+    ];
+    if (trabajo.imagenes !== undefined) valores.push(trabajo.imagenes);
+    valores.push(
+        trabajo.tipo_reparacion,
+        trabajo.fecha_inicio,
+        trabajo.fecha_fin,
+        id
+    );
+
     const [result] = await pool.query(
         `UPDATE portafolio
-         SET titulo = ?, descripcion = ?, imagen_url = ?, tipo_reparacion = ?,
+         SET titulo = ?, descripcion = ?, imagen_url = ?${campoImagenes}, tipo_reparacion = ?,
              fecha_inicio = ?, fecha_fin = ?
          WHERE id = ?`,
-        [
-            trabajo.titulo,
-            trabajo.descripcion,
-            trabajo.imagen_url,
-            trabajo.tipo_reparacion,
-            trabajo.fecha_inicio,
-            trabajo.fecha_fin,
-            id,
-        ]
+        valores
     );
     return { affectedRows: result.affectedRows };
 }
