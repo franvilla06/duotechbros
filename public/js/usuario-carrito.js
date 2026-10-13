@@ -20,6 +20,7 @@ const btnVaciarCarrito = document.getElementById('btn-vaciar-carrito');
 
 // modal de exito
 const modalExito = document.getElementById('modal-exito');
+const modalExitoCerrar = document.getElementById('modal-exito-cerrar');
 const modalPedidoId = document.getElementById('modal-pedido-id');
 const modalPedidoUnidades = document.getElementById('modal-pedido-unidades');
 const modalPedidoTotal = document.getElementById('modal-pedido-total');
@@ -457,6 +458,31 @@ async function enviarPedido() {
 
 btnEnviarPedido.addEventListener('click', enviarPedido);
 btnVaciarCarrito.addEventListener('click', vaciarCarrito);
+
+// CERRAR EL MODAL DE EXITO
+
+function cerrarModalExito() {
+    modalExito.classList.remove('modal-visible');
+
+    modalPedidoId.textContent = '#000';
+    modalPedidoUnidades.textContent = '0';
+    modalPedidoTotal.textContent = '$0.00';
+
+    cargarCarrito();
+    notificarCambioCarrito();
+}
+
+modalExitoCerrar.addEventListener('click', cerrarModalExito);
+
+modalExito.addEventListener('click', (e) => {
+    if (e.target === modalExito) cerrarModalExito();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalExito.classList.contains('modal-visible')) {
+        cerrarModalExito();
+    }
+});
 
 // INICIO
 
