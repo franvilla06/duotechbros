@@ -55,6 +55,37 @@ function claseTipoBadge(tipo) {
     return 'tipo-default';
 }
 
+// obtiene todas las imagenes de un trabajo (principal + adicionales)
+// la principal siempre va primero
+function obtenerImagenesTrabajo(trabajo) {
+    const urls = [];
+
+    if (trabajo.imagen_url && trabajo.imagen_url.trim() !== '') {
+        urls.push(trabajo.imagen_url.trim());
+    }
+
+    let adicionales = [];
+    const campo = trabajo.imagenes;
+    if (Array.isArray(campo)) {
+        adicionales = campo;
+    } else if (typeof campo === 'string' && campo.trim() !== '') {
+        try {
+            const parseado = JSON.parse(campo);
+            if (Array.isArray(parseado)) adicionales = parseado;
+        } catch (error) {
+            console.warn('No se pudieron leer las imagenes adicionales:', error.message);
+        }
+    }
+
+    adicionales.forEach((url) => {
+        if (typeof url === 'string' && url.trim() !== '') {
+            urls.push(url.trim());
+        }
+    });
+
+    return urls;
+}
+
 // genera el texto de fechas segun los datos disponibles
 function generarTextoFechas(trabajo) {
     const inicio = trabajo.fecha_inicio;
@@ -98,14 +129,9 @@ function renderizarTrabajos(trabajos) {
         const card = document.createElement('article');
         card.className = 'project-card';
 
-        const imagenHTML = t.imagen_url
-            ? `<img
-                 src="${escapar(t.imagen_url)}"
-                 alt="${escapar(t.titulo)}"
-                 class="project-imagen"
-                 loading="lazy"
-                 onerror="this.outerHTML='<div class=\\'project-imagen-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'"
-               />`
+        const imagenes = obtenerImagenesTrabajo(t);
+        const imagenHTML = imagenes.length > 0
+            ? construirCarruselHTML(imagenes, t.titulo)
             : `<div class="project-imagen-placeholder"><i class="fas fa-image"></i></div>`;
 
         const tipoBadge = t.tipo_reparacion
@@ -133,6 +159,9 @@ function renderizarTrabajos(trabajos) {
 
         lista.appendChild(card);
     });
+
+    // inicializar los carruseles de las tarjetas recien renderizadas
+    inicializarCarruseles(lista);
 }
 
 // CARGA DE DATOS
