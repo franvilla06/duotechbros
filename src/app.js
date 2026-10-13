@@ -9,11 +9,36 @@ const usuariosRoutes = require('./routes/usuarios.routes');
 
 const app = express();
 
-// exponer el pool de conexiones a todos los controllers
-// (los controllers lo van a usar como req.app.locals.pool)
+// exposicion del pool de conexiones a los controllers
 app.locals.pool = obtenerPool();
 
-app.use(cors());
+// configuracion de CORS
+// permite peticiones desde localhost y 127.0.0.1 en cualquier puerto
+// esto incluye el puerto 3000 (backend) y 5500 (Live Server)
+const corsOptions = {
+    origin: function (origin, callback) {
+        // permitir peticiones sin origin (Postman, curl, etc.)
+        if (!origin) return callback(null, true);
+
+        // permitir localhost y 127.0.0.1 en cualquier puerto
+        const patronesPermitidos = [
+            /^http:\/\/localhost(:\d+)?$/,
+            /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+        ];
+
+        const permitido = patronesPermitidos.some((patron) => patron.test(origin));
+
+        if (permitido) {
+            return callback(null, true);
+        }
+
+        console.warn(`Origen bloqueado por CORS: ${origin}`);
+        return callback(new Error('No permitido por CORS'));
+    },
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 

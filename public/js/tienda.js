@@ -42,6 +42,39 @@ function claseStock(stock) {
     return { clase: 'stock-disponible', texto: 'Disponible' };
 }
 
+// obtiene todas las imagenes de un producto (principal + adicionales)
+// la principal siempre va primero
+function obtenerImagenesProducto(producto) {
+    const urls = [];
+
+    // imagen principal
+    if (producto.imagen_url && producto.imagen_url.trim() !== '') {
+        urls.push(producto.imagen_url.trim());
+    }
+
+    // imagenes adicionales (pueden venir como array o como JSON string)
+    let adicionales = [];
+    const campo = producto.imagenes;
+    if (Array.isArray(campo)) {
+        adicionales = campo;
+    } else if (typeof campo === 'string' && campo.trim() !== '') {
+        try {
+            const parseado = JSON.parse(campo);
+            if (Array.isArray(parseado)) adicionales = parseado;
+        } catch (error) {
+            console.warn('No se pudieron leer las imagenes adicionales:', error.message);
+        }
+    }
+
+    adicionales.forEach((url) => {
+        if (typeof url === 'string' && url.trim() !== '') {
+            urls.push(url.trim());
+        }
+    });
+
+    return urls;
+}
+
 // NOTIFICACIONES TOAST
 
 function mostrarToast(mensaje, tipo = 'exito') {
@@ -123,14 +156,9 @@ function renderizarProductos(productos) {
         const card = document.createElement('article');
         card.className = 'product-card';
 
-        const imagenHTML = p.imagen_url
-            ? `<img
-                 src="${escapar(p.imagen_url)}"
-                 alt="${escapar(p.nombre)}"
-                 class="product-imagen"
-                 loading="lazy"
-                 onerror="this.outerHTML='<div class=\\'product-imagen-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'"
-               />`
+        const imagenes = obtenerImagenesProducto(p);
+        const imagenHTML = imagenes.length > 0
+            ? construirCarruselHTML(imagenes, p.nombre)
             : `<div class="product-imagen-placeholder"><i class="fas fa-image"></i></div>`;
 
         const categoriaBadge = p.categoria
@@ -180,6 +208,9 @@ function renderizarProductos(productos) {
             agregarAlCarrito(productoId, btn);
         });
     });
+
+    // inicializar los carruseles de las tarjetas recien renderizadas
+    inicializarCarruseles(lista);
 }
 
 // APLICAR FILTROS

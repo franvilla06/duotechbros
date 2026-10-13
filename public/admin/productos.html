@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/css/normalize.css" />
     <link rel="stylesheet" href="/css/admin.css" />
     <title>Gestionar Productos - DuotechBros Admin</title>
+    <script src="/js/config.js"></script>
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
@@ -148,6 +149,22 @@
                 />
               </div>
 
+              <div class="admin-form-group">
+                <div class="imagenes-header">
+                  <label>
+                    <i class="fas fa-images"></i> Imágenes adicionales
+                  </label>
+                  <span class="imagenes-contador" id="contador-imagenes-form">0/4</span>
+                </div>
+                <div class="imagenes-lista" id="imagenes-lista-form"></div>
+                <button type="button" class="btn-agregar-imagen" id="btn-agregar-imagen-form">
+                  <i class="fas fa-plus"></i> Agregar otra imagen
+                </button>
+                <small class="config-ayuda">
+                  Podés agregar hasta 4 imágenes adicionales. Se muestran como carrusel en la tienda.
+                </small>
+              </div>
+
               <div class="admin-form-actions">
                 <button type="submit" class="btn-primary" id="btn-guardar">
                   <i class="fas fa-save"></i> Guardar Producto
@@ -281,6 +298,19 @@
           <div class="admin-form-group">
             <label for="edit-imagen_url">URL de la imagen</label>
             <input type="url" id="edit-imagen_url" />
+          </div>
+
+          <div class="admin-form-group">
+            <div class="imagenes-header">
+              <label>
+                <i class="fas fa-images"></i> Imágenes adicionales
+              </label>
+              <span class="imagenes-contador" id="contador-imagenes-edit">0/4</span>
+            </div>
+            <div class="imagenes-lista" id="imagenes-lista-edit"></div>
+            <button type="button" class="btn-agregar-imagen" id="btn-agregar-imagen-edit">
+              <i class="fas fa-plus"></i> Agregar otra imagen
+            </button>
           </div>
 
           <div class="admin-form-actions">

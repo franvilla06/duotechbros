@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/css/normalize.css" />
     <link rel="stylesheet" href="/css/admin.css" />
     <title>Configuración del Sitio - DuotechBros Admin</title>
+    <script src="/js/config.js"></script>
   </head>
   <body data-admin-protected="true">
     <div class="admin-layout">
@@ -161,6 +162,46 @@
                 placeholder="https://tiktok.com/@tu-usuario"
               />
             </div>
+          </section>
+
+          <!-- SECCION: HORARIOS DE ATENCION -->
+          <section class="admin-card">
+            <h2><i class="fas fa-clock"></i> Horarios de atención</h2>
+
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label for="horario_semana">Lunes a Viernes</label>
+                <input
+                  type="text"
+                  id="horario_semana"
+                  name="horario_semana"
+                  placeholder="Ej: 9:00 AM - 7:00 PM"
+                />
+              </div>
+              <div class="admin-form-group">
+                <label for="horario_sabado">Sábados</label>
+                <input
+                  type="text"
+                  id="horario_sabado"
+                  name="horario_sabado"
+                  placeholder="Ej: 10:00 AM - 4:00 PM"
+                />
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label for="horario_domingo">Domingos</label>
+              <input
+                type="text"
+                id="horario_domingo"
+                name="horario_domingo"
+                placeholder="Ej: Cerrado"
+              />
+            </div>
+
+            <small class="config-ayuda">
+              Estos horarios se muestran en la sección de contacto del formulario de reparación.
+            </small>
           </section>
 
           <!-- SECCION: ENLACES LEGALES -->

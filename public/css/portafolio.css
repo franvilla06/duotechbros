@@ -299,3 +299,161 @@ main.container {
         font-size: 1.05rem;
     }
 }
+
+/* CARRUSEL DE IMAGENES EN LAS TARJETAS DEL PORTAFOLIO */
+
+.carrusel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.carrusel-imagenes {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #e8f4ff 0%, #d0e6ea 100%);
+}
+
+.carrusel-imagen {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.5s ease;
+    z-index: 1;
+}
+
+.carrusel-imagen.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+/* mantener el zoom al hover sobre la imagen activa */
+.project-card:hover .carrusel-imagen.active {
+    transform: scale(1.06);
+}
+
+/* flechas: aparecen al hover de la tarjeta */
+.carrusel-flecha {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.92);
+    color: #0b4a62;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease,
+        transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 4px 12px rgba(11, 74, 98, 0.25);
+    padding: 0;
+    font-family: inherit;
+}
+
+.project-card:hover .carrusel-flecha {
+    opacity: 1;
+    visibility: visible;
+}
+
+.carrusel-flecha:hover {
+    background-color: #ffffff;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.carrusel-flecha:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.carrusel-prev {
+    left: 10px;
+}
+
+.carrusel-next {
+    right: 10px;
+}
+
+/* puntitos: siempre visibles cuando hay multiples imagenes */
+.carrusel-puntos {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 5;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background-color: rgba(11, 74, 98, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.carrusel-punto {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-family: inherit;
+}
+
+.carrusel-punto:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.carrusel-punto.active {
+    background-color: #ffffff;
+    transform: scale(1.3);
+}
+
+/* si hay una sola imagen, no se ven flechas ni puntitos */
+.carrusel-simple .carrusel-flecha,
+.carrusel-simple .carrusel-puntos {
+    display: none;
+}
+
+/* responsive */
+@media (max-width: 600px) {
+    .carrusel-flecha {
+        width: 30px;
+        height: 30px;
+        font-size: 0.7rem;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .carrusel-prev {
+        left: 6px;
+    }
+
+    .carrusel-next {
+        right: 6px;
+    }
+
+    .carrusel-puntos {
+        bottom: 8px;
+        padding: 4px 8px;
+        gap: 4px;
+    }
+
+    .carrusel-punto {
+        width: 6px;
+        height: 6px;
+    }
+}

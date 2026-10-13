@@ -1,9 +1,29 @@
+# Dependencias
 node_modules/
+
+# Base de datos (SQLite vieja, ya no se usa)
 *.db
 *.db-journal
+*.sqlite
+*.sqlite3
+
+# Variables de entorno (credenciales reales)
+.env
+
+# Archivos de sistema
 .DS_Store
 Thumbs.db
+
+# Logs
 *.log
-.env
+npm-debug.log*
+
+# Postman
 .postman/
 postman/
+
+# GitHub (configuración interna)
+.github/
+
+# Archivos temporales de MySQL
+*.sql

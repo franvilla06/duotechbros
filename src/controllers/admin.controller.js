@@ -5,15 +5,50 @@ const portafolioModel = require('../models/portafolio.model');
 const pedidosModel = require('../models/pedidos.model');
 const { generarToken } = require('../utils/token.util');
 
+function normalizarImagenes(imagenes) {
+    if (imagenes === null || imagenes === undefined || imagenes === '') return null;
+
+    let array;
+    if (Array.isArray(imagenes)) {
+        array = imagenes;
+    } else if (typeof imagenes === 'string') {
+        try {
+            const parseado = JSON.parse(imagenes);
+            if (!Array.isArray(parseado)) {
+                throw new TypeError('Las imagenes deben ser un array.');
+            }
+            array = parseado;
+        } catch (error) {
+            throw new TypeError('El campo imagenes debe ser un array JSON valido.');
+        }
+    } else {
+        throw new TypeError('El campo imagenes debe ser un array o un JSON array.');
+    }
+
+    const limpias = array
+        .filter((url) => typeof url === 'string' && url.trim() !== '')
+        .map((url) => url.trim())
+        .slice(0, 4);
+
+    return limpias.length > 0 ? JSON.stringify(limpias) : null;
+}
+
 // PRODUCTOS
 
 async function crearProducto(req, res) {
-    const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
+    const { nombre, descripcion, precio, imagen_url, imagenes, categoria, stock } = req.body;
 
     if (!nombre || precio === undefined) {
         return res
             .status(400)
             .json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
+    }
+
+    let imagenesNormalizadas;
+    try {
+        imagenesNormalizadas = normalizarImagenes(imagenes);
+    } catch (error) {
+        return res.status(400).json({ success: false, error: error.message });
     }
 
     try {
@@ -22,6 +57,7 @@ async function crearProducto(req, res) {
             descripcion: descripcion || null,
             precio,
             imagen_url: imagen_url || null,
+            imagenes: imagenesNormalizadas,
             categoria: categoria || null,
             stock: stock || 0,
         });
@@ -33,12 +69,20 @@ async function crearProducto(req, res) {
 
 async function actualizarProducto(req, res) {
     const { id } = req.params;
-    const { nombre, descripcion, precio, imagen_url, categoria, stock } = req.body;
+    const { nombre, descripcion, precio, imagen_url, imagenes, categoria, stock } = req.body;
 
     if (!nombre || precio === undefined) {
         return res
             .status(400)
             .json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
+    }
+
+    let imagenesNormalizadas;
+    try {
+        imagenesNormalizadas =
+            imagenes === undefined ? undefined : normalizarImagenes(imagenes);
+    } catch (error) {
+        return res.status(400).json({ success: false, error: error.message });
     }
 
     try {
@@ -47,6 +91,7 @@ async function actualizarProducto(req, res) {
             descripcion: descripcion || null,
             precio,
             imagen_url: imagen_url || null,
+            imagenes: imagenesNormalizadas,
             categoria: categoria || null,
             stock: stock || 0,
         });
@@ -85,10 +130,18 @@ function normalizarFecha(valor) {
 }
 
 async function crearTrabajo(req, res) {
-    const { titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin } = req.body;
+    const { titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin } =
+        req.body;
 
     if (!titulo) {
         return res.status(400).json({ success: false, error: 'El título es obligatorio' });
+    }
+
+    let imagenesNormalizadas;
+    try {
+        imagenesNormalizadas = normalizarImagenes(imagenes);
+    } catch (error) {
+        return res.status(400).json({ success: false, error: error.message });
     }
 
     try {
@@ -96,6 +149,7 @@ async function crearTrabajo(req, res) {
             titulo,
             descripcion: descripcion || null,
             imagen_url: imagen_url || null,
+            imagenes: imagenesNormalizadas,
             tipo_reparacion: tipo_reparacion || null,
             fecha_inicio: normalizarFecha(fecha_inicio),
             fecha_fin: normalizarFecha(fecha_fin),
@@ -108,10 +162,19 @@ async function crearTrabajo(req, res) {
 
 async function actualizarTrabajo(req, res) {
     const { id } = req.params;
-    const { titulo, descripcion, imagen_url, tipo_reparacion, fecha_inicio, fecha_fin } = req.body;
+    const { titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin } =
+        req.body;
 
     if (!titulo) {
         return res.status(400).json({ success: false, error: 'El título es obligatorio' });
+    }
+
+    let imagenesNormalizadas;
+    try {
+        imagenesNormalizadas =
+            imagenes === undefined ? undefined : normalizarImagenes(imagenes);
+    } catch (error) {
+        return res.status(400).json({ success: false, error: error.message });
     }
 
     try {
@@ -119,6 +182,7 @@ async function actualizarTrabajo(req, res) {
             titulo,
             descripcion: descripcion || null,
             imagen_url: imagen_url || null,
+            imagenes: imagenesNormalizadas,
             tipo_reparacion: tipo_reparacion || null,
             fecha_inicio: normalizarFecha(fecha_inicio),
             fecha_fin: normalizarFecha(fecha_fin),

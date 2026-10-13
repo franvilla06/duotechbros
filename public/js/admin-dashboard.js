@@ -450,7 +450,8 @@ function renderizarGraficoProductos(datos) {
     const valores = datos.map((d) => d.total_vendido);
     const colores = datos.map((_, i) => PALETA_PRODUCTOS[i % PALETA_PRODUCTOS.length]);
 
-    const totalVendido = valores.reduce((a, b) => a + b, 0);
+    // convertir a numero antes de sumar porque MySQL devuelve los SUM() como strings
+    const totalVendido = valores.reduce((a, b) => Number(a) + Number(b), 0);
     const maxValor = Math.max(...valores, 1);
 
     // ajuste 1: dar margen al eje X para que las barras no toquen el borde
