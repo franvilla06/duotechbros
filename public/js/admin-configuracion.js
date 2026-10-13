@@ -24,6 +24,9 @@ const CAMPOS = [
     'footer_terminos_url',
     'footer_privacidad_url',
     'aviso_general',
+    'horario_semana',
+    'horario_sabado',
+    'horario_domingo',
 ];
 
 // configuracion original cargada desde el servidor

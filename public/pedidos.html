@@ -7,9 +7,9 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="css/normalize.css" />
-    <link rel="stylesheet" href="css/pie_encabezado.css" />
-    <link rel="stylesheet" href="css/pedidos.css" />
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/pie_encabezado.css" />
+    <link rel="stylesheet" href="/css/pedidos.css" />
     <title>Pedidos - DuoTechBros</title>
     <script src="/js/config.js"></script>
   </head>
@@ -29,83 +29,175 @@
       </nav>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL: FORMULARIO -->
-    <main class="container">
-      <h1>Solicitar reparación</h1>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="pedidos-main">
+      <!-- TITULO -->
+      <div class="pedidos-titulo">
+        <h1>Solicita tu Reparación</h1>
+        <p>
+          Cuéntanos qué necesita tu dispositivo y nuestros expertos te contactarán a la brevedad.
+        </p>
+      </div>
 
       <!-- AVISO PARA USUARIOS NO LOGUEADOS -->
       <div class="aviso-login" id="aviso-login" style="display: none">
         <i class="fas fa-info-circle"></i>
         <p>
-          Para enviar un pedido de reparacion necesitas iniciar sesion o crear
-          una cuenta. Podes completar el formulario ahora y te vamos a pedir que
-          te registres al momento de enviarlo.
+          Para enviar un pedido de reparación necesitas iniciar sesión o crear una cuenta.
+          Podés completar el formulario ahora y te vamos a pedir que te registres al enviarlo.
         </p>
         <a href="/user/login.html?redirect=/pedidos.html" class="aviso-login-btn">
-          <i class="fas fa-sign-in-alt"></i> Iniciar sesion / Registrarme
+          <i class="fas fa-sign-in-alt"></i> Iniciar sesión / Registrarme
         </a>
       </div>
 
-      <form id="form-pedido">
-        <label for="nombre_cliente">Nombre completo:</label>
-        <input type="text" id="nombre_cliente" name="nombre_cliente" required />
+      <!-- GRID PRINCIPAL -->
+      <div class="pedidos-grid">
+        <!-- FORMULARIO -->
+        <section class="pedidos-form-card">
+          <form id="form-pedido">
+            <div class="form-fila-full">
+              <label for="nombre_cliente">Nombre completo</label>
+              <input
+                type="text"
+                id="nombre_cliente"
+                name="nombre_cliente"
+                placeholder="Ej: Juan Pérez"
+                required
+              />
+            </div>
 
-        <label for="email">Correo electrónico:</label>
-        <input type="email" id="email" name="email" required />
+            <div class="form-fila-doble">
+              <div>
+                <label for="email">Correo electrónico</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="tu@email.com"
+                  required
+                />
+              </div>
+              <div>
+                <label for="telefono">Teléfono</label>
+                <input
+                  type="tel"
+                  id="telefono"
+                  name="telefono"
+                  placeholder="+54 376 400-0000"
+                />
+              </div>
+            </div>
 
-        <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" name="telefono" />
+            <div class="form-fila-full">
+              <label for="modelo_celular">Modelo del dispositivo</label>
+              <input
+                type="text"
+                id="modelo_celular"
+                name="modelo_celular"
+                placeholder="Ej: iPhone 13 Pro Max"
+                required
+              />
+            </div>
 
-        <label for="modelo_celular">Modelo del celular:</label>
-        <input type="text" id="modelo_celular" name="modelo_celular" required />
+            <div class="form-fila-full">
+              <label for="descripcion_problema">Descripción del problema</label>
+              <textarea
+                id="descripcion_problema"
+                name="descripcion_problema"
+                rows="6"
+                placeholder="Describí detalladamente el fallo o daño de tu equipo..."
+                required
+              ></textarea>
+            </div>
 
-        <label for="descripcion_problema">Descripción del problema:</label>
-        <textarea
-          id="descripcion_problema"
-          name="descripcion_problema"
-          rows="4"
-          required
-        ></textarea>
+            <button type="submit" class="pedidos-btn-enviar" id="btn-enviar">
+              <i class="fas fa-paper-plane"></i> Enviar pedido
+            </button>
 
-        <button type="submit" id="btn-enviar">Enviar pedido</button>
-      </form>
+            <p class="pedidos-form-nota">
+              <i class="fas fa-shield-alt"></i>
+              Tus datos están protegidos y serán usados únicamente para contactarte sobre tu reparación.
+            </p>
 
-      <div id="mensaje" class="mensaje" style="display: none"></div>
+            <div id="mensaje" class="mensaje" style="display: none"></div>
+          </form>
+        </section>
+
+        <!-- SIDEBAR: CONTACTO Y HORARIOS -->
+        <aside class="pedidos-sidebar">
+          <!-- CONTACTO DIRECTO -->
+          <div class="contacto-card">
+            <h2>
+              <i class="fas fa-headset"></i> Contacto Directo
+            </h2>
+
+            <a href="#" class="contacto-item" id="contacto-whatsapp">
+              <div class="contacto-icono contacto-whatsapp">
+                <i class="fab fa-whatsapp"></i>
+              </div>
+              <div class="contacto-texto">
+                <span class="contacto-label">WhatsApp</span>
+                <span class="contacto-valor" id="valor-whatsapp">—</span>
+              </div>
+            </a>
+
+            <a href="#" class="contacto-item" id="contacto-email">
+              <div class="contacto-icono contacto-email">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="contacto-texto">
+                <span class="contacto-label">Email</span>
+                <span class="contacto-valor" id="valor-email">—</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- HORARIO DE ATENCION -->
+          <div class="horario-card">
+            <h2>
+              <i class="fas fa-clock"></i> Horario de Atención
+            </h2>
+
+            <div class="horario-lista">
+              <div class="horario-fila">
+                <span class="horario-dia">Lunes - Viernes</span>
+                <span class="horario-hora" id="valor-horario-semana">—</span>
+              </div>
+              <div class="horario-fila">
+                <span class="horario-dia">Sábados</span>
+                <span class="horario-hora" id="valor-horario-sabado">—</span>
+              </div>
+              <div class="horario-fila">
+                <span class="horario-dia">Domingos</span>
+                <span class="horario-hora horario-cerrado" id="valor-horario-domingo">—</span>
+              </div>
+            </div>
+
+            <div class="horario-nota">
+              <i class="fas fa-info-circle"></i>
+              <p>Las respuestas a solicitudes web pueden tomar hasta 2 horas hábiles.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
     </main>
 
     <!-- FOOTER -->
-        <div class="aviso-general" id="aviso-general">
-      <i class="fas fa-bullhorn"></i>
-      <p id="aviso-general-texto"></p>
-    </div>
-
     <footer>
-      <div class="footer-contenido">
-        <div class="footer-marca" id="footer-marca">DuotechBros</div>
-        <p class="footer-copy" id="footer-copy">
-          © 2024 DuotechBros. Todos los derechos reservados.
-        </p>
-        <div class="footer-links" id="footer-links"></div>
-        <div class="footer-social" id="footer-social"></div>
-        <a class="footer-admin" href="admin/login.html">
-          <i class="fas fa-lock"></i> Acceso Admin
-        </a>
+      <p>© 2024 DuotechBros. Todos los derechos reservados.</p>
+      <div class="footer-social">
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <a href="#"><i class="fas fa-envelope"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
       </div>
+      <a class="footer-admin" href="admin/login.html">
+        <i class="fas fa-lock"></i> Acceso Admin
+      </a>
     </footer>
 
     <script src="/js/sitio-config.js"></script>
     <script src="/js/usuario-header.js"></script>
     <script src="/js/Script_Pedidos.js"></script>
-    <script>
-      // mostrar el aviso si el usuario no esta logueado
-      document.addEventListener('DOMContentLoaded', () => {
-        const logueado = sessionStorage.getItem('usuarioLogueado') === 'true'
-          && !!sessionStorage.getItem('usuarioToken');
-        if (!logueado) {
-          const aviso = document.getElementById('aviso-login');
-          if (aviso) aviso.style.display = 'flex';
-        }
-      });
-    </script>
   </body>
 </html>

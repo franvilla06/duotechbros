@@ -12,6 +12,9 @@ const CLAVES_PERMITIDAS = [
     'footer_terminos_url',
     'footer_privacidad_url',
     'aviso_general',
+    'horario_semana',
+    'horario_sabado',
+    'horario_domingo',
 ];
 
 async function obtenerConfiguracion(req, res) {

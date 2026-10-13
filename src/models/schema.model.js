@@ -144,6 +144,9 @@ async function inicializarEsquema(pool) {
         footer_terminos_url: '',
         footer_privacidad_url: '',
         aviso_general: '',
+        horario_semana: '9:00 AM - 7:00 PM',
+        horario_sabado: '10:00 AM - 4:00 PM',
+        horario_domingo: 'Cerrado',
     };
 
     for (const [clave, valor] of Object.entries(valoresIniciales)) {

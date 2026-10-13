@@ -1,4 +1,8 @@
-/* FONDO Y TIPOGRAFIA GENERAL */
+/* ============================================================
+   ESTILOS DE LA PAGINA DE PEDIDOS - DUOTECHBROS
+   ============================================================ */
+
+/* BASE */
 
 body {
     font-family: 'Arial', sans-serif;
@@ -8,27 +12,43 @@ body {
     padding: 0;
 }
 
-/* CONTENEDOR PRINCIPAL */
+/* ============================================================
+   CONTENEDOR PRINCIPAL
+   ============================================================ */
 
-main.container {
-    max-width: 600px;
-    margin: 30px auto;
-    padding: 30px 25px;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+.pedidos-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
 }
 
-/* TITULO */
+/* ============================================================
+   TITULO
+   ============================================================ */
 
-h1 {
-    text-align: center;
+.pedidos-titulo {
+    margin-bottom: 30px;
+    max-width: 720px;
+}
+
+.pedidos-titulo h1 {
+    font-size: 2.4rem;
     color: #0b4a62;
-    margin-top: 0;
-    margin-bottom: 25px;
+    margin: 0 0 12px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
-/* AVISO DE LOGIN */
+.pedidos-titulo p {
+    font-size: 1.05rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   AVISO LOGIN
+   ============================================================ */
 
 .aviso-login {
     display: flex;
@@ -36,10 +56,11 @@ h1 {
     gap: 14px;
     background-color: #e8f4ff;
     border-left: 4px solid #007bff;
-    border-radius: 10px;
-    padding: 16px 18px;
-    margin-bottom: 24px;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 26px;
     flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(11, 74, 98, 0.05);
 }
 
 .aviso-login > i {
@@ -63,7 +84,7 @@ h1 {
     gap: 8px;
     background-color: #007bff;
     color: #ffffff;
-    padding: 10px 18px;
+    padding: 10px 20px;
     border-radius: 999px;
     text-decoration: none;
     font-size: 0.85rem;
@@ -78,103 +99,395 @@ h1 {
     box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
 }
 
-/* FORMULARIO */
+/* ============================================================
+   GRID PRINCIPAL
+   ============================================================ */
 
-form {
+.pedidos-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 26px;
+    align-items: start;
+}
+
+/* ============================================================
+   TARJETA DEL FORMULARIO
+   ============================================================ */
+
+.pedidos-form-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 34px 32px;
+    box-shadow: 0 6px 24px rgba(11, 74, 98, 0.08);
+}
+
+.pedidos-form-card form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 18px;
 }
 
-label {
+/* Filas del formulario */
+
+.form-fila-full {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-fila-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.form-fila-doble > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Labels */
+
+.pedidos-form-card label {
+    font-size: 0.85rem;
     font-weight: 700;
     color: #0b4a62;
-    margin-bottom: 2px;
+    letter-spacing: 0.01em;
 }
 
-input,
-textarea {
+/* Inputs */
+
+.pedidos-form-card input,
+.pedidos-form-card textarea {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #dceff2;
-    border-radius: 8px;
-    font-size: 1rem;
-    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #d0e6ea;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
     background-color: #f7feff;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    box-sizing: border-box;
+    color: #333;
 }
 
-input:focus,
-textarea:focus {
+.pedidos-form-card input:focus,
+.pedidos-form-card textarea:focus {
     outline: none;
-    border-color: #007BFF;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    border-color: #007bff;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.12);
 }
 
-textarea {
+.pedidos-form-card textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 130px;
+    line-height: 1.5;
 }
 
-/* BOTON DE ENVIO */
+/* Placeholder */
 
-button[type="submit"] {
-    background: #007BFF;
+.pedidos-form-card input::placeholder,
+.pedidos-form-card textarea::placeholder {
+    color: #8aa7b2;
+}
+
+/* Boton */
+
+.pedidos-btn-enviar {
+    background: linear-gradient(135deg, #0a9396 0%, #0b4a62 100%);
     color: white;
     border: none;
-    padding: 14px;
+    padding: 14px 22px;
     border-radius: 999px;
-    font-size: 1rem;
+    font-size: 0.96rem;
     font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    margin-top: 8px;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     font-family: inherit;
+    box-shadow: 0 10px 18px rgba(11, 74, 98, 0.15);
 }
 
-button[type="submit"]:hover:not(:disabled) {
-    background: #005b9f;
+.pedidos-btn-enviar:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 22px rgba(11, 74, 98, 0.18);
 }
 
-button[type="submit"]:active:not(:disabled) {
-    transform: scale(0.97);
+.pedidos-btn-enviar:active:not(:disabled) {
+    transform: translateY(0);
 }
 
-button[type="submit"]:disabled {
-    background: #a0c8e8;
+.pedidos-btn-enviar:disabled {
+    opacity: 0.7;
     cursor: not-allowed;
 }
 
-/* MENSAJE DE EXITO/ERROR */
+/* Nota bajo el boton */
+
+.pedidos-form-nota {
+    font-size: 0.75rem;
+    color: #888;
+    text-align: center;
+    margin: 4px 0 0;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.pedidos-form-nota i {
+    color: #0a9396;
+    font-size: 0.8rem;
+}
+
+/* Mensaje de exito/error */
 
 .mensaje {
-    margin-top: 20px;
-    padding: 12px;
-    border-radius: 8px;
+    margin-top: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
     text-align: center;
     display: none;
     font-weight: 600;
+    font-size: 0.9rem;
     line-height: 1.5;
 }
 
 .exito {
-    background: #d4edda;
+    background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
 }
 
 .error {
-    background: #f8d7da;
+    background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
 
-/* RESPONSIVE */
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.pedidos-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Tarjeta de contacto */
+
+.contacto-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 26px 24px;
+    box-shadow: 0 6px 24px rgba(11, 74, 98, 0.08);
+}
+
+.contacto-card h2 {
+    font-size: 1.15rem;
+    color: #0b4a62;
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+}
+
+.contacto-card h2 i {
+    color: #0a9396;
+}
+
+.contacto-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s, transform 0.15s;
+    border: 1px solid transparent;
+}
+
+.contacto-item:hover {
+    background-color: #f7feff;
+    border-color: #d0e6ea;
+    transform: translateY(-2px);
+}
+
+.contacto-icono {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.contacto-whatsapp {
+    background-color: #d1f7dd;
+    color: #128c7e;
+}
+
+.contacto-email {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.contacto-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.contacto-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.contacto-valor {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0b4a62;
+    word-break: break-word;
+}
+
+/* Tarjeta de horarios (oscura) */
+
+.horario-card {
+    background: linear-gradient(135deg, #0b4a62 0%, #083b50 100%);
+    border-radius: 16px;
+    padding: 26px 24px;
+    color: #ffffff;
+    box-shadow: 0 8px 24px rgba(11, 74, 98, 0.2);
+}
+
+.horario-card h2 {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+}
+
+.horario-card h2 i {
+    color: #86f0f3;
+}
+
+.horario-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.horario-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 0.88rem;
+}
+
+.horario-fila:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.horario-dia {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.horario-hora {
+    font-weight: 700;
+    color: #ffffff;
+    text-align: right;
+}
+
+.horario-cerrado {
+    color: #f6bb83;
+}
+
+.horario-nota {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.horario-nota i {
+    color: #86f0f3;
+    font-size: 0.9rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.horario-nota p {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+    .pedidos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pedidos-titulo h1 {
+        font-size: 2rem;
+    }
+
+    .pedidos-form-card {
+        padding: 28px 24px;
+    }
+}
 
 @media (max-width: 600px) {
-    main.container {
-        margin: 20px 14px;
-        padding: 24px 18px;
+    .pedidos-main {
+        padding: 24px 16px 40px;
+    }
+
+    .pedidos-titulo h1 {
+        font-size: 1.7rem;
+    }
+
+    .pedidos-titulo p {
+        font-size: 0.95rem;
+    }
+
+    .pedidos-form-card {
+        padding: 22px 18px;
+        border-radius: 14px;
+    }
+
+    .form-fila-doble {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .contacto-card,
+    .horario-card {
+        padding: 22px 18px;
     }
 
     .aviso-login {

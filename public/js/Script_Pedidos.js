@@ -1,9 +1,11 @@
-// LOGICA DEL FORMULARIO DE PEDIDOS DE REPARACION
 // requiere estar logueado para enviar
-// los datos se guardan temporalmente para no perderlos si hay que loguearse
+// carga los datos de contacto y horarios desde la configuracion del sitio
+
+const API_CONFIG_PEDIDOS = '/api/configuracion';
 
 const form = document.getElementById('form-pedido');
 const mensajeDiv = document.getElementById('mensaje');
+const btnEnviar = document.getElementById('btn-enviar');
 
 const STORAGE_KEY = 'pedidoBorrador';
 
@@ -20,7 +22,14 @@ function obtenerTokenUsuario() {
     return sessionStorage.getItem('usuarioToken') || '';
 }
 
-// FUNCION PARA MOSTRAR MENSAJES
+// UTILIDADES GENERALES
+
+function escapar(texto) {
+    if (texto === null || texto === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(texto);
+    return div.innerHTML;
+}
 
 function mostrarMensaje(texto, tipo) {
     mensajeDiv.textContent = texto;
@@ -30,6 +39,64 @@ function mostrarMensaje(texto, tipo) {
     setTimeout(() => {
         mensajeDiv.style.display = 'none';
     }, 5000);
+}
+
+// CARGA DE DATOS DE CONTACTO Y HORARIOS
+
+async function cargarDatosContacto() {
+    try {
+        console.log('[pedidos] Cargando configuracion del sitio...');
+        const respuesta = await fetch(API_CONFIG_PEDIDOS);
+        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+
+        const config = await respuesta.json();
+        console.log('[pedidos] Configuracion recibida:', config);
+
+        // WhatsApp
+        const whatsapp = config.contacto_whatsapp || '';
+        const linkWhatsapp = document.getElementById('contacto-whatsapp');
+        const valorWhatsapp = document.getElementById('valor-whatsapp');
+        if (whatsapp && whatsapp.trim() !== '') {
+            valorWhatsapp.textContent = whatsapp;
+            const soloNumeros = whatsapp.replace(/[^\d]/g, '');
+            linkWhatsapp.href = `https://wa.me/${soloNumeros}`;
+            linkWhatsapp.target = '_blank';
+            linkWhatsapp.rel = 'noopener noreferrer';
+        } else {
+            valorWhatsapp.textContent = 'No disponible';
+            linkWhatsapp.style.opacity = '0.5';
+            linkWhatsapp.style.pointerEvents = 'none';
+        }
+
+        // Email
+        const email = config.contacto_email || '';
+        const linkEmail = document.getElementById('contacto-email');
+        const valorEmail = document.getElementById('valor-email');
+        if (email && email.trim() !== '') {
+            valorEmail.textContent = email;
+            linkEmail.href = `mailto:${email}`;
+        } else {
+            valorEmail.textContent = 'No disponible';
+            linkEmail.style.opacity = '0.5';
+            linkEmail.style.pointerEvents = 'none';
+        }
+
+        // Horarios
+        const horarioSemana = config.horario_semana || 'No disponible';
+        const horarioSabado = config.horario_sabado || 'No disponible';
+        const horarioDomingo = config.horario_domingo || 'No disponible';
+
+        document.getElementById('valor-horario-semana').textContent = horarioSemana;
+        document.getElementById('valor-horario-sabado').textContent = horarioSabado;
+        document.getElementById('valor-horario-domingo').textContent = horarioDomingo;
+    } catch (error) {
+        console.warn('No se pudo cargar la configuracion del sitio:', error.message);
+        document.getElementById('valor-whatsapp').textContent = 'No disponible';
+        document.getElementById('valor-email').textContent = 'No disponible';
+        document.getElementById('valor-horario-semana').textContent = 'No disponible';
+        document.getElementById('valor-horario-sabado').textContent = 'No disponible';
+        document.getElementById('valor-horario-domingo').textContent = 'No disponible';
+    }
 }
 
 // VALIDACIONES
@@ -51,31 +118,34 @@ function validarFormulario(datos) {
     }
 
     if (!datos.email || !esEmailValido(datos.email)) {
-        mostrarMensaje('Ingresa un email valido (ej: usuario@dominio.com).', 'error');
+        mostrarMensaje('Ingresá un email válido (ej: usuario@dominio.com).', 'error');
         return false;
     }
 
     if (datos.telefono && datos.telefono.trim() !== '') {
         if (!esTelefonoValido(datos.telefono)) {
-            mostrarMensaje('El telefono debe contener solo numeros y tener al menos 7 digitos.', 'error');
+            mostrarMensaje(
+                'El teléfono debe contener solo números y tener al menos 7 dígitos.',
+                'error'
+            );
             return false;
         }
     }
 
     if (!datos.modelo_celular || datos.modelo_celular.trim().length < 2) {
-        mostrarMensaje('Ingresa el modelo del celular.', 'error');
+        mostrarMensaje('Ingresá el modelo del celular.', 'error');
         return false;
     }
 
     if (!datos.descripcion_problema || datos.descripcion_problema.trim().length < 10) {
-        mostrarMensaje('La descripcion debe tener al menos 10 caracteres.', 'error');
+        mostrarMensaje('La descripción debe tener al menos 10 caracteres.', 'error');
         return false;
     }
 
     return true;
 }
 
-// GUARDAR / RESTAURAR DATOS DEL FORMULARIO
+// GUARDAR / RESTAURAR BORRADOR
 
 function guardarBorrador(datos) {
     try {
@@ -95,12 +165,11 @@ function restaurarBorrador() {
         if (datos.email) document.getElementById('email').value = datos.email;
         if (datos.telefono) document.getElementById('telefono').value = datos.telefono;
         if (datos.modelo_celular) document.getElementById('modelo_celular').value = datos.modelo_celular;
-        if (datos.descripcion_problema) document.getElementById('descripcion_problema').value = datos.descripcion_problema;
+        if (datos.descripcion_problema)
+            document.getElementById('descripcion_problema').value = datos.descripcion_problema;
 
-        // mostrar un aviso de que se restauro el borrador
-        mostrarMensaje('Se restauraron los datos que habias cargado antes de iniciar sesion.', 'exito');
+        mostrarMensaje('Se restauraron los datos que habías cargado antes de iniciar sesión.', 'exito');
 
-        // eliminar el borrador
         sessionStorage.removeItem(STORAGE_KEY);
     } catch (error) {
         console.warn('No se pudo restaurar el borrador:', error.message);
@@ -128,8 +197,7 @@ form.addEventListener('submit', async (e) => {
     if (!estaLogueadoUsuario()) {
         guardarBorrador(datos);
 
-        // mostrar mensaje antes de redirigir
-        mostrarMensaje('Necesitas iniciar sesion para enviar el pedido. Redirigiendo...', 'error');
+        mostrarMensaje('Necesitas iniciar sesión para enviar el pedido. Redirigiendo...', 'error');
 
         setTimeout(() => {
             window.location.href = '/user/login.html?redirect=/pedidos.html';
@@ -137,10 +205,8 @@ form.addEventListener('submit', async (e) => {
         return;
     }
 
-    // deshabilitar el boton mientras se envia
-    const boton = form.querySelector('button[type="submit"]');
-    boton.disabled = true;
-    boton.textContent = 'Enviando...';
+    btnEnviar.disabled = true;
+    btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
     try {
         const respuesta = await fetch('/api/pedidos', {
@@ -152,12 +218,11 @@ form.addEventListener('submit', async (e) => {
             body: JSON.stringify(datos),
         });
 
-        // si expiro el token, redirigir al login
         if (respuesta.status === 401) {
             sessionStorage.removeItem('usuarioLogueado');
             sessionStorage.removeItem('usuarioNombre');
             sessionStorage.removeItem('usuarioToken');
-            mostrarMensaje('Tu sesion expiro. Redirigiendo al login...', 'error');
+            mostrarMensaje('Tu sesión expiró. Redirigiendo al login...', 'error');
             setTimeout(() => {
                 window.location.href = '/user/login.html?redirect=/pedidos.html';
             }, 1500);
@@ -167,17 +232,20 @@ form.addEventListener('submit', async (e) => {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarMensaje('Pedido enviado con exito.', 'exito');
+            mostrarMensaje('¡Pedido enviado con éxito! Te vamos a contactar a la brevedad.', 'exito');
             form.reset();
         } else {
             mostrarMensaje(`Error: ${resultado.error}`, 'error');
         }
     } catch (error) {
-        mostrarMensaje('No se pudo conectar con el servidor.', 'error');
-        console.error('Error de conexion:', error);
+        mostrarMensaje(
+            'No se pudo conectar con el servidor. Asegurate de que esté corriendo.',
+            'error'
+        );
+        console.error('Error de conexión:', error);
     } finally {
-        boton.disabled = false;
-        boton.textContent = 'Enviar pedido';
+        btnEnviar.disabled = false;
+        btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
     }
 });
 
@@ -227,6 +295,15 @@ document.getElementById('descripcion_problema').addEventListener('blur', functio
 // INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
-    // si volvimos del login con un borrador guardado, restaurarlo
+    // mostrar el aviso si el usuario no esta logueado
+    if (!estaLogueadoUsuario()) {
+        const aviso = document.getElementById('aviso-login');
+        if (aviso) aviso.style.display = 'flex';
+    }
+
+    // cargar los datos de contacto y horarios desde la configuracion
+    cargarDatosContacto();
+
+    // restaurar el borrador si venimos de un login
     restaurarBorrador();
 });
