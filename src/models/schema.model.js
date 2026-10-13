@@ -144,6 +144,7 @@ async function inicializarEsquema(pool) {
         contacto_telefono: '+54 376 123-4567',
         contacto_whatsapp: '+54 376 123-4567',
         contacto_direccion: 'Posadas, Misiones',
+        email_admin: '',
         redes_instagram: '',
         redes_facebook: '',
         redes_tiktok: '',

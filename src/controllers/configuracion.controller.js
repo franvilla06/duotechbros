@@ -3,6 +3,7 @@ const configuracionModel = require('../models/configuracion.model');
 const CLAVES_PERMITIDAS = [
     'marca_nombre',
     'contacto_email',
+    'email_admin',
     'contacto_telefono',
     'contacto_whatsapp',
     'contacto_direccion',

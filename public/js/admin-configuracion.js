@@ -15,6 +15,7 @@ const btnGuardar = document.getElementById('btn-guardar');
 const CAMPOS = [
     'marca_nombre',
     'contacto_email',
+    'email_admin',
     'contacto_telefono',
     'contacto_whatsapp',
     'contacto_direccion',
