@@ -22,6 +22,14 @@ const formEditar = document.getElementById('form-editar');
 const btnCancelar = document.getElementById('btn-cancelar');
 const btnActualizar = document.getElementById('btn-actualizar');
 
+const MAX_IMAGENES_ADICIONALES = 4;
+const imagenesListaForm = document.getElementById('imagenes-lista-form');
+const btnAgregarImagenForm = document.getElementById('btn-agregar-imagen-form');
+const contadorImagenesForm = document.getElementById('contador-imagenes-form');
+const imagenesListaEdit = document.getElementById('imagenes-lista-edit');
+const btnAgregarImagenEdit = document.getElementById('btn-agregar-imagen-edit');
+const contadorImagenesEdit = document.getElementById('contador-imagenes-edit');
+
 const POR_PAGINA = 10;
 
 let trabajosOriginales = [];
@@ -80,6 +88,122 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
+function parsearImagenes(imagenes) {
+    if (!imagenes) return [];
+    if (Array.isArray(imagenes)) return imagenes;
+    if (typeof imagenes !== 'string') return [];
+
+    try {
+        const parseado = JSON.parse(imagenes);
+        return Array.isArray(parseado) ? parseado : [];
+    } catch (error) {
+        console.warn('No se pudieron interpretar las imágenes adicionales:', error.message);
+        return [];
+    }
+}
+
+function crearInputImagen(url, listaId) {
+    const fila = document.createElement('div');
+    fila.className = 'imagen-input-fila';
+
+    const preview = document.createElement('div');
+    preview.className = 'imagen-input-preview';
+    const icono = document.createElement('i');
+    icono.className = 'fas fa-image';
+    preview.appendChild(icono);
+
+    const actualizarPreview = (valor) => {
+        preview.replaceChildren();
+        const urlImagen = valor.trim();
+        if (!urlImagen) {
+            preview.appendChild(icono);
+            return;
+        }
+
+        const img = document.createElement('img');
+        img.alt = 'Vista previa de imagen';
+        img.src = urlImagen;
+        img.addEventListener('error', () => {
+            preview.replaceChildren(icono);
+        }, { once: true });
+        preview.appendChild(img);
+    };
+
+    const input = document.createElement('input');
+    input.type = 'url';
+    input.className = 'imagen-input-url';
+    input.placeholder = 'https://ejemplo.com/imagen.jpg';
+    input.value = url || '';
+    input.addEventListener('input', () => actualizarPreview(input.value));
+    actualizarPreview(input.value);
+
+    const btnEliminar = document.createElement('button');
+    btnEliminar.type = 'button';
+    btnEliminar.className = 'btn-eliminar-imagen';
+    btnEliminar.title = 'Eliminar esta imagen';
+    btnEliminar.setAttribute('aria-label', 'Eliminar esta imagen');
+    const iconoEliminar = document.createElement('i');
+    iconoEliminar.className = 'fas fa-times';
+    btnEliminar.appendChild(iconoEliminar);
+    btnEliminar.addEventListener('click', () => {
+        fila.remove();
+        actualizarContadorImagenes(listaId);
+    });
+
+    fila.append(preview, input, btnEliminar);
+    return fila;
+}
+
+function actualizarContadorImagenes(listaId) {
+    const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
+    if (!lista) return;
+
+    const esFormulario = listaId === 'imagenes-lista-form';
+    const contador = esFormulario ? contadorImagenesForm : contadorImagenesEdit;
+    const boton = esFormulario ? btnAgregarImagenForm : btnAgregarImagenEdit;
+    const cantidad = lista.children.length;
+
+    contador.textContent = `${cantidad}/${MAX_IMAGENES_ADICIONALES}`;
+    boton.disabled = cantidad >= MAX_IMAGENES_ADICIONALES;
+}
+
+function agregarImagenInput(listaId, url = '') {
+    const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
+    if (!lista) return;
+
+    if (lista.children.length >= MAX_IMAGENES_ADICIONALES) {
+        mostrarToast(`Máximo ${MAX_IMAGENES_ADICIONALES} imágenes adicionales.`, true);
+        return;
+    }
+
+    lista.appendChild(crearInputImagen(url, listaId));
+    actualizarContadorImagenes(listaId);
+}
+
+function cargarImagenesEnLista(listaId, imagenes) {
+    const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
+    if (!lista) return;
+
+    lista.replaceChildren();
+    parsearImagenes(imagenes)
+        .filter((url) => typeof url === 'string' && url.trim() !== '')
+        .slice(0, MAX_IMAGENES_ADICIONALES)
+        .forEach((url) => lista.appendChild(crearInputImagen(url, listaId)));
+    actualizarContadorImagenes(listaId);
+}
+
+function obtenerImagenesDeLista(listaId) {
+    const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
+    if (!lista) return [];
+
+    return Array.from(lista.querySelectorAll('.imagen-input-url'))
+        .map((input) => input.value.trim())
+        .filter(Boolean);
+}
+
+btnAgregarImagenForm.addEventListener('click', () => agregarImagenInput('imagenes-lista-form'));
+btnAgregarImagenEdit.addEventListener('click', () => agregarImagenInput('imagenes-lista-edit'));
+
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
     return [...array].sort((a, b) => {
@@ -112,6 +236,8 @@ function exportarCSV() {
         'Tipo de reparación',
         'Fecha de inicio',
         'Fecha de finalización',
+        'Imagen principal',
+        'Imágenes adicionales',
     ];
 
     const filas = trabajosFiltrados.map((t) => [
@@ -121,6 +247,8 @@ function exportarCSV() {
         t.tipo_reparacion,
         formatearFecha(t.fecha_inicio),
         formatearFecha(t.fecha_fin),
+        t.imagen_url || '',
+        parsearImagenes(t.imagenes).join(' | '),
     ]);
 
     const lineas = [
@@ -206,8 +334,17 @@ function renderizarTrabajos(trabajos) {
     itemsPagina.forEach((t) => {
         const tr = document.createElement('tr');
 
-        const imagenHTML = t.imagen_url
-            ? `<img src="${escapar(t.imagen_url)}" alt="${escapar(t.titulo)}" class="cell-imagen-portafolio" onerror="this.outerHTML='<div class=\\'cell-imagen-portafolio-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'" />`
+        const imagenesAdicionales = parsearImagenes(t.imagenes);
+        const totalImagenes = (t.imagen_url ? 1 : 0) + imagenesAdicionales.length;
+        const indicadorImagenes = totalImagenes > 1
+            ? `<span class="indicador-carrusel" title="${totalImagenes} imágenes"><i class="fas fa-images"></i> ${totalImagenes}</span>`
+            : '';
+        const imagenVista = t.imagen_url || imagenesAdicionales[0];
+        const imagenHTML = imagenVista
+            ? `<div class="cell-imagen-wrapper">
+                 <img src="${escapar(imagenVista)}" alt="${escapar(t.titulo)}" class="cell-imagen-portafolio" onerror="this.outerHTML='<div class=\\'cell-imagen-portafolio-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'" />
+                 ${indicadorImagenes}
+               </div>`
             : `<div class="cell-imagen-portafolio-placeholder"><i class="fas fa-image"></i></div>`;
 
         tr.innerHTML = `
@@ -331,6 +468,7 @@ formTrabajo.addEventListener('submit', async (e) => {
         fecha_inicio: document.getElementById('fecha_inicio').value || null,
         fecha_fin: document.getElementById('fecha_fin').value || null,
         imagen_url: document.getElementById('imagen_url').value.trim() || null,
+        imagenes: obtenerImagenesDeLista('imagenes-lista-form'),
     };
 
     if (!datos.titulo) {
@@ -360,6 +498,7 @@ formTrabajo.addEventListener('submit', async (e) => {
         if (resultado.success) {
             mostrarToast('Trabajo publicado correctamente.');
             formTrabajo.reset();
+            cargarImagenesEnLista('imagenes-lista-form', []);
             cargarTrabajos();
         } else {
             mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);
@@ -388,6 +527,7 @@ function abrirModalEdicion(id) {
     document.getElementById('edit-fecha_inicio').value = trabajo.fecha_inicio || '';
     document.getElementById('edit-fecha_fin').value = trabajo.fecha_fin || '';
     document.getElementById('edit-imagen_url').value = trabajo.imagen_url || '';
+    cargarImagenesEnLista('imagenes-lista-edit', trabajo.imagenes);
 
     modalEditar.classList.add('modal-visible');
 }
@@ -395,6 +535,7 @@ function abrirModalEdicion(id) {
 function cerrarModalEdicion() {
     modalEditar.classList.remove('modal-visible');
     formEditar.reset();
+    cargarImagenesEnLista('imagenes-lista-edit', []);
 }
 
 modalClose.addEventListener('click', cerrarModalEdicion);
@@ -424,6 +565,7 @@ formEditar.addEventListener('submit', async (e) => {
         fecha_inicio: document.getElementById('edit-fecha_inicio').value || null,
         fecha_fin: document.getElementById('edit-fecha_fin').value || null,
         imagen_url: document.getElementById('edit-imagen_url').value.trim() || null,
+        imagenes: obtenerImagenesDeLista('imagenes-lista-edit'),
     };
 
     if (!datos.titulo) {
