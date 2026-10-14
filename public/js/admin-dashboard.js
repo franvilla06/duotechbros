@@ -45,6 +45,9 @@ let graficoEstados = null;
 let graficoVentas = null;
 let graficoProductos = null;
 
+// guardamos los ultimos datos del top de productos para re-renderizar en resize
+let ultimosProductosData = [];
+
 // UTILIDADES
 
 function escapar(texto) {
@@ -198,33 +201,110 @@ function renderizarUltimosMovimientos(pedidos) {
         const pedidoIdFormateado = `#${String(p.id).padStart(4, '0')}`;
         const esRep = esReparacion(p);
 
+        // badges e iconos: el badge se ve en desktop, el icono en mobile
         const tipoBadge = esRep
             ? `<span class="mov-tipo-badge mov-tipo-reparacion"><i class="fas fa-tools"></i> Reparacion</span>`
             : `<span class="mov-tipo-badge mov-tipo-compra"><i class="fas fa-shopping-bag"></i> Compra</span>`;
+
+        const tipoIcono = esRep
+            ? `<span class="mov-tipo-icono mov-tipo-icono-reparacion"><i class="fas fa-tools"></i></span>`
+            : `<span class="mov-tipo-icono mov-tipo-icono-compra"><i class="fas fa-shopping-bag"></i></span>`;
 
         const detalle = esRep
             ? escapar(p.modelo_celular || 'Sin modelo')
             : escapar(p.modelo_celular || 'Compra de accesorios');
 
+        const nombreCliente = escapar(p.nombre_cliente);
+        const fechaFormateada = formatearFecha(p.creado_en);
+
+        // fila principal (compacta en mobile, normal en desktop)
         const tr = document.createElement('tr');
+        tr.className = 'mov-fila';
+        tr.dataset.id = p.id;
         tr.innerHTML = `
-            <td>${tipoBadge}</td>
-            <td><span class="cell-nombre">${pedidoIdFormateado}</span></td>
-            <td>${escapar(p.nombre_cliente)}</td>
-            <td>
-                <div class="cell-descripcion" title="${detalle}">
-                    ${detalle}
-                </div>
+            <td class="mov-celda-tipo">${tipoBadge}${tipoIcono}</td>
+            <td class="mov-celda-nro"><span class="cell-nombre">${pedidoIdFormateado}</span></td>
+            <td class="mov-celda-cliente">${nombreCliente}</td>
+            <td class="mov-celda-detalle">
+                <div class="cell-descripcion" title="${detalle}">${detalle}</div>
             </td>
-            <td><span class="cell-fecha">${formatearFecha(p.creado_en)}</span></td>
-            <td>
+            <td class="mov-celda-fecha"><span class="cell-fecha">${fechaFormateada}</span></td>
+            <td class="mov-celda-estado">
                 <span class="badge ${claseBadgeEstado(estadoActual)}">
                     ${capitalizar(estadoActual)}
                 </span>
+                <span class="mov-chevron"><i class="fas fa-chevron-down"></i></span>
             </td>
         `;
+
+        // fila de detalle (oculta por defecto, se muestra al hacer click en mobile)
+        const trDetalle = document.createElement('tr');
+        trDetalle.className = 'mov-detalle-fila';
+        trDetalle.dataset.id = p.id;
+        trDetalle.innerHTML = `
+            <td colspan="6">
+                <div class="mov-detalle-contenido">
+                    <div class="mov-detalle-linea">
+                        <span class="mov-detalle-label">Tipo</span>
+                        <span class="mov-detalle-valor">${tipoBadge}</span>
+                    </div>
+                    <div class="mov-detalle-linea">
+                        <span class="mov-detalle-label">Nro.</span>
+                        <span class="mov-detalle-valor">${pedidoIdFormateado}</span>
+                    </div>
+                    <div class="mov-detalle-linea">
+                        <span class="mov-detalle-label">Cliente</span>
+                        <span class="mov-detalle-valor">${nombreCliente}</span>
+                    </div>
+                    <div class="mov-detalle-linea">
+                        <span class="mov-detalle-label">Detalle</span>
+                        <span class="mov-detalle-valor">${detalle}</span>
+                    </div>
+                    <div class="mov-detalle-linea">
+                        <span class="mov-detalle-label">Fecha</span>
+                        <span class="mov-detalle-valor">${fechaFormateada}</span>
+                    </div>
+                    <div class="mov-detalle-linea">
+                        <span class="mov-detalle-label">Estado</span>
+                        <span class="badge ${claseBadgeEstado(estadoActual)}">${capitalizar(estadoActual)}</span>
+                    </div>
+                </div>
+            </td>
+        `;
+
+        // click en la fila principal: abrir/cerrar el detalle (solo en mobile)
+        tr.addEventListener('click', () => toggleDetalleMovimiento(p.id));
+
         tbodyMovimientos.appendChild(tr);
+        tbodyMovimientos.appendChild(trDetalle);
     });
+}
+
+// abre o cierra el detalle de un movimiento
+// solo hace algo en mobile (en desktop la tabla ya muestra todo)
+function toggleDetalleMovimiento(id) {
+    if (window.innerWidth > 700) return;
+
+    const filaPrincipal = tbodyMovimientos.querySelector(`.mov-fila[data-id="${id}"]`);
+    const filaDetalle = tbodyMovimientos.querySelector(`.mov-detalle-fila[data-id="${id}"]`);
+
+    if (!filaPrincipal || !filaDetalle) return;
+
+    const estabaAbierta = filaDetalle.classList.contains('mov-detalle-visible');
+
+    // cerrar todas las filas abiertas
+    tbodyMovimientos.querySelectorAll('.mov-detalle-fila').forEach((fila) => {
+        fila.classList.remove('mov-detalle-visible');
+    });
+    tbodyMovimientos.querySelectorAll('.mov-fila').forEach((fila) => {
+        fila.classList.remove('mov-fila-abierta');
+    });
+
+    // si la clickeada estaba cerrada, abrirla
+    if (!estabaAbierta) {
+        filaDetalle.classList.add('mov-detalle-visible');
+        filaPrincipal.classList.add('mov-fila-abierta');
+    }
 }
 
 // GRAFICOS
@@ -436,104 +516,162 @@ const pluginValoresEnBarras = {
 };
 
 // grafico 3: top 10 productos mas vendidos
+// en desktop: grafico de barras horizontales
+// en mobile: tabla con la cantidad y el nombre de cada producto
 function renderizarGraficoProductos(datos) {
     const canvas = document.getElementById('grafico-productos');
+    const wrapperGrafico = document.getElementById('grafico-productos-wrapper');
+    const wrapperTabla = document.getElementById('grafico-productos-tabla-wrapper');
+    const tablaContenedor = document.getElementById('grafico-productos-tabla');
     const nota = document.getElementById('grafico-productos-nota');
+
     if (!canvas || !nota) return;
 
+    // guardar los datos para el resize
+    ultimosProductosData = Array.isArray(datos) ? datos : [];
+
+    // sin datos: ocultar todo y mostrar mensaje
     if (!datos || datos.length === 0) {
         nota.textContent = 'Aún no hay ventas registradas para calcular el ranking.';
+        if (wrapperGrafico) wrapperGrafico.style.display = 'none';
+        if (wrapperTabla) wrapperTabla.style.display = 'none';
+        destruirGrafico(graficoProductos);
+        graficoProductos = null;
         return;
     }
 
-    const labels = datos.map((d) => d.nombre_producto);
-    const valores = datos.map((d) => d.total_vendido);
-    const colores = datos.map((_, i) => PALETA_PRODUCTOS[i % PALETA_PRODUCTOS.length]);
+    const esMobile = window.innerWidth <= 700;
 
-    // convertir a numero antes de sumar porque MySQL devuelve los SUM() como strings
-    const totalVendido = valores.reduce((a, b) => Number(a) + Number(b), 0);
-    const maxValor = Math.max(...valores, 1);
+    // calcular el total vendido (para la nota al pie)
+    const totalVendido = datos.reduce(
+        (total, producto) => total + Number(producto.total_vendido),
+        0
+    );
 
-    // ajuste 1: dar margen al eje X para que las barras no toquen el borde
-    // sumamos un poco mas del maximo para que el plugin de valores tenga lugar
-    const maxEjeX = Math.ceil(maxValor * 1.15 + 0.5);
+    if (esMobile) {
+        // modo mobile: tabla
+        if (wrapperGrafico) wrapperGrafico.style.display = 'none';
+        if (wrapperTabla) wrapperTabla.style.display = 'block';
 
-    destruirGrafico(graficoProductos);
+        // destruir el grafico si existia (para evitar fugas de memoria)
+        destruirGrafico(graficoProductos);
+        graficoProductos = null;
 
-    graficoProductos = new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Unidades vendidas',
-                    data: valores,
-                    backgroundColor: colores,
-                    borderRadius: 6,
-                    borderSkipped: false,
-                    maxBarThickness: 22,
-                },
-            ],
-        },
-        // registro del plugin que dibuja los valores al final de las barras
-        plugins: [pluginValoresEnBarras],
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-                // ajuste 2: agregar padding a la derecha para que los valores
-                // dibujados no se corten con el borde de la card
-                padding: {
-                    right: 30,
-                },
+        if (tablaContenedor) {
+            tablaContenedor.innerHTML = construirTablaProductosHTML(datos);
+        }
+    } else {
+        // modo desktop: grafico de barras
+        if (wrapperGrafico) wrapperGrafico.style.display = 'block';
+        if (wrapperTabla) wrapperTabla.style.display = 'none';
+
+        const labels = datos.map((d) => d.nombre_producto);
+        const valores = datos.map((d) => Number(d.total_vendido));
+        const colores = datos.map((_, i) => PALETA_PRODUCTOS[i % PALETA_PRODUCTOS.length]);
+
+        const maxValor = Math.max(...valores, 1);
+        const maxEjeX = Math.ceil(maxValor * 1.15 + 0.5);
+
+        destruirGrafico(graficoProductos);
+
+        graficoProductos = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Unidades vendidas',
+                        data: valores,
+                        backgroundColor: colores,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 22,
+                    },
+                ],
             },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    ...TOOLTIP_BASE,
-                    // ajuste 3: posicionar el tooltip cerca del cursor
-                    // y evitar que se salga de la pantalla
-                    position: 'nearest',
-                    yAlign: 'center',
-                    xAlign: 'left',
-                    callbacks: {
-                        label: (ctx) => {
-                            const idx = ctx.dataIndex;
-                            const cant = ctx.parsed.x;
-                            const recaudado = datos[idx].total_recaudado;
-                            return [
-                                `Vendidos: ${cant} unidad${cant !== 1 ? 'es' : ''}`,
-                                `Recaudado: ${formatearPrecio(recaudado)}`,
-                            ];
+            plugins: [pluginValoresEnBarras],
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        right: 30,
+                    },
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        ...TOOLTIP_BASE,
+                        position: 'nearest',
+                        yAlign: 'center',
+                        xAlign: 'left',
+                        callbacks: {
+                            label: (ctx) => {
+                                const idx = ctx.dataIndex;
+                                const cant = ctx.parsed.x;
+                                const recaudado = datos[idx].total_recaudado;
+                                return [
+                                    `Vendidos: ${cant} unidad${cant !== 1 ? 'es' : ''}`,
+                                    `Recaudado: ${formatearPrecio(recaudado)}`,
+                                ];
+                            },
                         },
                     },
                 },
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    // ajuste 1: usar el maximo calculado con margen
-                    max: maxEjeX,
-                    ticks: {
-                        stepSize: 1,
-                        color: '#777',
-                        font: { size: 11 },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: maxEjeX,
+                        ticks: {
+                            stepSize: 1,
+                            color: '#777',
+                            font: { size: 11 },
+                        },
+                        grid: { color: COLORES.grisClaro },
                     },
-                    grid: { color: COLORES.grisClaro },
-                },
-                y: {
-                    ticks: {
-                        color: '#0b4a62',
-                        font: { size: 11, weight: '600' },
+                    y: {
+                        ticks: {
+                            color: '#0b4a62',
+                            font: { size: 11, weight: '600' },
+                        },
+                        grid: { display: false },
                     },
-                    grid: { display: false },
                 },
             },
-        },
-    });
+        });
+    }
 
     nota.textContent = `${datos.length} producto${datos.length !== 1 ? 's' : ''} con ventas · Total: ${totalVendido} unidad${totalVendido !== 1 ? 'es' : ''} vendida${totalVendido !== 1 ? 's' : ''}.`;
+}
+
+// construye el html de la tabla de productos mas vendidos (version mobile)
+function construirTablaProductosHTML(datos) {
+    const filas = datos
+        .map((d, i) => {
+            const color = PALETA_PRODUCTOS[i % PALETA_PRODUCTOS.length];
+            return `
+                <div class="grafico-tabla-fila">
+                    <div class="grafico-tabla-cant" style="background-color: ${color}">
+                        ${Number(d.total_vendido)}
+                    </div>
+                    <div class="grafico-tabla-nombre" title="${escapar(d.nombre_producto)}">
+                        ${escapar(d.nombre_producto)}
+                    </div>
+                </div>
+            `;
+        })
+        .join('');
+
+    return `
+        <div class="grafico-tabla-header">
+            <span class="grafico-tabla-header-cant">Vendidos</span>
+            <span class="grafico-tabla-header-nombre">Producto</span>
+        </div>
+        <div class="grafico-tabla-filas">
+            ${filas}
+        </div>
+    `;
 }
 
 // CARGA DE DATOS
@@ -615,6 +753,18 @@ async function cargarDashboard() {
 // EVENTOS
 
 btnRefresh.addEventListener('click', cargarDashboard);
+
+// re-renderizar el top de productos cuando cambia el ancho
+// (para alternar entre grafico y tabla)
+let resizeTimerProductos = null;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimerProductos);
+    resizeTimerProductos = setTimeout(() => {
+        if (ultimosProductosData && ultimosProductosData.length > 0) {
+            renderizarGraficoProductos(ultimosProductosData);
+        }
+    }, 200);
+});
 
 // INICIO
 
