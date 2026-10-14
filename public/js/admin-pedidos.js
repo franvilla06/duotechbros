@@ -242,8 +242,8 @@ function renderizarPedidos(pedidos) {
             : 'Agregar notas o presupuesto';
 
         const iconoNotas = tieneNotas || tienePresupuesto
-            ? 'fa-solid fa-note-sticky'
-            : 'fa-regular fa-note-sticky';
+            ? 'fas fa-sticky-note'
+            : 'far fa-sticky-note';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `

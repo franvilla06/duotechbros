@@ -384,27 +384,100 @@ a {
     line-height: 1.5;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
+/* BOTÓN HAMBURGUESA DEL ADMIN (solo visible en mobile) */
+
+.admin-menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid #d0e6ea;
+    background-color: #f7feff;
+    color: #0b4a62;
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-family: inherit;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.admin-menu-toggle:hover {
+    background-color: #e8f4ff;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.admin-menu-toggle:active {
+    transform: scale(0.95);
+}
+
+/* OVERLAY DEL SIDEBAR EN MOBILE */
+
+.admin-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(11, 74, 98, 0.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.admin-sidebar-overlay.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* RESPONSIVE: SIDEBAR OFF-CANVAS */
+
+@media (max-width: 900px) {
+    .admin-menu-toggle {
+        display: inline-flex;
+    }
+
     .admin-sidebar {
-        width: 70px;
-        padding: 20px 8px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        width: 260px;
+        padding: 24px 16px;
     }
 
-    .admin-sidebar-brand h2,
-    .admin-sidebar-brand span,
-    .admin-nav a span,
-    .admin-user span {
-        display: none;
+    .admin-sidebar.sidebar-abierto {
+        transform: translateX(0);
+        box-shadow: 8px 0 32px rgba(11, 74, 98, 0.3);
     }
 
-    .admin-nav a {
-        justify-content: center;
+    .admin-sidebar.sidebar-abierto .admin-sidebar-brand h2,
+    .admin-sidebar.sidebar-abierto .admin-sidebar-brand span,
+    .admin-sidebar.sidebar-abierto .admin-nav a span,
+    .admin-sidebar.sidebar-abierto .admin-user span {
+        display: inline;
+    }
+
+    .admin-sidebar.sidebar-abierto .admin-nav a {
+        justify-content: flex-start;
     }
 
     .admin-main {
-        margin-left: 70px;
-        padding: 20px;
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .admin-header {
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .admin-header > div:first-of-type {
+        flex: 1;
+        min-width: 0;
     }
 }
 
@@ -415,6 +488,14 @@ a {
 
     .admin-header h1 {
         font-size: 1.3rem;
+    }
+
+    .admin-header p {
+        font-size: 0.82rem;
+    }
+
+    .admin-main {
+        padding: 16px 12px;
     }
 }
 
@@ -3055,6 +3136,8 @@ table.admin-table th.th-ordenable.activo {
 .cell-imagen-wrapper {
     position: relative;
     display: inline-block;
+    width: fit-content;
+    line-height: 0;
 }
 
 .indicador-carrusel {
@@ -3092,5 +3175,1051 @@ table.admin-table th.th-ordenable.activo {
     .btn-eliminar-imagen {
         width: 34px;
         height: 34px;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE DE TABLAS, TOOLBAR Y PAGINACION DEL ADMIN
+   ============================================================ */
+
+/* ---------- TABLA: SCROLL CON SOMBRAS ---------- */
+
+/* hacemos obvio que la tabla se puede desplazar lateralmente */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background:
+        /* sombras laterales que indican que hay mas contenido */
+        linear-gradient(to right, #ffffff 30%, rgba(255, 255, 255, 0)),
+        linear-gradient(to right, rgba(255, 255, 255, 0), #ffffff 70%) 100% 0,
+        radial-gradient(farthest-side at 0 50%, rgba(11, 74, 98, 0.15), transparent),
+        radial-gradient(farthest-side at 100% 50%, rgba(11, 74, 98, 0.15), transparent) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+}
+
+/* scroll bar mas delgada y prolija en webkit */
+.table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f0f4f8;
+    border-radius: 999px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #c0c7cd;
+    border-radius: 999px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #0a9396;
+}
+
+/* ---------- TABLA: COLUMNAS MINIMAS EN DESKTOP ---------- */
+
+/* asegura que las columnas de texto no se aplasten en pantallas medianas */
+table.admin-table {
+    min-width: 720px;
+}
+
+/* ---------- TABLA: RESPONSIVE EN MOBILE ---------- */
+
+@media (max-width: 900px) {
+    /* reducir padding de celdas para que entren mas columnas */
+    table.admin-table th {
+        padding: 12px 12px;
+        font-size: 0.7rem;
+    }
+
+    table.admin-table td {
+        padding: 12px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* descripcion mas angosta para no empujar tanto */
+    .cell-descripcion {
+        max-width: 160px;
+    }
+
+    /* imagenes mas chicas */
+    .cell-imagen,
+    .cell-imagen-placeholder {
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+    }
+
+    .cell-imagen-portafolio,
+    .cell-imagen-portafolio-placeholder {
+        width: 60px;
+        height: 46px;
+        font-size: 1rem;
+    }
+
+    /* fecha mas compacta */
+    .cell-fecha {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 600px) {
+    table.admin-table th {
+        padding: 10px 10px;
+        font-size: 0.65rem;
+        letter-spacing: 0.03em;
+    }
+
+    table.admin-table td {
+        padding: 10px 10px;
+        font-size: 0.8rem;
+    }
+
+    .cell-descripcion {
+        max-width: 120px;
+    }
+
+    /* ---------- BOTONES DE ACCION TACTILES ---------- */
+
+    /* botones de editar/eliminar/notas con area tactil comoda (minimo 44px) */
+    .btn-editar,
+    .btn-eliminar,
+    .btn-notas {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        border-radius: 8px;
+    }
+
+    .btn-editar {
+        margin-right: 4px;
+    }
+
+    /* boton "ver factura" adaptado */
+    .btn-ver-factura {
+        padding: 9px 12px;
+        font-size: 0.75rem;
+    }
+
+    /* boton "ver factura": solo icono en pantallas muy chicas */
+    .btn-ver-factura span {
+        display: none;
+    }
+
+    /* el select de estado mas compacto */
+    .estado-select {
+        min-width: 100px;
+        font-size: 0.78rem;
+        padding: 7px 8px;
+    }
+
+    /* ---------- TOOLBAR DEL ADMIN ---------- */
+
+    .admin-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .admin-search {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .admin-filtros {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .filtro-chip {
+        flex-shrink: 0;
+        font-size: 0.72rem;
+        padding: 7px 12px;
+    }
+
+    .btn-limpiar {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 14px;
+    }
+
+    /* ---------- CABECERA DE TABLA ---------- */
+
+    .table-header {
+        padding: 14px 14px;
+        gap: 8px;
+    }
+
+    .table-header h2 {
+        font-size: 1rem;
+    }
+
+    .table-counter {
+        font-size: 0.72rem;
+        padding: 4px 10px;
+    }
+
+    /* ---------- PAGINACION ---------- */
+
+    .paginacion {
+        padding: 12px 14px;
+        gap: 8px;
+    }
+
+    .paginacion-info {
+        font-size: 0.78rem;
+        width: 100%;
+        text-align: center;
+    }
+
+    .paginacion-controles {
+        justify-content: center;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .pag-btn,
+    .pag-num {
+        min-width: 34px;
+        height: 34px;
+        font-size: 0.8rem;
+        padding: 0 8px;
+    }
+
+    /* ---------- HEADER DE LA PAGINA ---------- */
+
+    .admin-header {
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+    }
+
+    .admin-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .admin-header p {
+        font-size: 0.85rem;
+    }
+
+    .admin-header-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .admin-header-actions .btn-refresh {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* ---------- LAYOUT DE DOS COLUMNAS (FORM + LISTA) ---------- */
+
+    .admin-grid-2col {
+        gap: 18px;
+    }
+
+    .admin-card {
+        padding: 18px 16px;
+    }
+
+    .admin-card h2 {
+        font-size: 1.05rem;
+    }
+
+    .admin-form-row {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .admin-form-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .admin-form-actions .btn-primary,
+    .admin-form-actions .btn-secondary {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .filtro-chip {
+        font-size: 0.68rem;
+        padding: 7px 10px;
+    }
+
+    .cell-descripcion {
+        max-width: 90px;
+    }
+
+    table.admin-table th {
+        padding: 9px 8px;
+        font-size: 0.6rem;
+    }
+
+    table.admin-table td {
+        padding: 9px 8px;
+        font-size: 0.75rem;
+    }
+
+    .btn-editar,
+    .btn-eliminar,
+    .btn-notas {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+
+    .admin-header h1 {
+        font-size: 1.2rem;
+    }
+}
+
+/* ---------- INDICADOR DE SCROLL EN MOBILE ---------- */
+
+@media (max-width: 900px) {
+    .table-container::before {
+        content: "Desliza la tabla para ver todas las columnas \2192";
+        display: block;
+        background-color: #e8f4ff;
+        color: #007bff;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 8px 14px;
+        text-align: center;
+        border-bottom: 1px solid #d0e6ea;
+    }
+}
+
+@media (min-width: 901px) {
+    .table-container::before {
+        display: none;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE DE PERFIL DEL ADMIN
+   ============================================================ */
+
+@media (max-width: 700px) {
+    .perfil-info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .perfil-info-item {
+        padding: 14px 16px;
+    }
+
+    .perfil-info-valor {
+        font-size: 1rem;
+    }
+
+    .perfil-tabs {
+        padding: 5px;
+        gap: 4px;
+    }
+
+    .perfil-tab {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 10px 6px;
+        font-size: 0.76rem;
+        gap: 5px;
+        flex-direction: column;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .perfil-tabs {
+        padding: 6px;
+        gap: 4px;
+        overflow-x: visible;
+    }
+
+    .perfil-tab i {
+        font-size: 0.9rem;
+    }
+
+    .admin-main {
+        overflow-x: hidden;
+    }
+
+    .admin-card {
+        overflow-x: hidden;
+    }
+}
+
+@media (max-width: 480px) {
+    .perfil-tab {
+        padding: 9px 4px;
+        font-size: 0.7rem;
+        gap: 4px;
+    }
+
+    .perfil-tab i {
+        font-size: 0.85rem;
+    }
+
+    .perfil-info-item {
+        padding: 12px 14px;
+    }
+
+    .perfil-info-label {
+        font-size: 0.68rem;
+    }
+
+    .perfil-info-valor {
+        font-size: 0.95rem;
+    }
+
+    .perfil-info-note {
+        padding: 12px 14px;
+    }
+
+    .perfil-info-note p {
+        font-size: 0.8rem;
+    }
+}
+
+/* ============================================================
+   TABLAS DEL ADMIN COMO CARDS EN MOBILE
+   ============================================================ */
+
+@media (max-width: 700px) {
+    .table-container::before {
+        display: none !important;
+    }
+
+    .table-wrapper {
+        overflow-x: visible;
+        background: none;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    table.admin-table {
+        min-width: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    table.admin-table thead {
+        display: none;
+    }
+
+    table.admin-table,
+    table.admin-table tbody,
+    table.admin-table tr,
+    table.admin-table td {
+        display: block;
+        width: 100%;
+    }
+
+    table.admin-table tr {
+        background-color: #ffffff;
+        border: 1px solid #e0eaf0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 0;
+        box-shadow: 0 4px 12px rgba(11, 74, 98, 0.06);
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    table.admin-table tr:hover {
+        background-color: #ffffff;
+        box-shadow: 0 6px 18px rgba(11, 74, 98, 0.1);
+    }
+
+    table.admin-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px solid #f0f4f8;
+        font-size: 0.85rem;
+        text-align: right;
+    }
+
+    table.admin-table td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-top: 6px;
+        padding-top: 12px;
+        border-top: 1px solid #eef3f6;
+        justify-content: flex-end;
+    }
+
+    table.admin-table td:first-child {
+        padding-top: 0;
+    }
+
+    table.admin-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #0b4a62;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        flex-shrink: 0;
+        text-align: left;
+    }
+
+    table.admin-table td:not([data-label])::before,
+    table.admin-table td[data-label=""]::before {
+        content: none;
+    }
+
+    .cell-imagen-wrapper,
+    .cell-imagen-placeholder,
+    .cell-imagen-portafolio,
+    .cell-imagen-portafolio-placeholder {
+        margin-left: auto;
+    }
+
+    .cell-imagen,
+    .cell-imagen-placeholder {
+        width: 44px;
+        height: 44px;
+    }
+
+    .cell-imagen-portafolio,
+    .cell-imagen-portafolio-placeholder {
+        width: 60px;
+        height: 46px;
+    }
+
+    .cell-descripcion {
+        max-width: none;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        text-align: right;
+        font-size: 0.82rem;
+        line-height: 1.4;
+    }
+
+    .cell-nombre {
+        font-weight: 700;
+    }
+
+    .cell-fecha {
+        font-size: 0.78rem;
+    }
+
+    table.admin-table td:has(.cell-descripcion) {
+        align-items: flex-start;
+    }
+
+    table.admin-table td:has(.cell-descripcion)::before {
+        padding-top: 2px;
+    }
+
+    table.admin-table td[style*="text-align: right"],
+    table.admin-table td:last-child {
+        text-align: right;
+    }
+
+    table.admin-table td .btn-editar,
+    table.admin-table td .btn-eliminar,
+    table.admin-table td .btn-notas {
+        width: 40px;
+        height: 40px;
+        margin: 0 2px;
+    }
+
+    table.admin-table td .btn-ver-factura {
+        width: auto;
+        padding: 9px 14px;
+    }
+
+    table.admin-table td .estado-select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    table.admin-table td:has(.estado-select) {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 420px) {
+    .table-wrapper {
+        padding: 8px;
+        gap: 10px;
+    }
+
+    table.admin-table tr {
+        padding: 12px 14px;
+    }
+
+    table.admin-table td {
+        font-size: 0.8rem;
+        padding: 8px 0;
+    }
+
+    table.admin-table td::before {
+        font-size: 0.65rem;
+    }
+
+    .cell-imagen,
+    .cell-imagen-placeholder {
+        width: 38px;
+        height: 38px;
+    }
+
+    .cell-imagen-portafolio,
+    .cell-imagen-portafolio-placeholder {
+        width: 50px;
+        height: 40px;
+    }
+}
+
+/* ============================================================
+   AJUSTES DE LA CARD DE PEDIDOS EN MOBILE
+   ============================================================ */
+
+@media (max-width: 700px) {
+    table.admin-table td .cell-email,
+    table.admin-table td .cell-telefono {
+        display: block;
+        width: 100%;
+        text-align: right;
+    }
+
+    table.admin-table td .cell-email {
+        margin-bottom: 3px;
+        font-size: 0.82rem;
+    }
+
+    table.admin-table td .cell-telefono {
+        font-size: 0.78rem;
+    }
+
+    table.admin-table td:has(.cell-email) {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+    }
+
+    table.admin-table td:has(.cell-email)::before {
+        align-self: flex-start;
+    }
+
+    table.admin-table td:has(.estado-select) {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    table.admin-table td .btn-notas {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        color: #0b4a62;
+        background-color: #f0f4f8;
+        border-radius: 10px;
+    }
+
+    table.admin-table td .btn-notas:hover {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+}
+
+/* ============================================================
+   AJUSTE DEL INDICADOR DE CARRUSEL EN MOBILE
+   ============================================================ */
+
+@media (max-width: 700px) {
+    table.admin-table td .cell-imagen-wrapper {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    .indicador-carrusel {
+        right: -4px;
+        bottom: -4px;
+        padding: 2px 6px;
+        font-size: 0.62rem;
+        box-shadow: 0 2px 6px rgba(11, 74, 98, 0.35);
+    }
+
+    .indicador-carrusel i {
+        font-size: 0.58rem;
+    }
+}
+
+/* ============================================================
+   DASHBOARD: TABLA DE MOVIMIENTOS CON ACORDEON EN MOBILE
+   ============================================================ */
+
+table.admin-table tbody tr.mov-detalle-fila {
+    display: none;
+}
+
+.mov-tipo-icono,
+.mov-chevron {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .table-wrapper:has(#tabla-movimientos) {
+        padding: 0;
+        gap: 0;
+    }
+
+    #tabla-movimientos tbody tr.mov-fila,
+    #tabla-movimientos tbody tr.mov-detalle-fila {
+        background-color: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-width: 0;
+    }
+
+    #tabla-movimientos tbody tr.mov-fila {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #f0f4f8;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    #tabla-movimientos tbody tr.mov-fila:hover {
+        background-color: #f7fafe;
+    }
+
+    #tabla-movimientos tbody tr.mov-fila.mov-fila-abierta {
+        background-color: #f7fafe;
+        border-bottom-color: transparent;
+    }
+
+    #tabla-movimientos tbody tr td::before {
+        content: none;
+    }
+
+    #tabla-movimientos tbody tr.mov-fila td {
+        display: block;
+        padding: 0;
+        border: none;
+        font-size: 0.85rem;
+        width: auto;
+        min-width: 0;
+    }
+
+    #tabla-movimientos .mov-celda-tipo {
+        flex-shrink: 0;
+    }
+
+    #tabla-movimientos .mov-celda-tipo .mov-tipo-badge {
+        display: none;
+    }
+
+    #tabla-movimientos .mov-tipo-icono {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    #tabla-movimientos .mov-tipo-icono-reparacion {
+        background-color: #e8f4ff;
+        color: #0b4a62;
+    }
+
+    #tabla-movimientos .mov-tipo-icono-compra {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    #tabla-movimientos .mov-celda-nro {
+        flex-shrink: 0;
+        font-weight: 800;
+        color: #0b4a62;
+        font-size: 0.82rem;
+    }
+
+    #tabla-movimientos .mov-celda-cliente {
+        order: 3;
+        flex-shrink: 1;
+        max-width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #555;
+        font-size: 0.78rem;
+        text-align: right;
+    }
+
+    #tabla-movimientos .mov-celda-detalle {
+        order: 2;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    #tabla-movimientos .mov-celda-detalle .cell-descripcion {
+        max-width: 100%;
+        width: 100%;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+        font-size: 0.78rem;
+        color: #666;
+    }
+
+    /* celda 5: fecha -> oculta en el estado colapsado */
+    /* usamos alta especificidad + !important porque la regla general de la
+       Fase 3 (table.admin-table td) puede pisarla segun el orden de carga */
+    table.admin-table#tabla-movimientos tbody tr.mov-fila td.mov-celda-fecha {
+        display: none !important;
+    }
+
+    #tabla-movimientos .mov-celda-estado {
+        order: 4;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    table.admin-table#tabla-movimientos tbody tr.mov-fila td.mov-celda-estado .badge {
+        display: none !important;
+    }
+
+    #tabla-movimientos .mov-chevron {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #f0f4f8;
+        color: #0b4a62;
+        font-size: 0.6rem;
+        transition: transform 0.25s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
+    #tabla-movimientos .mov-fila-abierta .mov-chevron {
+        transform: rotate(180deg);
+        background-color: #007bff;
+        color: #ffffff;
+    }
+
+    #tabla-movimientos tbody tr.mov-detalle-fila.mov-detalle-visible {
+        display: block;
+        background-color: #f7fafe;
+        border-bottom: 1px solid #f0f4f8;
+        animation: mov-detalle-aparecer 0.2s ease;
+    }
+
+    @keyframes mov-detalle-aparecer {
+        from {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    #tabla-movimientos tbody tr.mov-detalle-fila td {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: none;
+    }
+
+    #tabla-movimientos .mov-detalle-contenido {
+        padding: 14px 20px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #tabla-movimientos .mov-detalle-linea {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.82rem;
+    }
+
+    #tabla-movimientos .mov-detalle-label {
+        color: #888;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        flex-shrink: 0;
+    }
+
+    #tabla-movimientos .mov-detalle-valor {
+        color: #0b4a62;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+        min-width: 0;
+    }
+
+    #tabla-movimientos .mov-detalle-valor .mov-tipo-badge {
+        display: inline-flex;
+    }
+}
+
+/* ============================================================
+   TOP 10 PRODUCTOS: TABLA EN MOBILE
+   ============================================================ */
+
+.grafico-tabla-wrapper {
+    margin: 12px 0 4px;
+}
+
+.grafico-tabla-header {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 12px;
+    padding: 0 10px 8px;
+    border-bottom: 2px solid #e0eaf0;
+    margin-bottom: 4px;
+}
+
+.grafico-tabla-header-cant,
+.grafico-tabla-header-nombre {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #5a6b73;
+}
+
+.grafico-tabla-header-cant {
+    text-align: center;
+}
+
+.grafico-tabla-filas {
+    display: flex;
+    flex-direction: column;
+}
+
+.grafico-tabla-fila {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 10px 10px;
+    border-bottom: 1px solid #f0f4f8;
+    transition: background-color 0.15s ease;
+}
+
+.grafico-tabla-fila:last-child {
+    border-bottom: none;
+}
+
+.grafico-tabla-fila:hover {
+    background-color: #f9fcff;
+}
+
+.grafico-tabla-cant {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 32px;
+    padding: 0 10px;
+    margin: 0 auto;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    box-shadow: 0 2px 6px rgba(11, 74, 98, 0.15);
+}
+
+.grafico-tabla-nombre {
+    color: #0b4a62;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+
+@media (max-width: 700px) {
+    .grafico-tabla-fila {
+        padding: 9px 8px;
+    }
+
+    .grafico-tabla-header {
+        padding: 0 8px 6px;
+    }
+
+    .grafico-tabla-cant {
+        height: 30px;
+        font-size: 0.9rem;
+        min-width: 40px;
+    }
+
+    .grafico-tabla-nombre {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .grafico-tabla-fila {
+        grid-template-columns: 56px minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .grafico-tabla-header {
+        grid-template-columns: 56px minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .grafico-tabla-cant {
+        min-width: 36px;
+        height: 28px;
+        font-size: 0.85rem;
+        padding: 0 8px;
+    }
+
+    .grafico-tabla-nombre {
+        font-size: 0.8rem;
     }
 }

@@ -145,9 +145,16 @@
         <!-- GRAFICO: productos mas vendidos -->
         <section class="admin-card grafico-card grafico-card-full">
           <h2><i class="fas fa-trophy"></i> Top 10 productos más vendidos</h2>
-          <div class="grafico-wrapper grafico-wrapper-barras">
+          <!-- grafico (desktop) -->
+          <div class="grafico-wrapper grafico-wrapper-barras" id="grafico-productos-wrapper">
             <canvas id="grafico-productos"></canvas>
           </div>
+
+          <!-- tabla (mobile) -->
+          <div class="grafico-tabla-wrapper" id="grafico-productos-tabla-wrapper" style="display: none">
+            <div id="grafico-productos-tabla"></div>
+          </div>
+
           <p class="grafico-nota" id="grafico-productos-nota"></p>
         </section>
 

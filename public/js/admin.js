@@ -424,10 +424,122 @@ if (formLogin) {
     }
 }
 
+// MENU HAMBURGUESA DEL SIDEBAR (MOBILE)
+
+function iniciarMenuMobile() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    const header = document.querySelector('.admin-header');
+
+    if (!sidebar || !header) return;
+    if (document.getElementById('admin-menu-toggle')) return;
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'admin-menu-toggle';
+    toggle.id = 'admin-menu-toggle';
+    toggle.setAttribute('aria-label', 'Abrir menú');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.innerHTML = '<i class="fas fa-bars"></i>';
+    header.insertBefore(toggle, header.firstChild);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'admin-sidebar-overlay';
+    overlay.id = 'admin-sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    const icono = toggle.querySelector('i');
+
+    function abrir() {
+        sidebar.classList.add('sidebar-abierto');
+        overlay.classList.add('visible');
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.setAttribute('aria-label', 'Cerrar menú');
+        if (icono) icono.className = 'fas fa-times';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrar() {
+        sidebar.classList.remove('sidebar-abierto');
+        overlay.classList.remove('visible');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Abrir menú');
+        if (icono) icono.className = 'fas fa-bars';
+        document.body.style.overflow = '';
+    }
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (sidebar.classList.contains('sidebar-abierto')) {
+            cerrar();
+        } else {
+            abrir();
+        }
+    });
+
+    overlay.addEventListener('click', cerrar);
+
+    sidebar.querySelectorAll('.admin-nav a').forEach((link) => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 900) {
+                cerrar();
+            }
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('sidebar-abierto')) {
+            cerrar();
+        }
+    });
+
+    let ultimoAncho = window.innerWidth;
+    window.addEventListener('resize', () => {
+        const ancho = window.innerWidth;
+        if (ultimoAncho <= 900 && ancho > 900) {
+            cerrar();
+        }
+        ultimoAncho = ancho;
+    });
+}
+
+// TABLAS RESPONSIVE
+// copia el texto de cada <th> al atributo data-label de los <td> correspondientes
+function aplicarDataLabels(tabla) {
+    const encabezados = Array.from(tabla.querySelectorAll('thead th')).map((th) =>
+        th.textContent.replace(/\s+/g, ' ').trim()
+    );
+
+    tabla.querySelectorAll('tbody tr').forEach((fila) => {
+        fila.querySelectorAll('td').forEach((celda, indice) => {
+            if (!celda.hasAttribute('data-label')) {
+                celda.setAttribute('data-label', encabezados[indice] || '');
+            }
+        });
+    });
+}
+
+function prepararTablasResponsive() {
+    document.querySelectorAll('table.admin-table').forEach((tabla) => {
+        aplicarDataLabels(tabla);
+
+        const tbody = tabla.querySelector('tbody');
+        if (!tbody) return;
+
+        const observador = new MutationObserver(() => {
+            aplicarDataLabels(tabla);
+        });
+
+        observador.observe(tbody, { childList: true, subtree: false });
+    });
+}
+
 // PROTECCION AUTOMATICA DE PAGINAS INTERNAS
 
 document.addEventListener('DOMContentLoaded', () => {
     if (document.body.dataset.adminProtected === 'true') {
         protegerPagina();
     }
+
+    iniciarMenuMobile();
+    prepararTablasResponsive();
 });
