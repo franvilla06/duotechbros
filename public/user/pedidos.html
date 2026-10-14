@@ -23,6 +23,9 @@
           <span class="perfil-header-usuario" id="pedidos-usuario">
             <i class="fas fa-user-circle"></i> ...
           </span>
+          <button type="button" class="perfil-btn-exportar" id="btn-exportar-pdf" disabled>
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
           <a href="/tienda.html" class="perfil-btn-volver">
             <i class="fas fa-arrow-left"></i> Volver a la tienda
           </a>
@@ -119,6 +122,10 @@
         <div class="pedido-modal-acciones" id="modal-acciones"></div>
       </div>
     </div>
+
+    <!-- librerias para generar el pdf -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <script src="/js/usuario-pedidos.js"></script>
   </body>
