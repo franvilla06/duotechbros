@@ -4,6 +4,7 @@
 const API_PEDIDOS_USUARIO = '/api/usuarios/pedidos';
 
 const usuarioSpan = document.getElementById('pedidos-usuario');
+const btnExportarPDF = document.getElementById('btn-exportar-pdf');
 
 const pedidosToolbar = document.getElementById('pedidos-toolbar');
 const buscador = document.getElementById('buscador-pedidos');
@@ -385,6 +386,221 @@ function generarCardCompra(pedido) {
     `;
 }
 
+// EXPORTAR A PDF
+
+function fechaHaceMeses(meses) {
+    const hoy = new Date();
+    return new Date(hoy.getFullYear(), hoy.getMonth() - meses, hoy.getDate());
+}
+
+function formatearFechaCorta(fechaISO) {
+    if (!fechaISO) return '—';
+    const fecha = new Date(String(fechaISO).replace(' ', 'T'));
+    if (Number.isNaN(fecha.getTime())) return String(fechaISO);
+
+    const pad = (numero) => String(numero).padStart(2, '0');
+    return `${pad(fecha.getDate())}/${pad(fecha.getMonth() + 1)}/${fecha.getFullYear()}`;
+}
+
+function detalleParaPDF(pedido) {
+    if (esReparacion(pedido)) {
+        const modelo = pedido.modelo_celular || 'Sin modelo';
+        const descripcion = (pedido.descripcion_problema || '').trim();
+        return descripcion ? `${modelo} - ${descripcion}` : modelo;
+    }
+
+    const productos = Number(pedido.total_items) || 0;
+    const unidades = Number(pedido.total_unidades) || 0;
+    return `${productos} producto${productos !== 1 ? 's' : ''} (${unidades} unidad${unidades !== 1 ? 'es' : ''})`;
+}
+
+function montoParaPDF(pedido) {
+    if (esReparacion(pedido)) {
+        if (pedido.presupuesto === null || pedido.presupuesto === undefined) {
+            return 'A confirmar';
+        }
+        return formatearPrecio(pedido.presupuesto);
+    }
+    return formatearPrecio(pedido.total_precio);
+}
+
+function exportarPedidosPDF() {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        mostrarToast('No se pudo cargar la libreria de PDF. Revisa tu conexion.', 'error');
+        return;
+    }
+
+    const desde = fechaHaceMeses(6);
+    const pedidosRecientes = pedidosActuales.filter((pedido) => {
+        if (!pedido.creado_en) return false;
+        const fecha = new Date(String(pedido.creado_en).replace(' ', 'T'));
+        return !Number.isNaN(fecha.getTime()) && fecha >= desde;
+    });
+
+    if (pedidosRecientes.length === 0) {
+        mostrarToast('No hay pedidos en los ultimos 6 meses para exportar.', 'error');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    if (typeof doc.autoTable !== 'function') {
+        mostrarToast('No se pudo cargar el complemento de tablas PDF. Revisa tu conexion.', 'error');
+        return;
+    }
+
+    const margenIzq = 14;
+    const anchoPagina = doc.internal.pageSize.getWidth();
+
+    doc.setFillColor(11, 74, 98);
+    doc.rect(0, 0, anchoPagina, 28, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DuotechBros', margenIzq, 13);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Servicio tecnico y accesorios', margenIzq, 19);
+    doc.text('Mis pedidos - Ultimos 6 meses', margenIzq, 24);
+
+    const hoy = new Date();
+    doc.setTextColor(11, 74, 98);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Usuario: ${obtenerUsuarioActual() || '—'}`, margenIzq, 38);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(90, 107, 115);
+    doc.text(
+        `Rango: ${formatearFechaCorta(desde.toISOString())} al ${formatearFechaCorta(hoy.toISOString())}`,
+        margenIzq,
+        43
+    );
+    doc.text(
+        `Generado el ${formatearFechaCorta(hoy.toISOString())}`,
+        anchoPagina - margenIzq,
+        43,
+        { align: 'right' }
+    );
+
+    const filas = pedidosRecientes.map((pedido) => [
+        `#${String(pedido.id).padStart(4, '0')}`,
+        esReparacion(pedido) ? 'Reparacion' : 'Compra',
+        formatearFechaCorta(pedido.creado_en),
+        detalleParaPDF(pedido),
+        capitalizar(pedido.estado || 'pendiente'),
+        montoParaPDF(pedido),
+    ]);
+
+    doc.autoTable({
+        startY: 50,
+        head: [['Nro.', 'Tipo', 'Fecha', 'Detalle', 'Estado', 'Monto']],
+        body: filas,
+        theme: 'grid',
+        styles: {
+            font: 'helvetica',
+            fontSize: 9,
+            cellPadding: 3,
+            textColor: [51, 51, 51],
+            lineColor: [224, 234, 240],
+            lineWidth: 0.2,
+            valign: 'middle',
+        },
+        headStyles: {
+            fillColor: [11, 74, 98],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 9,
+            halign: 'left',
+        },
+        alternateRowStyles: {
+            fillColor: [247, 254, 255],
+        },
+        columnStyles: {
+            0: { cellWidth: 16, fontStyle: 'bold' },
+            1: { cellWidth: 22 },
+            2: { cellWidth: 22 },
+            3: { cellWidth: 'auto' },
+            4: { cellWidth: 24, halign: 'center' },
+            5: { cellWidth: 24, halign: 'right', fontStyle: 'bold' },
+        },
+        didParseCell: (data) => {
+            if (data.section === 'body' && data.column.index === 4) {
+                const estado = String(data.cell.raw || '').toLowerCase();
+                if (estado === 'pendiente') {
+                    data.cell.styles.textColor = [133, 100, 4];
+                } else if (estado === 'en proceso') {
+                    data.cell.styles.textColor = [8, 66, 152];
+                } else if (estado === 'completado') {
+                    data.cell.styles.textColor = [15, 81, 50];
+                } else if (estado === 'cancelado') {
+                    data.cell.styles.textColor = [132, 32, 41];
+                }
+            }
+        },
+    });
+
+    const compras = pedidosRecientes.filter((pedido) => !esReparacion(pedido));
+    const reparaciones = pedidosRecientes.filter((pedido) => esReparacion(pedido));
+    const totalCompras = compras.reduce(
+        (acumulado, pedido) => acumulado + Number(pedido.total_precio || 0),
+        0
+    );
+
+    let yFinal = doc.lastAutoTable.finalY + 12;
+    const altoResumen = 32;
+    if (yFinal + altoResumen > doc.internal.pageSize.getHeight() - 12) {
+        doc.addPage();
+        yFinal = 20;
+    }
+
+    doc.setFillColor(247, 254, 255);
+    doc.setDrawColor(208, 230, 234);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(margenIzq, yFinal, anchoPagina - margenIzq * 2, altoResumen, 3, 3, 'FD');
+
+    doc.setTextColor(11, 74, 98);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumen del periodo', margenIzq + 5, yFinal + 8);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(85, 85, 85);
+    doc.setFontSize(9);
+    doc.text(`Total de pedidos: ${pedidosRecientes.length}`, margenIzq + 5, yFinal + 15);
+    doc.text(`Reparaciones: ${reparaciones.length}`, margenIzq + 5, yFinal + 21);
+    doc.text(`Compras: ${compras.length}`, margenIzq + 5, yFinal + 27);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(11, 74, 98);
+    doc.text(
+        `Total gastado en compras: ${formatearPrecio(totalCompras)}`,
+        anchoPagina - margenIzq - 5,
+        yFinal + 21,
+        { align: 'right' }
+    );
+
+    const totalPaginas = doc.internal.getNumberOfPages();
+    for (let pagina = 1; pagina <= totalPaginas; pagina += 1) {
+        doc.setPage(pagina);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(153, 153, 153);
+        doc.text(
+            `DuotechBros - Pagina ${pagina} de ${totalPaginas}`,
+            anchoPagina / 2,
+            doc.internal.pageSize.getHeight() - 8,
+            { align: 'center' }
+        );
+    }
+
+    const fechaArchivo = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    doc.save(`mis-pedidos-duotechbros-${fechaArchivo}.pdf`);
+    mostrarToast(`Se exportaron ${pedidosRecientes.length} pedidos a PDF.`, 'exito');
+}
+
 // CARGAR PEDIDOS
 
 async function cargarPedidos() {
@@ -426,6 +642,9 @@ async function cargarPedidos() {
         estadoError.style.display = 'block';
     } finally {
         estadoCargando.style.display = 'none';
+        if (btnExportarPDF) {
+            btnExportarPDF.disabled = pedidosActuales.length === 0;
+        }
     }
 }
 
@@ -828,6 +1047,10 @@ document.addEventListener('keydown', (e) => {
 });
 
 // EVENTOS
+
+if (btnExportarPDF) {
+    btnExportarPDF.addEventListener('click', exportarPedidosPDF);
+}
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;

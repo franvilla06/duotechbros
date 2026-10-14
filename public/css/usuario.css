@@ -1199,6 +1199,37 @@
     transform: translateY(-1px);
 }
 
+/* boton de exportar pdf en el header de mis pedidos */
+.perfil-btn-exportar {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background-color: #ffffff;
+    color: #dc3545;
+    border: 1px solid #f5c6cb;
+    padding: 9px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s, opacity 0.2s;
+}
+
+.perfil-btn-exportar:hover:not(:disabled) {
+    background-color: #f8d7da;
+    color: #842029;
+    transform: translateY(-1px);
+}
+
+.perfil-btn-exportar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: #999;
+    border-color: #e0eaf0;
+}
+
 /* CONTENIDO PRINCIPAL */
 
 .perfil-main {
@@ -1584,6 +1615,14 @@
 
     .perfil-header-acciones {
         justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .perfil-btn-exportar,
+    .perfil-btn-volver {
+        flex: 1;
+        justify-content: center;
+        min-width: 140px;
     }
 
     .perfil-titulo h1 {
