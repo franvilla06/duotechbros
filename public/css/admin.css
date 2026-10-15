@@ -3218,11 +3218,12 @@ table.admin-table th.th-ordenable.activo {
     background: #0a9396;
 }
 
-/* ---------- TABLA: COLUMNAS MINIMAS EN DESKTOP ---------- */
+/* ---------- TABLA: ANCHO MINIMO ---------- */
 
-/* asegura que las columnas de texto no se aplasten en pantallas medianas */
+/* con las columnas fusionadas ya no hace falta forzar un min-width grande */
+/* dejamos uno chico para que en tablets muy angostas aparezca el scroll como respaldo */
 table.admin-table {
-    min-width: 720px;
+    min-width: 560px;
 }
 
 /* ---------- TABLA: RESPONSIVE EN MOBILE ---------- */
@@ -3725,6 +3726,221 @@ table.admin-table {
     table.admin-table td:has(.cell-descripcion) {
         align-items: flex-start;
     }
+}
+
+/* ============================================================
+   CELDAS FUSIONADAS EN TABLAS DEL ADMIN
+   ============================================================ */
+
+.cell-producto-principal {
+    padding: 12px 16px;
+}
+
+.cell-producto-contenido {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.cell-producto-contenido .cell-nombre {
+    font-weight: 700;
+    color: #0b4a62;
+    line-height: 1.3;
+    word-break: break-word;
+    min-width: 0;
+}
+
+.cell-precio-stock {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.cell-precio-stock-contenido {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.cell-precio-stock .cell-precio {
+    font-weight: 800;
+    color: #007bff;
+    font-size: 0.92rem;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+}
+
+.cell-precio-stock .badge {
+    font-size: 0.68rem;
+    padding: 3px 9px;
+    line-height: 1.2;
+}
+
+/* ---------- CELDA FECHAS (formato vertical) ---------- */
+
+.cell-fechas {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.cell-fechas-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cell-fechas-linea {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    color: #0b4a62;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.cell-fechas-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    flex-shrink: 0;
+    color: #0a9396;
+    font-size: 0.65rem;
+}
+
+.cell-fechas-valor {
+    font-size: 0.82rem;
+    color: #0b4a62;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cell-fechas-linea-pendiente .cell-fechas-valor,
+.cell-fechas-linea-pendiente .cell-fechas-icono {
+    color: #999;
+    font-style: italic;
+    font-weight: 500;
+}
+
+/* PRODUCTOS: 5 columnas */
+#tabla-productos th:nth-child(1) { width: 32%; }
+#tabla-productos th:nth-child(2) { width: 22%; }
+#tabla-productos th:nth-child(3) { width: 12%; }
+#tabla-productos th:nth-child(4) { width: 20%; }
+#tabla-productos th:nth-child(5) { width: 14%; text-align: right; }
+
+/* PORTAFOLIO: 5 columnas
+   mas ancho para Trabajo y Descripcion, menos para Fechas (ahora es vertical) */
+#tabla-trabajos th:nth-child(1) { width: 32%; }
+#tabla-trabajos th:nth-child(2) { width: 22%; }
+#tabla-trabajos th:nth-child(3) { width: 16%; }
+#tabla-trabajos th:nth-child(4) { width: 16%; }
+#tabla-trabajos th:nth-child(5) { width: 12%; text-align: right; }
+
+@media (max-width: 700px) {
+    table.admin-table td.cell-producto-principal {
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eef3f6;
+    }
+
+    table.admin-table td.cell-producto-principal::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    .cell-producto-contenido {
+        width: 100%;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .cell-producto-contenido .cell-nombre {
+        font-size: 0.95rem;
+        line-height: 1.35;
+        padding-top: 4px;
+    }
+
+    .cell-producto-contenido .cell-imagen-wrapper,
+    .cell-producto-contenido .cell-imagen-placeholder,
+    .cell-producto-contenido .cell-imagen-portafolio,
+    .cell-producto-contenido .cell-imagen-portafolio-placeholder {
+        flex-shrink: 0;
+        margin-left: 0;
+    }
+
+    table.admin-table td.cell-precio-stock {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .cell-precio-stock-contenido {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    table.admin-table td.cell-precio-stock::before {
+        content: none !important;
+    }
+
+    table.admin-table td.cell-precio-stock .cell-precio {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+
+    table.admin-table td.cell-precio-stock .cell-precio::before {
+        content: "Precio";
+        font-weight: 700;
+        color: #0b4a62;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    table.admin-table td.cell-precio-stock .badge {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 6px 10px;
+        font-size: 0.72rem;
+        border-radius: 8px;
+    }
+
+    table.admin-table td.cell-precio-stock .badge::before {
+        content: "Stock";
+        font-weight: 700;
+        color: inherit;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 0.68rem;
+        margin-right: auto;
+        padding-right: 8px;
+    }
+
+    table.admin-table td.cell-fechas::before {
+        content: none !important;
+    }
+
+    .cell-fechas {
+        align-items: flex-start;
+    }
+
+    table.admin-table td.cell-fechas {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 420px) {
+    .cell-producto-contenido .cell-nombre {
+        font-size: 0.9rem;
+    }
 
     table.admin-table td:has(.cell-descripcion)::before {
         padding-top: 2px;
@@ -4221,5 +4437,119 @@ table.admin-table tbody tr.mov-detalle-fila {
 
     .grafico-tabla-nombre {
         font-size: 0.8rem;
+    }
+}
+
+/* ============================================================
+   FIX DE LA TABLA DE PRODUCTOS Y PORTAFOLIO
+   ============================================================ */
+
+#tabla-productos,
+#tabla-trabajos {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.cell-producto-contenido .cell-nombre {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+#tabla-productos .cell-descripcion,
+#tabla-trabajos .cell-descripcion {
+    min-width: 0;
+}
+
+table.admin-table {
+    min-width: 0;
+}
+
+/* ============================================================
+   PREVENCION DE DESBORDE EN CELDAS CON CONTENIDO ANCHO
+   ============================================================ */
+
+#tabla-productos td .badge,
+#tabla-trabajos td .badge {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+#tabla-trabajos td:nth-child(3) {
+    overflow: hidden;
+}
+
+#tabla-productos td.cell-precio-stock .badge {
+    max-width: 100%;
+}
+
+#tabla-productos td:nth-child(3) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#tabla-productos td:last-child,
+#tabla-trabajos td:last-child {
+    white-space: nowrap;
+}
+
+#tabla-productos td:last-child .btn-editar,
+#tabla-productos td:last-child .btn-eliminar,
+#tabla-trabajos td:last-child .btn-editar,
+#tabla-trabajos td:last-child .btn-eliminar {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+}
+
+#tabla-productos td:nth-child(2),
+#tabla-trabajos td:nth-child(2) {
+    overflow: hidden;
+}
+
+/* ============================================================
+   FIX DE ALINEACION Y COMPACIDAD EN TABLAS DEL ADMIN
+   ============================================================ */
+
+table.admin-table td {
+    vertical-align: top;
+}
+
+@media (min-width: 701px) {
+    table.admin-table td {
+        padding: 12px 14px;
+    }
+
+    table.admin-table th {
+        padding: 11px 14px;
+    }
+}
+
+table.admin-table {
+    min-width: 480px;
+}
+
+@media (min-width: 1025px) {
+    .admin-grid-2col {
+        grid-template-columns: 340px 1fr;
+        gap: 20px;
+    }
+}
+
+#tabla-productos td:last-child,
+#tabla-trabajos td:last-child {
+    padding-top: 14px;
+}
+
+@media (min-width: 701px) {
+    .cell-precio-stock .cell-precio,
+    .cell-precio-stock .badge {
+        align-self: flex-start;
     }
 }

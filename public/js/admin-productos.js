@@ -341,16 +341,24 @@ function renderizarProductos(productos) {
             : `<div class="cell-imagen-placeholder"><i class="fas fa-image"></i></div>`;
 
         tr.innerHTML = `
-            <td>${imagenHTML}</td>
-            <td><span class="cell-nombre">${escapar(p.nombre)}</span></td>
+            <td class="cell-producto-principal" data-label="">
+                <div class="cell-producto-contenido">
+                    ${imagenHTML}
+                    <span class="cell-nombre">${escapar(p.nombre)}</span>
+                </div>
+            </td>
             <td>
                 <div class="cell-descripcion" title="${escapar(p.descripcion)}">
                     ${escapar(p.descripcion)}
                 </div>
             </td>
             <td>${escapar(p.categoria)}</td>
-            <td><span class="cell-precio">${formatearPrecio(p.precio)}</span></td>
-            <td><span class="badge ${claseStock(p.stock)}">${escapar(p.stock)} ud.</span></td>
+            <td class="cell-precio-stock">
+                <div class="cell-precio-stock-contenido">
+                    <span class="cell-precio">${formatearPrecio(p.precio)}</span>
+                    <span class="badge ${claseStock(p.stock)}">${escapar(p.stock)} ud.</span>
+                </div>
+            </td>
             <td style="text-align: right">
                 <button class="btn-editar" title="Editar" data-id="${p.id}">
                     <i class="fas fa-edit"></i>
@@ -656,11 +664,10 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarColumnasOrdenables(
         'tabla-productos',
         {
-            1: { campo: 'nombre', tipo: 'string' },
-            2: { campo: 'descripcion', tipo: 'string' },
-            3: { campo: 'categoria', tipo: 'string' },
-            4: { campo: 'precio', tipo: 'numero' },
-            5: { campo: 'stock', tipo: 'numero' },
+            0: { campo: 'nombre', tipo: 'string' },
+            1: { campo: 'descripcion', tipo: 'string' },
+            2: { campo: 'categoria', tipo: 'string' },
+            3: { campo: 'stock', tipo: 'numero' },
         },
         () => ordenActual,
         (nuevo) => { ordenActual = nuevo; },
