@@ -34,6 +34,7 @@
         opacity: 0;
         transform: translateY(15px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -924,6 +925,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -945,6 +947,7 @@
         opacity: 0;
         transform: translateY(20px) scale(0.96);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -970,9 +973,11 @@
     0% {
         transform: scale(0);
     }
+
     70% {
         transform: scale(1.1);
     }
+
     100% {
         transform: scale(1);
     }
@@ -1330,6 +1335,7 @@
         opacity: 0;
         transform: translateY(6px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1575,7 +1581,7 @@
     font-weight: 800;
 }
 
-.perfil-peligro > p {
+.perfil-peligro>p {
     color: #666;
     font-size: 0.9rem;
     line-height: 1.7;
@@ -1633,10 +1639,25 @@
         padding: 24px 20px;
     }
 
+    .perfil-tabs {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding: 6px;
+        gap: 6px;
+    }
+
     .perfil-tab {
-        min-width: auto;
+        flex: 1 1 calc(50% - 6px);
+        min-width: 0;
         font-size: 0.82rem;
-        padding: 11px 12px;
+        padding: 12px 10px;
+        gap: 6px;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .perfil-tab i {
+        font-size: 0.85rem;
     }
 
     .perfil-peligro {
@@ -1730,6 +1751,7 @@
         opacity: 0;
         transform: translateY(6px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2740,10 +2762,12 @@
         transform: scale(0.5);
         opacity: 0;
     }
+
     70% {
         transform: scale(1.05);
         opacity: 1;
     }
+
     100% {
         transform: scale(1);
     }
@@ -2961,4 +2985,804 @@
     .recuperar-passwords {
         gap: 12px;
     }
+}
+
+/* ============================================================
+   CARDS COMPACTAS CON EXPAND EN "MIS PEDIDOS"
+   ============================================================ */
+
+.pedido-card-compacta {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+}
+
+.pedido-compacto-header {
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    user-select: none;
+}
+
+.pedido-compacto-header:hover {
+    background-color: #f7fafe;
+}
+
+.pedido-compacto-linea1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.pedido-compacto-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #0b4a62;
+    font-size: 0.95rem;
+    min-width: 0;
+    overflow: hidden;
+    flex: 1;
+}
+
+.pedido-compacto-titulo i {
+    color: #0a9396;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.pedido-compacto-titulo strong {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pedido-compacto-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.pedido-compacto-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: #f0f4f8;
+    color: #0b4a62;
+    font-size: 0.65rem;
+    transition: transform 0.25s ease, background-color 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.pedido-card-compacta.pedido-card-abierta .pedido-compacto-chevron {
+    transform: rotate(180deg);
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.pedido-compacto-linea2 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    color: #666;
+    font-size: 0.82rem;
+    padding-left: 26px;
+}
+
+.pedido-compacto-dato {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.pedido-compacto-dato i {
+    color: #0a9396;
+    font-size: 0.78rem;
+}
+
+.pedido-compacto-dato-total {
+    margin-left: auto;
+    color: #007bff;
+    font-weight: 800;
+    font-size: 0.92rem;
+}
+
+.pedido-compacto-detalle {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+    padding: 0 18px;
+    border-top: 1px solid transparent;
+}
+
+.pedido-card-compacta.pedido-card-abierta .pedido-compacto-detalle {
+    max-height: 800px;
+    padding: 14px 18px 16px;
+    border-top-color: #eef3f6;
+    background-color: #f7fafe;
+}
+
+.pedido-detalle-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f4f8;
+    font-size: 0.85rem;
+}
+
+.pedido-detalle-linea:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.pedido-detalle-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.pedido-detalle-valor {
+    color: #0b4a62;
+    font-weight: 600;
+    text-align: right;
+    word-break: break-word;
+    min-width: 0;
+}
+
+.pedido-detalle-total {
+    color: #007bff;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.pedido-detalle-pendiente {
+    color: #f59e0b;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.pedido-detalle-linea-descripcion {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.pedido-detalle-texto {
+    margin: 0;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    background-color: #ffffff;
+    border: 1px solid #e0eaf0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pedido-compacto-acciones {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #eef3f6;
+    flex-wrap: wrap;
+}
+
+.pedido-compacto-acciones .pedido-btn-detalle,
+.pedido-compacto-acciones .pedido-btn-repetir-card {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.pedido-compacto-acciones .pedido-btn-repetir-card {
+    margin-right: 0;
+}
+
+@media (min-width: 701px) {
+    .pedido-compacto-detalle {
+        max-height: none;
+        padding: 14px 22px 18px;
+        border-top: 1px solid #eef3f6;
+        overflow: visible;
+    }
+
+    .pedido-compacto-chevron {
+        display: none;
+    }
+
+    .pedido-compacto-header {
+        cursor: default;
+    }
+
+    .pedido-compacto-header:hover {
+        background-color: transparent;
+    }
+
+    .pedido-card-compacta .pedido-compacto-detalle {
+        background-color: transparent;
+    }
+}
+
+@media (max-width: 700px) {
+    .pedido-compacto-header {
+        padding: 13px 16px;
+    }
+
+    .pedido-compacto-linea1 {
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .pedido-compacto-titulo {
+        font-size: 0.9rem;
+        gap: 8px;
+    }
+
+    .pedido-compacto-linea2 {
+        gap: 12px;
+        font-size: 0.78rem;
+        padding-left: 24px;
+    }
+
+    .pedido-compacto-dato-total {
+        font-size: 0.88rem;
+    }
+
+    .pedido-card-compacta.pedido-card-abierta .pedido-compacto-detalle {
+        padding: 12px 16px 14px;
+    }
+
+    .pedido-compacto-acciones {
+        margin-top: 14px;
+        padding-top: 12px;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 420px) {
+    .pedido-compacto-linea2 {
+        gap: 10px;
+        padding-left: 22px;
+    }
+
+    .pedido-compacto-dato {
+        font-size: 0.75rem;
+    }
+
+    .pedido-compacto-dato i {
+        font-size: 0.72rem;
+    }
+}
+
+/* ============================================================
+   FIX DEL MODAL DE DETALLE DE PEDIDO
+   ============================================================ */
+
+.modal-overlay {
+    align-items: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-overlay .modal-card {
+    margin: auto;
+    box-sizing: border-box;
+}
+
+.pedido-modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    padding: 0;
+    overflow: hidden;
+}
+
+.pedido-modal .modal-header {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 20px 24px 16px;
+    background-color: #ffffff;
+    border-bottom: 2px solid #eef3f6;
+    border-radius: 20px 20px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.pedido-modal .modal-header h2 {
+    font-size: 1.1rem;
+}
+
+.pedido-modal .pedido-modal-info,
+.pedido-modal .pedido-modal-items,
+.pedido-modal .pedido-modal-total {
+    flex-shrink: 0;
+}
+
+.pedido-modal .pedido-modal-info {
+    padding: 20px 24px 0;
+    margin-bottom: 0;
+}
+
+.pedido-modal .pedido-modal-items {
+    padding: 0 24px;
+}
+
+.pedido-modal .pedido-modal-total {
+    padding: 0 24px;
+    margin-top: 16px;
+}
+
+.pedido-modal .pedido-modal-acciones {
+    flex-shrink: 0;
+    padding: 16px 24px 24px;
+    margin-top: 16px;
+    border-top: 1px solid #eef3f6;
+    background-color: #ffffff;
+}
+
+.pedido-modal {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.pedido-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pedido-modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.pedido-modal::-webkit-scrollbar-thumb {
+    background: #c0c7cd;
+    border-radius: 999px;
+}
+
+.pedido-modal::-webkit-scrollbar-thumb:hover {
+    background: #0a9396;
+}
+
+/* ============================================================
+   RESPONSIVE DEL MODAL DE DETALLE
+   ============================================================ */
+
+@media (max-width: 600px) {
+    .modal-overlay {
+        padding: 12px;
+    }
+
+    .modal-overlay .modal-card {
+        border-radius: 16px;
+    }
+
+    .pedido-modal {
+        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px);
+        border-radius: 16px;
+    }
+
+    .pedido-modal .modal-header {
+        padding: 16px 18px 14px;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .pedido-modal .modal-header h2 {
+        font-size: 1rem;
+        gap: 6px;
+    }
+
+    .pedido-modal .modal-header h2 i {
+        font-size: 0.95rem;
+    }
+
+    .pedido-modal .pedido-modal-id {
+        font-size: 0.95rem;
+    }
+
+    .pedido-modal .pedido-modal-info {
+        padding: 16px 18px 0;
+    }
+
+    .pedido-modal .pedido-modal-items {
+        padding: 0 18px;
+    }
+
+    .pedido-modal .pedido-modal-total {
+        padding: 0 18px;
+        margin-top: 14px;
+    }
+
+    .pedido-modal .pedido-modal-acciones {
+        padding: 14px 18px 18px;
+        margin-top: 14px;
+    }
+
+    .pedido-modal .pedido-modal-botones {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pedido-modal .pedido-btn-repetir,
+    .pedido-modal .pedido-btn-cancelar {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .modal-overlay {
+        padding: 8px;
+    }
+
+    .pedido-modal {
+        max-height: calc(100vh - 16px);
+        max-height: calc(100dvh - 16px);
+    }
+
+    .pedido-modal .modal-header {
+        padding: 14px 16px 12px;
+    }
+
+    .pedido-modal .pedido-modal-info,
+    .pedido-modal .pedido-modal-items,
+    .pedido-modal .pedido-modal-total {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .pedido-modal .pedido-modal-acciones {
+        padding: 12px 16px 16px;
+    }
+}
+
+/* ============================================================
+   FIX: MODAL DE DETALLE (ESPACIADO + STICKY HEADER/FOOTER)
+   ============================================================ */
+
+.pedido-modal {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100dvh - 40px);
+    padding: 0;
+}
+
+/* ---------- HEADER STICKY ---------- */
+
+.pedido-modal .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #ffffff;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 18px 24px 16px;
+    border-bottom: 2px solid #eef3f6;
+    box-shadow: 0 4px 12px rgba(11, 74, 98, 0.05);
+    border-radius: 20px 20px 0 0;
+}
+
+/* ---------- BLOQUES DEL CUERPO (info, productos, totales) ---------- */
+
+.pedido-modal .pedido-modal-info {
+    flex-shrink: 0;
+    padding: 20px 24px;
+    margin: 20px 24px 0;
+    background-color: #f7feff;
+    border: 1px solid #d0e6ea;
+    border-radius: 12px;
+}
+
+.pedido-modal .pedido-modal-items {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 20px 24px 0;
+}
+
+.pedido-modal .pedido-modal-items-titulo {
+    margin: 0 0 14px;
+    color: #0b4a62;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pedido-modal .pedido-modal-items-titulo i {
+    color: #0a9396;
+}
+
+.pedido-modal .pedido-modal-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f4f8;
+    gap: 16px;
+}
+
+.pedido-modal .pedido-modal-item:last-child {
+    border-bottom: none;
+}
+
+.pedido-modal .pedido-modal-total {
+    flex-shrink: 0;
+    margin: 20px 24px 0;
+    padding: 16px 18px;
+    background-color: #f7feff;
+    border: 1px solid #d0e6ea;
+    border-radius: 12px;
+}
+
+/* ---------- ACCIONES STICKY ABAJO ---------- */
+
+.pedido-modal .pedido-modal-acciones {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background-color: #ffffff;
+    flex-shrink: 0;
+    margin: 20px 0 0;
+    padding: 16px 24px 24px;
+    border-top: 1px solid #eef3f6;
+    box-shadow: 0 -8px 16px rgba(11, 74, 98, 0.06);
+    border-radius: 0 0 20px 20px;
+}
+
+.pedido-modal .pedido-modal-aclaracion {
+    margin: 12px 0 0;
+}
+
+/* ---------- SCROLL PERSONALIZADO ---------- */
+
+.pedido-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pedido-modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.pedido-modal::-webkit-scrollbar-thumb {
+    background: #c0c7cd;
+    border-radius: 999px;
+}
+
+.pedido-modal::-webkit-scrollbar-thumb:hover {
+    background: #0a9396;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 600px) {
+    .pedido-modal {
+        max-height: calc(100dvh - 24px);
+        border-radius: 16px;
+    }
+
+    .pedido-modal .modal-header {
+        padding: 16px 18px 14px;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .pedido-modal .modal-header h2 {
+        font-size: 1rem;
+    }
+
+    .pedido-modal .pedido-modal-info {
+        padding: 16px 18px;
+        margin: 16px 18px 0;
+    }
+
+    .pedido-modal .pedido-modal-items {
+        margin: 18px 18px 0;
+    }
+
+    .pedido-modal .pedido-modal-items-titulo {
+        margin-bottom: 12px;
+    }
+
+    .pedido-modal .pedido-modal-total {
+        margin: 18px 18px 0;
+        padding: 14px 16px;
+    }
+
+    .pedido-modal .pedido-modal-acciones {
+        padding: 14px 18px 18px;
+        margin-top: 18px;
+        border-radius: 0 0 16px 16px;
+    }
+
+    .pedido-modal .pedido-modal-botones {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pedido-modal .pedido-btn-repetir,
+    .pedido-modal .pedido-btn-cancelar {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .pedido-modal {
+        max-height: calc(100dvh - 16px);
+    }
+
+    .pedido-modal .modal-header {
+        padding: 14px 16px 12px;
+    }
+
+    .pedido-modal .pedido-modal-info {
+        margin: 14px 14px 0;
+        padding: 14px 14px;
+    }
+
+    .pedido-modal .pedido-modal-items {
+        margin: 16px 14px 0;
+    }
+
+    .pedido-modal .pedido-modal-total {
+        margin: 16px 14px 0;
+        padding: 12px 14px;
+    }
+
+    .pedido-modal .pedido-modal-acciones {
+        padding: 12px 16px 16px;
+    }
+}
+
+/* ============================================================
+   FIX: INFO DEL MODAL HORIZONTAL EN MOBILE
+   (anula la regla vieja que apilaba label y valor)
+   ============================================================ */
+
+.pedido-modal .pedido-modal-info-linea {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eef3f6;
+}
+
+.pedido-modal .pedido-modal-info-linea:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.pedido-modal .pedido-modal-info-linea:first-child {
+    padding-top: 0;
+}
+
+.pedido-modal .pedido-modal-info-label {
+    flex-shrink: 0;
+    text-align: left;
+    color: #888;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pedido-modal .pedido-modal-info-valor,
+.pedido-modal .pedido-modal-info-linea > .badge,
+.pedido-modal .pedido-modal-info-linea > .pedido-tipo-badge {
+    margin-left: auto;
+    text-align: right;
+    flex-shrink: 1;
+    min-width: 0;
+    word-break: break-word;
+}
+
+.pedido-modal .pedido-modal-info-linea > .pedido-tipo-badge {
+    display: inline-flex;
+}
+
+/* ============================================================
+   FIX: INFO-BLOCK MAS COMPACTO PARA QUE ENTRE EL TOTAL
+   ============================================================ */
+
+.pedido-modal .pedido-modal-info {
+    padding: 14px 18px;
+    margin: 16px 20px 0;
+}
+
+.pedido-modal .pedido-modal-total {
+    padding: 14px 18px;
+    margin: 16px 20px 0;
+}
+
+.pedido-modal .pedido-modal-total-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.88rem;
+}
+
+.pedido-modal .pedido-modal-total-final {
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 2px solid #d0e6ea;
+}
+
+/* ============================================================
+   FIX: ESPACIO EXTRA AL FINAL DEL CONTENIDO
+   para que el ultimo bloque no quede tapado por los botones
+   ============================================================ */
+
+.pedido-modal .pedido-modal-total {
+    margin-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+    .pedido-modal .pedido-modal-info {
+        padding: 12px 14px;
+        margin: 14px 16px 0;
+    }
+
+    .pedido-modal .pedido-modal-info-linea {
+        padding: 7px 0;
+    }
+
+    .pedido-modal .pedido-modal-info-label {
+        font-size: 0.68rem;
+    }
+
+    .pedido-modal .pedido-modal-info-valor {
+        font-size: 0.85rem;
+    }
+
+    .pedido-modal .pedido-modal-total {
+        padding: 12px 14px;
+        margin: 14px 16px 8px;
+    }
+}
+
+/* ============================================================
+   FIX: DAR ESPACIO AL FINAL DEL SCROLL PARA QUE SE VEA EL TOTAL
+   ============================================================ */
+
+.pedido-modal {
+    scroll-padding-bottom: 100px;
+}
+
+.pedido-modal .pedido-modal-total {
+    margin-bottom: 8px;
+}
+
+.pedido-modal::after {
+    content: "";
+    display: block;
+    height: 4px;
+    flex-shrink: 0;
 }
