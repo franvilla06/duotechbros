@@ -347,9 +347,60 @@ function renderizarTrabajos(trabajos) {
                </div>`
             : `<div class="cell-imagen-portafolio-placeholder"><i class="fas fa-image"></i></div>`;
 
+        // fechas: inicio arriba, fin abajo (formato vertical)
+        const fechaInicio = t.fecha_inicio ? escapar(formatearFecha(t.fecha_inicio)) : null;
+        const fechaFin = t.fecha_fin ? escapar(formatearFecha(t.fecha_fin)) : null;
+
+        let fechasHTML;
+        if (fechaInicio && fechaFin) {
+            fechasHTML = `
+                <div class="cell-fechas-linea">
+                    <span class="cell-fechas-icono"><i class="fas fa-play"></i></span>
+                    <span class="cell-fechas-valor">${fechaInicio}</span>
+                </div>
+                <div class="cell-fechas-linea">
+                    <span class="cell-fechas-icono"><i class="fas fa-flag-checkered"></i></span>
+                    <span class="cell-fechas-valor">${fechaFin}</span>
+                </div>
+            `;
+        } else if (fechaInicio) {
+            fechasHTML = `
+                <div class="cell-fechas-linea">
+                    <span class="cell-fechas-icono"><i class="fas fa-play"></i></span>
+                    <span class="cell-fechas-valor">${fechaInicio}</span>
+                </div>
+                <div class="cell-fechas-linea cell-fechas-linea-pendiente">
+                    <span class="cell-fechas-icono"><i class="fas fa-hourglass-half"></i></span>
+                    <span class="cell-fechas-valor">En curso</span>
+                </div>
+            `;
+        } else if (fechaFin) {
+            fechasHTML = `
+                <div class="cell-fechas-linea cell-fechas-linea-pendiente">
+                    <span class="cell-fechas-icono"><i class="fas fa-play"></i></span>
+                    <span class="cell-fechas-valor">—</span>
+                </div>
+                <div class="cell-fechas-linea">
+                    <span class="cell-fechas-icono"><i class="fas fa-flag-checkered"></i></span>
+                    <span class="cell-fechas-valor">${fechaFin}</span>
+                </div>
+            `;
+        } else {
+            fechasHTML = `
+                <div class="cell-fechas-linea cell-fechas-linea-pendiente">
+                    <span class="cell-fechas-icono"><i class="fas fa-calendar"></i></span>
+                    <span class="cell-fechas-valor">Sin fechas</span>
+                </div>
+            `;
+        }
+
         tr.innerHTML = `
-            <td>${imagenHTML}</td>
-            <td><span class="cell-nombre">${escapar(t.titulo)}</span></td>
+            <td class="cell-producto-principal" data-label="">
+                <div class="cell-producto-contenido">
+                    ${imagenHTML}
+                    <span class="cell-nombre">${escapar(t.titulo)}</span>
+                </div>
+            </td>
             <td>
                 <div class="cell-descripcion" title="${escapar(t.descripcion)}">
                     ${escapar(t.descripcion)}
@@ -360,8 +411,9 @@ function renderizarTrabajos(trabajos) {
                     ${escapar(t.tipo_reparacion || 'Sin categoría')}
                 </span>
             </td>
-            <td><span class="cell-fecha">${formatearFecha(t.fecha_inicio)}</span></td>
-            <td><span class="cell-fecha">${formatearFecha(t.fecha_fin)}</span></td>
+            <td class="cell-fechas">
+                <div class="cell-fechas-contenido">${fechasHTML}</div>
+            </td>
             <td style="text-align: right">
                 <button class="btn-editar" title="Editar" data-id="${t.id}">
                     <i class="fas fa-edit"></i>
@@ -674,11 +726,10 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarColumnasOrdenables(
         'tabla-trabajos',
         {
-            1: { campo: 'titulo', tipo: 'string' },
-            2: { campo: 'descripcion', tipo: 'string' },
-            3: { campo: 'tipo_reparacion', tipo: 'string' },
-            4: { campo: 'fecha_inicio', tipo: 'fecha' },
-            5: { campo: 'fecha_fin', tipo: 'fecha' },
+            0: { campo: 'titulo', tipo: 'string' },
+            1: { campo: 'descripcion', tipo: 'string' },
+            2: { campo: 'tipo_reparacion', tipo: 'string' },
+            3: { campo: 'fecha_inicio', tipo: 'fecha' },
         },
         () => ordenActual,
         (nuevo) => { ordenActual = nuevo; },
