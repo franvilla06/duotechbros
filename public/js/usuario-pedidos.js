@@ -248,8 +248,9 @@ function renderizarPedidos(pedidos) {
 
     pedidos.forEach((pedido) => {
         const card = document.createElement('article');
-        card.className = 'pedido-card';
+        card.className = 'pedido-card pedido-card-compacta';
         card.dataset.tipo = esReparacion(pedido) ? 'reparacion' : 'compra';
+        card.dataset.id = pedido.id;
 
         card.innerHTML = esReparacion(pedido)
             ? generarCardReparacion(pedido)
@@ -258,18 +259,44 @@ function renderizarPedidos(pedidos) {
         pedidosLista.appendChild(card);
     });
 
+    pedidosLista.querySelectorAll('.pedido-card-compacta').forEach((card) => {
+        const header = card.querySelector('.pedido-compacto-header');
+        if (!header) return;
+
+        header.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            togglePedidoCard(card.dataset.id);
+        });
+    });
+
     pedidosLista.querySelectorAll('.pedido-btn-detalle').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             abrirModalDetalle(btn.dataset.id);
         });
     });
 
-    // boton "repetir" directo en la tarjeta (solo para compras no canceladas)
     pedidosLista.querySelectorAll('.pedido-btn-repetir-card').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             repetirPedido(btn.dataset.id);
         });
     });
+}
+
+function togglePedidoCard(id) {
+    if (window.innerWidth > 700) return;
+
+    const cards = Array.from(pedidosLista.querySelectorAll('.pedido-card-compacta'));
+    const card = cards.find((item) => item.dataset.id === String(id));
+    if (!card) return;
+
+    const estabaAbierta = card.classList.contains('pedido-card-abierta');
+    cards.forEach((item) => item.classList.remove('pedido-card-abierta'));
+
+    if (!estabaAbierta) {
+        card.classList.add('pedido-card-abierta');
+    }
 }
 
 function generarCardReparacion(pedido) {
@@ -279,50 +306,63 @@ function generarCardReparacion(pedido) {
     const descripcion = pedido.descripcion_problema || 'Sin descripcion';
 
     const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
-    const presupuestoHTML = tienePresupuesto
-        ? `<div class="pedido-card-presupuesto">
-               <span class="pedido-card-presupuesto-label">Presupuesto</span>
-               <span class="pedido-card-presupuesto-valor">${formatearPrecio(pedido.presupuesto)}</span>
-           </div>`
-        : '';
+    const presupuestoTexto = tienePresupuesto ? formatearPrecio(pedido.presupuesto) : 'A confirmar';
 
     return `
-        <div class="pedido-card-header pedido-card-header-reparacion">
-            <div class="pedido-card-id">
-                <i class="fas fa-tools"></i>
-                <strong>Pedido de Reparacion ${pedidoIdFormateado}</strong>
-                <span class="pedido-tipo-badge pedido-tipo-reparacion">
-                    <i class="fas fa-tools"></i> Reparacion
+        <div class="pedido-compacto-header">
+            <div class="pedido-compacto-linea1">
+                <div class="pedido-compacto-titulo">
+                    <i class="fas fa-tools"></i>
+                    <strong>Reparacion ${pedidoIdFormateado}</strong>
+                </div>
+                <div class="pedido-compacto-badges">
+                    <span class="badge ${claseBadgeEstado(estadoActual)}">
+                        ${capitalizar(estadoActual)}
+                    </span>
+                    <span class="pedido-compacto-chevron">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="pedido-compacto-linea2">
+                <span class="pedido-compacto-dato">
+                    <i class="fas fa-calendar-alt"></i>
+                    ${formatearFecha(pedido.creado_en)}
+                </span>
+                <span class="pedido-compacto-dato">
+                    <i class="fas fa-mobile-alt"></i>
+                    ${escapar(modelo)}
+                </span>
+                <span class="pedido-compacto-dato pedido-compacto-dato-total">
+                    ${presupuestoTexto}
                 </span>
             </div>
-            <span class="badge ${claseBadgeEstado(estadoActual)}">
-                ${capitalizar(estadoActual)}
-            </span>
         </div>
 
-        <div class="pedido-card-body">
-            <div class="pedido-card-info">
-                <div class="pedido-card-info-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>${formatearFecha(pedido.creado_en)}</span>
-                </div>
-                <div class="pedido-card-info-item">
-                    <i class="fas fa-mobile-alt"></i>
-                    <span>${escapar(modelo)}</span>
-                </div>
+        <div class="pedido-compacto-detalle">
+            <div class="pedido-detalle-linea pedido-detalle-linea-descripcion">
+                <span class="pedido-detalle-label">Descripcion</span>
+                <p class="pedido-detalle-texto">${escapar(descripcion)}</p>
             </div>
-
-            <p class="pedido-card-descripcion">
-                ${escapar(descripcion)}
-            </p>
-
-            ${presupuestoHTML}
-        </div>
-
-        <div class="pedido-card-footer">
-            <button type="button" class="pedido-btn-detalle" data-id="${pedido.id}">
-                <i class="fas fa-eye"></i> Ver detalle
-            </button>
+            <div class="pedido-detalle-linea">
+                <span class="pedido-detalle-label">Fecha</span>
+                <span class="pedido-detalle-valor">${formatearFecha(pedido.creado_en)}</span>
+            </div>
+            <div class="pedido-detalle-linea">
+                <span class="pedido-detalle-label">Modelo</span>
+                <span class="pedido-detalle-valor">${escapar(modelo)}</span>
+            </div>
+            <div class="pedido-detalle-linea">
+                <span class="pedido-detalle-label">Presupuesto</span>
+                <span class="pedido-detalle-valor ${tienePresupuesto ? '' : 'pedido-detalle-pendiente'}">
+                    ${presupuestoTexto}
+                </span>
+            </div>
+            <div class="pedido-compacto-acciones">
+                <button type="button" class="pedido-btn-detalle" data-id="${escapar(pedido.id)}">
+                    <i class="fas fa-eye"></i> Ver detalle
+                </button>
+            </div>
         </div>
     `;
 }
@@ -332,56 +372,69 @@ function generarCardCompra(pedido) {
     const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
     const totalItems = Number(pedido.total_items) || 0;
     const totalUnidades = Number(pedido.total_unidades) || 0;
+    const totalPrecio = formatearPrecio(pedido.total_precio);
 
-    // mostrar "repetir" si no esta cancelado
     const mostrarRepetir = estadoActual.toLowerCase() !== 'cancelado';
     const botonRepetir = mostrarRepetir
-        ? `<button type="button" class="pedido-btn-repetir-card" data-id="${pedido.id}">
+        ? `<button type="button" class="pedido-btn-repetir-card" data-id="${escapar(pedido.id)}">
                <i class="fas fa-redo"></i> Volver a pedir
            </button>`
         : '';
 
     return `
-        <div class="pedido-card-header pedido-card-header-compra">
-            <div class="pedido-card-id">
-                <i class="fas fa-shopping-bag"></i>
-                <strong>Compra ${pedidoIdFormateado}</strong>
-                <span class="pedido-tipo-badge pedido-tipo-compra">
-                    <i class="fas fa-shopping-bag"></i> Compra
+        <div class="pedido-compacto-header">
+            <div class="pedido-compacto-linea1">
+                <div class="pedido-compacto-titulo">
+                    <i class="fas fa-shopping-bag"></i>
+                    <strong>Compra ${pedidoIdFormateado}</strong>
+                </div>
+                <div class="pedido-compacto-badges">
+                    <span class="badge ${claseBadgeEstado(estadoActual)}">
+                        ${capitalizar(estadoActual)}
+                    </span>
+                    <span class="pedido-compacto-chevron">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="pedido-compacto-linea2">
+                <span class="pedido-compacto-dato">
+                    <i class="fas fa-calendar-alt"></i>
+                    ${formatearFecha(pedido.creado_en)}
+                </span>
+                <span class="pedido-compacto-dato">
+                    <i class="fas fa-box"></i>
+                    ${totalItems} producto${totalItems !== 1 ? 's' : ''}
+                </span>
+                <span class="pedido-compacto-dato pedido-compacto-dato-total">
+                    ${totalPrecio}
                 </span>
             </div>
-            <span class="badge ${claseBadgeEstado(estadoActual)}">
-                ${capitalizar(estadoActual)}
-            </span>
         </div>
 
-        <div class="pedido-card-body">
-            <div class="pedido-card-info">
-                <div class="pedido-card-info-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>${formatearFecha(pedido.creado_en)}</span>
-                </div>
-                <div class="pedido-card-info-item">
-                    <i class="fas fa-box"></i>
-                    <span>${totalItems} producto${totalItems !== 1 ? 's' : ''}</span>
-                </div>
-                <div class="pedido-card-info-item">
-                    <i class="fas fa-cubes"></i>
-                    <span>${totalUnidades} unidad${totalUnidades !== 1 ? 'es' : ''}</span>
-                </div>
+        <div class="pedido-compacto-detalle">
+            <div class="pedido-detalle-linea">
+                <span class="pedido-detalle-label">Fecha</span>
+                <span class="pedido-detalle-valor">${formatearFecha(pedido.creado_en)}</span>
             </div>
-
-            <div class="pedido-card-total">
-                <span class="pedido-card-total-label">Total</span>
-                <span class="pedido-card-total-valor">${formatearPrecio(pedido.total_precio)}</span>
+            <div class="pedido-detalle-linea">
+                <span class="pedido-detalle-label">Productos</span>
+                <span class="pedido-detalle-valor">${totalItems}</span>
             </div>
-        </div>
-
-        <div class="pedido-card-footer">
-            ${botonRepetir}
-            <button type="button" class="pedido-btn-detalle" data-id="${pedido.id}">
-                <i class="fas fa-eye"></i> Ver detalle
-            </button>
+            <div class="pedido-detalle-linea">
+                <span class="pedido-detalle-label">Unidades</span>
+                <span class="pedido-detalle-valor">${totalUnidades}</span>
+            </div>
+            <div class="pedido-detalle-linea">
+                <span class="pedido-detalle-label">Total</span>
+                <span class="pedido-detalle-valor pedido-detalle-total">${totalPrecio}</span>
+            </div>
+            <div class="pedido-compacto-acciones">
+                ${botonRepetir}
+                <button type="button" class="pedido-btn-detalle" data-id="${escapar(pedido.id)}">
+                    <i class="fas fa-eye"></i> Ver detalle
+                </button>
+            </div>
         </div>
     `;
 }
@@ -905,7 +958,7 @@ function cerrarModalDetalle() {
 async function cancelarPedido(pedidoId) {
     const confirmar = confirm(
         'Estas seguro de que queres cancelar este pedido?\n\n' +
-            'Esta accion no se puede revertir.'
+        'Esta accion no se puede revertir.'
     );
     if (!confirmar) return;
 
