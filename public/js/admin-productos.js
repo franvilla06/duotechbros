@@ -325,8 +325,6 @@ function renderizarProductos(productos) {
     const itemsPagina = paginador ? paginador.getItems(productos) : productos;
 
     itemsPagina.forEach((p) => {
-        const tr = document.createElement('tr');
-
         const imagenesAdicionales = parsearImagenes(p.imagenes);
         const totalImagenes = (p.imagen_url ? 1 : 0) + imagenesAdicionales.length;
         const indicadorImagenes = totalImagenes > 1
@@ -340,6 +338,9 @@ function renderizarProductos(productos) {
                </div>`
             : `<div class="cell-imagen-placeholder"><i class="fas fa-image"></i></div>`;
 
+        const tr = document.createElement('tr');
+        tr.className = 'prod-fila';
+        tr.dataset.id = p.id;
         tr.innerHTML = `
             <td class="cell-producto-principal" data-label="">
                 <div class="cell-producto-contenido">
@@ -359,16 +360,68 @@ function renderizarProductos(productos) {
                     <span class="badge ${claseStock(p.stock)}">${escapar(p.stock)} ud.</span>
                 </div>
             </td>
-            <td style="text-align: right">
-                <button class="btn-editar" title="Editar" data-id="${p.id}">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-eliminar" title="Eliminar" data-id="${p.id}" data-nombre="${escapar(p.nombre)}">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+            <td class="cell-acciones" style="text-align: right">
+                <div class="cell-acciones-contenido">
+                    <button class="btn-editar" title="Editar" data-id="${p.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-eliminar" title="Eliminar" data-id="${p.id}" data-nombre="${escapar(p.nombre)}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                <span class="fila-chevron"><i class="fas fa-chevron-down"></i></span>
             </td>
         `;
+
+        const trDetalle = document.createElement('tr');
+        trDetalle.className = 'prod-detalle-fila';
+        trDetalle.dataset.id = p.id;
+        trDetalle.innerHTML = `
+            <td colspan="5">
+                <div class="fila-detalle-contenido">
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Imagen</span>
+                        <span class="fila-detalle-valor fila-detalle-valor-imagen">${imagenHTML}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Nombre</span>
+                        <span class="fila-detalle-valor">${escapar(p.nombre)}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Descripción</span>
+                        <span class="fila-detalle-valor">${escapar(p.descripcion) || '—'}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Categoría</span>
+                        <span class="fila-detalle-valor">${escapar(p.categoria) || '—'}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Precio</span>
+                        <span class="fila-detalle-valor"><span class="cell-precio">${formatearPrecio(p.precio)}</span></span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Stock</span>
+                        <span class="fila-detalle-valor"><span class="badge ${claseStock(p.stock)}">${escapar(p.stock)} ud.</span></span>
+                    </div>
+                    <div class="fila-detalle-acciones">
+                        <button class="btn-editar" title="Editar" data-id="${p.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-eliminar" title="Eliminar" data-id="${p.id}" data-nombre="${escapar(p.nombre)}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </td>
+        `;
+
+        tr.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            toggleDetalleProducto(p.id);
+        });
+
         tbody.appendChild(tr);
+        tbody.appendChild(trDetalle);
     });
 
     tbody.querySelectorAll('.btn-editar').forEach((btn) => {
@@ -380,6 +433,28 @@ function renderizarProductos(productos) {
             eliminarProducto(btn.dataset.id, btn.dataset.nombre);
         });
     });
+}
+
+function toggleDetalleProducto(id) {
+    if (window.innerWidth > 700) return;
+
+    const filaPrincipal = tbody.querySelector(`.prod-fila[data-id="${id}"]`);
+    const filaDetalle = tbody.querySelector(`.prod-detalle-fila[data-id="${id}"]`);
+    if (!filaPrincipal || !filaDetalle) return;
+
+    const estabaAbierta = filaDetalle.classList.contains('fila-detalle-visible');
+
+    tbody.querySelectorAll('.prod-detalle-fila').forEach((fila) => {
+        fila.classList.remove('fila-detalle-visible');
+    });
+    tbody.querySelectorAll('.prod-fila').forEach((fila) => {
+        fila.classList.remove('fila-abierta');
+    });
+
+    if (!estabaAbierta) {
+        filaDetalle.classList.add('fila-detalle-visible');
+        filaPrincipal.classList.add('fila-abierta');
+    }
 }
 
 // ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----

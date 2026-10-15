@@ -228,12 +228,12 @@ function renderizarPedidos(pedidos) {
         const estadoActual = p.estado || 'pendiente';
         const tieneNotas = p.notas && p.notas.trim() !== '';
         const tienePresupuesto = p.presupuesto !== null && p.presupuesto !== undefined;
+        const badgeId = `badge-${p.id}`;
 
         const opciones = ESTADOS.map(
             (e) => `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
         ).join('');
 
-        // clases del boton de notas (indica si hay notas o presupuesto)
         let claseBotonNotas = 'btn-notas';
         if (tieneNotas || tienePresupuesto) claseBotonNotas += ' tiene-notas';
 
@@ -245,35 +245,97 @@ function renderizarPedidos(pedidos) {
             ? 'fas fa-sticky-note'
             : 'far fa-sticky-note';
 
+        const nombreCliente = escapar(p.nombre_cliente);
+        const email = escapar(p.email);
+        const telefono = escapar(p.telefono);
+        const modelo = escapar(p.modelo_celular);
+        const descripcion = escapar(p.descripcion_problema);
+        const fechaFormateada = formatearFecha(p.creado_en);
+
         const tr = document.createElement('tr');
+        tr.className = 'pedido-fila';
+        tr.dataset.id = p.id;
         tr.innerHTML = `
-            <td><span class="cell-nombre">${escapar(p.nombre_cliente)}</span></td>
-            <td>
-                <div class="cell-email">${escapar(p.email)}</div>
-                <div class="cell-telefono">${escapar(p.telefono)}</div>
+            <td class="pedido-celda-cliente"><span class="cell-nombre">${nombreCliente}</span></td>
+            <td class="pedido-celda-contacto">
+                <div class="cell-email">${email}</div>
+                <div class="cell-telefono">${telefono}</div>
             </td>
-            <td>${escapar(p.modelo_celular)}</td>
-            <td>
-                <div class="cell-descripcion" title="${escapar(p.descripcion_problema)}">
-                    ${escapar(p.descripcion_problema)}
-                </div>
+            <td class="pedido-celda-modelo">${modelo}</td>
+            <td class="pedido-celda-descripcion">
+                <div class="cell-descripcion" title="${descripcion}">${descripcion}</div>
             </td>
-            <td><span class="cell-fecha">${formatearFecha(p.creado_en)}</span></td>
-            <td>
-                <span class="badge ${claseBadgeEstado(estadoActual)}" id="badge-${p.id}">
+            <td class="pedido-celda-fecha"><span class="cell-fecha">${fechaFormateada}</span></td>
+            <td class="pedido-celda-estado">
+                <span class="badge ${claseBadgeEstado(estadoActual)}" id="${badgeId}">
                     ${capitalizar(estadoActual)}
                 </span>
             </td>
-            <td style="text-align: right">
-                <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}">
-                    ${opciones}
-                </select>
-                <button class="${claseBotonNotas}" title="${tituloBotonNotas}" data-id="${p.id}">
-                    <i class="${iconoNotas}"></i>
-                </button>
+            <td class="cell-acciones" style="text-align: right">
+                <div class="cell-acciones-contenido">
+                    <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}">
+                        ${opciones}
+                    </select>
+                    <button class="${claseBotonNotas}" title="${tituloBotonNotas}" data-id="${p.id}">
+                        <i class="${iconoNotas}"></i>
+                    </button>
+                </div>
+                <span class="fila-chevron"><i class="fas fa-chevron-down"></i></span>
             </td>
         `;
+
+        const trDetalle = document.createElement('tr');
+        trDetalle.className = 'pedido-detalle-fila';
+        trDetalle.dataset.id = p.id;
+        trDetalle.innerHTML = `
+            <td colspan="7">
+                <div class="fila-detalle-contenido">
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Cliente</span>
+                        <span class="fila-detalle-valor">${nombreCliente}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Email</span>
+                        <span class="fila-detalle-valor">${email}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Teléfono</span>
+                        <span class="fila-detalle-valor">${telefono}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Modelo</span>
+                        <span class="fila-detalle-valor">${modelo}</span>
+                    </div>
+                    <div class="fila-detalle-linea fila-detalle-linea-descripcion">
+                        <span class="fila-detalle-label">Descripción</span>
+                        <span class="fila-detalle-valor">${descripcion}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Fecha</span>
+                        <span class="fila-detalle-valor">${fechaFormateada}</span>
+                    </div>
+                    <div class="fila-detalle-acciones-vertical">
+                        <div class="fila-detalle-campo">
+                            <label class="fila-detalle-campo-label">Estado</label>
+                            <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}">
+                                ${opciones}
+                            </select>
+                        </div>
+                        <button class="${claseBotonNotas}" title="${tituloBotonNotas}" data-id="${p.id}">
+                            <i class="${iconoNotas}"></i> Notas y presupuesto
+                        </button>
+                    </div>
+                </div>
+            </td>
+        `;
+
+        tr.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('select')) return;
+            toggleDetallePedido(p.id);
+        });
+
         tbody.appendChild(tr);
+        tbody.appendChild(trDetalle);
     });
 
     tbody.querySelectorAll('.estado-select').forEach((select) => {
@@ -287,11 +349,33 @@ function renderizarPedidos(pedidos) {
     });
 
     tbody.querySelectorAll('.btn-notas').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-            abrirModalNotas(id);
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            abrirModalNotas(btn.dataset.id);
         });
     });
+}
+
+function toggleDetallePedido(id) {
+    if (window.innerWidth > 700) return;
+
+    const filaPrincipal = tbody.querySelector(`.pedido-fila[data-id="${id}"]`);
+    const filaDetalle = tbody.querySelector(`.pedido-detalle-fila[data-id="${id}"]`);
+    if (!filaPrincipal || !filaDetalle) return;
+
+    const estabaAbierta = filaDetalle.classList.contains('fila-detalle-visible');
+
+    tbody.querySelectorAll('.pedido-detalle-fila').forEach((fila) => {
+        fila.classList.remove('fila-detalle-visible');
+    });
+    tbody.querySelectorAll('.pedido-fila').forEach((fila) => {
+        fila.classList.remove('fila-abierta');
+    });
+
+    if (!estabaAbierta) {
+        filaDetalle.classList.add('fila-detalle-visible');
+        filaPrincipal.classList.add('fila-abierta');
+    }
 }
 
 // APLICAR FILTROS

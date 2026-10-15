@@ -158,42 +158,120 @@ function renderizarCompras(compras) {
     itemsPagina.forEach((c) => {
         const estadoActual = c.estado || 'pendiente';
         const pedidoId = String(c.id).padStart(4, '0');
-
-        // extraer el total desde el campo que devuelve el backend
         const total = c.total_precio !== undefined ? Number(c.total_precio) : null;
         const totalTexto = total !== null ? formatearPrecio(total) : '—';
-
-        // items y unidades vienen del backend como agregados
         const items = Number(c.total_items) || 0;
         const unidades = Number(c.total_unidades) || 0;
+        const nombreUsuario = escapar(c.usuario_nombre || c.nombre_cliente || '—');
+        const fechaFormateada = formatearFecha(c.creado_en);
 
         const tr = document.createElement('tr');
+        tr.className = 'compra-fila';
+        tr.dataset.id = c.id;
         tr.innerHTML = `
-            <td><span class="cell-nombre">#${pedidoId}</span></td>
-            <td>${escapar(c.usuario_nombre || c.nombre_cliente || '—')}</td>
-            <td>${items}</td>
-            <td>${unidades}</td>
-            <td><span class="cell-precio">${totalTexto}</span></td>
-            <td><span class="cell-fecha">${formatearFecha(c.creado_en)}</span></td>
-            <td>
+            <td class="compra-celda-id"><span class="cell-nombre">#${pedidoId}</span></td>
+            <td class="compra-celda-usuario">${nombreUsuario}</td>
+            <td class="compra-celda-items">${items}</td>
+            <td class="compra-celda-unidades">${unidades}</td>
+            <td class="compra-celda-total"><span class="cell-precio">${totalTexto}</span></td>
+            <td class="compra-celda-fecha"><span class="cell-fecha">${fechaFormateada}</span></td>
+            <td class="compra-celda-estado">
                 <span class="badge ${claseBadgeEstado(estadoActual)}">
                     ${capitalizar(estadoActual)}
                 </span>
             </td>
-            <td style="text-align: right">
-                <button class="btn-ver-factura" title="Ver factura" data-id="${c.id}">
-                    <i class="fas fa-file-invoice"></i> Ver factura
-                </button>
+            <td class="cell-acciones" style="text-align: right">
+                <div class="cell-acciones-contenido">
+                    <button class="btn-ver-factura" title="Ver factura" data-id="${c.id}">
+                        <i class="fas fa-file-invoice"></i> Ver factura
+                    </button>
+                </div>
+                <span class="fila-chevron"><i class="fas fa-chevron-down"></i></span>
             </td>
         `;
+
+        const trDetalle = document.createElement('tr');
+        trDetalle.className = 'compra-detalle-fila';
+        trDetalle.dataset.id = c.id;
+        trDetalle.innerHTML = `
+            <td colspan="8">
+                <div class="fila-detalle-contenido">
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Nro.</span>
+                        <span class="fila-detalle-valor">#${pedidoId}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Usuario</span>
+                        <span class="fila-detalle-valor">${nombreUsuario}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Items</span>
+                        <span class="fila-detalle-valor">${items}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Unidades</span>
+                        <span class="fila-detalle-valor">${unidades}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Total</span>
+                        <span class="fila-detalle-valor"><span class="cell-precio">${totalTexto}</span></span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Fecha</span>
+                        <span class="fila-detalle-valor">${fechaFormateada}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Estado</span>
+                        <span class="fila-detalle-valor">
+                            <span class="badge ${claseBadgeEstado(estadoActual)}">${capitalizar(estadoActual)}</span>
+                        </span>
+                    </div>
+                    <div class="fila-detalle-acciones">
+                        <button class="btn-ver-factura" title="Ver factura" data-id="${c.id}">
+                            <i class="fas fa-file-invoice"></i> Ver factura
+                        </button>
+                    </div>
+                </div>
+            </td>
+        `;
+
+        tr.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            toggleDetalleCompra(c.id);
+        });
+
         tbody.appendChild(tr);
+        tbody.appendChild(trDetalle);
     });
 
     tbody.querySelectorAll('.btn-ver-factura').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             abrirModalFactura(btn.dataset.id);
         });
     });
+}
+
+function toggleDetalleCompra(id) {
+    if (window.innerWidth > 700) return;
+
+    const filaPrincipal = tbody.querySelector(`.compra-fila[data-id="${id}"]`);
+    const filaDetalle = tbody.querySelector(`.compra-detalle-fila[data-id="${id}"]`);
+    if (!filaPrincipal || !filaDetalle) return;
+
+    const estabaAbierta = filaDetalle.classList.contains('fila-detalle-visible');
+
+    tbody.querySelectorAll('.compra-detalle-fila').forEach((fila) => {
+        fila.classList.remove('fila-detalle-visible');
+    });
+    tbody.querySelectorAll('.compra-fila').forEach((fila) => {
+        fila.classList.remove('fila-abierta');
+    });
+
+    if (!estabaAbierta) {
+        filaDetalle.classList.add('fila-detalle-visible');
+        filaPrincipal.classList.add('fila-abierta');
+    }
 }
 
 // APLICAR FILTROS
