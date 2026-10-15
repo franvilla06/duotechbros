@@ -332,8 +332,6 @@ function renderizarTrabajos(trabajos) {
     const itemsPagina = paginador ? paginador.getItems(trabajos) : trabajos;
 
     itemsPagina.forEach((t) => {
-        const tr = document.createElement('tr');
-
         const imagenesAdicionales = parsearImagenes(t.imagenes);
         const totalImagenes = (t.imagen_url ? 1 : 0) + imagenesAdicionales.length;
         const indicadorImagenes = totalImagenes > 1
@@ -394,6 +392,9 @@ function renderizarTrabajos(trabajos) {
             `;
         }
 
+        const tr = document.createElement('tr');
+        tr.className = 'trab-fila';
+        tr.dataset.id = t.id;
         tr.innerHTML = `
             <td class="cell-producto-principal" data-label="">
                 <div class="cell-producto-contenido">
@@ -414,16 +415,68 @@ function renderizarTrabajos(trabajos) {
             <td class="cell-fechas">
                 <div class="cell-fechas-contenido">${fechasHTML}</div>
             </td>
-            <td style="text-align: right">
-                <button class="btn-editar" title="Editar" data-id="${t.id}">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-eliminar" title="Eliminar" data-id="${t.id}" data-titulo="${escapar(t.titulo)}">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+            <td class="cell-acciones" style="text-align: right">
+                <div class="cell-acciones-contenido">
+                    <button class="btn-editar" title="Editar" data-id="${t.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-eliminar" title="Eliminar" data-id="${t.id}" data-titulo="${escapar(t.titulo)}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                <span class="fila-chevron"><i class="fas fa-chevron-down"></i></span>
             </td>
         `;
+
+        const trDetalle = document.createElement('tr');
+        trDetalle.className = 'trab-detalle-fila';
+        trDetalle.dataset.id = t.id;
+        trDetalle.innerHTML = `
+            <td colspan="5">
+                <div class="fila-detalle-contenido">
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Imagen</span>
+                        <span class="fila-detalle-valor fila-detalle-valor-imagen">${imagenHTML}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Título</span>
+                        <span class="fila-detalle-valor">${escapar(t.titulo)}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Descripción</span>
+                        <span class="fila-detalle-valor">${escapar(t.descripcion) || '—'}</span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Tipo</span>
+                        <span class="fila-detalle-valor">
+                            <span class="badge ${claseTipo(t.tipo_reparacion)}">${escapar(t.tipo_reparacion || 'Sin categoría')}</span>
+                        </span>
+                    </div>
+                    <div class="fila-detalle-linea">
+                        <span class="fila-detalle-label">Fechas</span>
+                        <span class="fila-detalle-valor">
+                            <div class="cell-fechas-contenido">${fechasHTML}</div>
+                        </span>
+                    </div>
+                    <div class="fila-detalle-acciones">
+                        <button class="btn-editar" title="Editar" data-id="${t.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-eliminar" title="Eliminar" data-id="${t.id}" data-titulo="${escapar(t.titulo)}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </td>
+        `;
+
+        tr.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            toggleDetalleTrabajo(t.id);
+        });
+
         tbody.appendChild(tr);
+        tbody.appendChild(trDetalle);
     });
 
     tbody.querySelectorAll('.btn-editar').forEach((btn) => {
@@ -435,6 +488,28 @@ function renderizarTrabajos(trabajos) {
             eliminarTrabajo(btn.dataset.id, btn.dataset.titulo);
         });
     });
+}
+
+function toggleDetalleTrabajo(id) {
+    if (window.innerWidth > 700) return;
+
+    const filaPrincipal = tbody.querySelector(`.trab-fila[data-id="${id}"]`);
+    const filaDetalle = tbody.querySelector(`.trab-detalle-fila[data-id="${id}"]`);
+    if (!filaPrincipal || !filaDetalle) return;
+
+    const estabaAbierta = filaDetalle.classList.contains('fila-detalle-visible');
+
+    tbody.querySelectorAll('.trab-detalle-fila').forEach((fila) => {
+        fila.classList.remove('fila-detalle-visible');
+    });
+    tbody.querySelectorAll('.trab-fila').forEach((fila) => {
+        fila.classList.remove('fila-abierta');
+    });
+
+    if (!estabaAbierta) {
+        filaDetalle.classList.add('fila-detalle-visible');
+        filaPrincipal.classList.add('fila-abierta');
+    }
 }
 
 // APLICAR FILTROS

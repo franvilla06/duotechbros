@@ -4553,3 +4553,379 @@ table.admin-table {
         align-self: flex-start;
     }
 }
+
+/* ============================================================
+   FILAS DE TABLA COMO ACORDEON EN MOBILE (PRODUCTOS Y PORTAFOLIO)
+   ============================================================ */
+
+table.admin-table tbody tr.prod-detalle-fila,
+table.admin-table tbody tr.trab-detalle-fila {
+    display: none;
+}
+
+.cell-acciones .fila-chevron {
+    display: none;
+}
+
+.cell-acciones-contenido {
+    display: inline-flex;
+    gap: 4px;
+}
+
+@media (max-width: 700px) {
+    table.admin-table tbody tr.prod-fila,
+    table.admin-table tbody tr.trab-fila,
+    table.admin-table tbody tr.prod-detalle-fila,
+    table.admin-table tbody tr.trab-detalle-fila {
+        background-color: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-width: 0;
+    }
+
+    table.admin-table tbody tr.prod-fila,
+    table.admin-table tbody tr.trab-fila {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #f0f4f8;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    table.admin-table tbody tr.prod-fila:hover,
+    table.admin-table tbody tr.trab-fila:hover {
+        background-color: #f7fafe;
+    }
+
+    table.admin-table tbody tr.prod-fila.fila-abierta,
+    table.admin-table tbody tr.trab-fila.fila-abierta {
+        background-color: #f7fafe;
+        border-bottom-color: transparent;
+    }
+
+    table.admin-table tbody tr.prod-fila td::before,
+    table.admin-table tbody tr.trab-fila td::before,
+    table.admin-table tbody tr.prod-detalle-fila td::before,
+    table.admin-table tbody tr.trab-detalle-fila td::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    table.admin-table tbody tr.prod-fila td,
+    table.admin-table tbody tr.trab-fila td {
+        display: block;
+        padding: 0;
+        border: none;
+        font-size: 0.85rem;
+        width: auto;
+        min-width: 0;
+        text-align: left;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-producto-principal,
+    table.admin-table tbody tr.trab-fila td.cell-producto-principal {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    table.admin-table tbody tr.prod-fila .cell-producto-contenido,
+    table.admin-table tbody tr.trab-fila .cell-producto-contenido {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    table.admin-table tbody tr.prod-fila .cell-imagen-wrapper,
+    table.admin-table tbody tr.prod-fila .cell-imagen-placeholder,
+    table.admin-table tbody tr.trab-fila .cell-imagen-wrapper,
+    table.admin-table tbody tr.trab-fila .cell-imagen-portafolio-placeholder {
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+    }
+
+    table.admin-table tbody tr.prod-fila .cell-imagen,
+    table.admin-table tbody tr.prod-fila .cell-imagen-placeholder,
+    table.admin-table tbody tr.trab-fila .cell-imagen-portafolio,
+    table.admin-table tbody tr.trab-fila .cell-imagen-portafolio-placeholder {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+
+    table.admin-table tbody tr.prod-fila .cell-producto-contenido .cell-nombre,
+    table.admin-table tbody tr.trab-fila .cell-producto-contenido .cell-nombre {
+        font-size: 0.9rem;
+        font-weight: 700;
+        line-height: 1.25;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        word-break: break-word;
+        min-width: 0;
+        padding: 0;
+    }
+
+    table.admin-table tbody tr.prod-fila td:nth-child(2),
+    table.admin-table tbody tr.prod-fila td:nth-child(3),
+    table.admin-table tbody tr.prod-fila td:nth-child(4),
+    table.admin-table tbody tr.trab-fila td:nth-child(2),
+    table.admin-table tbody tr.trab-fila td:nth-child(3),
+    table.admin-table tbody tr.trab-fila td:nth-child(4) {
+        display: none;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-acciones,
+    table.admin-table tbody tr.trab-fila td.cell-acciones {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-acciones .cell-acciones-contenido,
+    table.admin-table tbody tr.trab-fila td.cell-acciones .cell-acciones-contenido {
+        display: none;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock {
+        display: block;
+        flex-shrink: 0;
+        font-weight: 800;
+        color: #007bff;
+        font-size: 0.9rem;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-producto-principal { order: 1; }
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock { order: 2; }
+    table.admin-table tbody tr.prod-fila td.cell-acciones { order: 3; }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .cell-precio-stock-contenido {
+        display: block;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .cell-precio-stock-contenido .badge {
+        display: none;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .cell-precio {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #007bff;
+        white-space: nowrap;
+    }
+
+    table.admin-table tbody tr.trab-fila td.cell-fechas {
+        display: none;
+    }
+
+    table.admin-table tbody tr.trab-fila td:nth-child(3) {
+        display: block;
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    table.admin-table tbody tr.trab-fila td.cell-producto-principal { order: 1; }
+    table.admin-table tbody tr.trab-fila td.cell-acciones { order: 3; }
+
+    table.admin-table tbody tr.trab-fila td:nth-child(3) .badge {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+    }
+
+    .cell-acciones .fila-chevron {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #f0f4f8;
+        color: #0b4a62;
+        font-size: 0.6rem;
+        transition: transform 0.25s ease, background-color 0.2s ease, color 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    table.admin-table tbody tr.fila-abierta .cell-acciones .fila-chevron {
+        transform: rotate(180deg);
+        background-color: #007bff;
+        color: #ffffff;
+    }
+
+    table.admin-table tbody tr.prod-detalle-fila.fila-detalle-visible,
+    table.admin-table tbody tr.trab-detalle-fila.fila-detalle-visible {
+        display: block;
+        background-color: #f7fafe;
+        border-bottom: 1px solid #f0f4f8;
+        animation: fila-detalle-aparecer 0.2s ease;
+    }
+
+    @keyframes fila-detalle-aparecer {
+        from {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    table.admin-table tbody tr.prod-detalle-fila td,
+    table.admin-table tbody tr.trab-detalle-fila td {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: none;
+    }
+
+    .fila-detalle-contenido {
+        padding: 14px 18px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .fila-detalle-linea {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 0.85rem;
+    }
+
+    .fila-detalle-label {
+        color: #888;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        flex-shrink: 0;
+        padding-top: 2px;
+    }
+
+    .fila-detalle-valor {
+        color: #0b4a62;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+        min-width: 0;
+    }
+
+    .fila-detalle-valor-imagen .cell-imagen-wrapper,
+    .fila-detalle-valor-imagen .cell-imagen-placeholder,
+    .fila-detalle-valor-imagen .cell-imagen-portafolio,
+    .fila-detalle-valor-imagen .cell-imagen-portafolio-placeholder {
+        width: 60px;
+        height: 60px;
+    }
+
+    .fila-detalle-valor-imagen .cell-imagen-portafolio,
+    .fila-detalle-valor-imagen .cell-imagen-portafolio-placeholder {
+        width: 80px;
+        height: 60px;
+    }
+
+    .fila-detalle-valor .cell-fechas-contenido {
+        align-items: flex-end;
+    }
+
+    .fila-detalle-valor .cell-fechas-linea {
+        justify-content: flex-end;
+    }
+
+    .fila-detalle-acciones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding-top: 12px;
+        margin-top: 4px;
+        border-top: 1px solid #eef3f6;
+    }
+
+    .fila-detalle-acciones .btn-editar,
+    .fila-detalle-acciones .btn-eliminar {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+
+    .fila-detalle-acciones .btn-editar {
+        background-color: #e8f4ff;
+        color: #007bff;
+    }
+
+    .fila-detalle-acciones .btn-editar:hover {
+        background-color: #007bff;
+        color: #ffffff;
+    }
+
+    .fila-detalle-acciones .btn-eliminar {
+        background-color: #f8d7da;
+        color: #dc3545;
+    }
+
+    .fila-detalle-acciones .btn-eliminar:hover {
+        background-color: #dc3545;
+        color: #ffffff;
+    }
+
+    /* ---------- LIMPIEZA: sobrescribir reglas de la Fase 3 en la fila compacta ---------- */
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .cell-precio-stock-contenido {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        gap: 3px !important;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .cell-precio::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .cell-precio {
+        display: block !important;
+        font-size: 0.85rem !important;
+        font-weight: 800 !important;
+        color: #007bff !important;
+        white-space: nowrap !important;
+        line-height: 1.1 !important;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .badge {
+        display: inline-flex !important;
+        width: auto !important;
+        max-width: 100% !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 2px 8px !important;
+        font-size: 0.66rem !important;
+        font-weight: 700 !important;
+        border-radius: 999px !important;
+        line-height: 1.4 !important;
+        box-shadow: none !important;
+        white-space: nowrap !important;
+    }
+
+    table.admin-table tbody tr.prod-fila td.cell-precio-stock .badge::before {
+        content: none !important;
+        display: none !important;
+    }
+}
