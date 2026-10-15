@@ -147,6 +147,8 @@ main.container {
     position: absolute;
     top: 14px;
     left: 14px;
+    /* z-index alto para quedar por encima de las imagenes del carrusel */
+    z-index: 10;
     display: inline-flex;
     align-items: center;
     gap: 6px;
