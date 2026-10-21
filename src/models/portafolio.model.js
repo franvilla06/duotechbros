@@ -1,9 +1,9 @@
-async function listar(pool) {
+export const listar = async (pool) => {
     const [rows] = await pool.query('SELECT * FROM portafolio ORDER BY fecha DESC');
     return rows;
-}
+};
 
-async function crear(pool, trabajo) {
+export const crear = async (pool, trabajo) => {
     const [result] = await pool.query(
         `INSERT INTO portafolio (titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -18,9 +18,9 @@ async function crear(pool, trabajo) {
         ]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function actualizar(pool, id, trabajo) {
+export const actualizar = async (pool, id, trabajo) => {
     const campoImagenes = trabajo.imagenes === undefined ? '' : ', imagenes = ?';
     const valores = [
         trabajo.titulo,
@@ -43,11 +43,9 @@ async function actualizar(pool, id, trabajo) {
         valores
     );
     return { affectedRows: result.affectedRows };
-}
+};
 
-async function eliminar(pool, id) {
+export const eliminar = async (pool, id) => {
     const [result] = await pool.query('DELETE FROM portafolio WHERE id = ?', [id]);
     return { affectedRows: result.affectedRows };
-}
-
-module.exports = { listar, crear, actualizar, eliminar };
+};

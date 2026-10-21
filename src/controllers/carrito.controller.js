@@ -1,13 +1,13 @@
-const carritoModel = require('../models/carrito.model');
-const carritoService = require('../services/carrito.service');
+import * as carritoModel from '../models/carrito.model.js';
+import * as carritoService from '../services/carrito.service.js';
 
-function obtenerUsuarioId(pool, nombreUsuario) {
+const obtenerUsuarioId = (pool, nombreUsuario) => {
     return carritoModel.obtenerUsuarioId(pool, nombreUsuario);
-}
+};
 
 // AGREGAR AL CARRITO
 
-async function agregarAlCarrito(req, res) {
+export const agregarAlCarrito = async (req, res) => {
     const { producto_id, cantidad } = req.body;
 
     if (!producto_id) {
@@ -61,11 +61,11 @@ async function agregarAlCarrito(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // LISTAR EL CARRITO
 
-async function listarCarrito(req, res) {
+export const listarCarrito = async (req, res) => {
     try {
         const pool = req.app.locals.pool;
 
@@ -96,11 +96,11 @@ async function listarCarrito(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // CAMBIAR CANTIDAD
 
-async function cambiarCantidad(req, res) {
+export const cambiarCantidad = async (req, res) => {
     const { id } = req.params;
     const { cantidad } = req.body;
 
@@ -138,11 +138,11 @@ async function cambiarCantidad(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // ELIMINAR ITEM
 
-async function eliminarItem(req, res) {
+export const eliminarItem = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -165,11 +165,11 @@ async function eliminarItem(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // VACIAR CARRITO
 
-async function vaciarCarrito(req, res) {
+export const vaciarCarrito = async (req, res) => {
     try {
         const pool = req.app.locals.pool;
 
@@ -188,11 +188,11 @@ async function vaciarCarrito(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // ENVIAR PEDIDO
 
-async function enviarPedido(req, res) {
+export const enviarPedido = async (req, res) => {
     try {
         const resultado = await carritoService.enviarPedido(req.app.locals.pool, req.usuario);
         return res.status(resultado.status).json(resultado.body);
@@ -200,13 +200,4 @@ async function enviarPedido(req, res) {
         console.error('Error al enviar pedido:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
-
-module.exports = {
-    agregarAlCarrito,
-    listarCarrito,
-    cambiarCantidad,
-    eliminarItem,
-    vaciarCarrito,
-    enviarPedido,
 };

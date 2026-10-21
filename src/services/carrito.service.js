@@ -1,20 +1,20 @@
-const carritoModel = require('../models/carrito.model');
-const configuracionModel = require('../models/configuracion.model');
-const pedidosModel = require('../models/pedidos.model');
-const productosModel = require('../models/productos.model');
-const usuariosModel = require('../models/usuarios.model');
-const emailService = require('./email.service');
+import * as carritoModel from '../models/carrito.model.js';
+import * as configuracionModel from '../models/configuracion.model.js';
+import * as pedidosModel from '../models/pedidos.model.js';
+import * as productosModel from '../models/productos.model.js';
+import * as usuariosModel from '../models/usuarios.model.js';
+import * as emailService from './email.service.js';
 
 // ENVIAR PEDIDO
 
-async function enviarPedido(pool, nombreUsuario) {
+export const enviarPedido = async (pool, nombreUsuario) => {
     const usuarioId = await carritoModel.obtenerUsuarioId(pool, nombreUsuario);
     if (!usuarioId) {
         return {
             status: 404,
             body: { success: false, error: 'Usuario no encontrado.' },
         };
-    }
+    };
 
     const items = await carritoModel.listarItemsParaPedido(pool, usuarioId);
     if (items.length === 0) {
@@ -102,6 +102,7 @@ async function enviarPedido(pool, nombreUsuario) {
         await conexion.commit();
 
         const emailAdmin = await configuracionModel.obtener(pool, 'email_admin');
+        const marca = await configuracionModel.obtener(pool, 'marca_nombre') || 'DuotechBros';
         const emailDestino = emailCliente || emailAdmin;
 
         if (emailDestino || emailAdmin) {
@@ -115,6 +116,7 @@ async function enviarPedido(pool, nombreUsuario) {
                         total: Number(totalPrecio.toFixed(2)),
                         items: pedidoItems,
                         fecha: new Date(),
+                        marca,
                     });
                 } catch (error) {
                     console.error('Error al enviar confirmacion de compra:', error.message);
@@ -142,7 +144,7 @@ async function enviarPedido(pool, nombreUsuario) {
 
 // REPETIR PEDIDO
 
-async function repetirPedido(pool, nombreUsuario, pedidoId) {
+export const repetirPedido = async (pool, nombreUsuario, pedidoId) => {
     const usuarioId = await carritoModel.obtenerUsuarioId(pool, nombreUsuario);
     if (!usuarioId) {
         return { status: 404, body: { success: false, error: 'Usuario no encontrado.' } };
@@ -253,6 +255,4 @@ async function repetirPedido(pool, nombreUsuario, pedidoId) {
             omitidos,
         },
     };
-}
-
-module.exports = { enviarPedido, repetirPedido };
+};

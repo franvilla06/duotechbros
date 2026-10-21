@@ -1,4 +1,4 @@
-async function crear(pool, pedido) {
+export const crear = async (pool, pedido) => {
     const [result] = await pool.query(
         `INSERT INTO pedidos (nombre_cliente, telefono, email, modelo_celular, descripcion_problema, usuario_id, tipo)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -13,9 +13,9 @@ async function crear(pool, pedido) {
         ]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function listar(pool, tipo = null) {
+export const listar = async (pool, tipo = null) => {
     if (tipo) {
         const [rows] = await pool.query(
             'SELECT * FROM pedidos WHERE tipo = ? ORDER BY creado_en DESC',
@@ -25,32 +25,32 @@ async function listar(pool, tipo = null) {
     }
     const [rows] = await pool.query('SELECT * FROM pedidos ORDER BY creado_en DESC');
     return rows;
-}
+};
 
-async function actualizarEstado(pool, id, estado) {
+export const actualizarEstado = async (pool, id, estado) => {
     const [result] = await pool.query('UPDATE pedidos SET estado = ? WHERE id = ?', [estado, id]);
     return { affectedRows: result.affectedRows };
-}
+};
 
-async function actualizarNotas(pool, id, notas) {
+export const actualizarNotas = async (pool, id, notas) => {
     const [result] = await pool.query('UPDATE pedidos SET notas = ? WHERE id = ?', [notas, id]);
     return { affectedRows: result.affectedRows };
-}
+};
 
-async function actualizarPresupuesto(pool, id, presupuesto) {
+export const actualizarPresupuesto = async (pool, id, presupuesto) => {
     const [result] = await pool.query(
         'UPDATE pedidos SET presupuesto = ? WHERE id = ?',
         [presupuesto, id]
     );
     return { affectedRows: result.affectedRows };
-}
+};
 
-async function eliminar(pool, id) {
+export const eliminar = async (pool, id) => {
     const [result] = await pool.query('DELETE FROM pedidos WHERE id = ?', [id]);
     return { affectedRows: result.affectedRows };
-}
+};
 
-async function crearPedidoDeUsuario(pool, pedido) {
+export const crearPedidoDeUsuario = async (pool, pedido) => {
     const [result] = await pool.query(
         `INSERT INTO pedidos (
             nombre_cliente, telefono, email, modelo_celular, descripcion_problema,
@@ -68,9 +68,9 @@ async function crearPedidoDeUsuario(pool, pedido) {
         ]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function insertarItem(pool, item) {
+export const insertarItem = async (pool, item) => {
     await pool.query(
         `INSERT INTO pedido_items (pedido_id, producto_id, nombre_producto, precio_unitario, cantidad, subtotal)
          VALUES (?, ?, ?, ?, ?, ?)`,
@@ -83,11 +83,11 @@ async function insertarItem(pool, item) {
             item.subtotal,
         ]
     );
-}
+};
 
 // HISTORIAL DEL USUARIO
 
-async function listarPorUsuario(pool, usuarioId) {
+export const listarPorUsuario = async (pool, usuarioId) => {
     const [rows] = await pool.query(
         `SELECT
             p.id, p.estado, p.creado_en, p.notas, p.tipo,
@@ -103,9 +103,9 @@ async function listarPorUsuario(pool, usuarioId) {
         [usuarioId]
     );
     return rows;
-}
+};
 
-async function obtenerPedidoDeUsuario(pool, pedidoId, usuarioId) {
+export const obtenerPedidoDeUsuario = async (pool, pedidoId, usuarioId) => {
     const [rows] = await pool.query(
         `SELECT id, estado, creado_en, notas, tipo, modelo_celular,
                 descripcion_problema, presupuesto, nombre_cliente, telefono, email
@@ -114,9 +114,9 @@ async function obtenerPedidoDeUsuario(pool, pedidoId, usuarioId) {
         [pedidoId, usuarioId]
     );
     return rows[0] || null;
-}
+};
 
-async function listarItemsDePedido(pool, pedidoId) {
+export const listarItemsDePedido = async (pool, pedidoId) => {
     const [rows] = await pool.query(
         `SELECT id, producto_id, nombre_producto, precio_unitario, cantidad, subtotal
          FROM pedido_items
@@ -125,11 +125,11 @@ async function listarItemsDePedido(pool, pedidoId) {
         [pedidoId]
     );
     return rows;
-}
+};
 
 // DETALLE COMPLETO PARA EL ADMIN
 
-async function obtenerPedidoConItems(pool, pedidoId) {
+export const obtenerPedidoConItems = async (pool, pedidoId) => {
     const [rows] = await pool.query(
         `SELECT
             p.id, p.nombre_cliente, p.telefono, p.email, p.modelo_celular,
@@ -157,11 +157,11 @@ async function obtenerPedidoConItems(pool, pedidoId) {
         total_unidades: totalUnidades,
         total_precio: Number(totalPrecio.toFixed(2)),
     };
-}
+};
 
 // CANCELAR UN PEDIDO DEL USUARIO (con transaccion)
 
-async function cancelarPedidoDeUsuario(pool, pedidoId, usuarioId) {
+export const cancelarPedidoDeUsuario = async (pool, pedidoId, usuarioId) => {
     const [rows] = await pool.query(
         'SELECT id, tipo, estado FROM pedidos WHERE id = ? AND usuario_id = ?',
         [pedidoId, usuarioId]
@@ -207,20 +207,4 @@ async function cancelarPedidoDeUsuario(pool, pedidoId, usuarioId) {
     } finally {
         conexion.release();
     }
-}
-
-module.exports = {
-    crear,
-    listar,
-    actualizarEstado,
-    actualizarNotas,
-    actualizarPresupuesto,
-    eliminar,
-    crearPedidoDeUsuario,
-    insertarItem,
-    listarPorUsuario,
-    obtenerPedidoDeUsuario,
-    listarItemsDePedido,
-    obtenerPedidoConItems,
-    cancelarPedidoDeUsuario,
 };

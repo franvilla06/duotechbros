@@ -1,8 +1,8 @@
-const mysql = require('mysql2/promise');
-const inicializarEsquema = require('../models/schema.model');
+import mysql from 'mysql2/promise';
+import { inicializarEsquema } from '../models/schema.model.js';
 
 // parametros de conexion leidos desde .env
-const config = {
+export const config = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER || 'root',
@@ -19,7 +19,7 @@ let pool = null;
 
 // crea la base de datos si no existe
 // se conecta sin especificar database para poder crearla
-async function crearBaseDeDatos() {
+const crearBaseDeDatos = async () => {
     const conexionTemporal = await mysql.createConnection({
         host: config.host,
         port: config.port,
@@ -35,11 +35,11 @@ async function crearBaseDeDatos() {
     } finally {
         await conexionTemporal.end();
     }
-}
+};
 
 // inicializa el pool de conexiones
 // el pool maneja multiples conexiones de forma eficiente
-async function inicializarPool() {
+const inicializarPool = async () => {
     await crearBaseDeDatos();
 
     pool = mysql.createPool(config);
@@ -52,25 +52,19 @@ async function inicializarPool() {
     } finally {
         conexion.release();
     }
-}
+};
 
 // inicializa todo: base de datos, pool y esquema
-async function inicializarBaseDatos() {
+export const inicializarBaseDatos = async () => {
     await inicializarPool();
     await inicializarEsquema(pool);
     console.log('Base de datos lista');
-}
+};
 
 // devuelve el pool de conexiones
-function obtenerPool() {
+export const obtenerPool = () => {
     if (!pool) {
         throw new Error('El pool de conexiones no esta inicializado');
     }
     return pool;
-}
-
-module.exports = {
-    inicializarBaseDatos,
-    obtenerPool,
-    config,
 };

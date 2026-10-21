@@ -14,6 +14,7 @@ const estadoCargando = document.getElementById('estado-cargando');
 const btnRefresh = document.getElementById('btn-refresh');
 
 const buscador = document.getElementById('buscador-compras');
+const filtroTiempoTabla = document.getElementById('filtro-tiempo-tabla');
 const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
@@ -31,6 +32,7 @@ const POR_PAGINA = 10;
 let comprasOriginales = [];
 let comprasFiltradas = [];
 let estadoFiltroActivo = 'Todos';
+let tiempoFiltroActivo = 'todos';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
@@ -132,7 +134,10 @@ function construirFiltrosEstado() {
 }
 
 function actualizarBotonLimpiar() {
-    const hayFiltro = estadoFiltroActivo !== 'Todos' || textoBusqueda.trim() !== '';
+    const hayFiltro =
+        estadoFiltroActivo !== 'Todos' ||
+        tiempoFiltroActivo !== 'todos' ||
+        textoBusqueda.trim() !== '';
     btnLimpiar.disabled = !hayFiltro;
 }
 
@@ -280,7 +285,8 @@ function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
 
-    let filtrados = [...comprasOriginales];
+    const baseFiltrada = filtrarPorRangoTiempo(comprasOriginales, tiempoFiltroActivo);
+    let filtrados = [...baseFiltrada];
 
     if (estadoFiltroActivo !== 'Todos') {
         filtrados = filtrados.filter(
@@ -571,10 +577,19 @@ buscador.addEventListener('input', (e) => {
     aplicarFiltros();
 });
 
+if (filtroTiempoTabla) {
+    filtroTiempoTabla.addEventListener('change', (e) => {
+        tiempoFiltroActivo = e.target.value;
+        aplicarFiltros();
+    });
+}
+
 btnLimpiar.addEventListener('click', () => {
     textoBusqueda = '';
     buscador.value = '';
     estadoFiltroActivo = 'Todos';
+    tiempoFiltroActivo = 'todos';
+    if (filtroTiempoTabla) filtroTiempoTabla.value = 'todos';
     filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
         c.classList.toggle('active', c.dataset.estado === 'Todos');
     });

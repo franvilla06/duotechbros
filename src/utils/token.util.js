@@ -1,17 +1,17 @@
-const crypto = require('crypto');
-const { secret } = require('../config/auth.config');
+import crypto from 'crypto';
+import { authConfig } from '../config/auth.config.js';
 
-function generarToken(rol, usuario) {
+export const generarToken = (rol, usuario) => {
     const timestamp = Date.now();
     const hash = crypto
         .createHash('sha256')
-        .update(`${rol}-${usuario}-${timestamp}-${secret}`)
+        .update(`${rol}-${usuario}-${timestamp}-${authConfig.secret}`)
         .digest('hex')
         .substring(0, 16);
     return `${rol}.${usuario}.${timestamp}.${hash}`;
-}
+};
 
-function verificarToken(token, rolEsperado) {
+export const verificarToken = (token, rolEsperado) => {
     if (!token || typeof token !== 'string') return false;
 
     const partes = token.split('.');
@@ -22,11 +22,9 @@ function verificarToken(token, rolEsperado) {
 
     const hashEsperado = crypto
         .createHash('sha256')
-        .update(`${rol}-${usuario}-${timestamp}-${secret}`)
+        .update(`${rol}-${usuario}-${timestamp}-${authConfig.secret}`)
         .digest('hex')
         .substring(0, 16);
 
     return hash === hashEsperado;
-}
-
-module.exports = { generarToken, verificarToken };
+};

@@ -1,13 +1,14 @@
-const estadisticasModel = require('../models/estadisticas.model');
+import * as estadisticasModel from '../models/estadisticas.model.js';
 
-async function obtenerEstadisticas(req, res) {
+export const obtenerEstadisticas = async (req, res) => {
     try {
         const pool = req.app.locals.pool;
+        const rango = req.query.rango || 'todos';
 
         const [pedidosPorEstado, productosMasVendidos, ventasPorMes] = await Promise.all([
-            estadisticasModel.pedidosPorEstado(pool),
-            estadisticasModel.productosMasVendidos(pool, 10),
-            estadisticasModel.ventasPorMes(pool, 6),
+            estadisticasModel.pedidosPorEstado(pool, rango),
+            estadisticasModel.productosMasVendidos(pool, 10, rango),
+            estadisticasModel.ventasPorMes(pool, 6, rango),
         ]);
 
         return res.json({
@@ -20,6 +21,4 @@ async function obtenerEstadisticas(req, res) {
         console.error('Error al obtener estadisticas:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
-
-module.exports = { obtenerEstadisticas };
+};

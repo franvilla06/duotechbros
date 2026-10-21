@@ -14,6 +14,7 @@ const btnRefresh = document.getElementById('btn-refresh');
 const btnExportar = document.getElementById('btn-exportar');
 
 const buscador = document.getElementById('buscador-pedidos');
+const filtroTiempoTabla = document.getElementById('filtro-tiempo-tabla');
 const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
@@ -32,6 +33,7 @@ const POR_PAGINA = 10;
 let pedidosOriginales = [];
 let pedidosFiltrados = [];
 let estadoFiltroActivo = 'Todos';
+let tiempoFiltroActivo = 'todos';
 let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
@@ -118,10 +120,21 @@ function escaparCSV(valor) {
     return texto;
 }
 
-function exportarCSV() {
+async function exportarCSV() {
     if (pedidosFiltrados.length === 0) {
         mostrarToast('No hay pedidos para exportar.', true);
         return;
+    }
+
+    let marca = 'DuotechBros';
+    try {
+        const resConfig = await fetch('/api/configuracion');
+        if (resConfig.ok) {
+            const config = await resConfig.json();
+            marca = config.marca_nombre || 'DuotechBros';
+        }
+    } catch (error) {
+        console.warn('No se pudo obtener la marca:', error.message);
     }
 
     const encabezados = [
@@ -161,7 +174,8 @@ function exportarCSV() {
 
     const hoy = new Date();
     const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-    const nombreArchivo = `pedidos-duotechbros-${fecha}.csv`;
+    const marcaSlug = marca.toLowerCase().replace(/\s+/g, '-');
+    const nombreArchivo = `pedidos-${marcaSlug}-${fecha}.csv`;
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -201,7 +215,10 @@ function construirFiltrosEstado() {
 }
 
 function actualizarBotonLimpiar() {
-    const hayFiltro = estadoFiltroActivo !== 'Todos' || textoBusqueda.trim() !== '';
+    const hayFiltro =
+        estadoFiltroActivo !== 'Todos' ||
+        tiempoFiltroActivo !== 'todos' ||
+        textoBusqueda.trim() !== '';
     btnLimpiar.disabled = !hayFiltro;
 }
 
@@ -384,7 +401,8 @@ function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
 
-    let filtrados = [...pedidosOriginales];
+    const baseFiltrada = filtrarPorRangoTiempo(pedidosOriginales, tiempoFiltroActivo);
+    let filtrados = [...baseFiltrada];
 
     if (estadoFiltroActivo !== 'Todos') {
         filtrados = filtrados.filter(
@@ -651,10 +669,19 @@ buscador.addEventListener('input', (e) => {
     aplicarFiltros();
 });
 
+if (filtroTiempoTabla) {
+    filtroTiempoTabla.addEventListener('change', (e) => {
+        tiempoFiltroActivo = e.target.value;
+        aplicarFiltros();
+    });
+}
+
 btnLimpiar.addEventListener('click', () => {
     textoBusqueda = '';
     buscador.value = '';
     estadoFiltroActivo = 'Todos';
+    tiempoFiltroActivo = 'todos';
+    if (filtroTiempoTabla) filtroTiempoTabla.value = 'todos';
     filtrosEstado.querySelectorAll('.filtro-chip').forEach((c) => {
         c.classList.toggle('active', c.dataset.estado === 'Todos');
     });

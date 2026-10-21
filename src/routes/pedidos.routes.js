@@ -1,23 +1,23 @@
-const express = require('express');
-const controller = require('../controllers/pedidos.controller');
-const configuracionController = require('../controllers/configuracion.controller');
-const { requiereAuth, requiereAuthUsuario } = require('../middlewares/auth.middleware');
+import express from 'express';
+import * as pedidosController from '../controllers/pedidos.controller.js';
+import * as configuracionController from '../controllers/configuracion.controller.js';
+import { requiereAuth, requiereAuthUsuario } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 // crear un pedido de reparacion requiere usuario autenticado
-router.post('/pedidos', requiereAuthUsuario, controller.crearPedido);
+router.post('/pedidos', requiereAuthUsuario, pedidosController.crearPedido);
 
 // las lecturas son publicas
-router.get('/pedidos', controller.listarPedidos);
-router.get('/productos', controller.listarProductos);
-router.get('/portafolio', controller.listarPortafolio);
-router.post('/login', controller.iniciarSesion);
+router.get('/pedidos', pedidosController.listarPedidos);
+router.get('/productos', pedidosController.listarProductos);
+router.get('/portafolio', pedidosController.listarPortafolio);
+router.post('/login', pedidosController.iniciarSesion);
 
 // configuracion publica del sitio (para el footer, contacto, etc.)
 router.get('/configuracion', configuracionController.obtenerConfiguracion);
 
 // detalle de un pedido (solo admin)
-router.get('/pedidos/:id/detalle', requiereAuth, controller.obtenerDetallePedidoAdmin);
+router.get('/pedidos/:id/detalle', requiereAuth, pedidosController.obtenerDetallePedidoAdmin);
 
-module.exports = router;
+export const pedidosRoutes = router;

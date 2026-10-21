@@ -7,6 +7,7 @@ const API_PORTAFOLIO = '/api/portafolio';
 const API_ESTADISTICAS = '/api/admin/estadisticas';
 
 const btnRefresh = document.getElementById('btn-refresh');
+const filtroTiempo = document.getElementById('filtro-tiempo');
 const tbodyMovimientos = document.getElementById('tbody-movimientos');
 const estadoVacio = document.getElementById('estado-vacio');
 const contadorMovimientos = document.getElementById('contador-movimientos');
@@ -348,7 +349,9 @@ function renderizarGraficoEstados(datos) {
     const totalGeneral = Object.values(totales).reduce((a, b) => a + b, 0);
 
     if (totalGeneral === 0) {
-        nota.textContent = 'No hay pedidos registrados todavía.';
+        destruirGrafico(graficoEstados);
+        graficoEstados = null;
+        nota.textContent = 'No hay pedidos para este período.';
         return;
     }
 
@@ -412,21 +415,27 @@ function renderizarGraficoVentas(datos) {
     if (!canvas || !nota) return;
 
     if (!datos || datos.length === 0) {
-        nota.textContent = 'No hay datos de ventas.';
+        destruirGrafico(graficoVentas);
+        graficoVentas = null;
+        nota.textContent = 'No hay ventas registradas en este período.';
         return;
     }
 
-    const MESES_CORTOS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
     const labels = datos.map((d) => {
-        const [anio, mes] = d.mes.split('-');
-        return `${MESES_CORTOS[parseInt(mes) - 1]} ${anio}`;
+        const partes = d.fecha.split('-');
+        if (partes.length === 3) {
+            const [anio, mes, dia] = partes;
+            return `${dia}/${mes}/${anio.slice(2)}`;
+        }
+        const [anio, mes] = partes;
+        const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        return `${MESES[parseInt(mes) - 1]} ${anio.slice(2)}`;
     });
 
     const totales = datos.map((d) => d.total);
     const cantidadPedidos = datos.map((d) => d.cantidad_pedidos);
 
-    const totalGeneral = totales.reduce((a, b) => a + b, 0);
+    const totalGeneral = totales.reduce((a, b) => Number(a) + Number(b), 0);
 
     destruirGrafico(graficoVentas);
 
@@ -483,7 +492,7 @@ function renderizarGraficoVentas(datos) {
         },
     });
 
-    nota.textContent = `Total vendido en 6 meses: ${formatearPrecio(totalGeneral)}.`;
+    nota.textContent = `Total vendido en el período: ${formatearPrecio(totalGeneral)}.`;
 }
 
 // PLUGIN PERSONALIZADO: DIBUJA EL VALOR AL FINAL DE CADA BARRA
@@ -681,12 +690,14 @@ async function cargarDashboard() {
     icono.classList.add('spinning');
     btnRefresh.disabled = true;
 
+    const rangoActual = filtroTiempo ? filtroTiempo.value : 'todos';
+
     try {
         const [resPedidos, resProductos, resPortafolio, resEstadisticas] = await Promise.all([
             fetch(API_PEDIDOS),
             fetch(API_PRODUCTOS),
             fetch(API_PORTAFOLIO),
-            fetchAdmin(API_ESTADISTICAS),
+            fetchAdmin(`${API_ESTADISTICAS}?rango=${rangoActual}`),
         ]);
 
         if (!resPedidos.ok || !resProductos.ok || !resPortafolio.ok) {
@@ -699,10 +710,11 @@ async function cargarDashboard() {
             resPortafolio.json(),
         ]);
 
-        const reparaciones = pedidos.filter((p) => esReparacion(p));
-        const compras = pedidos.filter((p) => !esReparacion(p));
+        const pedidosFiltrados = filtrarPorRangoTiempo(pedidos, rangoActual, 'creado_en');
+        const reparaciones = pedidosFiltrados.filter((p) => esReparacion(p));
+        const compras = pedidosFiltrados.filter((p) => !esReparacion(p));
 
-        // renderizar tarjetas y tabla
+        // renderizar tarjetas
         renderizarStats(reparaciones, compras, productos, portafolio);
         renderizarUltimosMovimientos(pedidos);
 
@@ -712,6 +724,17 @@ async function cargarDashboard() {
 
             if (stats.success) {
                 renderizarGraficoEstados(stats.pedidos_por_estado || []);
+
+                const h2Ventas = document.getElementById('grafico-ventas')?.closest('.grafico-card')?.querySelector('h2');
+                if (h2Ventas) {
+                    let textoRango = 'los últimos 6 meses';
+                    if (rangoActual === 'hoy') textoRango = 'hoy';
+                    if (rangoActual === 'semana') textoRango = 'la última semana';
+                    if (rangoActual === 'mes') textoRango = 'el último mes';
+
+                    h2Ventas.innerHTML = `<i class="fas fa-chart-line"></i> Ventas de ${textoRango}`;
+                }
+
                 renderizarGraficoVentas(stats.ventas_por_mes || []);
                 renderizarGraficoProductos(stats.productos_mas_vendidos || []);
             }
@@ -753,6 +776,9 @@ async function cargarDashboard() {
 // EVENTOS
 
 btnRefresh.addEventListener('click', cargarDashboard);
+if (filtroTiempo) {
+    filtroTiempo.addEventListener('change', cargarDashboard);
+}
 
 // re-renderizar el top de productos cuando cambia el ancho
 // (para alternar entre grafico y tabla)

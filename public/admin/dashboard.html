@@ -18,7 +18,7 @@
         <div class="admin-sidebar-brand">
           <i class="fas fa-tools"></i>
           <div>
-            <h2>DuotechBros</h2>
+            <h2 class="admin-marca">DuotechBros</h2>
             <span>Panel Interno</span>
           </div>
         </div>
@@ -65,11 +65,20 @@
         <header class="admin-header">
           <div>
             <h1>Bienvenido al Panel</h1>
-            <p>Resumen general de la actividad de DuotechBros.</p>
+            <p>Resumen general de la actividad de <span class="admin-marca">DuotechBros</span>.</p>
           </div>
-          <button class="btn-refresh" id="btn-refresh">
-            <i class="fas fa-sync-alt"></i> Actualizar
-          </button>
+          <div class="admin-header-actions">
+            <select id="filtro-tiempo" class="admin-filtro-tiempo">
+              <option value="todos">Todo el tiempo</option>
+              <option value="hoy">Hoy</option>
+              <option value="semana">Última semana</option>
+              <option value="mes">Último mes</option>
+            </select>
+
+            <button class="btn-refresh" id="btn-refresh">
+              <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+          </div>
         </header>
 
         <!-- ESTADISTICAS PRINCIPALES -->

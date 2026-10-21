@@ -477,10 +477,21 @@ function montoParaPDF(pedido) {
     return formatearPrecio(pedido.total_precio);
 }
 
-function exportarPedidosPDF() {
+async function exportarPedidosPDF() {
     if (!window.jspdf || !window.jspdf.jsPDF) {
         mostrarToast('No se pudo cargar la libreria de PDF. Revisa tu conexion.', 'error');
         return;
+    }
+
+    let marca = 'DuotechBros';
+    try {
+        const resConfig = await fetch('/api/configuracion');
+        if (resConfig.ok) {
+            const config = await resConfig.json();
+            marca = config.marca_nombre || 'DuotechBros';
+        }
+    } catch (error) {
+        console.warn('No se pudo obtener la marca para el PDF:', error.message);
     }
 
     const desde = fechaHaceMeses(6);
@@ -511,7 +522,7 @@ function exportarPedidosPDF() {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('DuotechBros', margenIzq, 13);
+    doc.text(marca, margenIzq, 13);
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
@@ -642,7 +653,7 @@ function exportarPedidosPDF() {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(153, 153, 153);
         doc.text(
-            `DuotechBros - Pagina ${pagina} de ${totalPaginas}`,
+            `${marca} - Pagina ${pagina} de ${totalPaginas}`,
             anchoPagina / 2,
             doc.internal.pageSize.getHeight() - 8,
             { align: 'center' }
@@ -650,7 +661,8 @@ function exportarPedidosPDF() {
     }
 
     const fechaArchivo = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-    doc.save(`mis-pedidos-duotechbros-${fechaArchivo}.pdf`);
+    const marcaSlug = marca.toLowerCase().replace(/\s+/g, '-');
+    doc.save(`mis-pedidos-${marcaSlug}-${fechaArchivo}.pdf`);
     mostrarToast(`Se exportaron ${pedidosRecientes.length} pedidos a PDF.`, 'exito');
 }
 
