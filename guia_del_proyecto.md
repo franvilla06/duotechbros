@@ -1,6 +1,6 @@
 # Guía de desarrollo y operación - DuotechBros
 
-Esta guía describe la estructura y el funcionamiento de la versión actual del proyecto. El backend utiliza MySQL, no SQLite. La aplicación sirve sus archivos web desde `public/` y ofrece una API Express bajo `/api`.
+Esta guía describe la estructura y el funcionamiento de la versión actual del proyecto. El backend utiliza MySQL, no SQLite, y está implementado con módulos ES (ESM) de Node.js. La aplicación sirve sus archivos web desde `public/` y ofrece una API Express bajo `/api`.
 
 ## 1. Requisitos y preparación
 
@@ -37,7 +37,7 @@ npm run dev
 
 `npm run dev` ejecuta `node server.js`. No existe un script `npm start` configurado actualmente. El backend usa `PORT` o `3000` por defecto y está disponible en `http://localhost:3000`.
 
-Al arrancar, `server.js` carga `.env`, crea la base MySQL si no existe, establece un pool de conexiones, inicializa las tablas y valores iniciales y luego inicia Express. La base de datos no es un archivo del repositorio: queda gestionada por el servidor MySQL configurado.
+Al arrancar, `server.js` carga `.env`, crea la base MySQL si no existe, establece un pool de conexiones, inicializa las tablas y valores iniciales y luego importa `src/app.js` e inicia Express. El orden es importante porque la aplicación obtiene el pool de conexiones al cargarse. El backend usa `import`/`export` de ESM; los imports locales deben incluir la extensión `.js`. La base de datos no es un archivo del repositorio: queda gestionada por el servidor MySQL configurado.
 
 Para detener el proceso, usa `Ctrl+C` en la terminal del servidor. No hay recarga automática del backend; reinícialo tras cambiar código del servidor. Para cambios de frontend, vuelve a cargar la página.
 
@@ -78,6 +78,8 @@ El catálogo y el portafolio se administran desde las páginas del panel. El reg
 - `/portafolio.html`: trabajos y reparaciones cargados desde la API.
 - `/pedidos.html`: formulario de reparación; requiere una sesión de usuario.
 
+El nombre de marca se administra desde la configuración del sitio y se aplica a los textos marcados en las páginas públicas y de usuario.
+
 El catálogo y el portafolio admiten una imagen principal y hasta cuatro imágenes adicionales. El script reutilizable `public/js/carrusel.js` presenta varias imágenes. El menú público tiene comportamiento adaptable para pantallas pequeñas.
 
 ### Cuenta del usuario
@@ -85,29 +87,31 @@ El catálogo y el portafolio admiten una imagen principal y hasta cuatro imágen
 - `/user/login.html`: registro, verificación del código, inicio de sesión, recuperación de contraseña e inicio de sesión con email.
 - `/user/perfil.html`: datos de cuenta, cambio de email y contraseña y baja de cuenta.
 - `/user/carrito.html`: consulta y edición de cantidades, eliminación de artículos y confirmación de compra.
-- `/user/pedidos.html`: historial de compras y reparaciones, búsqueda, filtros, detalle, acciones disponibles y exportación PDF de pedidos de los últimos seis meses.
+- `/user/pedidos.html`: historial de compras y reparaciones, búsqueda, filtros, detalle, acciones disponibles y exportación PDF de pedidos de los últimos seis meses. El nombre de marca configurado se utiliza en el documento.
 
 Al enviar la compra, el sistema comprueba disponibilidad, registra cabecera y detalle, descuenta stock y limpia el carrito en una transacción MySQL. Si una validación falla, la operación no debe dejar una compra parcialmente aplicada.
 
 ### Panel administrativo
 
 - `/admin/login.html`: acceso administrativo.
-- `/admin/dashboard.html`: estadísticas de pedidos, productos más vendidos, ventas por mes, pedidos recientes y alertas de stock. Los gráficos utilizan Chart.js.
-- `/admin/pedidos.html`: pedidos de reparación con búsqueda, filtros, paginación, ordenamiento, actualización de estado/notas/presupuesto, eliminación y exportación CSV.
-- `/admin/compras.html`: compras realizadas desde el carrito, con búsqueda, filtros, paginación y visualización del detalle/estado.
+- `/admin/dashboard.html`: estadísticas de pedidos, productos más vendidos, ventas y alertas de stock. El filtro temporal permite consultar todo el tiempo, hoy, la última semana o el último mes; los gráficos muestran ventas agrupadas por día en períodos filtrados y por mes en la vista de todo el tiempo. Los gráficos utilizan Chart.js.
+- `/admin/pedidos.html`: pedidos de reparación con búsqueda, filtros por fecha y estado, paginación, ordenamiento, actualización de estado/notas/presupuesto, eliminación y exportación CSV.
+- `/admin/compras.html`: compras realizadas desde el carrito, con búsqueda, filtros por fecha y estado, paginación y visualización del detalle/estado.
 - `/admin/productos.html`: alta, edición y eliminación de productos; gestiona precios, categorías, existencias e imágenes.
 - `/admin/portafolio.html`: alta, edición y eliminación de trabajos e imágenes.
 - `/admin/configuracion.html`: contacto, redes sociales, horarios, avisos y email administrativo.
 - `/admin/perfil.html`: consulta y cambio de usuario y contraseña del administrador.
 
-Las vistas protegidas requieren autenticación administrativa. La interfaz del panel también recibió ajustes responsive.
+El nombre de marca configurado se aplica a las etiquetas `.admin-marca` del panel. `public/js/admin.js` comparte la carga de configuración y el helper `filtrarPorRangoTiempo`, utilizado por dashboard, pedidos y compras. El botón “Limpiar” restablece los filtros de búsqueda, estado y fecha en las tablas. Las exportaciones CSV administrativas usan la marca en el nombre del archivo; la exportación PDF de pedidos también la muestra en el documento y en su nombre.
+
+Las vistas protegidas requieren autenticación administrativa. El panel y el sitio público cuentan con diseños adaptables a pantallas pequeñas.
 
 ## 6. Organización del código
 
 ```text
 server.js                  Carga configuración, inicializa MySQL e inicia Express
 src/
-  app.js                   Configura Express, CORS, archivos estáticos y routers
+  app.js                   Configura Express, CORS, archivos estáticos y routers (ESM)
   config/                  Conexión a MySQL, autenticación y correo
   controllers/             Validación de solicitudes y respuestas HTTP
   middlewares/             Protección de rutas de usuario y administración
@@ -128,7 +132,7 @@ public/
 package.json               Dependencias y comando de ejecución
 ```
 
-El frontend no utiliza un framework SPA. `src/app.js` monta tres routers: `pedidos.routes.js` bajo `/api`, `admin.routes.js` bajo `/api/admin` y `usuarios.routes.js` bajo `/api/usuarios`. Las rutas y reglas de negocio se separan en controladores, servicios y modelos.
+El frontend no utiliza un framework SPA. El backend usa ESM, exportaciones nombradas y funciones flecha; sus imports locales incluyen `.js`. `src/app.js` monta tres routers: `pedidos.routes.js` bajo `/api`, `admin.routes.js` bajo `/api/admin` y `usuarios.routes.js` bajo `/api/usuarios`. Las rutas y reglas de negocio se separan en controladores, servicios y modelos.
 
 ## 7. API HTTP
 
@@ -157,7 +161,7 @@ Las solicitudes y respuestas usan JSON. Las rutas protegidas reciben `Authorizat
 | `PUT`                   | `/api/admin/pedidos/:id/presupuesto`                  | Cambiar presupuesto.                             |
 | `DELETE`                | `/api/admin/pedidos/:id`                              | Eliminar pedido.                                 |
 | `PUT`                   | `/api/admin/configuracion`                            | Actualizar configuración permitida del sitio.    |
-| `GET`                   | `/api/admin/estadisticas`                             | Datos agregados para los gráficos del dashboard. |
+| `GET`                   | `/api/admin/estadisticas?rango=todos`                 | Datos agregados para los gráficos; admite `todos`, `hoy`, `semana` y `mes` (por defecto: `todos`). |
 | `GET`                   | `/api/admin/perfil`                                   | Consultar perfil administrativo.                 |
 | `PUT`                   | `/api/admin/perfil/usuario`                           | Cambiar nombre de usuario administrativo.        |
 | `PUT`                   | `/api/admin/perfil/password`                          | Cambiar contraseña administrativa.               |
@@ -189,9 +193,11 @@ Las solicitudes y respuestas usan JSON. Las rutas protegidas reciben `Authorizat
 
 La API no tiene una especificación OpenAPI publicada. Sus rutas y métodos se documentan en las tablas anteriores y se implementan en los routers de `src/routes/`.
 
+Para `hoy`, `semana` y `mes`, la API limita los agregados al período solicitado y devuelve las ventas agrupadas por día. Con `rango=todos`, las ventas se agrupan por mes y el gráfico presenta los últimos seis meses. El dashboard aplica el mismo rango a las tarjetas de pedidos y compras mediante el helper compartido del frontend.
+
 ## 8. Correo electrónico
 
-`src/config/email.config.js` habilita SMTP cuando están configurados `SMTP_HOST` y `SMTP_USER`; `SMTP_PORT`, `SMTP_PASS` y `SMTP_FROM` completan la conexión. Con `SMTP_HOST` vacío, el backend no envía mensajes reales: imprime códigos de verificación y contenidos de correo en la consola, útil para desarrollo. Al configurar `email_admin` desde el panel, el administrador puede recibir avisos de compra y reparación junto con los correos destinados al cliente.
+`src/config/email.config.js` habilita SMTP cuando están configurados `SMTP_HOST` y `SMTP_USER`; `SMTP_PORT`, `SMTP_PASS` y `SMTP_FROM` completan la conexión. Con `SMTP_HOST` vacío, el backend no envía mensajes reales: imprime códigos de verificación y contenidos de correo en la consola, útil para desarrollo. Al configurar `email_admin` desde el panel, el administrador puede recibir avisos de compra y reparación junto con los correos destinados al cliente. El nombre de marca configurado se usa en los asuntos y plantillas de los correos, con `DuotechBros` como valor de respaldo.
 
 Los códigos de verificación tienen vencimiento de diez minutos. Mantén las credenciales SMTP solo en el `.env` local.
 

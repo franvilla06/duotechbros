@@ -1,13 +1,13 @@
-const pedidosModel = require('../models/pedidos.model');
-const productosModel = require('../models/productos.model');
-const portafolioModel = require('../models/portafolio.model');
-const usuariosModel = require('../models/usuarios.model');
-const configuracionModel = require('../models/configuracion.model');
-const authService = require('../services/auth.service');
-const emailService = require('../services/email.service');
+import * as pedidosModel from '../models/pedidos.model.js';
+import * as productosModel from '../models/productos.model.js';
+import * as portafolioModel from '../models/portafolio.model.js';
+import * as usuariosModel from '../models/usuarios.model.js';
+import * as configuracionModel from '../models/configuracion.model.js';
+import * as authService from '../services/auth.service.js';
+import * as emailService from '../services/email.service.js';
 
 // crear un pedido de reparacion (requiere usuario autenticado)
-async function crearPedido(req, res) {
+export const crearPedido = async (req, res) => {
     const { nombre_cliente, telefono, email, modelo_celular, descripcion_problema } = req.body;
     if (!nombre_cliente || !email || !modelo_celular || !descripcion_problema) {
         return res.status(400).json({ success: false, error: 'Faltan campos obligatorios' });
@@ -46,9 +46,9 @@ async function crearPedido(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function enviarConfirmacionReparacionPorEmail(pool, nombreUsuario, pedidoId, datos) {
+const enviarConfirmacionReparacionPorEmail = async (pool, nombreUsuario, pedidoId, datos) => {
     const destinatarios = new Set();
     if (datos.email && String(datos.email).trim() !== '') {
         destinatarios.add(String(datos.email).trim().toLowerCase());
@@ -61,6 +61,7 @@ async function enviarConfirmacionReparacionPorEmail(pool, nombreUsuario, pedidoI
 
     const config = await configuracionModel.obtenerTodo(pool);
     const emailAdmin = (config.email_admin || '').trim();
+    const marca = config.marca_nombre || 'DuotechBros';
     if (emailAdmin !== '') {
         destinatarios.add(emailAdmin.toLowerCase());
     }
@@ -82,10 +83,11 @@ async function enviarConfirmacionReparacionPorEmail(pool, nombreUsuario, pedidoI
         modelo_celular: datos.modelo_celular,
         descripcion_problema: datos.descripcion_problema,
         creado_en: new Date(),
+        marca,
     });
-}
+};
 
-async function listarPedidos(req, res) {
+export const listarPedidos = async (req, res) => {
     try {
         const tipo = req.query.tipo || null;
         const pedidos = await pedidosModel.listar(req.app.locals.pool, tipo);
@@ -93,25 +95,25 @@ async function listarPedidos(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function listarProductos(req, res) {
+export const listarProductos = async (req, res) => {
     try {
         return res.json(await productosModel.listar(req.app.locals.pool));
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function listarPortafolio(req, res) {
+export const listarPortafolio = async (req, res) => {
     try {
         return res.json(await portafolioModel.listar(req.app.locals.pool));
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function iniciarSesion(req, res) {
+export const iniciarSesion = async (req, res) => {
     const { usuario, password } = req.body;
     try {
         const admin = await authService.autenticarAdministrador(
@@ -133,9 +135,9 @@ async function iniciarSesion(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function obtenerDetallePedidoAdmin(req, res) {
+export const obtenerDetallePedidoAdmin = async (req, res) => {
     const { id } = req.params;
     try {
         const pedido = await pedidosModel.obtenerPedidoConItems(req.app.locals.pool, id);
@@ -146,13 +148,4 @@ async function obtenerDetallePedidoAdmin(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
-
-module.exports = {
-    crearPedido,
-    listarPedidos,
-    listarProductos,
-    listarPortafolio,
-    iniciarSesion,
-    obtenerDetallePedidoAdmin,
 };

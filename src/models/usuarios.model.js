@@ -1,91 +1,77 @@
-async function contarPorUsuario(pool, usuario) {
+export const contarPorUsuario = async (pool, usuario) => {
     const [rows] = await pool.query(
         'SELECT COUNT(*) as count FROM usuarios WHERE usuario = ?',
         [usuario]
     );
     return rows[0];
-}
+};
 
-async function buscarPorUsuario(pool, usuario) {
+export const buscarPorUsuario = async (pool, usuario) => {
     const [rows] = await pool.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario]);
     return rows[0] || null;
-}
+};
 
-async function buscarPorEmail(pool, email) {
+export const buscarPorEmail = async (pool, email) => {
     const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
     return rows[0] || null;
-}
+};
 
-async function crear(pool, usuario, passwordHash) {
+export const crear = async (pool, usuario, passwordHash) => {
     const [result] = await pool.query(
         'INSERT INTO usuarios (usuario, password_hash) VALUES (?, ?)',
         [usuario, passwordHash]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function crearConEmail(pool, usuario, email, passwordHash) {
+export const crearConEmail = async (pool, usuario, email, passwordHash) => {
     const [result] = await pool.query(
         'INSERT INTO usuarios (usuario, email, password_hash) VALUES (?, ?, ?)',
         [usuario, email, passwordHash]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function obtenerId(pool, usuario) {
+export const obtenerId = async (pool, usuario) => {
     const [rows] = await pool.query('SELECT id FROM usuarios WHERE usuario = ?', [usuario]);
     return rows[0] ? rows[0].id : null;
-}
+};
 
-async function obtenerPerfil(pool, usuario) {
+export const obtenerPerfil = async (pool, usuario) => {
     const [rows] = await pool.query(
         'SELECT id, usuario, email, creado_en FROM usuarios WHERE usuario = ?',
         [usuario]
     );
     return rows[0] || null;
-}
+};
 
-async function actualizarPassword(pool, usuario, passwordHash) {
+export const actualizarPassword = async (pool, usuario, passwordHash) => {
     const [result] = await pool.query(
         'UPDATE usuarios SET password_hash = ? WHERE usuario = ?',
         [passwordHash, usuario]
     );
     return { affectedRows: result.affectedRows };
-}
+};
 
 // actualiza el email de un usuario
-async function actualizarEmail(pool, usuario, email) {
+export const actualizarEmail = async (pool, usuario, email) => {
     const [result] = await pool.query(
         'UPDATE usuarios SET email = ? WHERE usuario = ?',
         [email, usuario]
     );
     return { affectedRows: result.affectedRows };
-}
+};
 
 // cuenta cuantos usuarios tienen un email (para validar duplicados)
-async function contarPorEmail(pool, email) {
+export const contarPorEmail = async (pool, email) => {
     const [rows] = await pool.query(
         'SELECT COUNT(*) as count FROM usuarios WHERE email = ?',
         [email]
     );
     return rows[0];
-}
+};
 
-async function eliminar(pool, usuario) {
+export const eliminar = async (pool, usuario) => {
     const [result] = await pool.query('DELETE FROM usuarios WHERE usuario = ?', [usuario]);
     return { affectedRows: result.affectedRows };
-}
-
-module.exports = {
-    contarPorUsuario,
-    contarPorEmail,
-    buscarPorUsuario,
-    buscarPorEmail,
-    crear,
-    crearConEmail,
-    obtenerId,
-    obtenerPerfil,
-    actualizarPassword,
-    actualizarEmail,
-    eliminar,
 };

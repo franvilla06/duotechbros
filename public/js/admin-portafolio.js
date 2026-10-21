@@ -223,10 +223,21 @@ function escaparCSV(valor) {
     return texto;
 }
 
-function exportarCSV() {
+async function exportarCSV() {
     if (trabajosFiltrados.length === 0) {
         mostrarToast('No hay trabajos para exportar.', true);
         return;
+    }
+
+    let marca = 'DuotechBros';
+    try {
+        const resConfig = await fetch('/api/configuracion');
+        if (resConfig.ok) {
+            const config = await resConfig.json();
+            marca = config.marca_nombre || 'DuotechBros';
+        }
+    } catch (error) {
+        console.warn('No se pudo obtener la marca:', error.message);
     }
 
     const encabezados = [
@@ -262,7 +273,8 @@ function exportarCSV() {
 
     const hoy = new Date();
     const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-    const nombreArchivo = `portafolio-duotechbros-${fecha}.csv`;
+    const marcaSlug = marca.toLowerCase().replace(/\s+/g, '-');
+    const nombreArchivo = `portafolio-${marcaSlug}-${fecha}.csv`;
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

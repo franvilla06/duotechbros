@@ -1,9 +1,9 @@
-async function listar(pool) {
+export const listar = async (pool) => {
     const [rows] = await pool.query('SELECT * FROM productos ORDER BY id DESC');
     return rows;
-}
+};
 
-async function crear(pool, producto) {
+export const crear = async (pool, producto) => {
     const [result] = await pool.query(
         `INSERT INTO productos (nombre, descripcion, precio, imagen_url, imagenes, categoria, stock)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -18,9 +18,9 @@ async function crear(pool, producto) {
         ]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function actualizar(pool, id, producto) {
+export const actualizar = async (pool, id, producto) => {
     const camposImagenes = producto.imagenes === undefined ? '' : ', imagenes = ?';
     const valores = [
         producto.nombre,
@@ -38,29 +38,27 @@ async function actualizar(pool, id, producto) {
         valores
     );
     return { affectedRows: result.affectedRows };
-}
+};
 
-async function eliminar(pool, id) {
+export const eliminar = async (pool, id) => {
     const [result] = await pool.query('DELETE FROM productos WHERE id = ?', [id]);
     return { affectedRows: result.affectedRows };
-}
+};
 
 // descuenta stock de un producto (dentro de una transaccion se pasa la conexion)
-async function descontarStock(pool, productoId, cantidad) {
+export const descontarStock = async (pool, productoId, cantidad) => {
     const [result] = await pool.query(
         'UPDATE productos SET stock = stock - ? WHERE id = ?',
         [cantidad, productoId]
     );
     return { affectedRows: result.affectedRows };
-}
+};
 
 // restaura stock (usado al cancelar una compra)
-async function restaurarStock(pool, productoId, cantidad) {
+export const restaurarStock = async (pool, productoId, cantidad) => {
     const [result] = await pool.query(
         'UPDATE productos SET stock = stock + ? WHERE id = ?',
         [cantidad, productoId]
     );
     return { affectedRows: result.affectedRows };
-}
-
-module.exports = { listar, crear, actualizar, eliminar, descontarStock, restaurarStock };
+};

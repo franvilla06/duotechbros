@@ -4,9 +4,9 @@ Aplicación web para presentar los servicios de DuotechBros, recibir solicitudes
 
 ## Descripción y arquitectura
 
-El proyecto es una aplicación web cliente-servidor. El frontend está hecho con HTML, CSS y JavaScript sin framework; el backend se ejecuta en Node.js con Express; y la persistencia se realiza en MySQL mediante `mysql2`. Express sirve la carpeta `public/` y expone la API bajo `/api`.
+El proyecto es una aplicación web cliente-servidor. El frontend está hecho con HTML, CSS y JavaScript sin framework; el backend se ejecuta en Node.js con Express y módulos ES (ESM); y la persistencia se realiza en MySQL mediante `mysql2`. Express sirve la carpeta `public/` y expone la API bajo `/api`.
 
-El servidor carga la configuración desde `.env`, inicializa la base de datos y su esquema y, solo después, inicia la aplicación HTTP. Los controladores atienden las solicitudes, los servicios coordinan los flujos de negocio y los modelos ejecutan consultas SQL.
+El servidor carga la configuración desde `.env`, inicializa la base de datos y su esquema y, solo después, importa la aplicación e inicia el servidor HTTP. Los módulos locales del backend se importan con extensión `.js`, usan exportaciones nombradas y mantienen las funciones en formato flecha. Los controladores atienden las solicitudes, los servicios coordinan los flujos de negocio y los modelos ejecutan consultas SQL.
 
 ## Funcionalidades
 
@@ -20,21 +20,22 @@ El servidor carga la configuración desde `.env`, inicializa la base de datos y 
 - Formulario de reparación asociado a la cuenta autenticada y sección de historial personal.
 - Carrito de compras; al confirmar la compra se valida el stock, se crea el pedido y sus ítems, se actualizan las existencias y se vacía el carrito dentro de una transacción.
 - Historial de compras y reparaciones con detalle, filtros por tipo y estado, búsqueda, cancelación o repetición de compras cuando corresponde, y exportación de pedidos recientes a PDF.
+- La marca del sitio se configura desde el panel y se refleja en los textos públicos y de usuario, además de los correos transaccionales y documentos exportados.
 - Correos de confirmación de reparaciones y compras; también se puede notificar al administrador de las compras.
 
 ### Administración
 
-- Inicio de sesión administrativo y panel con estadísticas, gráficos, pedidos recientes y alertas de stock.
+- Inicio de sesión administrativo y panel con estadísticas, gráficos filtrables por período, pedidos recientes y alertas de stock.
 - Gestión de productos y trabajos del portafolio, incluidas hasta cuatro imágenes adicionales además de la imagen principal.
-- Gestión de pedidos de reparación y compras: consulta, filtros, cambios de estado, notas, presupuestos y eliminación.
-- Búsqueda, ordenamiento, paginación y exportación CSV donde están disponibles en las tablas administrativas.
-- Configuración de datos de contacto, redes, horarios y avisos del sitio.
+- Gestión de pedidos de reparación y compras: consulta, filtros por fecha y estado, cambios de estado, notas, presupuestos y eliminación.
+- Búsqueda, ordenamiento, paginación y exportación CSV con la marca actual en las tablas administrativas que ofrecen esa opción.
+- Configuración de la marca, datos de contacto, redes, horarios y avisos del sitio.
 - Perfil administrativo para cambiar usuario y contraseña.
 - Interfaz adaptable a dispositivos móviles, incluido el menú público y el panel de administración.
 
 ## Tecnologías y dependencias
 
-- **Entorno y servidor:** Node.js, Express 5 y CommonJS.
+- **Entorno y servidor:** Node.js, Express 5 y módulos ES (ESM).
 - **Frontend:** HTML5, CSS3 y JavaScript vanilla; no se utiliza un framework de interfaz.
 - **Base de datos:** MySQL, normalmente ejecutado localmente con XAMPP; `mysql2` proporciona el cliente asíncrono con pool de conexiones.
 - **Autenticación y correo:** `bcryptjs` para hashes de contraseñas, tokens Bearer implementados por el proyecto y `nodemailer` para SMTP.
@@ -110,9 +111,9 @@ Las cuentas de usuario guardan hashes de contraseña con `bcryptjs`; las rutas d
 - `npm test` no ejecuta pruebas: el script actual es solo un marcador que termina con error.
 - [guia_del_proyecto.md](guia_del_proyecto.md) contiene el mapa funcional de páginas, la arquitectura y las rutas de API.
 
-## Cambios recientes
+## Comportamiento actual
 
-Los commits recientes de la rama incluyen mejoras responsive para el menú público y el panel administrativo, exportación PDF de la sección “Mis pedidos”, cierre de la confirmación de compra para volver al carrito, envío de correos informativos de compras y reparaciones, carrusel público y gestión de imágenes múltiples para productos y portafolio. El historial anterior también registra la migración de SQLite a MySQL, autenticación por email, verificación de registro por correo, recuperación de contraseña y gráficos del dashboard.
+El backend usa módulos ES de Node.js. `server.js` inicializa MySQL antes de cargar `src/app.js`, que obtiene el pool de conexiones durante su inicialización. En las páginas web, la marca se lee desde `/api/configuracion` y se refleja en los elementos preparados para mostrarla, los correos y los archivos exportados. Los filtros temporales del dashboard, pedidos y compras admiten hoy, última semana, último mes y todo el tiempo; el dashboard agrupa las ventas por día para períodos acotados y por mes para todo el tiempo.
 
 ## Autores
 

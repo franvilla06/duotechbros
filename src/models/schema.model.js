@@ -1,7 +1,7 @@
 // inicializa el esquema de la base de datos (MySQL)
 // crea todas las tablas si no existen
 // a diferencia de sqlite, mysql soporta IF NOT EXISTS de forma nativa
-async function inicializarEsquema(pool) {
+export const inicializarEsquema = async (pool) => {
     const tablas = [
         // usuarios del sitio publico
         `CREATE TABLE IF NOT EXISTS usuarios (
@@ -128,8 +128,8 @@ async function inicializarEsquema(pool) {
     );
 
     if (admins[0].count === 0) {
-        const bcrypt = require('bcryptjs');
-        const hash = bcrypt.hashSync('admin123', 10);
+        const bcrypt = await import('bcryptjs');
+        const hash = bcrypt.default.hashSync('admin123', 10);
         await pool.query(
             'INSERT INTO admin (usuario, password_hash) VALUES (?, ?)',
             ['admin', hash]
@@ -162,14 +162,12 @@ async function inicializarEsquema(pool) {
             [clave, valor]
         );
     }
-}
+};
 
-async function agregarColumnaSiNoExiste(pool, tabla, columna, tipo) {
+const agregarColumnaSiNoExiste = async (pool, tabla, columna, tipo) => {
     const [columnas] = await pool.query(`SHOW COLUMNS FROM \`${tabla}\` LIKE ?`, [columna]);
     if (columnas.length === 0) {
         await pool.query(`ALTER TABLE \`${tabla}\` ADD COLUMN \`${columna}\` ${tipo}`);
         console.log(`Migracion aplicada: columna ${columna} agregada a ${tabla}`);
     }
-}
-
-module.exports = inicializarEsquema;
+};

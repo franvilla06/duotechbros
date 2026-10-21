@@ -533,6 +533,71 @@ function prepararTablasResponsive() {
     });
 }
 
+// Actualizar la marca en el panel admin
+const actualizarMarcaAdmin = async () => {
+    try {
+        const respuesta = await fetch(`${API_BASE}/configuracion`);
+        if (!respuesta.ok) return;
+
+        const config = await respuesta.json();
+        const marca = config.marca_nombre || 'DuotechBros';
+
+        // sidebar
+        const brandSidebar = document.querySelector('.admin-sidebar-brand h2');
+        if (brandSidebar) brandSidebar.textContent = marca;
+
+        // textos con la clase admin-marca
+        document.querySelectorAll('.admin-marca').forEach((el) => {
+            el.textContent = marca;
+        });
+    } catch (error) {
+        console.warn('No se pudo actualizar la marca en el admin:', error.message);
+    }
+};
+
+// FILTRADO POR RANGO DE TIEMPO (USADO EN VARIAS SECCIONES)
+const filtrarPorRangoTiempo = (items, rango, campoFecha = 'creado_en') => {
+    if (rango === 'todos') return items;
+
+    const ahora = new Date();
+    ahora.setHours(23, 59, 59, 999);
+
+    let limite = new Date();
+    limite.setHours(0, 0, 0, 0);
+
+    if (rango === 'hoy') {
+        limite.setHours(0, 0, 0, 0);
+    } else if (rango === 'semana') {
+        limite.setDate(limite.getDate() - 7);
+    } else if (rango === 'mes') {
+        const diaActual = limite.getDate();
+        limite.setDate(1);
+        limite.setMonth(limite.getMonth() - 1);
+        const ultimoDiaMesAnterior = new Date(
+            limite.getFullYear(),
+            limite.getMonth() + 1,
+            0
+        ).getDate();
+        limite.setDate(Math.min(diaActual, ultimoDiaMesAnterior));
+    }
+
+    return items.filter((item) => {
+        const valorFecha = item[campoFecha];
+        if (!valorFecha) return false;
+
+        const fecha = new Date(String(valorFecha).replace(' ', 'T'));
+        if (isNaN(fecha)) return false;
+
+        if (fecha > ahora) return false;
+
+        if (rango === 'hoy') {
+            return fecha.toDateString() === new Date().toDateString();
+        }
+
+        return fecha >= limite;
+    });
+};
+
 // PROTECCION AUTOMATICA DE PAGINAS INTERNAS
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -542,4 +607,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     iniciarMenuMobile();
     prepararTablasResponsive();
+    actualizarMarcaAdmin();
 });

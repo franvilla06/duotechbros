@@ -1,14 +1,15 @@
-const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-const adminModel = require('../models/admin.model');
-const usuariosModel = require('../models/usuarios.model');
-const verificacionModel = require('../models/verificacion.model');
-const emailService = require('./email.service');
-const { generarToken } = require('../utils/token.util');
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import * as adminModel from '../models/admin.model.js';
+import * as usuariosModel from '../models/usuarios.model.js';
+import * as verificacionModel from '../models/verificacion.model.js';
+import * as configuracionModel from '../models/configuracion.model.js';
+import * as emailService from './email.service.js';
+import { generarToken } from '../utils/token.util.js';
 
 // REGISTRO CON VERIFICACION POR EMAIL
 
-async function iniciarRegistro(pool, usuario, email, password) {
+export const iniciarRegistro = async (pool, usuario, email, password) => {
     const existeUsuario = await usuariosModel.contarPorUsuario(pool, usuario);
     if (existeUsuario.count > 0) {
         return { error: 'Ese nombre de usuario ya esta en uso.' };
@@ -34,12 +35,13 @@ async function iniciarRegistro(pool, usuario, email, password) {
         expira_en: formatearFechaMySQL(expiraEn),
     });
 
-    await emailService.enviarCodigoVerificacion(email, usuario, codigo);
+    const marca = await configuracionModel.obtener(pool, 'marca_nombre') || 'DuotechBros';
+    await emailService.enviarCodigoVerificacion(email, usuario, codigo, marca);
 
     return { exito: true, email };
-}
+};
 
-async function verificarCodigo(pool, email, codigo) {
+export const verificarCodigo = async (pool, email, codigo) => {
     await verificacionModel.limpiarVencidos(pool);
 
     const registro = await verificacionModel.buscarPorEmail(pool, email, 'registro');
@@ -96,14 +98,14 @@ async function verificarCodigo(pool, email, codigo) {
     } finally {
         conexion.release();
     }
-}
+};
 
-async function reenviarCodigo(pool, email) {
+export const reenviarCodigo = async (pool, email) => {
     const registro = await verificacionModel.buscarPorEmail(pool, email, 'registro');
 
     if (!registro) {
         return { error: 'No hay un registro pendiente para este email. Volve a registrarte.' };
-    }
+    };
 
     const nuevoCodigo = crypto.randomInt(100000, 999999).toString();
     const nuevaExpiracion = new Date(Date.now() + 10 * 60 * 1000);
@@ -113,14 +115,15 @@ async function reenviarCodigo(pool, email) {
         [nuevoCodigo, formatearFechaMySQL(nuevaExpiracion), registro.id]
     );
 
-    await emailService.enviarCodigoVerificacion(email, registro.usuario, nuevoCodigo);
+    const marca = await configuracionModel.obtener(pool, 'marca_nombre') || 'DuotechBros';
+    await emailService.enviarCodigoVerificacion(email, registro.usuario, nuevoCodigo, marca);
 
     return { exito: true };
 }
 
 // RECUPERACION DE CONTRASENIA
 
-async function iniciarRecuperacion(pool, email) {
+export const iniciarRecuperacion = async (pool, email) => {
     const [rows] = await pool.query(
         'SELECT usuario, email FROM usuarios WHERE email = ?',
         [email]
@@ -142,19 +145,20 @@ async function iniciarRecuperacion(pool, email) {
         expira_en: formatearFechaMySQL(expiraEn),
     });
 
-    await emailService.enviarCodigoRecuperacion(email, usuario.usuario, codigo);
+    const marca = await configuracionModel.obtener(pool, 'marca_nombre') || 'DuotechBros';
+    await emailService.enviarCodigoRecuperacion(email, usuario.usuario, codigo, marca);
 
     return { exito: true, existe: true };
-}
+};
 
-async function restablecerPassword(pool, email, codigo, passwordNueva) {
+export const restablecerPassword = async (pool, email, codigo, passwordNueva) => {
     await verificacionModel.limpiarVencidos(pool);
 
     const registro = await verificacionModel.buscarPorEmail(pool, email, 'recuperacion');
 
     if (!registro) {
         return { error: 'No hay una solicitud de recuperacion activa. Pedi un nuevo codigo.' };
-    }
+    };
 
     const ahora = new Date();
     const expira = new Date(registro.expira_en);
@@ -207,7 +211,7 @@ async function restablecerPassword(pool, email, codigo, passwordNueva) {
 
 // LOGIN
 
-async function autenticarUsuario(pool, email, password) {
+export const autenticarUsuario = async (pool, email, password) => {
     const user = await usuariosModel.buscarPorEmail(pool, email);
     if (!user || !bcrypt.compareSync(password, user.password_hash)) return null;
 
@@ -217,9 +221,9 @@ async function autenticarUsuario(pool, email, password) {
         id: user.id,
         token: generarToken('usuario', user.usuario),
     };
-}
+};
 
-async function autenticarAdministrador(pool, usuario, password) {
+export const autenticarAdministrador = async (pool, usuario, password) => {
     const admin = await adminModel.buscarPorUsuario(pool, usuario);
     if (!admin || !bcrypt.compareSync(password, admin.password_hash)) return null;
 
@@ -227,11 +231,11 @@ async function autenticarAdministrador(pool, usuario, password) {
         usuario: admin.usuario,
         token: generarToken('admin', admin.usuario),
     };
-}
+};
 
 // PERFIL
 
-async function cambiarPassword(pool, usuario, passwordActual, passwordNueva) {
+export const cambiarPassword = async (pool, usuario, passwordActual, passwordNueva) => {
     const user = await usuariosModel.buscarPorUsuario(pool, usuario);
     if (!user) {
         return { error: 'Usuario no encontrado.' };
@@ -245,13 +249,13 @@ async function cambiarPassword(pool, usuario, passwordActual, passwordNueva) {
     await usuariosModel.actualizarPassword(pool, usuario, nuevoHash);
 
     return { success: true };
-}
+};
 
-async function darDeBaja(pool, usuario) {
+export const darDeBaja = async (pool, usuario) => {
     const user = await usuariosModel.buscarPorUsuario(pool, usuario);
     if (!user) {
         return { error: 'Usuario no encontrado.' };
-    }
+    };
 
     await usuariosModel.eliminar(pool, usuario);
 
@@ -261,21 +265,9 @@ async function darDeBaja(pool, usuario) {
 // UTILIDAD
 
 // convierte un objeto Date a formato MySQL DATETIME (YYYY-MM-DD HH:MM:SS)
-function formatearFechaMySQL(fecha) {
+export const formatearFechaMySQL = (fecha) => {
     const pad = (n) => String(n).padStart(2, '0');
     return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())} ${pad(
         fecha.getHours()
     )}:${pad(fecha.getMinutes())}:${pad(fecha.getSeconds())}`;
-}
-
-module.exports = {
-    iniciarRegistro,
-    verificarCodigo,
-    reenviarCodigo,
-    iniciarRecuperacion,
-    restablecerPassword,
-    autenticarUsuario,
-    autenticarAdministrador,
-    cambiarPassword,
-    darDeBaja,
 };

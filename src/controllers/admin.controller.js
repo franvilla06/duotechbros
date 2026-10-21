@@ -1,11 +1,11 @@
-const bcrypt = require('bcryptjs');
-const adminModel = require('../models/admin.model');
-const productosModel = require('../models/productos.model');
-const portafolioModel = require('../models/portafolio.model');
-const pedidosModel = require('../models/pedidos.model');
-const { generarToken } = require('../utils/token.util');
+import bcrypt from 'bcryptjs';
+import * as adminModel from '../models/admin.model.js';
+import * as productosModel from '../models/productos.model.js';
+import * as portafolioModel from '../models/portafolio.model.js';
+import * as pedidosModel from '../models/pedidos.model.js';
+import { generarToken } from '../utils/token.util.js';
 
-function normalizarImagenes(imagenes) {
+const normalizarImagenes = (imagenes) => {
     if (imagenes === null || imagenes === undefined || imagenes === '') return null;
 
     let array;
@@ -31,11 +31,11 @@ function normalizarImagenes(imagenes) {
         .slice(0, 4);
 
     return limpias.length > 0 ? JSON.stringify(limpias) : null;
-}
+};
 
 // PRODUCTOS
 
-async function crearProducto(req, res) {
+export const crearProducto = async (req, res) => {
     const { nombre, descripcion, precio, imagen_url, imagenes, categoria, stock } = req.body;
 
     if (!nombre || precio === undefined) {
@@ -65,9 +65,9 @@ async function crearProducto(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function actualizarProducto(req, res) {
+export const actualizarProducto = async (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, imagen_url, imagenes, categoria, stock } = req.body;
 
@@ -104,9 +104,9 @@ async function actualizarProducto(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function eliminarProducto(req, res) {
+export const eliminarProducto = async (req, res) => {
     const { id } = req.params;
     try {
         const info = await productosModel.eliminar(req.app.locals.pool, id);
@@ -117,19 +117,19 @@ async function eliminarProducto(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // PORTAFOLIO
 
-function normalizarFecha(valor) {
+const normalizarFecha = (valor) => {
     if (valor === undefined || valor === null || valor === '') return null;
     const texto = String(valor).trim();
     if (texto === '') return null;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return null;
     return texto;
-}
+};
 
-async function crearTrabajo(req, res) {
+export const crearTrabajo = async (req, res) => {
     const { titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin } =
         req.body;
 
@@ -158,9 +158,9 @@ async function crearTrabajo(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function actualizarTrabajo(req, res) {
+export const actualizarTrabajo = async (req, res) => {
     const { id } = req.params;
     const { titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin } =
         req.body;
@@ -196,9 +196,9 @@ async function actualizarTrabajo(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function eliminarTrabajo(req, res) {
+export const eliminarTrabajo = async (req, res) => {
     const { id } = req.params;
     try {
         const info = await portafolioModel.eliminar(req.app.locals.pool, id);
@@ -209,13 +209,13 @@ async function eliminarTrabajo(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // PEDIDOS
 
 const ESTADOS_VALIDOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 
-async function actualizarEstadoPedido(req, res) {
+export const actualizarEstadoPedido = async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
 
@@ -237,9 +237,9 @@ async function actualizarEstadoPedido(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function actualizarNotasPedido(req, res) {
+export const actualizarNotasPedido = async (req, res) => {
     const { id } = req.params;
     const { notas } = req.body;
 
@@ -260,9 +260,9 @@ async function actualizarNotasPedido(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function actualizarPresupuestoPedido(req, res) {
+export const actualizarPresupuestoPedido = async (req, res) => {
     const { id } = req.params;
     const { presupuesto } = req.body;
 
@@ -298,9 +298,9 @@ async function actualizarPresupuestoPedido(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function eliminarPedido(req, res) {
+export const eliminarPedido = async (req, res) => {
     const { id } = req.params;
     try {
         const info = await pedidosModel.eliminar(req.app.locals.pool, id);
@@ -311,11 +311,11 @@ async function eliminarPedido(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // PERFIL DEL ADMIN
 
-async function cambiarUsuarioAdmin(req, res) {
+export const cambiarUsuarioAdmin = async (req, res) => {
     const usuarioNuevo = typeof req.body.usuario_nuevo === 'string'
         ? req.body.usuario_nuevo.trim()
         : '';
@@ -369,9 +369,9 @@ async function cambiarUsuarioAdmin(req, res) {
         console.error('Error en cambiarUsuarioAdmin:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function cambiarPasswordAdmin(req, res) {
+export const cambiarPasswordAdmin = async (req, res) => {
     const { password_actual, password_nueva, password_confirmar } = req.body;
 
     if (!password_actual || !password_nueva || !password_confirmar) {
@@ -414,9 +414,9 @@ async function cambiarPasswordAdmin(req, res) {
         console.error('Error en cambiarPasswordAdmin:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function obtenerPerfilAdmin(req, res) {
+export const obtenerPerfilAdmin = async (req, res) => {
     try {
         const admin = await adminModel.buscarPorUsuario(req.app.locals.pool, req.usuario);
         if (!admin) {
@@ -432,20 +432,4 @@ async function obtenerPerfilAdmin(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
-
-module.exports = {
-    crearProducto,
-    actualizarProducto,
-    eliminarProducto,
-    crearTrabajo,
-    actualizarTrabajo,
-    eliminarTrabajo,
-    actualizarEstadoPedido,
-    actualizarNotasPedido,
-    actualizarPresupuestoPedido,
-    eliminarPedido,
-    cambiarUsuarioAdmin,
-    cambiarPasswordAdmin,
-    obtenerPerfilAdmin,
 };

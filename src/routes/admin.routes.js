@@ -1,10 +1,10 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import * as adminController from '../controllers/admin.controller.js';
+import * as configuracionController from '../controllers/configuracion.controller.js';
+import * as estadisticasController from '../controllers/estadisticas.controller.js';
+import { requiereAuth } from '../middlewares/auth.middleware.js';
 
-const adminController = require('../controllers/admin.controller');
-const configuracionController = require('../controllers/configuracion.controller');
-const estadisticasController = require('../controllers/estadisticas.controller');
-const { requiereAuth } = require('../middlewares/auth.middleware');
+const router = express.Router();
 
 // todas las rutas de este router están protegidas por el middleware
 router.use(requiereAuth);
@@ -36,4 +36,4 @@ router.get('/perfil', adminController.obtenerPerfilAdmin);
 router.put('/perfil/usuario', adminController.cambiarUsuarioAdmin);
 router.put('/perfil/password', adminController.cambiarPasswordAdmin);
 
-module.exports = router;
+export const adminRoutes = router;

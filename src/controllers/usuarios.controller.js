@@ -1,11 +1,12 @@
-const authService = require('../services/auth.service');
-const carritoService = require('../services/carrito.service');
-const usuariosModel = require('../models/usuarios.model');
-const pedidosModel = require('../models/pedidos.model');
+import bcrypt from 'bcryptjs';
+import * as authService from '../services/auth.service.js';
+import * as carritoService from '../services/carrito.service.js';
+import * as usuariosModel from '../models/usuarios.model.js';
+import * as pedidosModel from '../models/pedidos.model.js';
 
 // VALIDACIONES
 
-function validarUsuario(usuario) {
+const validarUsuario = (usuario) => {
     if (!usuario) return 'El nombre de usuario es obligatorio.';
     if (usuario.length < 3) return 'El nombre de usuario debe tener al menos 3 caracteres.';
     if (usuario.length > 30) return 'El nombre de usuario no puede superar los 30 caracteres.';
@@ -13,25 +14,25 @@ function validarUsuario(usuario) {
         return 'El nombre de usuario solo puede contener letras, numeros y guion bajo.';
     }
     return null;
-}
+};
 
-function validarEmail(email) {
+const validarEmail = (email) => {
     if (!email) return 'El email es obligatorio.';
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) return 'El email no es valido.';
     if (email.length > 100) return 'El email es demasiado largo.';
     return null;
-}
+};
 
-function validarPassword(password) {
+const validarPassword = (password) => {
     if (!password) return 'La contrasenia es obligatoria.';
     if (password.length < 6) return 'La contrasenia debe tener al menos 6 caracteres.';
     return null;
-}
+};
 
 // REGISTRO
 
-async function iniciarRegistro(req, res) {
+export const iniciarRegistro = async (req, res) => {
     const { usuario, email, password } = req.body;
 
     const errorUsuario = validarUsuario(usuario);
@@ -64,9 +65,9 @@ async function iniciarRegistro(req, res) {
         console.error('Error en iniciarRegistro:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function verificarCodigo(req, res) {
+export const verificarCodigo = async (req, res) => {
     const { email, codigo } = req.body;
 
     if (!email || !codigo) {
@@ -95,9 +96,9 @@ async function verificarCodigo(req, res) {
         console.error('Error en verificarCodigo:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function reenviarCodigo(req, res) {
+export const reenviarCodigo = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
@@ -116,11 +117,11 @@ async function reenviarCodigo(req, res) {
         console.error('Error en reenviarCodigo:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // RECUPERACION
 
-async function recuperarPassword(req, res) {
+export const recuperarPassword = async (req, res) => {
     const { email } = req.body;
 
     const errorEmail = validarEmail(email);
@@ -137,9 +138,9 @@ async function recuperarPassword(req, res) {
         console.error('Error en recuperarPassword:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function restablecerPassword(req, res) {
+export const restablecerPassword = async (req, res) => {
     const { email, codigo, password_nueva, password_confirmar } = req.body;
 
     if (!email || !codigo || !password_nueva || !password_confirmar) {
@@ -177,11 +178,11 @@ async function restablecerPassword(req, res) {
         console.error('Error en restablecerPassword:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // LOGIN
 
-async function iniciarSesion(req, res) {
+export const iniciarSesion = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -216,11 +217,9 @@ async function iniciarSesion(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-// PERFIL
-
-async function obtenerPerfil(req, res) {
+export const obtenerPerfil = async (req, res) => {
     try {
         const user = await usuariosModel.obtenerPerfil(req.app.locals.pool, req.usuario);
         if (!user) {
@@ -230,9 +229,9 @@ async function obtenerPerfil(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function cambiarPassword(req, res) {
+export const cambiarPassword = async (req, res) => {
     const { password_actual, password_nueva, password_confirmar } = req.body;
 
     if (!password_actual || !password_nueva || !password_confirmar) {
@@ -268,11 +267,9 @@ async function cambiarPassword(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-// cambia el email del usuario
-// requiere la contrasenia actual como confirmacion
-async function cambiarEmail(req, res) {
+export const cambiarEmail = async (req, res) => {
     const { email_nuevo, password } = req.body;
 
     if (!email_nuevo || !password) {
@@ -286,9 +283,7 @@ async function cambiarEmail(req, res) {
 
     try {
         const pool = req.app.locals.pool;
-        const bcrypt = require('bcryptjs');
 
-        // verificar contrasenia
         const usuario = await usuariosModel.buscarPorUsuario(pool, req.usuario);
         if (!usuario) {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
@@ -298,7 +293,6 @@ async function cambiarEmail(req, res) {
             return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
         }
 
-        // verificar que el email no este en uso por otro usuario
         const emailNormalizado = email_nuevo.toLowerCase().trim();
         const existe = await usuariosModel.contarPorEmail(pool, emailNormalizado);
         const emailActualNormalizado = (usuario.email || '').toLowerCase().trim();
@@ -308,7 +302,6 @@ async function cambiarEmail(req, res) {
                 .json({ success: false, error: 'Ese email ya esta en uso por otra cuenta.' });
         }
 
-        // actualizar
         await usuariosModel.actualizarEmail(pool, req.usuario, emailNormalizado);
 
         return res.json({
@@ -320,9 +313,9 @@ async function cambiarEmail(req, res) {
         console.error('Error en cambiarEmail:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function darDeBajaUsuario(req, res) {
+export const darDeBajaUsuario = async (req, res) => {
     const { password } = req.body;
 
     if (!password) {
@@ -332,20 +325,11 @@ async function darDeBajaUsuario(req, res) {
     }
 
     try {
-        const user = await authService.autenticarUsuario(
-            req.app.locals.pool,
-            req.usuario,
-            password
-        );
-
-        // el autenticarUsuario espera email, pero aca tenemos usuario
-        // usamos el modelo directamente
         const usuarioReal = await usuariosModel.buscarPorUsuario(req.app.locals.pool, req.usuario);
         if (!usuarioReal) {
             return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
         }
 
-        const bcrypt = require('bcryptjs');
         if (!bcrypt.compareSync(password, usuarioReal.password_hash)) {
             return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
         }
@@ -359,11 +343,11 @@ async function darDeBajaUsuario(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 // HISTORIAL DE PEDIDOS
 
-async function listarMisPedidos(req, res) {
+export const listarMisPedidos = async (req, res) => {
     try {
         const usuarioId = await usuariosModel.obtenerId(req.app.locals.pool, req.usuario);
         if (!usuarioId) {
@@ -381,9 +365,9 @@ async function listarMisPedidos(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function obtenerDetallePedido(req, res) {
+export const obtenerDetallePedido = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -435,9 +419,9 @@ async function obtenerDetallePedido(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function cancelarPedido(req, res) {
+export const cancelarPedido = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -458,9 +442,9 @@ async function cancelarPedido(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function repetirPedido(req, res) {
+export const repetirPedido = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -474,21 +458,4 @@ async function repetirPedido(req, res) {
         console.error('Error al repetir pedido:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
-}
-
-module.exports = {
-    iniciarRegistro,
-    verificarCodigo,
-    reenviarCodigo,
-    recuperarPassword,
-    restablecerPassword,
-    iniciarSesion,
-    obtenerPerfil,
-    cambiarPassword,
-    cambiarEmail,
-    darDeBajaUsuario,
-    listarMisPedidos,
-    obtenerDetallePedido,
-    cancelarPedido,
-    repetirPedido,
 };

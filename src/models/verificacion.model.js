@@ -1,4 +1,4 @@
-async function crear(pool, { usuario, email, password_hash, codigo, expira_en }) {
+export const crear = async (pool, { usuario, email, password_hash, codigo, expira_en }) => {
     // borrar codigos de registro previos
     await pool.query(
         "DELETE FROM codigos_verificacion WHERE (usuario = ? OR email = ?) AND tipo = 'registro'",
@@ -11,9 +11,9 @@ async function crear(pool, { usuario, email, password_hash, codigo, expira_en })
         [usuario, email, password_hash, codigo, expira_en]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function crearRecuperacion(pool, { usuario, email, codigo, expira_en }) {
+export const crearRecuperacion = async (pool, { usuario, email, codigo, expira_en }) => {
     // borrar codigos de recuperacion previos
     await pool.query(
         "DELETE FROM codigos_verificacion WHERE email = ? AND tipo = 'recuperacion'",
@@ -26,9 +26,9 @@ async function crearRecuperacion(pool, { usuario, email, codigo, expira_en }) {
         [usuario, email, codigo, expira_en]
     );
     return { insertId: result.insertId };
-}
+};
 
-async function buscarPorEmail(pool, email, tipo = 'registro') {
+export const buscarPorEmail = async (pool, email, tipo = 'registro') => {
     const [rows] = await pool.query(
         `SELECT * FROM codigos_verificacion
          WHERE email = ? AND tipo = ? AND usado = 0
@@ -37,33 +37,23 @@ async function buscarPorEmail(pool, email, tipo = 'registro') {
         [email, tipo]
     );
     return rows[0] || null;
-}
+};
 
-async function incrementarIntentos(pool, id) {
+export const incrementarIntentos = async (pool, id) => {
     await pool.query(
         'UPDATE codigos_verificacion SET intentos = intentos + 1 WHERE id = ?',
         [id]
     );
-}
+};
 
-async function marcarUsado(pool, id) {
+export const marcarUsado = async (pool, id) => {
     await pool.query('UPDATE codigos_verificacion SET usado = 1 WHERE id = ?', [id]);
-}
+};
 
-async function eliminar(pool, id) {
+export const eliminar = async (pool, id) => {
     await pool.query('DELETE FROM codigos_verificacion WHERE id = ?', [id]);
-}
+};
 
-async function limpiarVencidos(pool) {
+export const limpiarVencidos = async (pool) => {
     await pool.query('DELETE FROM codigos_verificacion WHERE expira_en < NOW() OR usado = 1');
-}
-
-module.exports = {
-    crear,
-    crearRecuperacion,
-    buscarPorEmail,
-    incrementarIntentos,
-    marcarUsado,
-    eliminar,
-    limpiarVencidos,
 };

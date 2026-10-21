@@ -1,4 +1,4 @@
-const configuracionModel = require('../models/configuracion.model');
+import * as configuracionModel from '../models/configuracion.model.js';
 
 const CLAVES_PERMITIDAS = [
     'marca_nombre',
@@ -18,16 +18,16 @@ const CLAVES_PERMITIDAS = [
     'horario_domingo',
 ];
 
-async function obtenerConfiguracion(req, res) {
+export const obtenerConfiguracion = async (req, res) => {
     try {
         const config = await configuracionModel.obtenerTodo(req.app.locals.pool);
         return res.json(config);
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
-async function actualizarConfiguracion(req, res) {
+export const actualizarConfiguracion = async (req, res) => {
     const cambios = req.body;
 
     if (!cambios || typeof cambios !== 'object') {
@@ -58,6 +58,4 @@ async function actualizarConfiguracion(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
-}
-
-module.exports = { obtenerConfiguracion, actualizarConfiguracion };
+};

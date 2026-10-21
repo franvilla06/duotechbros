@@ -37,6 +37,11 @@ function aplicarConfiguracion(config) {
         footerMarca.textContent = marca;
     }
 
+    // actualizar todos los textos que tengan la clase texto-marca
+    document.querySelectorAll('.texto-marca').forEach((el) => {
+        el.textContent = marca;
+    });
+
     // copy: actualizar el copyright con el nombre de la marca
     const footerCopy = document.getElementById('footer-copy');
     if (footerCopy) {

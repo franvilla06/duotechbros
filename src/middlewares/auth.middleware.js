@@ -1,14 +1,14 @@
-const { verificarToken } = require('../utils/token.util');
+import { verificarToken } from '../utils/token.util.js';
 
 // extraer el token del header authorization
-function extraerToken(req) {
+export const extraerToken = (req) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     return authHeader.substring(7);
-}
+};
 
 // middleware para rutas de administrador
-function requiereAuth(req, res, next) {
+export const requiereAuth = (req, res, next) => {
     const token = extraerToken(req);
     if (!token) {
         return res.status(401).json({
@@ -26,10 +26,10 @@ function requiereAuth(req, res, next) {
     req.usuario = partes[1];
     req.rol = partes[0];
     next();
-}
+};
 
 // middleware para rutas de usuario
-function requiereAuthUsuario(req, res, next) {
+export const requiereAuthUsuario = (req, res, next) => {
     const token = extraerToken(req);
     if (!token) {
         return res.status(401).json({
@@ -47,9 +47,4 @@ function requiereAuthUsuario(req, res, next) {
     req.usuario = partes[1];
     req.rol = partes[0];
     next();
-}
-
-module.exports = {
-    requiereAuth,
-    requiereAuthUsuario,
 };

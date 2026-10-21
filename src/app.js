@@ -1,13 +1,18 @@
-const path = require('path');
-const express = require('express');
-const cors = require('cors');
-const { obtenerPool } = require('./config/database');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import express from 'express';
+import cors from 'cors';
+import { obtenerPool } from './config/database.js';
 
-const pedidosRoutes = require('./routes/pedidos.routes');
-const adminRoutes = require('./routes/admin.routes');
-const usuariosRoutes = require('./routes/usuarios.routes');
+import { pedidosRoutes } from './routes/pedidos.routes.js';
+import { adminRoutes } from './routes/admin.routes.js';
+import { usuariosRoutes } from './routes/usuarios.routes.js';
 
-const app = express();
+// como en ES Modules __dirname no existe, lo recreamos
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export const app = express();
 
 // exposicion del pool de conexiones a los controllers
 app.locals.pool = obtenerPool();
@@ -16,7 +21,7 @@ app.locals.pool = obtenerPool();
 // permite peticiones desde localhost y 127.0.0.1 en cualquier puerto
 // esto incluye el puerto 3000 (backend) y 5500 (Live Server)
 const corsOptions = {
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
         // permitir peticiones sin origin (Postman, curl, etc.)
         if (!origin) return callback(null, true);
 
@@ -45,5 +50,3 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api', pedidosRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/usuarios', usuariosRoutes);
-
-module.exports = app;

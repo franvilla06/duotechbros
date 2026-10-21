@@ -1,9 +1,9 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import * as usuariosController from '../controllers/usuarios.controller.js';
+import * as carritoController from '../controllers/carrito.controller.js';
+import { requiereAuthUsuario } from '../middlewares/auth.middleware.js';
 
-const usuariosController = require('../controllers/usuarios.controller');
-const carritoController = require('../controllers/carrito.controller');
-const { requiereAuthUsuario } = require('../middlewares/auth.middleware');
+const router = express.Router();
 
 // REGISTRO EN DOS PASOS
 router.post('/registro', usuariosController.iniciarRegistro);
@@ -37,4 +37,4 @@ router.delete('/carrito/:id', requiereAuthUsuario, carritoController.eliminarIte
 router.delete('/carrito', requiereAuthUsuario, carritoController.vaciarCarrito);
 router.post('/carrito/enviar-pedido', requiereAuthUsuario, carritoController.enviarPedido);
 
-module.exports = router;
+export const usuariosRoutes = router;
