@@ -243,13 +243,16 @@ function renderizarPedidos(pedidos) {
 
     itemsPagina.forEach((p) => {
         const estadoActual = p.estado || 'pendiente';
+        const esCancelado = estadoActual.toLowerCase().trim() === 'cancelado';
         const tieneNotas = p.notas && p.notas.trim() !== '';
         const tienePresupuesto = p.presupuesto !== null && p.presupuesto !== undefined;
         const badgeId = `badge-${p.id}`;
 
-        const opciones = ESTADOS.map(
-            (e) => `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
-        ).join('');
+        const opciones = esCancelado
+            ? '<option value="cancelado" selected>Cancelado</option>'
+            : ESTADOS.map(
+                  (e) => `<option value="${e}" ${e === estadoActual ? 'selected' : ''}>${capitalizar(e)}</option>`
+              ).join('');
 
         let claseBotonNotas = 'btn-notas';
         if (tieneNotas || tienePresupuesto) claseBotonNotas += ' tiene-notas';
@@ -290,7 +293,7 @@ function renderizarPedidos(pedidos) {
             </td>
             <td class="cell-acciones" style="text-align: right">
                 <div class="cell-acciones-contenido">
-                    <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}">
+                    <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}" ${esCancelado ? 'disabled' : ''}>
                         ${opciones}
                     </select>
                     <button class="${claseBotonNotas}" title="${tituloBotonNotas}" data-id="${p.id}">
@@ -334,7 +337,7 @@ function renderizarPedidos(pedidos) {
                     <div class="fila-detalle-acciones-vertical">
                         <div class="fila-detalle-campo">
                             <label class="fila-detalle-campo-label">Estado</label>
-                            <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}">
+                            <select class="estado-select" data-id="${p.id}" data-estado-anterior="${estadoActual}" ${esCancelado ? 'disabled' : ''}>
                                 ${opciones}
                             </select>
                         </div>

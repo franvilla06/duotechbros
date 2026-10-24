@@ -401,15 +401,27 @@ async function abrirModalFactura(id) {
         }
 
         pedidoFacturaActual = data.pedido;
-
-        // precargar el estado actual en el select
-        facturaEstado.value = pedidoFacturaActual.estado || 'pendiente';
+        configurarEstadoFactura(pedidoFacturaActual.estado);
 
         renderizarFactura(pedidoFacturaActual);
     } catch (error) {
         console.error('Error al cargar factura:', error);
         facturaContenido.innerHTML = '<div class="factura-cargando">No se pudo conectar con el servidor.</div>';
     }
+}
+
+function configurarEstadoFactura(estado) {
+    const estadoActual = (estado || 'pendiente').toLowerCase().trim();
+    const esCancelado = estadoActual === 'cancelado';
+
+    facturaEstado.disabled = esCancelado;
+    btnGuardarEstado.disabled = esCancelado;
+    facturaEstado.innerHTML = esCancelado
+        ? '<option value="cancelado">Cancelado</option>'
+        : ESTADOS.map((estadoValido) => (
+              `<option value="${estadoValido}">${capitalizar(estadoValido)}</option>`
+          )).join('');
+    facturaEstado.value = estadoActual;
 }
 
 function renderizarFactura(pedido) {
@@ -535,6 +547,7 @@ async function guardarEstadoFactura() {
         if (resultado.success) {
             mostrarToast(`Estado actualizado a "${capitalizar(nuevoEstado)}"`);
             pedidoFacturaActual.estado = nuevoEstado;
+            configurarEstadoFactura(nuevoEstado);
 
             // actualizar el estado en la lista local
             const compra = comprasOriginales.find((c) => String(c.id) === String(pedidoFacturaActual.id));
@@ -550,7 +563,8 @@ async function guardarEstadoFactura() {
         console.error('Error al cambiar estado:', error);
         mostrarToast('No se pudo conectar con el servidor', true);
     } finally {
-        btnGuardarEstado.disabled = false;
+        btnGuardarEstado.disabled =
+            (pedidoFacturaActual?.estado || '').toLowerCase().trim() === 'cancelado';
         btnGuardarEstado.innerHTML = '<i class="fas fa-save"></i> Guardar estado';
     }
 }

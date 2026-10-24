@@ -1,12 +1,18 @@
 import mysql from 'mysql2/promise';
 import { inicializarEsquema } from '../models/schema.model.js';
 
+if (!process.env.DB_HOST || !process.env.DB_USER || process.env.DB_PASSWORD === undefined) {
+    console.error('ERROR FATAL: Faltan variables de entorno para la base de datos.');
+    console.error('Asegurate de configurar DB_HOST, DB_USER y DB_PASSWORD en tu archivo .env.');
+    throw new Error('No se puede iniciar sin las credenciales requeridas de la base de datos.');
+}
+
 // parametros de conexion leidos desde .env
 export const config = {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT) || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || 'duotechbros',
     waitForConnections: true,
     connectionLimit: 10,

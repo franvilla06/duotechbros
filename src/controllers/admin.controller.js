@@ -229,6 +229,10 @@ export const actualizarEstadoPedido = async (req, res) => {
     try {
         const info = await pedidosModel.actualizarEstado(req.app.locals.pool, id, estado);
 
+        if (info.error) {
+            return res.status(400).json({ success: false, error: info.error });
+        }
+
         if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }

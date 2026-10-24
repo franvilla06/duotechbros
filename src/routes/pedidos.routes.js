@@ -8,8 +8,8 @@ const router = express.Router();
 // crear un pedido de reparacion requiere usuario autenticado
 router.post('/pedidos', requiereAuthUsuario, pedidosController.crearPedido);
 
-// las lecturas son publicas
-router.get('/pedidos', pedidosController.listarPedidos);
+// las lecturas de pedidos requieren autenticacion de administrador
+router.get('/pedidos', requiereAuth, pedidosController.listarPedidos);
 router.get('/productos', pedidosController.listarProductos);
 router.get('/portafolio', pedidosController.listarPortafolio);
 router.post('/login', pedidosController.iniciarSesion);
