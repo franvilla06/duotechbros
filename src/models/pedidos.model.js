@@ -27,9 +27,74 @@ export const listar = async (pool, tipo = null) => {
     return rows;
 };
 
-export const actualizarEstado = async (pool, id, estado) => {
-    const [result] = await pool.query('UPDATE pedidos SET estado = ? WHERE id = ?', [estado, id]);
-    return { affectedRows: result.affectedRows };
+const restaurarStockPedido = async (conexion, pedidoId) => {
+    const [items] = await conexion.query(
+        'SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?',
+        [pedidoId]
+    );
+
+    for (const item of items) {
+        if (item.producto_id) {
+            await conexion.query('UPDATE productos SET stock = stock + ? WHERE id = ?', [
+                item.cantidad,
+                item.producto_id,
+            ]);
+        }
+    }
+};
+
+export const actualizarEstado = async (pool, id, nuevoEstado) => {
+    const conexion = await pool.getConnection();
+    try {
+        await conexion.beginTransaction();
+
+        const [rows] = await conexion.query(
+            'SELECT estado, tipo FROM pedidos WHERE id = ? FOR UPDATE',
+            [id]
+        );
+        const pedido = rows[0];
+
+        if (!pedido) {
+            await conexion.rollback();
+            return { affectedRows: 0 };
+        }
+
+        const estadoAnterior = (pedido.estado || 'pendiente').toLowerCase().trim();
+        const estadoNormalizado = nuevoEstado.toLowerCase().trim();
+
+        if (estadoAnterior === estadoNormalizado) {
+            await conexion.commit();
+            return { affectedRows: 1 };
+        }
+
+        if (estadoAnterior === 'cancelado' && estadoNormalizado !== 'cancelado') {
+            await conexion.rollback();
+            return {
+                error: 'Un pedido cancelado no puede volver a abrirse. Si se requiere, se debe generar uno nuevo.',
+            };
+        }
+
+        if (
+            estadoNormalizado === 'cancelado' &&
+            estadoAnterior !== 'cancelado' &&
+            pedido.tipo === 'producto'
+        ) {
+            await restaurarStockPedido(conexion, id);
+        }
+
+        const [result] = await conexion.query(
+            'UPDATE pedidos SET estado = ? WHERE id = ?',
+            [nuevoEstado, id]
+        );
+
+        await conexion.commit();
+        return { affectedRows: result.affectedRows };
+    } catch (error) {
+        await conexion.rollback();
+        throw error;
+    } finally {
+        conexion.release();
+    }
 };
 
 export const actualizarNotas = async (pool, id, notas) => {
@@ -162,38 +227,29 @@ export const obtenerPedidoConItems = async (pool, pedidoId) => {
 // CANCELAR UN PEDIDO DEL USUARIO (con transaccion)
 
 export const cancelarPedidoDeUsuario = async (pool, pedidoId, usuarioId) => {
-    const [rows] = await pool.query(
-        'SELECT id, tipo, estado FROM pedidos WHERE id = ? AND usuario_id = ?',
-        [pedidoId, usuarioId]
-    );
-
-    const pedido = rows[0];
-    if (!pedido) return { error: 'Pedido no encontrado.' };
-
-    const estadoActual = (pedido.estado || 'pendiente').toLowerCase().trim();
-    if (estadoActual !== 'pendiente') {
-        return { error: 'Solo se pueden cancelar pedidos en estado pendiente.' };
-    }
-
     const conexion = await pool.getConnection();
     try {
         await conexion.beginTransaction();
 
-        // si es compra, restaurar stock
-        if (pedido.tipo === 'producto') {
-            const [items] = await conexion.query(
-                'SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?',
-                [pedidoId]
-            );
+        const [rows] = await conexion.query(
+            'SELECT id, tipo, estado FROM pedidos WHERE id = ? AND usuario_id = ? FOR UPDATE',
+            [pedidoId, usuarioId]
+        );
+        const pedido = rows[0];
 
-            for (const item of items) {
-                if (item.producto_id) {
-                    await conexion.query(
-                        'UPDATE productos SET stock = stock + ? WHERE id = ?',
-                        [item.cantidad, item.producto_id]
-                    );
-                }
-            }
+        if (!pedido) {
+            await conexion.rollback();
+            return { error: 'Pedido no encontrado.' };
+        }
+
+        const estadoActual = (pedido.estado || 'pendiente').toLowerCase().trim();
+        if (estadoActual !== 'pendiente') {
+            await conexion.rollback();
+            return { error: 'Solo se pueden cancelar pedidos en estado pendiente.' };
+        }
+
+        if (pedido.tipo === 'producto') {
+            await restaurarStockPedido(conexion, pedidoId);
         }
 
         // cambiar estado

@@ -9,8 +9,17 @@ import * as emailService from '../services/email.service.js';
 // crear un pedido de reparacion (requiere usuario autenticado)
 export const crearPedido = async (req, res) => {
     const { nombre_cliente, telefono, email, modelo_celular, descripcion_problema } = req.body;
-    if (!nombre_cliente || !email || !modelo_celular || !descripcion_problema) {
-        return res.status(400).json({ success: false, error: 'Faltan campos obligatorios' });
+    if (
+        !nombre_cliente ||
+        !telefono ||
+        !String(telefono).trim() ||
+        !email ||
+        !modelo_celular ||
+        !descripcion_problema
+    ) {
+        return res
+            .status(400)
+            .json({ success: false, error: 'Faltan campos obligatorios (incluyendo el teléfono)' });
     }
 
     try {

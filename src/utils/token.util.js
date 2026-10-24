@@ -20,11 +20,23 @@ export const verificarToken = (token, rolEsperado) => {
     const [rol, usuario, timestamp, hash] = partes;
     if (rol !== rolEsperado) return false;
 
+    if (!/^\d+$/.test(timestamp)) return false;
+    const emision = Number(timestamp);
+    const ahora = Date.now();
+    if (
+        !Number.isSafeInteger(emision) ||
+        emision > ahora ||
+        ahora - emision > authConfig.expiracionMs
+    ) {
+        return false;
+    }
+
     const hashEsperado = crypto
         .createHash('sha256')
         .update(`${rol}-${usuario}-${timestamp}-${authConfig.secret}`)
         .digest('hex')
         .substring(0, 16);
 
-    return hash === hashEsperado;
+    if (!/^[a-f0-9]{16}$/.test(hash)) return false;
+    return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(hashEsperado));
 };

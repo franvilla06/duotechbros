@@ -91,10 +91,16 @@ export const enviarPedido = async (pool, nombreUsuario) => {
         }
 
         for (const item of items) {
-            await conexion.query('UPDATE productos SET stock = stock - ? WHERE id = ?', [
-                item.cantidad,
-                item.producto_id,
-            ]);
+            const [updateResult] = await conexion.query(
+                'UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?',
+                [item.cantidad, item.producto_id, item.cantidad]
+            );
+
+            if (updateResult.affectedRows === 0) {
+                throw new Error(
+                    `No hay stock suficiente para "${item.nombre}". Alguien más lo acaba de comprar.`
+                );
+            }
         }
 
         await conexion.query('DELETE FROM carrito WHERE usuario_id = ?', [usuarioId]);

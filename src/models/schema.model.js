@@ -1,3 +1,5 @@
+import crypto from 'node:crypto';
+
 // inicializa el esquema de la base de datos (MySQL)
 // crea todas las tablas si no existen
 // a diferencia de sqlite, mysql soporta IF NOT EXISTS de forma nativa
@@ -129,12 +131,25 @@ export const inicializarEsquema = async (pool) => {
 
     if (admins[0].count === 0) {
         const bcrypt = await import('bcryptjs');
-        const hash = bcrypt.default.hashSync('admin123', 10);
+        const configuredPassword = process.env.ADMIN_PASSWORD?.trim();
+        const adminPassword = configuredPassword || crypto.randomBytes(18).toString('hex');
+        const hash = bcrypt.default.hashSync(adminPassword, 10);
+
         await pool.query(
             'INSERT INTO admin (usuario, password_hash) VALUES (?, ?)',
             ['admin', hash]
         );
-        console.log('Administrador creado: admin / admin123');
+
+        console.log('\n======================================================');
+        console.log('⚠️  ADMINISTRADOR INICIAL CREADO');
+        console.log('Usuario: admin');
+        if (!configuredPassword) {
+            console.log(`Contraseña: ${adminPassword}`);
+            console.log('GUARDA ESTA CONTRASEÑA. No se volverá a mostrar.');
+        } else {
+            console.log('Contraseña configurada mediante ADMIN_PASSWORD.');
+        }
+        console.log('======================================================\n');
     }
 
     // valores por defecto de configuracion
