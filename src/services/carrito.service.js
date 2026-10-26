@@ -16,45 +16,52 @@ export const enviarPedido = async (pool, nombreUsuario) => {
         };
     };
 
-    const items = await carritoModel.listarItemsParaPedido(pool, usuarioId);
-    if (items.length === 0) {
-        return {
-            status: 400,
-            body: { success: false, error: 'El carrito esta vacio.' },
-        };
-    }
-
-    const sinStock = [];
-    for (const item of items) {
-        if (item.cantidad > Number(item.stock)) {
-            sinStock.push(`${item.nombre} (disponible: ${item.stock}, pedido: ${item.cantidad})`);
-        }
-    }
-
-    if (sinStock.length > 0) {
-        return {
-            status: 400,
-            body: {
-                success: false,
-                error: 'Algunos productos no tienen stock suficiente.',
-                detalle: sinStock,
-            },
-        };
-    }
-
-    const totalPrecio = items.reduce((acc, item) => acc + Number(item.precio) * item.cantidad, 0);
-    const totalUnidades = items.reduce((acc, item) => acc + item.cantidad, 0);
-    const resumenNotas = items.map((item) => `${item.cantidad}x ${item.nombre}`).join(', ');
-
-    // transaccion
     const conexion = await pool.getConnection();
     let pedidoId = null;
     let pedidoItems = [];
+    let totalPrecio = 0;
+    let totalUnidades = 0;
     try {
         await conexion.beginTransaction();
 
-        const usuario = await usuariosModel.buscarPorUsuario(pool, nombreUsuario);
-        const emailCliente = (usuario && usuario.email) ? usuario.email : '';
+        const items = await carritoModel.listarItemsParaPedido(conexion, usuarioId, true);
+
+        if (items.length === 0) {
+            await conexion.rollback();
+            return {
+                status: 400,
+                body: { success: false, error: 'El carrito esta vacio.' },
+            };
+        }
+
+        const sinStock = [];
+        for (const item of items) {
+            if (item.cantidad > Number(item.stock)) {
+                sinStock.push(`${item.nombre} (disponible: ${item.stock}, pedido: ${item.cantidad})`);
+            }
+        }
+
+        if (sinStock.length > 0) {
+            await conexion.rollback();
+            return {
+                status: 400,
+                body: {
+                    success: false,
+                    error: 'Algunos productos no tienen stock suficiente.',
+                    detalle: sinStock,
+                },
+            };
+        }
+
+        totalPrecio = items.reduce(
+            (acc, item) => acc + Number(item.precio) * item.cantidad,
+            0
+        );
+        totalUnidades = items.reduce((acc, item) => acc + item.cantidad, 0);
+        const resumenNotas = items.map((item) => `${item.cantidad}x ${item.nombre}`).join(', ');
+
+        const usuario = await usuariosModel.buscarPorUsuario(conexion, nombreUsuario);
+        const emailCliente = usuario && usuario.email ? usuario.email : '';
 
         const [pedidoResult] = await conexion.query(
             `INSERT INTO pedidos (

@@ -44,6 +44,22 @@ export const crearProducto = async (req, res) => {
             .json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
     }
 
+    const precioNum = Number(precio);
+    const stockNum = Number(stock || 0);
+
+    if (!Number.isFinite(precioNum) || precioNum < 0) {
+        return res
+            .status(400)
+            .json({ success: false, error: 'El precio debe ser un número positivo.' });
+    }
+
+    if (!Number.isInteger(stockNum) || stockNum < 0) {
+        return res.status(400).json({
+            success: false,
+            error: 'El stock debe ser un número entero mayor o igual a 0.',
+        });
+    }
+
     let imagenesNormalizadas;
     try {
         imagenesNormalizadas = normalizarImagenes(imagenes);
@@ -55,11 +71,11 @@ export const crearProducto = async (req, res) => {
         const info = await productosModel.crear(req.app.locals.pool, {
             nombre,
             descripcion: descripcion || null,
-            precio,
+            precio: precioNum,
             imagen_url: imagen_url || null,
             imagenes: imagenesNormalizadas,
             categoria: categoria || null,
-            stock: stock || 0,
+            stock: stockNum,
         });
         return res.json({ success: true, id: info.insertId });
     } catch (error) {
@@ -77,6 +93,22 @@ export const actualizarProducto = async (req, res) => {
             .json({ success: false, error: 'Faltan campos obligatorios (nombre, precio)' });
     }
 
+    const precioNum = Number(precio);
+    const stockNum = Number(stock || 0);
+
+    if (!Number.isFinite(precioNum) || precioNum < 0) {
+        return res
+            .status(400)
+            .json({ success: false, error: 'El precio debe ser un número positivo.' });
+    }
+
+    if (!Number.isInteger(stockNum) || stockNum < 0) {
+        return res.status(400).json({
+            success: false,
+            error: 'El stock debe ser un número entero mayor o igual a 0.',
+        });
+    }
+
     let imagenesNormalizadas;
     try {
         imagenesNormalizadas =
@@ -89,11 +121,11 @@ export const actualizarProducto = async (req, res) => {
         const info = await productosModel.actualizar(req.app.locals.pool, id, {
             nombre,
             descripcion: descripcion || null,
-            precio,
+            precio: precioNum,
             imagen_url: imagen_url || null,
             imagenes: imagenesNormalizadas,
             categoria: categoria || null,
-            stock: stock || 0,
+            stock: stockNum,
         });
 
         if (info.affectedRows === 0) {
@@ -307,11 +339,21 @@ export const actualizarPresupuestoPedido = async (req, res) => {
 export const eliminarPedido = async (req, res) => {
     const { id } = req.params;
     try {
-        const info = await pedidosModel.eliminar(req.app.locals.pool, id);
+        const info = await pedidosModel.actualizarEstado(
+            req.app.locals.pool,
+            id,
+            'cancelado'
+        );
+        if (info.error) {
+            return res.status(400).json({ success: false, error: info.error });
+        }
         if (info.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'Pedido no encontrado' });
         }
-        return res.json({ success: true, message: 'Pedido eliminado' });
+        return res.json({
+            success: true,
+            message: 'Pedido anulado/cancelado correctamente (no se borro de la base de datos).',
+        });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -346,7 +388,7 @@ export const cambiarUsuarioAdmin = async (req, res) => {
         const pool = req.app.locals.pool;
         const admin = await adminModel.buscarPorUsuario(pool, req.usuario);
         if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
-            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
+            return res.status(400).json({ success: false, error: 'Contrasenia incorrecta.' });
         }
 
         if (usuarioNuevo !== req.usuario) {
@@ -363,11 +405,14 @@ export const cambiarUsuarioAdmin = async (req, res) => {
             return res.status(404).json({ success: false, error: 'Admin no encontrado.' });
         }
 
+        await adminModel.incrementarTokenVersion(pool, usuarioNuevo);
+        const adminActualizado = await adminModel.buscarPorUsuario(pool, usuarioNuevo);
+
         return res.json({
             success: true,
             message: 'Usuario actualizado correctamente.',
             usuario: usuarioNuevo,
-            token: generarToken('admin', usuarioNuevo),
+            token: generarToken('admin', usuarioNuevo, adminActualizado.token_version || 0),
         });
     } catch (error) {
         console.error('Error en cambiarUsuarioAdmin:', error);
@@ -406,14 +451,20 @@ export const cambiarPasswordAdmin = async (req, res) => {
         const admin = await adminModel.buscarPorUsuario(pool, req.usuario);
         if (!admin || !bcrypt.compareSync(password_actual, admin.password_hash)) {
             return res
-                .status(401)
+                .status(400)
                 .json({ success: false, error: 'Contrasenia actual incorrecta.' });
         }
 
         const nuevoHash = bcrypt.hashSync(password_nueva, 10);
         await adminModel.actualizarPassword(pool, req.usuario, nuevoHash);
+        await adminModel.incrementarTokenVersion(pool, req.usuario);
+        const adminActualizado = await adminModel.buscarPorUsuario(pool, req.usuario);
 
-        return res.json({ success: true, message: 'Contrasenia actualizada correctamente.' });
+        return res.json({
+            success: true,
+            message: 'Contrasenia actualizada correctamente.',
+            token: generarToken('admin', req.usuario, adminActualizado.token_version || 0),
+        });
     } catch (error) {
         console.error('Error en cambiarPasswordAdmin:', error);
         return res.status(500).json({ success: false, error: error.message });

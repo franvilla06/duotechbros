@@ -15,7 +15,7 @@ router.get('/portafolio', pedidosController.listarPortafolio);
 router.post('/login', pedidosController.iniciarSesion);
 
 // configuracion publica del sitio (para el footer, contacto, etc.)
-router.get('/configuracion', configuracionController.obtenerConfiguracion);
+router.get('/configuracion', configuracionController.obtenerConfiguracionPublica);
 
 // detalle de un pedido (solo admin)
 router.get('/pedidos/:id/detalle', requiereAuth, pedidosController.obtenerDetallePedidoAdmin);

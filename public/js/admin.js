@@ -279,7 +279,7 @@ async function actualizarNotificaciones() {
     if (!badgeReparacion && !badgeProducto) return;
 
     try {
-        const respuesta = await fetch(`${API_BASE}/pedidos`);
+        const respuesta = await fetchAdmin(`${API_BASE}/pedidos`);
         if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
 
         const pedidos = await respuesta.json();
@@ -333,6 +333,13 @@ function iniciarNotificaciones() {
     if (intervalNotificaciones) clearInterval(intervalNotificaciones);
     intervalNotificaciones = setInterval(actualizarNotificaciones, INTERVALO_NOTIFICACIONES);
 }
+
+window.pausarNotificaciones = () => {
+    if (intervalNotificaciones) {
+        clearInterval(intervalNotificaciones);
+        intervalNotificaciones = null;
+    }
+};
 
 // PROTECCION DE PAGINAS + INICIALIZACION
 

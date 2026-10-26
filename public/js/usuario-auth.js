@@ -54,7 +54,7 @@ function obtenerUrlRedireccion() {
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
 
-    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.startsWith('/\\')) {
         return redirect;
     }
     return '/index.html';

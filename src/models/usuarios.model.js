@@ -75,3 +75,29 @@ export const eliminar = async (pool, usuario) => {
     const [result] = await pool.query('DELETE FROM usuarios WHERE usuario = ?', [usuario]);
     return { affectedRows: result.affectedRows };
 };
+
+// incrementa los intentos fallidos y bloquea si llega a 5
+export const registrarIntentoFallido = async (pool, usuario) => {
+    await pool.query(
+        `UPDATE usuarios
+         SET bloqueado_hasta = IF(intentos_fallidos + 1 >= 5, DATE_ADD(NOW(), INTERVAL 15 MINUTE), bloqueado_hasta),
+             intentos_fallidos = intentos_fallidos + 1
+         WHERE usuario = ?`,
+        [usuario]
+    );
+};
+
+// resetea los intentos al iniciar sesion correctamente
+export const resetearIntentos = async (pool, usuario) => {
+    await pool.query(
+        'UPDATE usuarios SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE usuario = ?',
+        [usuario]
+    );
+};
+
+export const incrementarTokenVersion = async (pool, usuario) => {
+    await pool.query(
+        'UPDATE usuarios SET token_version = token_version + 1 WHERE usuario = ?',
+        [usuario]
+    );
+};

@@ -1129,7 +1129,8 @@ table.admin-table tbody tr:hover {
 
 .estado-select:disabled {
     opacity: 0.6;
-    cursor: wait;
+    cursor: not-allowed;
+    background-color: #f0f4f8;
 }
 
 /* TOAST (NOTIFICACIÓN FLOTANTE) */
@@ -4441,7 +4442,7 @@ table.admin-table tbody tr.mov-detalle-fila {
 }
 
 /* ============================================================
-   FIX DE LA TABLA DE PRODUCTOS Y PORTAFOLIO
+FIX DE LA TABLA DE PRODUCTOS Y PORTAFOLIO
    ============================================================ */
 
 #tabla-productos,
@@ -4467,7 +4468,7 @@ table.admin-table {
 }
 
 /* ============================================================
-   PREVENCION DE DESBORDE EN CELDAS CON CONTENIDO ANCHO
+PREVENCION DE DESBORDE EN CELDAS CON CONTENIDO ANCHO
    ============================================================ */
 
 #tabla-productos td .badge,
@@ -4514,7 +4515,7 @@ table.admin-table {
 }
 
 /* ============================================================
-   FIX DE ALINEACION Y COMPACIDAD EN TABLAS DEL ADMIN
+FIX DE ALINEACION Y COMPACIDAD EN TABLAS DEL ADMIN
    ============================================================ */
 
 table.admin-table td {
@@ -4555,7 +4556,7 @@ table.admin-table {
 }
 
 /* ============================================================
-   FILAS DE TABLA COMO ACORDEON EN MOBILE (PRODUCTOS Y PORTAFOLIO)
+FILAS DE TABLA COMO ACORDEON EN MOBILE (PRODUCTOS Y PORTAFOLIO)
    ============================================================ */
 
 table.admin-table tbody tr.prod-detalle-fila,

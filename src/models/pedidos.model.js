@@ -79,7 +79,9 @@ export const actualizarEstado = async (pool, id, nuevoEstado) => {
             estadoAnterior !== 'cancelado' &&
             pedido.tipo === 'producto'
         ) {
-            await restaurarStockPedido(conexion, id);
+            if (estadoAnterior !== 'completado') {
+                await restaurarStockPedido(conexion, id);
+            }
         }
 
         const [result] = await conexion.query(

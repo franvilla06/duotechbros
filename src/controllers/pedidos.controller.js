@@ -130,10 +130,9 @@ export const iniciarSesion = async (req, res) => {
             usuario,
             password
         );
-        if (!admin) {
-            return res
-                .status(401)
-                .json({ success: false, error: 'Usuario o contrasenia incorrectos' });
+
+        if (admin.error) {
+            return res.status(401).json({ success: false, error: admin.error });
         }
         return res.json({
             success: true,

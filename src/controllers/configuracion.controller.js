@@ -18,6 +18,16 @@ const CLAVES_PERMITIDAS = [
     'horario_domingo',
 ];
 
+export const obtenerConfiguracionPublica = async (req, res) => {
+    try {
+        const config = await configuracionModel.obtenerTodo(req.app.locals.pool);
+        delete config.email_admin;
+        return res.json(config);
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 export const obtenerConfiguracion = async (req, res) => {
     try {
         const config = await configuracionModel.obtenerTodo(req.app.locals.pool);

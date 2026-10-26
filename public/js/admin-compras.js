@@ -329,7 +329,7 @@ async function cargarCompras() {
         // traer TODOS los pedidos y quedarnos con los de tipo producto
         // el backend ahora soporta ?tipo=producto, pero traemos todos y filtramos aca
         // para no perder compatibilidad si hay datos viejos sin tipo asignado
-        const respuesta = await fetch(`${API_PEDIDOS}?tipo=producto`);
+        const respuesta = await fetchAdmin(`${API_PEDIDOS}?tipo=producto`);
         if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
         const compras = await respuesta.json();
 

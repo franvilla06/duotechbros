@@ -40,10 +40,11 @@ export const buscarPorEmail = async (pool, email, tipo = 'registro') => {
 };
 
 export const incrementarIntentos = async (pool, id) => {
-    await pool.query(
-        'UPDATE codigos_verificacion SET intentos = intentos + 1 WHERE id = ?',
+    const [result] = await pool.query(
+        'UPDATE codigos_verificacion SET intentos = intentos + 1 WHERE id = ? AND intentos < 5',
         [id]
     );
+    return result;
 };
 
 export const marcarUsado = async (pool, id) => {
