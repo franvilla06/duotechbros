@@ -1,6 +1,6 @@
-// ============================================================
-// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DuotechBros Admin
-// ============================================================
+
+// LÓGICA DE LA PÁGINA "GESTIONAR PRODUCTOS" - DUOTECHBROS ADMIN
+
 
 const API_PRODUCTOS = '/api/productos';
 const API_ADMIN_PRODUCTOS = '/api/admin/productos';
@@ -34,7 +34,7 @@ const contadorImagenesEdit = document.getElementById('contador-imagenes-edit');
 
 const POR_PAGINA = 10;
 
-// Estado local
+// ESTADO LOCAL
 let productosOriginales = [];
 let productosFiltrados = [];   // ← nuevo
 let categoriaFiltroActivo = 'Todas';
@@ -42,8 +42,9 @@ let textoBusqueda = '';
 let ordenActual = { campo: null, tipo: null, direccion: 'asc' };
 let paginador = null;
 
-// ----- UTILIDADES -----
+// UTILIDADES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
     const div = document.createElement('div');
@@ -51,12 +52,14 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// formatea el precio como importe monetario.
 function formatearPrecio(precio) {
     const num = Number(precio);
     if (isNaN(num)) return '$0.00';
     return `$${num.toFixed(2)}`;
 }
 
+// elige la clase visual seg?n la disponibilidad del producto.
 function claseStock(stock) {
     const s = Number(stock);
     if (s <= 0) return 'badge-stock-agotado';
@@ -64,6 +67,7 @@ function claseStock(stock) {
     return 'badge-stock';
 }
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, esError = false) {
     const anterior = document.getElementById('toast-admin');
     if (anterior) anterior.remove();
@@ -81,6 +85,7 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
+// convierte el valor recibido en una lista de im?genes.
 function parsearImagenes(imagenes) {
     if (!imagenes) return [];
     if (Array.isArray(imagenes)) return imagenes;
@@ -95,6 +100,7 @@ function parsearImagenes(imagenes) {
     }
 }
 
+// crea un campo para agregar una imagen con su vista previa.
 function crearInputImagen(url, listaId) {
     const fila = document.createElement('div');
     fila.className = 'imagen-input-fila';
@@ -105,6 +111,7 @@ function crearInputImagen(url, listaId) {
     icono.className = 'fas fa-image';
     preview.appendChild(icono);
 
+    // actualiza la vista previa de la imagen seleccionada.
     const actualizarPreview = (valor) => {
         preview.replaceChildren();
         const urlImagen = valor.trim();
@@ -147,6 +154,7 @@ function crearInputImagen(url, listaId) {
     return fila;
 }
 
+// actualiza el contador y el estado del bot?n de im?genes.
 function actualizarContadorImagenes(listaId) {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return;
@@ -160,6 +168,7 @@ function actualizarContadorImagenes(listaId) {
     boton.disabled = cantidad >= MAX_IMAGENES_ADICIONALES;
 }
 
+// agrega un campo de imagen a la lista indicada.
 function agregarImagenInput(listaId, url = '') {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return;
@@ -173,6 +182,7 @@ function agregarImagenInput(listaId, url = '') {
     actualizarContadorImagenes(listaId);
 }
 
+// muestra los campos de imagen recibidos en la lista indicada.
 function cargarImagenesEnLista(listaId, imagenes) {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return;
@@ -185,6 +195,7 @@ function cargarImagenesEnLista(listaId, imagenes) {
     actualizarContadorImagenes(listaId);
 }
 
+// recopila las URL de imagen ingresadas en la lista.
 function obtenerImagenesDeLista(listaId) {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return [];
@@ -197,6 +208,7 @@ function obtenerImagenesDeLista(listaId) {
 btnAgregarImagenForm.addEventListener('click', () => agregarImagenInput('imagenes-lista-form'));
 btnAgregarImagenEdit.addEventListener('click', () => agregarImagenInput('imagenes-lista-edit'));
 
+// ordena los elementos seg?n los criterios seleccionados.
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
     return [...array].sort((a, b) => {
@@ -205,8 +217,9 @@ function aplicarOrdenamiento(array) {
     });
 }
 
-// ----- EXPORTAR A CSV -----
+// EXPORTAR A CSV
 
+// escapa los valores para conservar el formato del archivo CSV.
 function escaparCSV(valor) {
     if (valor === null || valor === undefined) return '';
     let texto = String(valor);
@@ -221,6 +234,7 @@ function escaparCSV(valor) {
     return texto;
 }
 
+// descarga los datos visibles en un archivo CSV.
 async function exportarCSV() {
     if (productosFiltrados.length === 0) {
         mostrarToast('No hay productos para exportar.', true);
@@ -286,8 +300,9 @@ async function exportarCSV() {
     mostrarToast(`✅ Se exportaron ${productosFiltrados.length} producto${productosFiltrados.length !== 1 ? 's' : ''} a CSV.`);
 }
 
-// ----- FILTROS -----
+// FILTROS
 
+// crea los controles para filtrar productos por categor?a.
 function construirFiltrosCategoria() {
     const categorias = ['Todas'];
     productosOriginales.forEach((p) => {
@@ -317,13 +332,15 @@ function construirFiltrosCategoria() {
     });
 }
 
+// actualiza el bot?n para reflejar si hay filtros activos.
 function actualizarBotonLimpiar() {
     const hayFiltro = categoriaFiltroActivo !== 'Todas' || textoBusqueda.trim() !== '';
     btnLimpiar.disabled = !hayFiltro;
 }
 
-// ----- RENDERIZADO -----
+// RENDERIZADO
 
+// muestra los productos con sus datos y acciones disponibles.
 function renderizarProductos(productos) {
     tbody.innerHTML = '';
 
@@ -452,6 +469,7 @@ function renderizarProductos(productos) {
     });
 }
 
+// muestra u oculta el detalle del producto seleccionado.
 function toggleDetalleProducto(id) {
     if (window.innerWidth > 700) return;
 
@@ -474,8 +492,9 @@ function toggleDetalleProducto(id) {
     }
 }
 
-// ----- APLICAR FILTROS + ORDEN + PAGINACIÓN -----
+// APLICAR FILTROS + ORDEN + PAGINACIÓN
 
+// filtra los elementos seg?n los criterios seleccionados.
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
@@ -506,8 +525,9 @@ function aplicarFiltros() {
     renderizarProductos(filtrados);
 }
 
-// ----- CARGA DE DATOS -----
+// CARGA DE DATOS
 
+// solicita los productos y actualiza la vista.
 async function cargarProductos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
@@ -545,7 +565,7 @@ async function cargarProductos() {
     }
 }
 
-// ----- CREAR PRODUCTO -----
+// CREAR PRODUCTO
 
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -597,8 +617,9 @@ formProducto.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- MODAL -----
+// MODAL
 
+// muestra el formulario para editar el elemento seleccionado.
 function abrirModalEdicion(id) {
     const producto = productosOriginales.find((p) => String(p.id) === String(id));
     if (!producto) {
@@ -618,6 +639,7 @@ function abrirModalEdicion(id) {
     modalEditar.classList.add('modal-visible');
 }
 
+// cierra el formulario de edici?n.
 function cerrarModalEdicion() {
     modalEditar.classList.remove('modal-visible');
     formEditar.reset();
@@ -637,7 +659,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ----- GUARDAR CAMBIOS -----
+// GUARDAR CAMBIOS
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -689,8 +711,9 @@ formEditar.addEventListener('submit', async (e) => {
     }
 });
 
-// ----- ELIMINAR -----
+// ELIMINAR
 
+// solicita la eliminaci?n del producto seleccionado.
 async function eliminarProducto(id, nombre) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${nombre}"?`);
     if (!confirmar) return;
@@ -713,7 +736,7 @@ async function eliminarProducto(id, nombre) {
     }
 }
 
-// ----- EVENTOS -----
+// EVENTOS
 
 buscador.addEventListener('input', (e) => {
     textoBusqueda = e.target.value;
@@ -732,7 +755,7 @@ btnLimpiar.addEventListener('click', () => {
 
 btnExportar.addEventListener('click', exportarCSV);
 
-// ----- INICIO -----
+// INICIO
 
 document.addEventListener('DOMContentLoaded', () => {
     paginador = crearPaginador('paginacion-productos', POR_PAGINA, () => {

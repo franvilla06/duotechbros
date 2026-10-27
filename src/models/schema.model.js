@@ -1,11 +1,9 @@
 import crypto from 'node:crypto';
 
-// inicializa el esquema de la base de datos (MySQL)
-// crea todas las tablas si no existen
-// a diferencia de sqlite, mysql soporta IF NOT EXISTS de forma nativa
+// inicializa el esquema de MySQL y crea las tablas que todavía no existen
 export const inicializarEsquema = async (pool) => {
     const tablas = [
-        // usuarios del sitio publico
+        // USUARIOS DEL SITIO PÚBLICO
         `CREATE TABLE IF NOT EXISTS usuarios (
             id INT AUTO_INCREMENT PRIMARY KEY,
             usuario VARCHAR(30) UNIQUE NOT NULL,
@@ -17,7 +15,7 @@ export const inicializarEsquema = async (pool) => {
             creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // administradores del panel
+        // ADMINISTRADORES DEL PANEL
         `CREATE TABLE IF NOT EXISTS admin (
             id INT AUTO_INCREMENT PRIMARY KEY,
             usuario VARCHAR(30) UNIQUE NOT NULL,
@@ -27,7 +25,7 @@ export const inicializarEsquema = async (pool) => {
             token_version INT DEFAULT 0
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // productos de la tienda
+        // PRODUCTOS DE LA TIENDA
         `CREATE TABLE IF NOT EXISTS productos (
             id INT AUTO_INCREMENT PRIMARY KEY,
             nombre VARCHAR(150) NOT NULL,
@@ -39,7 +37,7 @@ export const inicializarEsquema = async (pool) => {
             stock INT DEFAULT 0 CHECK (stock >= 0)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // portafolio de trabajos realizados
+        // PORTAFOLIO DE TRABAJOS REALIZADOS
         `CREATE TABLE IF NOT EXISTS portafolio (
             id INT AUTO_INCREMENT PRIMARY KEY,
             titulo VARCHAR(200) NOT NULL,
@@ -52,7 +50,7 @@ export const inicializarEsquema = async (pool) => {
             fecha_fin DATE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // pedidos (reparaciones y compras)
+        // PEDIDOS DE REPARACIONES Y COMPRAS
         `CREATE TABLE IF NOT EXISTS pedidos (
             id INT AUTO_INCREMENT PRIMARY KEY,
             nombre_cliente VARCHAR(150) NOT NULL,
@@ -72,7 +70,7 @@ export const inicializarEsquema = async (pool) => {
             FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // items de cada pedido (solo para compras)
+        // PRODUCTOS INCLUIDOS EN CADA PEDIDO
         `CREATE TABLE IF NOT EXISTS pedido_items (
             id INT AUTO_INCREMENT PRIMARY KEY,
             pedido_id INT NOT NULL,
@@ -85,7 +83,7 @@ export const inicializarEsquema = async (pool) => {
             FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // carrito de compras
+        // CARRITO DE COMPRAS
         `CREATE TABLE IF NOT EXISTS carrito (
             id INT AUTO_INCREMENT PRIMARY KEY,
             usuario_id INT NOT NULL,
@@ -98,7 +96,7 @@ export const inicializarEsquema = async (pool) => {
             FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // codigos de verificacion (registro y recuperacion)
+        // CÓDIGOS DE VERIFICACIÓN PARA REGISTRO Y RECUPERACIÓN
         `CREATE TABLE IF NOT EXISTS codigos_verificacion (
             id INT AUTO_INCREMENT PRIMARY KEY,
             usuario VARCHAR(30) NOT NULL,
@@ -113,19 +111,19 @@ export const inicializarEsquema = async (pool) => {
             INDEX idx_email_tipo (email, tipo)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        // configuracion del sitio
+        // CONFIGURACIÓN DEL SITIO
         `CREATE TABLE IF NOT EXISTS configuracion (
             clave VARCHAR(100) PRIMARY KEY,
             valor TEXT
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
     ];
 
-    // crear cada tabla si no existe
+    // crea cada tabla si todavía no existe
     for (const sql of tablas) {
         await pool.query(sql);
     }
 
-    // agregar las columnas en bases existentes sin afectar los datos actuales
+    // agrega las columnas faltantes sin modificar los datos existentes
     await agregarColumnaSiNoExiste(pool, 'productos', 'imagenes', 'TEXT');
     await agregarColumnaSiNoExiste(pool, 'portafolio', 'imagenes', 'TEXT');
     await agregarColumnaSiNoExiste(pool, 'usuarios', 'intentos_fallidos', 'INT DEFAULT 0');
@@ -135,7 +133,7 @@ export const inicializarEsquema = async (pool) => {
     await agregarColumnaSiNoExiste(pool, 'usuarios', 'token_version', 'INT DEFAULT 0');
     await agregarColumnaSiNoExiste(pool, 'admin', 'token_version', 'INT DEFAULT 0');
 
-    // insertar el admin por defecto si no existe ningun administrador
+    // crea una cuenta inicial solo si todavía no hay administradores
     const [admins] = await pool.query('SELECT COUNT(*) as count FROM admin');
 
     if (Number(admins[0].count) === 0) {
@@ -161,7 +159,7 @@ export const inicializarEsquema = async (pool) => {
         console.log('======================================================\n');
     }
 
-    // valores por defecto de configuracion
+    // define los valores iniciales de la configuración del sitio
     const valoresIniciales = {
         marca_nombre: 'DuotechBros',
         contacto_email: 'contacto@duotechbros.com',
@@ -188,6 +186,7 @@ export const inicializarEsquema = async (pool) => {
     }
 };
 
+// agrega una columna únicamente cuando aún no está presente en la tabla
 const agregarColumnaSiNoExiste = async (pool, tabla, columna, tipo) => {
     const [columnas] = await pool.query(`SHOW COLUMNS FROM \`${tabla}\` LIKE ?`, [columna]);
     if (columnas.length === 0) {

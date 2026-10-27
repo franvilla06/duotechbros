@@ -11,7 +11,7 @@ router.post('/registro', limitadorEmails, usuariosController.iniciarRegistro);
 router.post('/verificar-codigo', usuariosController.verificarCodigo);
 router.post('/reenviar-codigo', limitadorEmails, usuariosController.reenviarCodigo);
 
-// RECUPERACION DE CONTRASENIA
+// RECUPERACIÓN DE CONTRASEÑA
 router.post('/recuperar-password', limitadorEmails, usuariosController.recuperarPassword);
 router.post('/restablecer-password', limitadorAuth, usuariosController.restablecerPassword);
 

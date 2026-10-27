@@ -1,4 +1,4 @@
-// requiere estar logueado para enviar
+// REQUIERE ESTAR LOGUEADO PARA ENVIAR
 // carga los datos de contacto y horarios desde la configuracion del sitio
 
 const API_CONFIG_PEDIDOS = '/api/configuracion';
@@ -11,6 +11,7 @@ const STORAGE_KEY = 'pedidoBorrador';
 
 // UTILIDADES DE SESION
 
+// indica si hay una sesi?n de usuario activa.
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
@@ -18,12 +19,14 @@ function estaLogueadoUsuario() {
     );
 }
 
+// obtiene el token de autenticaci?n del usuario.
 function obtenerTokenUsuario() {
     return sessionStorage.getItem('usuarioToken') || '';
 }
 
 // UTILIDADES GENERALES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '';
     const div = document.createElement('div');
@@ -31,6 +34,7 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// muestra un mensaje de estado en el elemento indicado.
 function mostrarMensaje(texto, tipo) {
     mensajeDiv.textContent = texto;
     mensajeDiv.className = `mensaje ${tipo}`;
@@ -43,6 +47,7 @@ function mostrarMensaje(texto, tipo) {
 
 // CARGA DE DATOS DE CONTACTO Y HORARIOS
 
+// carga los datos de contacto y horarios desde la configuraci?n del sitio.
 async function cargarDatosContacto() {
     try {
         console.log('[pedidos] Cargando configuracion del sitio...');
@@ -68,7 +73,7 @@ async function cargarDatosContacto() {
             linkWhatsapp.style.pointerEvents = 'none';
         }
 
-        // Email
+        // EMAIL
         const email = config.contacto_email || '';
         const linkEmail = document.getElementById('contacto-email');
         const valorEmail = document.getElementById('valor-email');
@@ -81,7 +86,7 @@ async function cargarDatosContacto() {
             linkEmail.style.pointerEvents = 'none';
         }
 
-        // Horarios
+        // HORARIOS
         const horarioSemana = config.horario_semana || 'No disponible';
         const horarioSabado = config.horario_sabado || 'No disponible';
         const horarioDomingo = config.horario_domingo || 'No disponible';
@@ -101,16 +106,19 @@ async function cargarDatosContacto() {
 
 // VALIDACIONES
 
+// indica si el correo electr?nico tiene un formato v?lido.
 function esEmailValido(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 }
 
+// indica si el tel?fono contiene suficientes d?gitos.
 function esTelefonoValido(telefono) {
     const soloNumeros = /^[0-9]+$/.test(telefono);
     return soloNumeros && telefono.length >= 7;
 }
 
+// valida los datos ingresados antes de enviar el formulario.
 function validarFormulario(datos) {
     if (!datos.nombre_cliente || datos.nombre_cliente.trim().length < 3) {
         mostrarMensaje('El nombre debe tener al menos 3 caracteres.', 'error');
@@ -147,6 +155,7 @@ function validarFormulario(datos) {
 
 // GUARDAR / RESTAURAR BORRADOR
 
+// guarda los datos del formulario para recuperarlos m?s tarde.
 function guardarBorrador(datos) {
     try {
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
@@ -155,6 +164,7 @@ function guardarBorrador(datos) {
     }
 }
 
+// recupera los datos del formulario guardados anteriormente.
 function restaurarBorrador() {
     try {
         const guardado = sessionStorage.getItem(STORAGE_KEY);
@@ -304,6 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // cargar los datos de contacto y horarios desde la configuracion
     cargarDatosContacto();
 
-    // restaurar el borrador si venimos de un login
+    // RESTAURAR EL BORRADOR SI VENIMOS DE UN LOGIN
     restaurarBorrador();
 });

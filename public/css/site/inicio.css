@@ -1,6 +1,4 @@
-/* ============================================================
-   ESTILOS DE LA PAGINA DE INICIO - DUOTECHBROS
-   ============================================================ */
+/* ESTILOS DE LA PAGINA DE INICIO - DUOTECHBROS */
 
 /* BASE */
 
@@ -12,9 +10,7 @@ body {
     padding: 0;
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+/* HERO */
 
 .hero {
     background: var(--gradient-primary);
@@ -27,7 +23,7 @@ body {
     overflow: hidden;
 }
 
-/* patron de puntos decorativo en el hero */
+/* PATRON DE PUNTOS DECORATIVO EN EL HERO */
 .hero::before {
     content: "";
     position: absolute;
@@ -120,9 +116,7 @@ body {
     font-size: 1rem;
 }
 
-/* ============================================================
-   CONTENEDOR GENERAL
-   ============================================================ */
+/* CONTENEDOR GENERAL */
 
 .contenedor {
     max-width: 1200px;
@@ -130,9 +124,7 @@ body {
     padding: 0 20px 60px;
 }
 
-/* ============================================================
-   ENCABEZADOS DE SECCION
-   ============================================================ */
+/* ENCABEZADOS DE SECCION */
 
 .seccion-header {
     margin-bottom: 30px;
@@ -385,7 +377,7 @@ body {
     margin: 0;
 }
 
-/* SECCION CTA (LLAMADA A LA ACCION) */
+/* SECCION CTA (llamada a la accion) */
 
 .cta {
     background: var(--gradient-primary);

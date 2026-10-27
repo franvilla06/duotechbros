@@ -6,6 +6,7 @@ import * as pedidosModel from '../models/pedidos.model.js';
 
 // VALIDACIONES
 
+// valida el formato y la longitud del nombre de usuario
 const validarUsuario = (usuario) => {
     if (!usuario) return 'El nombre de usuario es obligatorio.';
     if (usuario.length < 3) return 'El nombre de usuario debe tener al menos 3 caracteres.';
@@ -16,6 +17,7 @@ const validarUsuario = (usuario) => {
     return null;
 };
 
+// valida que el correo tenga un formato aceptable y una longitud permitida
 const validarEmail = (email) => {
     if (!email) return 'El email es obligatorio.';
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,6 +26,7 @@ const validarEmail = (email) => {
     return null;
 };
 
+// comprueba que la contraseña cumpla los requisitos mínimos
 const validarPassword = (password) => {
     if (!password) return 'La contrasenia es obligatoria.';
     if (password.length < 6) return 'La contrasenia debe tener al menos 6 caracteres.';
@@ -32,6 +35,7 @@ const validarPassword = (password) => {
 
 // REGISTRO
 
+// valida los datos e inicia el registro con verificación por correo
 export const iniciarRegistro = async (req, res) => {
     const { usuario, email, password } = req.body;
 
@@ -67,6 +71,7 @@ export const iniciarRegistro = async (req, res) => {
     }
 };
 
+// valida el código de registro y completa la creación de la cuenta
 export const verificarCodigo = async (req, res) => {
     const { email, codigo } = req.body;
 
@@ -98,6 +103,7 @@ export const verificarCodigo = async (req, res) => {
     }
 };
 
+// solicita el reenvío del código de verificación del registro
 export const reenviarCodigo = async (req, res) => {
     const { email } = req.body;
 
@@ -119,8 +125,9 @@ export const reenviarCodigo = async (req, res) => {
     }
 };
 
-// RECUPERACION
+// RECUPERACIÓN
 
+// inicia la recuperación de contraseña sin revelar si el correo está registrado
 export const recuperarPassword = async (req, res) => {
     const { email } = req.body;
 
@@ -140,6 +147,7 @@ export const recuperarPassword = async (req, res) => {
     }
 };
 
+// valida el código de recuperación y establece una nueva contraseña
 export const restablecerPassword = async (req, res) => {
     const { email, codigo, password_nueva, password_confirmar } = req.body;
 
@@ -182,6 +190,7 @@ export const restablecerPassword = async (req, res) => {
 
 // LOGIN
 
+// autentica al usuario y devuelve los datos de su sesión
 export const iniciarSesion = async (req, res) => {
     const { email, password } = req.body;
 
@@ -218,6 +227,7 @@ export const iniciarSesion = async (req, res) => {
     }
 };
 
+// devuelve el perfil del usuario autenticado
 export const obtenerPerfil = async (req, res) => {
     try {
         const user = await usuariosModel.obtenerPerfil(req.app.locals.pool, req.usuario);
@@ -230,6 +240,7 @@ export const obtenerPerfil = async (req, res) => {
     }
 };
 
+// valida la contraseña actual y actualiza la contraseña del usuario
 export const cambiarPassword = async (req, res) => {
     const { password_actual, password_nueva, password_confirmar } = req.body;
 
@@ -268,6 +279,7 @@ export const cambiarPassword = async (req, res) => {
     }
 };
 
+// verifica las credenciales y cambia el correo del usuario
 export const cambiarEmail = async (req, res) => {
     const { email_nuevo, password } = req.body;
 
@@ -314,6 +326,7 @@ export const cambiarEmail = async (req, res) => {
     }
 };
 
+// valida la contraseña y da de baja la cuenta del usuario
 export const darDeBajaUsuario = async (req, res) => {
     const { password } = req.body;
 
@@ -346,6 +359,7 @@ export const darDeBajaUsuario = async (req, res) => {
 
 // HISTORIAL DE PEDIDOS
 
+// lista los pedidos del usuario con sus importes normalizados
 export const listarMisPedidos = async (req, res) => {
     try {
         const usuarioId = await usuariosModel.obtenerId(req.app.locals.pool, req.usuario);
@@ -366,6 +380,7 @@ export const listarMisPedidos = async (req, res) => {
     }
 };
 
+// obtiene el detalle de un pedido que pertenece al usuario autenticado
 export const obtenerDetallePedido = async (req, res) => {
     const { id } = req.params;
 
@@ -420,6 +435,7 @@ export const obtenerDetallePedido = async (req, res) => {
     }
 };
 
+// cancela un pedido del usuario si todavía puede anularse
 export const cancelarPedido = async (req, res) => {
     const { id } = req.params;
 
@@ -443,6 +459,7 @@ export const cancelarPedido = async (req, res) => {
     }
 };
 
+// solicita agregar al carrito los productos disponibles de un pedido anterior
 export const repetirPedido = async (req, res) => {
     const { id } = req.params;
 

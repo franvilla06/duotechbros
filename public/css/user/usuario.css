@@ -994,7 +994,7 @@
     font-weight: 800;
 }
 
-/* boton de cerrar del modal de exito */
+/* BOTON DE CERRAR DEL MODAL DE EXITO */
 .modal-exito-cerrar {
     position: absolute;
     top: 14px;
@@ -1551,7 +1551,7 @@
     display: block;
 }
 
-/* ZONA DE PELIGRO (DAR DE BAJA) */
+/* ZONA DE PELIGRO (dar de baja) */
 
 .perfil-peligro {
     background-color: #fff5f5;
@@ -2154,7 +2154,7 @@
     }
 }
 
-/* TIPO DE PEDIDO (BADGE) */
+/* TIPO DE PEDIDO (badge) */
 
 .pedido-tipo-badge {
     display: inline-flex;
@@ -2304,7 +2304,7 @@
     }
 }
 
-/* TOOLBAR DE PEDIDOS DEL USUARIO (FILTROS + BUSCADOR) */
+/* TOOLBAR DE PEDIDOS DEL USUARIO (filtros + buscador) */
 
 .pedidos-toolbar {
     display: flex;
@@ -2508,7 +2508,7 @@
     letter-spacing: -0.01em;
 }
 
-/* ACCIONES DEL MODAL (BOTON CANCELAR) */
+/* ACCIONES DEL MODAL (boton cancelar) */
 
 .pedido-modal-acciones {
     margin-top: 20px;
@@ -2550,7 +2550,7 @@
     transform: none;
 }
 
-/* BOTONES DE ACCION DEL MODAL (REPETIR + CANCELAR) */
+/* BOTONES DE ACCION DEL MODAL (repetir + cancelar) */
 
 .pedido-modal-botones {
     display: flex;
@@ -2987,9 +2987,7 @@
     }
 }
 
-/* ============================================================
-   CARDS COMPACTAS CON EXPAND EN "MIS PEDIDOS"
-   ============================================================ */
+/* CARDS COMPACTAS CON EXPAND EN "MIS PEDIDOS" */
 
 .pedido-card-compacta {
     display: block;
@@ -3272,9 +3270,7 @@
     }
 }
 
-/* ============================================================
-   FIX DEL MODAL DE DETALLE DE PEDIDO
-   ============================================================ */
+/* FIX DEL MODAL DE DETALLE DE PEDIDO */
 
 .modal-overlay {
     align-items: flex-start;
@@ -3364,9 +3360,7 @@
     background: var(--color-primary-teal);
 }
 
-/* ============================================================
-   RESPONSIVE DEL MODAL DE DETALLE
-   ============================================================ */
+/* RESPONSIVE DEL MODAL DE DETALLE */
 
 @media (max-width: 600px) {
     .modal-overlay {
@@ -3457,9 +3451,7 @@
     }
 }
 
-/* ============================================================
-   FIX: MODAL DE DETALLE (ESPACIADO + STICKY HEADER/FOOTER)
-   ============================================================ */
+/* FIX: MODAL DE DETALLE (espaciado + sticky header/footer) */
 
 .pedido-modal {
     display: flex;
@@ -3470,7 +3462,7 @@
     padding: 0;
 }
 
-/* ---------- HEADER STICKY ---------- */
+/* HEADER STICKY */
 
 .pedido-modal .modal-header {
     position: sticky;
@@ -3485,7 +3477,7 @@
     border-radius: 20px 20px 0 0;
 }
 
-/* ---------- BLOQUES DEL CUERPO (info, productos, totales) ---------- */
+/* BLOQUES DEL CUERPO (info, productos, totales) */
 
 .pedido-modal .pedido-modal-info {
     flex-shrink: 0;
@@ -3540,7 +3532,7 @@
     border-radius: var(--radius-md);
 }
 
-/* ---------- ACCIONES STICKY ABAJO ---------- */
+/* ACCIONES STICKY ABAJO */
 
 .pedido-modal .pedido-modal-acciones {
     position: sticky;
@@ -3559,7 +3551,7 @@
     margin: 12px 0 0;
 }
 
-/* ---------- SCROLL PERSONALIZADO ---------- */
+/* SCROLL PERSONALIZADO */
 
 .pedido-modal::-webkit-scrollbar {
     width: 6px;
@@ -3578,7 +3570,7 @@
     background: var(--color-primary-teal);
 }
 
-/* ---------- RESPONSIVE ---------- */
+/* RESPONSIVE */
 
 @media (max-width: 600px) {
     .pedido-modal {
@@ -3659,10 +3651,7 @@
     }
 }
 
-/* ============================================================
-   FIX: INFO DEL MODAL HORIZONTAL EN MOBILE
-   (anula la regla vieja que apilaba label y valor)
-   ============================================================ */
+/* FIX: INFO DEL MODAL HORIZONTAL EN MOBILE (anula la regla vieja que apilaba label y valor) */
 
 .pedido-modal .pedido-modal-info-linea {
     display: flex;
@@ -3707,9 +3696,7 @@
     display: inline-flex;
 }
 
-/* ============================================================
-   FIX: INFO-BLOCK MAS COMPACTO PARA QUE ENTRE EL TOTAL
-   ============================================================ */
+/* FIX: INFO-BLOCK MAS COMPACTO PARA QUE ENTRE EL TOTAL */
 
 .pedido-modal .pedido-modal-info {
     padding: 14px 18px;
@@ -3735,10 +3722,7 @@
     border-top: 2px solid var(--border-input);
 }
 
-/* ============================================================
-   FIX: ESPACIO EXTRA AL FINAL DEL CONTENIDO
-   para que el ultimo bloque no quede tapado por los botones
-   ============================================================ */
+/* FIX: ESPACIO EXTRA AL FINAL DEL CONTENIDO para que el ultimo bloque no quede tapado por los botones */
 
 .pedido-modal .pedido-modal-total {
     margin-bottom: 8px;
@@ -3768,9 +3752,7 @@
     }
 }
 
-/* ============================================================
-   FIX: DAR ESPACIO AL FINAL DEL SCROLL PARA QUE SE VEA EL TOTAL
-   ============================================================ */
+/* FIX: DAR ESPACIO AL FINAL DEL SCROLL PARA QUE SE VEA EL TOTAL */
 
 .pedido-modal {
     scroll-padding-bottom: 100px;

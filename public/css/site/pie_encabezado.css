@@ -1,9 +1,6 @@
 /* ESTILOS REUTILIZABLES PARA ENCABEZADO Y PIE DE PÁGINA */
 
-/* ============================================================
-   RESET DE BOX-SIZING PARA EL HEADER
-   evita que el padding y el borde sumen por fuera del ancho
-   ============================================================ */
+/* RESET DE BOX-SIZING PARA EL HEADER evita que el padding y el borde sumen por fuera del ancho */
 
 header nav,
 header nav *,
@@ -207,7 +204,7 @@ footer p {
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
 }
 
-/* BOTÓN DE ACCESO ADMIN (DISCRETO) */
+/* BOTÓN DE ACCESO ADMIN (discreto) */
 .footer-admin {
     display: inline-flex;
     align-items: center;
@@ -481,9 +478,9 @@ footer p {
     border: 1px solid #e0eaf0;
     /* evita que cualquier contenido se desborde del contenedor redondeado */
     overflow: hidden;
-    /* fuerza a los hijos a respetar el border-radius */
+    /* FUERZA A LOS HIJOS A RESPETAR EL BORDER-RADIUS */
     isolation: isolate;
-    /* previene la aparicion de scroll horizontal */
+    /* PREVIENE LA APARICION DE SCROLL HORIZONTAL */
     overflow-x: hidden;
 }
 
@@ -563,7 +560,7 @@ footer p {
     color: var(--status-danger-text);
 }
 
-/* asegura que los items no sobresalgan del contenedor */
+/* ASEGURA QUE LOS ITEMS NO SOBRESALGAN DEL CONTENEDOR */
 .usuario-menu-item {
     max-width: 100%;
     box-sizing: border-box;
@@ -581,7 +578,7 @@ header nav {
 }
 
 /* RESPONSIVE DEL USUARIO EN EL HEADER */
-/* (los estilos de mobile ya estan definidos en el bloque principal de arriba) */
+/*  (los estilos de mobile ya estan definidos en el bloque principal de arriba) */
 
 /* BADGE DEL CARRITO EN EL BOTON DE USUARIO */
 
@@ -659,7 +656,7 @@ header nav {
     }
 }
 
-/* AVISO GENERAL (BANDA DESTACADA ARRIBA DEL FOOTER) */
+/* AVISO GENERAL (banda destacada arriba del footer) */
 
 .aviso-general {
     display: none;

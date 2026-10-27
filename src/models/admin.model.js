@@ -1,8 +1,10 @@
+// busca un administrador por su nombre de usuario
 export const buscarPorUsuario = async (pool, usuario) => {
     const [rows] = await pool.query('SELECT * FROM admin WHERE usuario = ?', [usuario]);
     return rows[0] || null;
 };
 
+// cuenta las coincidencias de un nombre de usuario de administrador
 export const contarPorUsuario = async (pool, usuario) => {
     const [rows] = await pool.query(
         'SELECT COUNT(*) as count FROM admin WHERE usuario = ?',
@@ -11,6 +13,7 @@ export const contarPorUsuario = async (pool, usuario) => {
     return rows[0];
 };
 
+// crea un administrador con la contraseña ya cifrada
 export const crear = async (pool, usuario, passwordHash) => {
     const [result] = await pool.query(
         'INSERT INTO admin (usuario, password_hash) VALUES (?, ?)',
@@ -19,7 +22,7 @@ export const crear = async (pool, usuario, passwordHash) => {
     return { insertId: result.insertId };
 };
 
-// actualiza el nombre de usuario del admin
+// cambia el nombre de usuario del administrador
 export const actualizarUsuario = async (pool, usuarioActual, usuarioNuevo) => {
     const [result] = await pool.query('UPDATE admin SET usuario = ? WHERE usuario = ?', [
         usuarioNuevo,
@@ -28,7 +31,7 @@ export const actualizarUsuario = async (pool, usuarioActual, usuarioNuevo) => {
     return { affectedRows: result.affectedRows };
 };
 
-// actualiza la contrasenia del admin
+// guarda el nuevo hash de contraseña del administrador
 export const actualizarPassword = async (pool, usuario, passwordHash) => {
     const [result] = await pool.query('UPDATE admin SET password_hash = ? WHERE usuario = ?', [
         passwordHash,
@@ -37,7 +40,7 @@ export const actualizarPassword = async (pool, usuario, passwordHash) => {
     return { affectedRows: result.affectedRows };
 };
 
-// incrementa los intentos fallidos y bloquea si llega a 5
+// registra un intento fallido y aplica un bloqueo temporal al alcanzar cinco
 export const registrarIntentoFallido = async (pool, usuario) => {
     await pool.query(
         `UPDATE admin
@@ -48,7 +51,7 @@ export const registrarIntentoFallido = async (pool, usuario) => {
     );
 };
 
-// resetea los intentos al iniciar sesion correctamente
+// elimina el bloqueo y restablece los intentos fallidos del administrador
 export const resetearIntentos = async (pool, usuario) => {
     await pool.query(
         'UPDATE admin SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE usuario = ?',
@@ -56,6 +59,7 @@ export const resetearIntentos = async (pool, usuario) => {
     );
 };
 
+// incrementa la versión para invalidar los tokens anteriores del administrador
 export const incrementarTokenVersion = async (pool, usuario) => {
     await pool.query('UPDATE admin SET token_version = token_version + 1 WHERE usuario = ?', [
         usuario,

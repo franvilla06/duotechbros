@@ -1,5 +1,5 @@
 // LOGICA DE LA TIENDA PUBLICA
-// consume GET /api/productos, permite filtrar y buscar
+// CONSUME GET /API/PRODUCTOS, PERMITE FILTRAR Y BUSCAR
 // permite agregar productos al carrito si el usuario esta logueado
 
 const API_PRODUCTOS = '/api/productos';
@@ -15,13 +15,14 @@ const estadoVacio = document.getElementById('estado-vacio');
 const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoError = document.getElementById('estado-error');
 
-// estado local de la pagina
+// ESTADO LOCAL DE LA PAGINA
 let productosOriginales = [];
 let categoriaActiva = 'Todas';
 let textoBusqueda = '';
 
 // UTILIDADES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '';
     const div = document.createElement('div');
@@ -29,12 +30,14 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// formatea el precio como importe monetario.
 function formatearPrecio(precio) {
     const num = Number(precio);
     if (isNaN(num)) return '$0.00';
     return `$${num.toFixed(2)}`;
 }
 
+// elige la clase visual seg?n la disponibilidad del producto.
 function claseStock(stock) {
     const s = Number(stock);
     if (s <= 0) return { clase: 'stock-agotado', texto: 'Sin stock' };
@@ -42,17 +45,17 @@ function claseStock(stock) {
     return { clase: 'stock-disponible', texto: 'Disponible' };
 }
 
-// obtiene todas las imagenes de un producto (principal + adicionales)
-// la principal siempre va primero
+// OBTIENE TODAS LAS IMAGENES DE UN PRODUCTO (principal + adicionales)
+// obtiene las im?genes asociadas al producto.
 function obtenerImagenesProducto(producto) {
     const urls = [];
 
-    // imagen principal
+    // IMAGEN PRINCIPAL
     if (producto.imagen_url && producto.imagen_url.trim() !== '') {
         urls.push(producto.imagen_url.trim());
     }
 
-    // imagenes adicionales (pueden venir como array o como JSON string)
+    // IMAGENES ADICIONALES (pueden venir como array o como json string)
     let adicionales = [];
     const campo = producto.imagenes;
     if (Array.isArray(campo)) {
@@ -77,6 +80,7 @@ function obtenerImagenesProducto(producto) {
 
 // NOTIFICACIONES TOAST
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, tipo = 'exito') {
     const anterior = document.getElementById('toast-publico');
     if (anterior) anterior.remove();
@@ -96,6 +100,7 @@ function mostrarToast(mensaje, tipo = 'exito') {
 
 // SESION DEL USUARIO
 
+// indica si hay una sesi?n de usuario activa.
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
@@ -103,12 +108,14 @@ function estaLogueadoUsuario() {
     );
 }
 
+// obtiene el token de autenticaci?n del usuario.
 function obtenerTokenUsuario() {
     return sessionStorage.getItem('usuarioToken') || '';
 }
 
 // FILTROS
 
+// crea los controles de filtro a partir de los productos disponibles.
 function construirFiltros(productos) {
     const categorias = ['Todas'];
     productos.forEach((p) => {
@@ -137,6 +144,7 @@ function construirFiltros(productos) {
 
 // RENDERIZADO
 
+// muestra los productos con sus datos y acciones disponibles.
 function renderizarProductos(productos) {
     lista.innerHTML = '';
 
@@ -201,7 +209,7 @@ function renderizarProductos(productos) {
         lista.appendChild(card);
     });
 
-    // asignar evento a los botones "agregar al carrito"
+    // ASIGNAR EVENTO A LOS BOTONES "AGREGAR AL CARRITO"
     lista.querySelectorAll('.product-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
             const productoId = btn.dataset.productoId;
@@ -209,12 +217,13 @@ function renderizarProductos(productos) {
         });
     });
 
-    // inicializar los carruseles de las tarjetas recien renderizadas
+    // INICIALIZAR LOS CARRUSELES DE LAS TARJETAS RECIEN RENDERIZADAS
     inicializarCarruseles(lista);
 }
 
 // APLICAR FILTROS
 
+// filtra los elementos seg?n los criterios seleccionados.
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
@@ -240,8 +249,9 @@ function aplicarFiltros() {
 
 // AGREGAR AL CARRITO
 
+// agrega el producto seleccionado al carrito del usuario.
 async function agregarAlCarrito(productoId, btnElement) {
-    // si no esta logueado, preguntar si quiere ingresar
+    // SI NO ESTA LOGUEADO, PREGUNTAR SI QUIERE INGRESAR
     if (!estaLogueadoUsuario()) {
         const quiereIngresar = confirm(
             'Necesitas iniciar sesion para agregar productos al carrito.\n\nQueres ingresar ahora?'
@@ -252,7 +262,7 @@ async function agregarAlCarrito(productoId, btnElement) {
         return;
     }
 
-    // deshabilitar el boton mientras se procesa
+    // DESHABILITAR EL BOTON MIENTRAS SE PROCESA
     const contenidoOriginal = btnElement.innerHTML;
     btnElement.disabled = true;
     btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
@@ -270,7 +280,7 @@ async function agregarAlCarrito(productoId, btnElement) {
         const resultado = await respuesta.json();
 
         if (respuesta.status === 401) {
-            // token expirado o invalido
+            // TOKEN EXPIRADO O INVALIDO
             sessionStorage.removeItem('usuarioLogueado');
             sessionStorage.removeItem('usuarioNombre');
             sessionStorage.removeItem('usuarioToken');
@@ -283,7 +293,7 @@ async function agregarAlCarrito(productoId, btnElement) {
 
         if (resultado.success) {
             mostrarToast(resultado.message || 'Producto agregado al carrito.', 'exito');
-            // avisar al header para que actualice el contador
+            // AVISAR AL HEADER PARA QUE ACTUALICE EL CONTADOR
             document.dispatchEvent(new CustomEvent('carritoActualizado'));
         } else {
             mostrarToast(resultado.error || 'No se pudo agregar al carrito.', 'error');
@@ -299,6 +309,7 @@ async function agregarAlCarrito(productoId, btnElement) {
 
 // CARGA DE DATOS
 
+// solicita los productos y actualiza la vista.
 async function cargarProductos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';

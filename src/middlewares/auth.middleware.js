@@ -2,14 +2,14 @@ import { verificarToken, extraerDatosToken } from '../utils/token.util.js';
 import * as usuariosModel from '../models/usuarios.model.js';
 import * as adminModel from '../models/admin.model.js';
 
-// extraer el token del header authorization
+// extrae el token de acceso del encabezado Authorization
 export const extraerToken = (req) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     return authHeader.substring(7);
 };
 
-// middleware para rutas de administrador
+// valida el token y su versión antes de permitir el acceso del administrador
 export const requiereAuth = async (req, res, next) => {
     const token = extraerToken(req);
     if (!token) {
@@ -43,7 +43,7 @@ export const requiereAuth = async (req, res, next) => {
     }
 };
 
-// middleware para rutas de usuario
+// valida el token y su versión antes de permitir el acceso del usuario
 export const requiereAuthUsuario = async (req, res, next) => {
     const token = extraerToken(req);
     if (!token) {

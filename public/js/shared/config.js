@@ -20,11 +20,11 @@
         console.log('[config] Frontend en puerto 3000 (mismo servidor)');
     }
 
-    // exponer globalmente
+    // EXPONER GLOBALMENTE
     window.API_BASE = apiBase;
 
     // interceptar fetch para agregar la base de la API automaticamente
-    // cuando la url empieza con /api
+    // CUANDO LA URL EMPIEZA CON /API
     // esto permite que el resto del codigo siga usando rutas relativas
     const fetchOriginal = window.fetch;
 

@@ -7,24 +7,29 @@ let intervalNotificaciones = null;
 
 // UTILIDADES DE SESION
 
+// guarda los datos de sesi?n administrativa en el almacenamiento local.
 function guardarSesion(usuario, token) {
     sessionStorage.setItem('adminLogueado', 'true');
     sessionStorage.setItem('adminUsuario', usuario);
     sessionStorage.setItem('adminToken', token);
 }
 
+// indica si hay una sesi?n administrativa activa.
 function estaLogueado() {
     return sessionStorage.getItem('adminLogueado') === 'true' && !!sessionStorage.getItem('adminToken');
 }
 
+// obtiene el nombre del usuario administrativo de la sesi?n.
 function obtenerUsuario() {
     return sessionStorage.getItem('adminUsuario') || 'Admin';
 }
 
+// obtiene el token de autenticaci?n almacenado.
 function obtenerToken() {
     return sessionStorage.getItem('adminToken') || '';
 }
 
+// elimina los datos de sesi?n y redirige al inicio de sesi?n.
 function cerrarSesion() {
     sessionStorage.removeItem('adminLogueado');
     sessionStorage.removeItem('adminUsuario');
@@ -32,6 +37,7 @@ function cerrarSesion() {
     window.location.href = '/admin/login.html';
 }
 
+// realiza solicitudes a la API con la sesi?n administrativa.
 async function fetchAdmin(url, opciones = {}) {
     const token = obtenerToken();
     const headers = {
@@ -53,6 +59,7 @@ async function fetchAdmin(url, opciones = {}) {
 
 // ORDENAMIENTO DE TABLAS
 
+// compara dos valores seg?n el tipo de dato indicado.
 function compararValores(a, b, tipo) {
     if (a === null || a === undefined || a === '') return 1;
     if (b === null || b === undefined || b === '') return -1;
@@ -62,6 +69,7 @@ function compararValores(a, b, tipo) {
     return String(a).localeCompare(String(b), 'es', { sensitivity: 'base' });
 }
 
+// actualiza los iconos que indican el orden de la tabla.
 function actualizarIconosOrden(tabla, campoActivo, direccion) {
     tabla.querySelectorAll('thead th').forEach((th) => {
         const icono = th.querySelector('.th-sort-icon');
@@ -77,6 +85,7 @@ function actualizarIconosOrden(tabla, campoActivo, direccion) {
     });
 }
 
+// habilita el ordenamiento en las columnas configuradas.
 function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden, callbackReRender) {
     const tabla = document.getElementById(tablaId);
     if (!tabla) return;
@@ -115,6 +124,7 @@ function configurarColumnasOrdenables(tablaId, mapaColumnas, getOrden, setOrden,
 
 // PAGINACION
 
+// crea los controles para recorrer los resultados por p?ginas.
 function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
     let paginaActual = 1;
     let totalItems = 0;
@@ -122,10 +132,12 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
     const contenedor = document.getElementById(contenedorId);
     if (!contenedor) return null;
 
+    // calcula el total de p?ginas seg?n el tama?o configurado.
     function getTotalPaginas() {
         return Math.max(1, Math.ceil(totalItems / porPagina));
     }
 
+    // calcula los n?meros de p?gina que se mostrar?n.
     function generarBotones(pag) {
         const total = getTotalPaginas();
         const botones = [];
@@ -147,6 +159,7 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
         return botones;
     }
 
+    // actualiza la vista del paginador seg?n su estado actual.
     function render() {
         const totalPags = getTotalPaginas();
 
@@ -243,16 +256,16 @@ function crearPaginador(contenedorId, porPagina, onCambiarPagina) {
 // NOTIFICACIONES DE PEDIDOS PENDIENTES
 // inserta dos badges: uno en reparaciones y otro en compras del sidebar
 
-// configura un badge para el link indicado
+// prepara la insignia de notificaci?n para el elemento indicado.
 function configurarBadge(tipo) {
-    // tipo puede ser "reparacion" o "producto"
+    // TIPO PUEDE SER "REPARACION" O "PRODUCTO"
     const href = tipo === 'reparacion' ? 'pedidos.html' : 'compras.html';
     const badgeId = `notif-badge-${tipo}`;
 
     const link = document.querySelector(`.admin-nav a[href="${href}"]`);
     if (!link) return;
 
-    // evitar duplicados
+    // EVITAR DUPLICADOS
     if (link.querySelector('.notif-badge')) return;
 
     const badge = document.createElement('span');
@@ -264,13 +277,13 @@ function configurarBadge(tipo) {
     link.appendChild(badge);
 }
 
-// inserta ambos badges en el sidebar
+// muestra las insignias de notificaciones pendientes.
 function insertarBadgesNotificacion() {
     configurarBadge('reparacion');
     configurarBadge('producto');
 }
 
-// actualiza los dos badges consultando la api de pedidos
+// actualiza las notificaciones pendientes del panel.
 async function actualizarNotificaciones() {
     const badgeReparacion = document.getElementById('notif-badge-reparacion');
     const badgeProducto = document.getElementById('notif-badge-producto');
@@ -284,7 +297,7 @@ async function actualizarNotificaciones() {
 
         const pedidos = await respuesta.json();
 
-        // contar pendientes por tipo
+        // CONTAR PENDIENTES POR TIPO
         let pendientesReparacion = 0;
         let pendientesProducto = 0;
 
@@ -300,7 +313,7 @@ async function actualizarNotificaciones() {
             }
         });
 
-        // actualizar badge de reparaciones
+        // ACTUALIZAR BADGE DE REPARACIONES
         if (badgeReparacion) {
             if (pendientesReparacion > 0) {
                 badgeReparacion.textContent = pendientesReparacion > 99 ? '99+' : String(pendientesReparacion);
@@ -311,7 +324,7 @@ async function actualizarNotificaciones() {
             }
         }
 
-        // actualizar badge de compras
+        // ACTUALIZAR BADGE DE COMPRAS
         if (badgeProducto) {
             if (pendientesProducto > 0) {
                 badgeProducto.textContent = pendientesProducto > 99 ? '99+' : String(pendientesProducto);
@@ -326,6 +339,7 @@ async function actualizarNotificaciones() {
     }
 }
 
+// programa la actualizaci?n peri?dica de notificaciones.
 function iniciarNotificaciones() {
     insertarBadgesNotificacion();
     actualizarNotificaciones();
@@ -343,6 +357,7 @@ window.pausarNotificaciones = () => {
 
 // PROTECCION DE PAGINAS + INICIALIZACION
 
+// redirige al inicio de sesi?n si no hay una sesi?n v?lida.
 function protegerPagina() {
     if (!estaLogueado()) {
         window.location.href = '/admin/login.html';
@@ -425,14 +440,16 @@ if (formLogin) {
         }
     });
 
+    // muestra el mensaje correspondiente en el formulario de acceso.
     function mostrarMensajeLogin(texto, tipo) {
         mensajeDiv.textContent = texto;
         mensajeDiv.className = `login-mensaje ${tipo}`;
     }
 }
 
-// MENU HAMBURGUESA DEL SIDEBAR (MOBILE)
+// MENU HAMBURGUESA DEL SIDEBAR (mobile)
 
+// configura los controles del men? para pantallas peque?as.
 function iniciarMenuMobile() {
     const sidebar = document.querySelector('.admin-sidebar');
     const header = document.querySelector('.admin-header');
@@ -456,6 +473,7 @@ function iniciarMenuMobile() {
 
     const icono = toggle.querySelector('i');
 
+    // muestra el menú lateral y bloquea el desplazamiento de la página.
     function abrir() {
         sidebar.classList.add('sidebar-abierto');
         overlay.classList.add('visible');
@@ -465,6 +483,7 @@ function iniciarMenuMobile() {
         document.body.style.overflow = 'hidden';
     }
 
+    // oculta el menú lateral y restablece el desplazamiento de la página.
     function cerrar() {
         sidebar.classList.remove('sidebar-abierto');
         overlay.classList.remove('visible');
@@ -510,7 +529,7 @@ function iniciarMenuMobile() {
 }
 
 // TABLAS RESPONSIVE
-// copia el texto de cada <th> al atributo data-label de los <td> correspondientes
+// a?ade etiquetas de datos a la configuraci?n del gr?fico.
 function aplicarDataLabels(tabla) {
     const encabezados = Array.from(tabla.querySelectorAll('thead th')).map((th) =>
         th.textContent.replace(/\s+/g, ' ').trim()
@@ -525,6 +544,7 @@ function aplicarDataLabels(tabla) {
     });
 }
 
+// adapta las tablas para su visualizaci?n en pantallas peque?as.
 function prepararTablasResponsive() {
     document.querySelectorAll('table.admin-table').forEach((tabla) => {
         aplicarDataLabels(tabla);
@@ -540,7 +560,7 @@ function prepararTablasResponsive() {
     });
 }
 
-// Actualizar la marca en el panel admin
+// actualizar la marca en el panel admin.
 const actualizarMarcaAdmin = async () => {
     try {
         const respuesta = await fetch(`${API_BASE}/configuracion`);
@@ -549,11 +569,11 @@ const actualizarMarcaAdmin = async () => {
         const config = await respuesta.json();
         const marca = config.marca_nombre || 'DuotechBros';
 
-        // sidebar
+        // SIDEBAR
         const brandSidebar = document.querySelector('.admin-sidebar-brand h2');
         if (brandSidebar) brandSidebar.textContent = marca;
 
-        // textos con la clase admin-marca
+        // TEXTOS CON LA CLASE ADMIN-MARCA
         document.querySelectorAll('.admin-marca').forEach((el) => {
             el.textContent = marca;
         });
@@ -562,7 +582,8 @@ const actualizarMarcaAdmin = async () => {
     }
 };
 
-// FILTRADO POR RANGO DE TIEMPO (USADO EN VARIAS SECCIONES)
+// FILTRADO POR RANGO DE TIEMPO (usado en varias secciones)
+// filtra los elementos seg?n el intervalo de tiempo seleccionado.
 const filtrarPorRangoTiempo = (items, rango, campoFecha = 'creado_en') => {
     if (rango === 'todos') return items;
 

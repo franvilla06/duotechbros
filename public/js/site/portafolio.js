@@ -1,5 +1,5 @@
 // LOGICA DEL PORTAFOLIO PUBLICO - DUOTECHBROS
-// consume get /api/portafolio y renderiza las tarjetas
+// CONSUME GET /API/PORTAFOLIO Y RENDERIZA LAS TARJETAS
 
 const API_PORTAFOLIO = '/api/portafolio';
 
@@ -11,6 +11,7 @@ const estadoError = document.getElementById('estado-error');
 
 // UTILIDADES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '';
     const div = document.createElement('div');
@@ -18,7 +19,7 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
-// formatea una fecha a "Mes Año" (ej. "Septiembre 2026")
+// convierte la fecha al formato de mes y a?o.
 function formatearMesAnio(fechaISO) {
     if (!fechaISO) return '';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -31,7 +32,7 @@ function formatearMesAnio(fechaISO) {
     return `${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
 }
 
-// formatea una fecha corta (ej. "15/09/2026")
+// convierte la fecha al formato corto utilizado en la interfaz.
 function formatearFechaCorta(fechaISO) {
     if (!fechaISO) return '';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -43,6 +44,7 @@ function formatearFechaCorta(fechaISO) {
     return `${dia}/${mes}/${anio}`;
 }
 
+// elige la clase del distintivo seg?n el tipo de trabajo.
 function claseTipoBadge(tipo) {
     if (!tipo) return 'tipo-default';
     const t = tipo.toLowerCase();
@@ -55,8 +57,8 @@ function claseTipoBadge(tipo) {
     return 'tipo-default';
 }
 
-// obtiene todas las imagenes de un trabajo (principal + adicionales)
-// la principal siempre va primero
+// OBTIENE TODAS LAS IMAGENES DE UN TRABAJO (principal + adicionales)
+// obtiene las im?genes asociadas al trabajo.
 function obtenerImagenesTrabajo(trabajo) {
     const urls = [];
 
@@ -86,7 +88,7 @@ function obtenerImagenesTrabajo(trabajo) {
     return urls;
 }
 
-// genera el texto de fechas segun los datos disponibles
+// genera el texto con las fechas del trabajo.
 function generarTextoFechas(trabajo) {
     const inicio = trabajo.fecha_inicio;
     const fin = trabajo.fecha_fin;
@@ -103,7 +105,7 @@ function generarTextoFechas(trabajo) {
         return `<i class="fas fa-calendar-check"></i>
                 <span>Finalizado el ${formatearFechaCorta(fin)}</span>`;
     }
-    // fallback: usar la fecha de publicacion
+    // FALLBACK: USAR LA FECHA DE PUBLICACION
     if (trabajo.fecha) {
         return `<i class="fas fa-calendar-alt"></i>
                 <span>${formatearMesAnio(trabajo.fecha)}</span>`;
@@ -113,6 +115,7 @@ function generarTextoFechas(trabajo) {
 
 // RENDERIZADO
 
+// muestra los trabajos en la lista del portafolio.
 function renderizarTrabajos(trabajos) {
     lista.innerHTML = '';
 
@@ -160,12 +163,13 @@ function renderizarTrabajos(trabajos) {
         lista.appendChild(card);
     });
 
-    // inicializar los carruseles de las tarjetas recien renderizadas
+    // INICIALIZAR LOS CARRUSELES DE LAS TARJETAS RECIEN RENDERIZADAS
     inicializarCarruseles(lista);
 }
 
 // CARGA DE DATOS
 
+// solicita los trabajos y actualiza el portafolio.
 async function cargarPortafolio() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';

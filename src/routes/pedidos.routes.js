@@ -5,19 +5,19 @@ import { requiereAuth, requiereAuthUsuario } from '../middlewares/auth.middlewar
 
 const router = express.Router();
 
-// crear un pedido de reparacion requiere usuario autenticado
+// crea una solicitud de reparación para el usuario autenticado
 router.post('/pedidos', requiereAuthUsuario, pedidosController.crearPedido);
 
-// las lecturas de pedidos requieren autenticacion de administrador
+// exige autenticación de administrador para consultar la lista de pedidos
 router.get('/pedidos', requiereAuth, pedidosController.listarPedidos);
 router.get('/productos', pedidosController.listarProductos);
 router.get('/portafolio', pedidosController.listarPortafolio);
 router.post('/login', pedidosController.iniciarSesion);
 
-// configuracion publica del sitio (para el footer, contacto, etc.)
+// publica la configuración visible en el sitio
 router.get('/configuracion', configuracionController.obtenerConfiguracionPublica);
 
-// detalle de un pedido (solo admin)
+// limita el detalle de cada pedido al administrador autenticado
 router.get('/pedidos/:id/detalle', requiereAuth, pedidosController.obtenerDetallePedidoAdmin);
 
 export const pedidosRoutes = router;

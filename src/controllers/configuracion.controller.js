@@ -18,6 +18,7 @@ const CLAVES_PERMITIDAS = [
     'horario_domingo',
 ];
 
+// devuelve la configuración pública sin exponer el correo administrativo
 export const obtenerConfiguracionPublica = async (req, res) => {
     try {
         const config = await configuracionModel.obtenerTodo(req.app.locals.pool);
@@ -28,6 +29,7 @@ export const obtenerConfiguracionPublica = async (req, res) => {
     }
 };
 
+// devuelve toda la configuración disponible para administración
 export const obtenerConfiguracion = async (req, res) => {
     try {
         const config = await configuracionModel.obtenerTodo(req.app.locals.pool);
@@ -37,6 +39,7 @@ export const obtenerConfiguracion = async (req, res) => {
     }
 };
 
+// filtra y guarda las claves de configuración permitidas
 export const actualizarConfiguracion = async (req, res) => {
     const cambios = req.body;
 
@@ -45,6 +48,7 @@ export const actualizarConfiguracion = async (req, res) => {
     }
 
     const cambiosFiltrados = {};
+    // conserva solo las claves permitidas y normaliza sus valores como texto
     Object.entries(cambios).forEach(([clave, valor]) => {
         if (CLAVES_PERMITIDAS.includes(clave)) {
             cambiosFiltrados[clave] =

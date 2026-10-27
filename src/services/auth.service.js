@@ -7,8 +7,9 @@ import * as configuracionModel from '../models/configuracion.model.js';
 import * as emailService from './email.service.js';
 import { generarToken } from '../utils/token.util.js';
 
-// REGISTRO CON VERIFICACION POR EMAIL
+// REGISTRO CON VERIFICACIÓN POR EMAIL
 
+// valida que el usuario y el correo estén disponibles e inicia la verificación
 export const iniciarRegistro = async (pool, usuario, email, password) => {
     const existeUsuario = await usuariosModel.contarPorUsuario(pool, usuario);
     if (existeUsuario.count > 0) {
@@ -41,6 +42,7 @@ export const iniciarRegistro = async (pool, usuario, email, password) => {
     return { exito: true, email };
 };
 
+// valida el código activo y crea la cuenta dentro de una transacción
 export const verificarCodigo = async (pool, email, codigo) => {
     await verificacionModel.limpiarVencidos(pool);
 
@@ -74,7 +76,7 @@ export const verificarCodigo = async (pool, email, codigo) => {
         return { error: `Codigo incorrecto. Intentos restantes: ${restantes}.` };
     }
 
-    // crear usuario + marcar codigo como usado en una transaccion
+    // crea el usuario y marca el código como usado dentro de una transacción
     const conexion = await pool.getConnection();
     try {
         await conexion.beginTransaction();
@@ -106,6 +108,7 @@ export const verificarCodigo = async (pool, email, codigo) => {
     }
 };
 
+// genera y envía un nuevo código para un registro pendiente
 export const reenviarCodigo = async (pool, email) => {
     const registro = await verificacionModel.buscarPorEmail(pool, email, 'registro');
 
@@ -127,8 +130,9 @@ export const reenviarCodigo = async (pool, email) => {
     return { exito: true };
 }
 
-// RECUPERACION DE CONTRASENIA
+// RECUPERACIÓN DE CONTRASEÑA
 
+// inicia la recuperación sin revelar si el correo está registrado
 export const iniciarRecuperacion = async (pool, email) => {
     const [rows] = await pool.query(
         'SELECT usuario, email FROM usuarios WHERE email = ?',
@@ -137,7 +141,7 @@ export const iniciarRecuperacion = async (pool, email) => {
     const usuario = rows[0];
 
     if (!usuario) {
-        // no revelamos si el email esta registrado
+        // mantiene la misma respuesta para correos registrados y desconocidos
         return { exito: true, existe: false };
     }
 
@@ -157,6 +161,7 @@ export const iniciarRecuperacion = async (pool, email) => {
     return { exito: true, existe: true };
 };
 
+// verifica el código y reemplaza la contraseña de forma transaccional
 export const restablecerPassword = async (pool, email, codigo, passwordNueva) => {
     await verificacionModel.limpiarVencidos(pool);
 
@@ -226,6 +231,7 @@ export const restablecerPassword = async (pool, email, codigo, passwordNueva) =>
 
 // LOGIN
 
+// autentica al usuario y aplica el control de intentos fallidos
 export const autenticarUsuario = async (pool, email, password) => {
     const user = await usuariosModel.buscarPorEmail(pool, email);
 
@@ -278,6 +284,7 @@ export const autenticarUsuario = async (pool, email, password) => {
     };
 };
 
+// autentica al administrador y aplica el control de intentos fallidos
 export const autenticarAdministrador = async (pool, usuario, password) => {
     const admin = await adminModel.buscarPorUsuario(pool, usuario);
 
@@ -313,6 +320,7 @@ export const autenticarAdministrador = async (pool, usuario, password) => {
 
 // PERFIL
 
+// comprueba la contraseña actual y guarda su nueva versión cifrada
 export const cambiarPassword = async (pool, usuario, passwordActual, passwordNueva) => {
     const user = await usuariosModel.buscarPorUsuario(pool, usuario);
     if (!user) {
@@ -330,6 +338,7 @@ export const cambiarPassword = async (pool, usuario, passwordActual, passwordNue
     return { success: true };
 };
 
+// verifica la contraseña antes de eliminar la cuenta del usuario
 export const darDeBaja = async (pool, usuario) => {
     const user = await usuariosModel.buscarPorUsuario(pool, usuario);
     if (!user) {
@@ -353,8 +362,9 @@ export const darDeBaja = async (pool, usuario) => {
 
 // UTILIDAD
 
-// convierte un objeto Date a formato MySQL DATETIME (YYYY-MM-DD HH:MM:SS)
+// convierte una fecha al formato DATETIME que espera MySQL
 export const formatearFechaMySQL = (fecha) => {
+    // completa con un cero inicial los valores de un solo dígito
     const pad = (n) => String(n).padStart(2, '0');
     return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())} ${pad(
         fecha.getHours()

@@ -1,6 +1,6 @@
 // LOGICA DE LA PAGINA "PEDIDOS DE REPARACION" - DUOTECHBROS ADMIN
-// incluye: ver, cambiar estado, notas internas, presupuesto, buscar,
-// filtrar, ordenar, paginar y exportar csv
+// INCLUYE: VER, CAMBIAR ESTADO, NOTAS INTERNAS, PRESUPUESTO, BUSCAR,
+// FILTRAR, ORDENAR, PAGINAR Y EXPORTAR CSV
 
 const API_PEDIDOS = '/api/pedidos';
 const API_ADMIN_PEDIDOS = '/api/admin/pedidos';
@@ -41,6 +41,7 @@ let pedidoNotasActual = null;
 
 // UTILIDADES
 
+// convierte la fecha al formato utilizado en la interfaz.
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -54,12 +55,14 @@ function formatearFecha(fechaISO) {
     return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
 }
 
+// formatea el precio como importe monetario.
 function formatearPrecio(precio) {
     const num = Number(precio);
     if (isNaN(num)) return '$0.00';
     return `$${num.toFixed(2)}`;
 }
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
     const div = document.createElement('div');
@@ -67,21 +70,25 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// unifica el formato del estado para facilitar su comparaci?n.
 function normalizarEstado(estado) {
     return (estado || 'pendiente').toLowerCase().trim().replace(/\s+/g, '-');
 }
 
+// elige la clase visual del distintivo seg?n el estado.
 function claseBadgeEstado(estado) {
     const e = normalizarEstado(estado);
     const validos = ['pendiente', 'en-proceso', 'completado', 'cancelado'];
     return validos.includes(e) ? `badge-${e}` : 'badge-pendiente';
 }
 
+// convierte la primera letra del texto a may?scula.
 function capitalizar(texto) {
     if (!texto) return '';
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, esError = false) {
     const anterior = document.getElementById('toast-admin');
     if (anterior) anterior.remove();
@@ -101,6 +108,7 @@ function mostrarToast(mensaje, esError = false) {
 
 // ORDENAMIENTO
 
+// ordena los elementos seg?n los criterios seleccionados.
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
     return [...array].sort((a, b) => {
@@ -111,6 +119,7 @@ function aplicarOrdenamiento(array) {
 
 // EXPORTAR A CSV
 
+// escapa los valores para conservar el formato del archivo CSV.
 function escaparCSV(valor) {
     if (valor === null || valor === undefined) return '';
     let texto = String(valor);
@@ -125,6 +134,7 @@ function escaparCSV(valor) {
     return texto;
 }
 
+// descarga los datos visibles en un archivo CSV.
 async function exportarCSV() {
     if (pedidosFiltrados.length === 0) {
         mostrarToast('No hay pedidos para exportar.', true);
@@ -196,6 +206,7 @@ async function exportarCSV() {
 
 // FILTROS
 
+// crea los controles para filtrar los elementos por estado.
 function construirFiltrosEstado() {
     const opciones = ['Todos', ...ESTADOS];
     filtrosEstado.innerHTML = '';
@@ -219,6 +230,7 @@ function construirFiltrosEstado() {
     });
 }
 
+// actualiza el bot?n para reflejar si hay filtros activos.
 function actualizarBotonLimpiar() {
     const hayFiltro =
         estadoFiltroActivo !== 'Todos' ||
@@ -229,6 +241,7 @@ function actualizarBotonLimpiar() {
 
 // RENDERIZADO
 
+// muestra los pedidos con sus datos y acciones disponibles.
 function renderizarPedidos(pedidos) {
     tbody.innerHTML = '';
 
@@ -381,6 +394,7 @@ function renderizarPedidos(pedidos) {
     });
 }
 
+// muestra u oculta el detalle del pedido seleccionado.
 function toggleDetallePedido(id) {
     if (window.innerWidth > 700) return;
 
@@ -405,6 +419,7 @@ function toggleDetallePedido(id) {
 
 // APLICAR FILTROS
 
+// filtra los elementos seg?n los criterios seleccionados.
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
@@ -440,6 +455,7 @@ function aplicarFiltros() {
 
 // CARGA DE DATOS
 
+// solicita los pedidos y actualiza la vista.
 async function cargarPedidos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
@@ -484,6 +500,7 @@ async function cargarPedidos() {
 
 // CAMBIO DE ESTADO
 
+// guarda el nuevo estado del elemento seleccionado.
 async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
     selectElement.disabled = true;
 
@@ -508,7 +525,7 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
 
             mostrarToast(`Estado actualizado a "${capitalizar(nuevoEstado)}"`);
 
-            // volver a renderizar sin resetear la pagina
+            // VOLVER A RENDERIZAR SIN RESETEAR LA PAGINA
             let filtrados = [...pedidosOriginales];
             if (estadoFiltroActivo !== 'Todos') {
                 filtrados = filtrados.filter(
@@ -544,6 +561,7 @@ async function cambiarEstado(id, nuevoEstado, estadoAnterior, selectElement) {
 
 // MODAL: NOTAS + PRESUPUESTO
 
+// muestra el formulario para editar las notas y el presupuesto.
 function abrirModalNotas(id) {
     const pedido = pedidosOriginales.find((p) => String(p.id) === String(id));
     if (!pedido) {
@@ -553,7 +571,7 @@ function abrirModalNotas(id) {
 
     pedidoNotasActual = pedido;
 
-    // rellenar la info del pedido
+    // RELLENAR LA INFO DEL PEDIDO
     notasInfo.innerHTML = `
         <div class="notas-info-linea">
             <span class="notas-info-label">Cliente</span>
@@ -575,7 +593,7 @@ function abrirModalNotas(id) {
         </div>
     `;
 
-    // rellenar campos
+    // RELLENAR CAMPOS
     editNotas.value = pedido.notas || '';
     editPresupuesto.value = pedido.presupuesto !== null && pedido.presupuesto !== undefined
         ? Number(pedido.presupuesto).toFixed(2)
@@ -585,6 +603,7 @@ function abrirModalNotas(id) {
     editPresupuesto.focus();
 }
 
+// cierra el formulario de notas y presupuesto.
 function cerrarModalNotas() {
     modalNotas.classList.remove('modal-visible');
     editNotas.value = '';
@@ -592,6 +611,7 @@ function cerrarModalNotas() {
     pedidoNotasActual = null;
 }
 
+// guarda las notas y el presupuesto del pedido.
 async function guardarNotasYPresupuesto() {
     if (!pedidoNotasActual) return;
 
@@ -599,7 +619,7 @@ async function guardarNotasYPresupuesto() {
     const notas = editNotas.value.trim();
     const presupuestoTexto = editPresupuesto.value.trim();
 
-    // validar presupuesto si se cargo
+    // VALIDAR PRESUPUESTO SI SE CARGO
     let presupuestoValor = null;
     if (presupuestoTexto !== '') {
         const num = Number(presupuestoTexto);
@@ -614,7 +634,7 @@ async function guardarNotasYPresupuesto() {
     btnNotasGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
     try {
-        // guardar presupuesto y notas en paralelo
+        // GUARDAR PRESUPUESTO Y NOTAS EN PARALELO
         const [resPresupuesto, resNotas] = await Promise.all([
             fetchAdmin(`${API_ADMIN_PEDIDOS}/${id}/presupuesto`, {
                 method: 'PUT',
@@ -630,7 +650,7 @@ async function guardarNotasYPresupuesto() {
         const resultadoNotas = await resNotas.json();
 
         if (resultadoPresupuesto.success && resultadoNotas.success) {
-            // actualizar el pedido en el estado local
+            // ACTUALIZAR EL PEDIDO EN EL ESTADO LOCAL
             pedidoNotasActual.notas = resultadoNotas.notas;
             pedidoNotasActual.presupuesto = resultadoPresupuesto.presupuesto;
 

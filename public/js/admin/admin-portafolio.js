@@ -41,6 +41,7 @@ let paginador = null;
 
 // UTILIDADES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
     const div = document.createElement('div');
@@ -48,8 +49,8 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
-// formatea una fecha al estilo dd/mm/yyyy
-// si es null o vacia, devuelve un guion
+// FORMATEA UNA FECHA AL ESTILO DD/MM/YYYY
+// convierte la fecha al formato utilizado en la interfaz.
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -61,6 +62,7 @@ function formatearFecha(fechaISO) {
     return `${dia}/${mes}/${anio}`;
 }
 
+// elige la clase visual correspondiente al tipo de contenido.
 function claseTipo(tipo) {
     if (!tipo) return 'badge-tipo-default';
     const t = tipo.toLowerCase();
@@ -71,6 +73,7 @@ function claseTipo(tipo) {
     return 'badge-tipo-default';
 }
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, esError = false) {
     const anterior = document.getElementById('toast-admin');
     if (anterior) anterior.remove();
@@ -88,6 +91,7 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
+// convierte el valor recibido en una lista de im?genes.
 function parsearImagenes(imagenes) {
     if (!imagenes) return [];
     if (Array.isArray(imagenes)) return imagenes;
@@ -102,6 +106,7 @@ function parsearImagenes(imagenes) {
     }
 }
 
+// crea un campo para agregar una imagen con su vista previa.
 function crearInputImagen(url, listaId) {
     const fila = document.createElement('div');
     fila.className = 'imagen-input-fila';
@@ -112,6 +117,7 @@ function crearInputImagen(url, listaId) {
     icono.className = 'fas fa-image';
     preview.appendChild(icono);
 
+    // actualiza la vista previa de la imagen seleccionada.
     const actualizarPreview = (valor) => {
         preview.replaceChildren();
         const urlImagen = valor.trim();
@@ -154,6 +160,7 @@ function crearInputImagen(url, listaId) {
     return fila;
 }
 
+// actualiza el contador y el estado del bot?n de im?genes.
 function actualizarContadorImagenes(listaId) {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return;
@@ -167,6 +174,7 @@ function actualizarContadorImagenes(listaId) {
     boton.disabled = cantidad >= MAX_IMAGENES_ADICIONALES;
 }
 
+// agrega un campo de imagen a la lista indicada.
 function agregarImagenInput(listaId, url = '') {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return;
@@ -180,6 +188,7 @@ function agregarImagenInput(listaId, url = '') {
     actualizarContadorImagenes(listaId);
 }
 
+// muestra los campos de imagen recibidos en la lista indicada.
 function cargarImagenesEnLista(listaId, imagenes) {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return;
@@ -192,6 +201,7 @@ function cargarImagenesEnLista(listaId, imagenes) {
     actualizarContadorImagenes(listaId);
 }
 
+// recopila las URL de imagen ingresadas en la lista.
 function obtenerImagenesDeLista(listaId) {
     const lista = listaId === 'imagenes-lista-form' ? imagenesListaForm : imagenesListaEdit;
     if (!lista) return [];
@@ -204,6 +214,7 @@ function obtenerImagenesDeLista(listaId) {
 btnAgregarImagenForm.addEventListener('click', () => agregarImagenInput('imagenes-lista-form'));
 btnAgregarImagenEdit.addEventListener('click', () => agregarImagenInput('imagenes-lista-edit'));
 
+// ordena los elementos seg?n los criterios seleccionados.
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
     return [...array].sort((a, b) => {
@@ -214,6 +225,7 @@ function aplicarOrdenamiento(array) {
 
 // EXPORTAR A CSV
 
+// escapa los valores para conservar el formato del archivo CSV.
 function escaparCSV(valor) {
     if (valor === null || valor === undefined) return '';
     let texto = String(valor);
@@ -228,6 +240,7 @@ function escaparCSV(valor) {
     return texto;
 }
 
+// descarga los datos visibles en un archivo CSV.
 async function exportarCSV() {
     if (trabajosFiltrados.length === 0) {
         mostrarToast('No hay trabajos para exportar.', true);
@@ -295,6 +308,7 @@ async function exportarCSV() {
 
 // FILTROS
 
+// crea los controles para filtrar los elementos por tipo.
 function construirFiltrosTipo() {
     const tipos = ['Todos'];
     trabajosOriginales.forEach((t) => {
@@ -324,6 +338,7 @@ function construirFiltrosTipo() {
     });
 }
 
+// actualiza el bot?n para reflejar si hay filtros activos.
 function actualizarBotonLimpiar() {
     const hayFiltro = tipoFiltroActivo !== 'Todos' || textoBusqueda.trim() !== '';
     btnLimpiar.disabled = !hayFiltro;
@@ -331,6 +346,7 @@ function actualizarBotonLimpiar() {
 
 // RENDERIZADO
 
+// muestra los trabajos en la lista del portafolio.
 function renderizarTrabajos(trabajos) {
     tbody.innerHTML = '';
 
@@ -362,7 +378,7 @@ function renderizarTrabajos(trabajos) {
                </div>`
             : `<div class="cell-imagen-portafolio-placeholder"><i class="fas fa-image"></i></div>`;
 
-        // fechas: inicio arriba, fin abajo (formato vertical)
+        // FECHAS: INICIO ARRIBA, FIN ABAJO (formato vertical)
         const fechaInicio = t.fecha_inicio ? escapar(formatearFecha(t.fecha_inicio)) : null;
         const fechaFin = t.fecha_fin ? escapar(formatearFecha(t.fecha_fin)) : null;
 
@@ -507,6 +523,7 @@ function renderizarTrabajos(trabajos) {
     });
 }
 
+// muestra u oculta el detalle del trabajo seleccionado.
 function toggleDetalleTrabajo(id) {
     if (window.innerWidth > 700) return;
 
@@ -531,6 +548,7 @@ function toggleDetalleTrabajo(id) {
 
 // APLICAR FILTROS
 
+// filtra los elementos seg?n los criterios seleccionados.
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
@@ -563,6 +581,7 @@ function aplicarFiltros() {
 
 // CARGA DE DATOS
 
+// solicita los trabajos y actualiza la vista del portafolio.
 async function cargarTrabajos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
@@ -657,6 +676,7 @@ formTrabajo.addEventListener('submit', async (e) => {
 
 // MODAL
 
+// muestra el formulario para editar el elemento seleccionado.
 function abrirModalEdicion(id) {
     const trabajo = trabajosOriginales.find((t) => String(t.id) === String(id));
     if (!trabajo) {
@@ -676,6 +696,7 @@ function abrirModalEdicion(id) {
     modalEditar.classList.add('modal-visible');
 }
 
+// cierra el formulario de edici?n.
 function cerrarModalEdicion() {
     modalEditar.classList.remove('modal-visible');
     formEditar.reset();
@@ -753,6 +774,7 @@ formEditar.addEventListener('submit', async (e) => {
 
 // ELIMINAR
 
+// solicita la eliminaci?n del trabajo seleccionado.
 async function eliminarTrabajo(id, titulo) {
     const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
     if (!confirmar) return;

@@ -1,5 +1,6 @@
 import { emailConfig, modoReal, transporter } from '../config/email.config.js';
 
+// escapa caracteres HTML para evitar que los datos se interpreten como marcado
 export const escaparHTML = (valor) => {
     if (valor === null || valor === undefined) return '';
     return String(valor)
@@ -10,6 +11,7 @@ export const escaparHTML = (valor) => {
         .replace(/'/g, '&#39;');
 };
 
+// formatea una fecha para incluirla en correos dirigidos a usuarios
 export const formatearFecha = (fecha) => {
     const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
     if (Number.isNaN(fechaObj.getTime())) return 'Fecha no disponible';
@@ -23,6 +25,7 @@ export const formatearFecha = (fecha) => {
     }).format(fechaObj);
 };
 
+// formatea un importe como moneda argentina
 export const formatearPrecio = (valor) => {
     const numero = Number(valor);
     if (!Number.isFinite(numero)) return '$0,00';
@@ -33,6 +36,7 @@ export const formatearPrecio = (valor) => {
     }).format(numero);
 };
 
+// inserta el contenido de un mensaje en la plantilla común de correo
 export const envolverHTML = (contenido, marca = 'DuotechBros') => {
     return `
         <!doctype html>
@@ -60,6 +64,7 @@ export const envolverHTML = (contenido, marca = 'DuotechBros') => {
     `;
 };
 
+// limpia y deduplica la lista de destinatarios de un mensaje
 const normalizarDestinatarios = (destinatarios) => {
     const lista = Array.isArray(destinatarios) ? destinatarios : [destinatarios];
     return [...new Set(
@@ -69,6 +74,7 @@ const normalizarDestinatarios = (destinatarios) => {
     )];
 };
 
+// envía un correo con HTML y texto o registra su contenido en modo de desarrollo
 export const enviarEmail = async ({ to, subject, title, message, htmlContent, textContent, marca = 'DuotechBros' }) => {
     const destinatarios = normalizarDestinatarios(to);
     if (destinatarios.length === 0) {
@@ -108,6 +114,7 @@ export const enviarEmail = async ({ to, subject, title, message, htmlContent, te
     }
 };
 
+// construye el correo con código compartido por los flujos de registro y recuperación
 const enviarCodigo = async ({ destinatario, usuario, codigo, asunto, titulo, mensaje, tipo, marca = 'DuotechBros' }) => {
     const texto = `
 ${titulo}
@@ -141,6 +148,7 @@ Este codigo expira en 10 minutos. Si no solicitaste este email, podes ignorarlo.
     });
 };
 
+// envía el código requerido para confirmar un registro
 export const enviarCodigoVerificacion = async (destinatario, usuario, codigo, marca = 'DuotechBros') => {
     return enviarCodigo({
         destinatario,
@@ -154,6 +162,7 @@ export const enviarCodigoVerificacion = async (destinatario, usuario, codigo, ma
     });
 };
 
+// envía el código requerido para restablecer una contraseña
 export const enviarCodigoRecuperacion = async (destinatario, usuario, codigo, marca = 'DuotechBros') => {
     return enviarCodigo({
         destinatario,
@@ -167,6 +176,7 @@ export const enviarCodigoRecuperacion = async (destinatario, usuario, codigo, ma
     });
 };
 
+// envía la confirmación de una solicitud de reparación a cada destinatario
 export const enviarConfirmacionReparacion = async (destinatarios, pedido) => {
     const marca = pedido.marca || 'DuotechBros';
     const fecha = formatearFecha(pedido.creado_en);
@@ -208,7 +218,9 @@ export const enviarConfirmacionReparacion = async (destinatarios, pedido) => {
     );
 };
 
+// envía al cliente el detalle y el total estimado de su compra
 export const enviarConfirmacionCompra = async ({ destinatario, nombreCliente, pedidoId, total, items = [], fecha = new Date(), marca = 'DuotechBros' }) => {
+    // prepara los nombres, cantidades y precios que se mostrarán al cliente
     const resumenItems = (items || []).map((item) => {
         const nombre = item.nombre_producto || item.nombre || 'Producto';
         const cantidad = item.cantidad || 1;
@@ -236,7 +248,9 @@ export const enviarConfirmacionCompra = async ({ destinatario, nombreCliente, pe
     });
 };
 
+// informa al administrador sobre una compra recibida
 export const notificarAdminCompra = async ({ emailAdmin, nombreCliente, pedidoId, total, items = [], fecha = new Date(), marca = 'DuotechBros' }) => {
+    // resume los productos incluidos para el aviso interno del administrador
     const resumenItems = (items || []).map((item) => {
         const nombre = item.nombre_producto || item.nombre || 'Producto';
         const cantidad = item.cantidad || 1;
@@ -265,6 +279,7 @@ export const notificarAdminCompra = async ({ emailAdmin, nombreCliente, pedidoId
     });
 };
 
+// coordina el envío de la confirmación al cliente y el aviso al administrador
 export const enviarCompraYNotificacion = async ({ destinatario, emailAdmin, nombreCliente, pedidoId, total, items = [], fecha = new Date(), marca = 'DuotechBros' }) => {
     const resultados = [];
 

@@ -21,16 +21,19 @@ const formPassword = document.getElementById('form-password');
 const btnCambiarPassword = document.getElementById('btn-cambiar-password');
 const mensajePassword = document.getElementById('mensaje-password');
 
+// muestra un mensaje de estado en el elemento indicado.
 function mostrarMensaje(elemento, texto, tipo) {
     elemento.textContent = texto;
     elemento.className = `perfil-mensaje perfil-mensaje-${tipo}`;
 }
 
+// borra el mensaje y restablece su presentaci?n.
 function limpiarMensaje(elemento) {
     elemento.textContent = '';
     elemento.className = 'perfil-mensaje';
 }
 
+// muestra la secci?n asociada a la pesta?a seleccionada.
 function activarTab(nombre) {
     tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === nombre));
     Object.entries(secciones).forEach(([clave, seccion]) => {
@@ -44,6 +47,7 @@ tabs.forEach((tab) => {
     tab.addEventListener('click', () => activarTab(tab.dataset.tab));
 });
 
+// solicita los datos del perfil y los muestra en el formulario.
 async function cargarPerfil() {
     try {
         const respuesta = await fetchAdmin(API_ADMIN_PERFIL);

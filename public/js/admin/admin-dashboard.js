@@ -12,7 +12,7 @@ const tbodyMovimientos = document.getElementById('tbody-movimientos');
 const estadoVacio = document.getElementById('estado-vacio');
 const contadorMovimientos = document.getElementById('contador-movimientos');
 
-// colores reutilizables para los graficos
+// COLORES REUTILIZABLES PARA LOS GRAFICOS
 const COLORES = {
     azul: '#007bff',
     azulClaro: 'rgba(0, 123, 255, 0.15)',
@@ -26,7 +26,7 @@ const COLORES = {
     grisClaro: '#e0eaf0',
 };
 
-// colores por estado (coherentes con los badges)
+// COLORES POR ESTADO (coherentes con los badges)
 const COLORES_ESTADO = {
     pendiente: '#f59e0b',
     'en proceso': '#007bff',
@@ -34,7 +34,7 @@ const COLORES_ESTADO = {
     cancelado: '#dc3545',
 };
 
-// paleta para los productos mas vendidos (se cicla)
+// PALETA PARA LOS PRODUCTOS MAS VENDIDOS (se cicla)
 const PALETA_PRODUCTOS = [
     '#007bff', '#0a9396', '#f59e0b', '#8b5cf6',
     '#ec4899', '#14b8a6', '#f97316', '#6366f1',
@@ -51,6 +51,7 @@ let ultimosProductosData = [];
 
 // UTILIDADES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
     const div = document.createElement('div');
@@ -58,6 +59,7 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// convierte la fecha al formato utilizado en la interfaz.
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -71,31 +73,37 @@ function formatearFecha(fechaISO) {
     return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
 }
 
+// formatea el precio como importe monetario.
 function formatearPrecio(precio) {
     const num = Number(precio);
     if (isNaN(num)) return '$0.00';
     return `$${num.toFixed(2)}`;
 }
 
+// convierte la primera letra del texto a may?scula.
 function capitalizar(texto) {
     if (!texto) return '';
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+// unifica el formato del estado para facilitar su comparaci?n.
 function normalizarEstado(estado) {
     return (estado || 'pendiente').toLowerCase().trim();
 }
 
+// elige la clase visual del distintivo seg?n el estado.
 function claseBadgeEstado(estado) {
     const e = normalizarEstado(estado).replace(/\s+/g, '-');
     const validos = ['pendiente', 'en-proceso', 'completado', 'cancelado'];
     return validos.includes(e) ? `badge-${e}` : 'badge-pendiente';
 }
 
+// indica si el pedido corresponde a una reparaci?n.
 function esReparacion(pedido) {
     return (pedido.tipo || 'reparacion') === 'reparacion';
 }
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, esError = false) {
     const anterior = document.getElementById('toast-admin');
     if (anterior) anterior.remove();
@@ -115,13 +123,14 @@ function mostrarToast(mensaje, esError = false) {
 
 // RENDERIZADO DE ESTADISTICAS PRINCIPALES
 
+// actualiza las tarjetas con los totales y estados principales.
 function renderizarStats(reparaciones, compras, productos, portafolio) {
     document.getElementById('total-reparaciones').textContent = reparaciones.length;
     document.getElementById('total-compras').textContent = compras.length;
     document.getElementById('total-productos').textContent = productos.length;
     document.getElementById('total-portafolio').textContent = portafolio.length;
 
-    // subtitulo de reparaciones
+    // SUBTITULO DE REPARACIONES
     const pendientesRep = reparaciones.filter(
         (p) => normalizarEstado(p.estado) === 'pendiente'
     ).length;
@@ -132,7 +141,7 @@ function renderizarStats(reparaciones, compras, productos, portafolio) {
         subReparaciones.textContent = 'Sin pendientes';
     }
 
-    // subtitulo de compras
+    // SUBTITULO DE COMPRAS
     const pendientesComp = compras.filter(
         (p) => normalizarEstado(p.estado) === 'pendiente'
     ).length;
@@ -143,7 +152,7 @@ function renderizarStats(reparaciones, compras, productos, portafolio) {
         subCompras.textContent = 'Sin pendientes';
     }
 
-    // subtitulo de productos
+    // SUBTITULO DE PRODUCTOS
     const stockBajo = productos.filter((p) => Number(p.stock) <= 3).length;
     const subProductos = document.getElementById('sub-productos');
     if (stockBajo > 0) {
@@ -152,7 +161,7 @@ function renderizarStats(reparaciones, compras, productos, portafolio) {
         subProductos.textContent = 'Stock saludable';
     }
 
-    // subtitulo de portafolio
+    // SUBTITULO DE PORTAFOLIO
     const subPortafolio = document.getElementById('sub-portafolio');
     if (portafolio.length > 0) {
         const ultimo = [...portafolio].sort((a, b) => {
@@ -182,6 +191,7 @@ function renderizarStats(reparaciones, compras, productos, portafolio) {
 
 // RENDERIZADO DE ULTIMOS MOVIMIENTOS
 
+// muestra los movimientos m?s recientes del panel.
 function renderizarUltimosMovimientos(pedidos) {
     tbodyMovimientos.innerHTML = '';
 
@@ -218,7 +228,7 @@ function renderizarUltimosMovimientos(pedidos) {
         const nombreCliente = escapar(p.nombre_cliente);
         const fechaFormateada = formatearFecha(p.creado_en);
 
-        // fila principal (compacta en mobile, normal en desktop)
+        // FILA PRINCIPAL (compacta en mobile, normal en desktop)
         const tr = document.createElement('tr');
         tr.className = 'mov-fila';
         tr.dataset.id = p.id;
@@ -238,7 +248,7 @@ function renderizarUltimosMovimientos(pedidos) {
             </td>
         `;
 
-        // fila de detalle (oculta por defecto, se muestra al hacer click en mobile)
+        // FILA DE DETALLE (oculta por defecto, se muestra al hacer click en mobile)
         const trDetalle = document.createElement('tr');
         trDetalle.className = 'mov-detalle-fila';
         trDetalle.dataset.id = p.id;
@@ -273,7 +283,7 @@ function renderizarUltimosMovimientos(pedidos) {
             </td>
         `;
 
-        // click en la fila principal: abrir/cerrar el detalle (solo en mobile)
+        // CLICK EN LA FILA PRINCIPAL: ABRIR/CERRAR EL DETALLE (solo en mobile)
         tr.addEventListener('click', () => toggleDetalleMovimiento(p.id));
 
         tbodyMovimientos.appendChild(tr);
@@ -281,8 +291,8 @@ function renderizarUltimosMovimientos(pedidos) {
     });
 }
 
-// abre o cierra el detalle de un movimiento
-// solo hace algo en mobile (en desktop la tabla ya muestra todo)
+// ABRE O CIERRA EL DETALLE DE UN MOVIMIENTO
+// muestra u oculta el detalle del movimiento seleccionado.
 function toggleDetalleMovimiento(id) {
     if (window.innerWidth > 700) return;
 
@@ -293,7 +303,7 @@ function toggleDetalleMovimiento(id) {
 
     const estabaAbierta = filaDetalle.classList.contains('mov-detalle-visible');
 
-    // cerrar todas las filas abiertas
+    // CERRAR TODAS LAS FILAS ABIERTAS
     tbodyMovimientos.querySelectorAll('.mov-detalle-fila').forEach((fila) => {
         fila.classList.remove('mov-detalle-visible');
     });
@@ -301,7 +311,7 @@ function toggleDetalleMovimiento(id) {
         fila.classList.remove('mov-fila-abierta');
     });
 
-    // si la clickeada estaba cerrada, abrirla
+    // SI LA CLICKEADA ESTABA CERRADA, ABRIRLA
     if (!estabaAbierta) {
         filaDetalle.classList.add('mov-detalle-visible');
         filaPrincipal.classList.add('mov-fila-abierta');
@@ -310,6 +320,7 @@ function toggleDetalleMovimiento(id) {
 
 // GRAFICOS
 
+// elimina una instancia del gr?fico antes de volver a dibujarlo.
 function destruirGrafico(instancia) {
     if (instancia) {
         instancia.destroy();
@@ -326,7 +337,7 @@ const TOOLTIP_BASE = {
     bodyFont: { size: 12 },
 };
 
-// grafico 1: pedidos por estado (doughnut)
+// muestra el gr?fico de pedidos agrupados por estado.
 function renderizarGraficoEstados(datos) {
     const canvas = document.getElementById('grafico-estados');
     const nota = document.getElementById('grafico-estados-nota');
@@ -408,7 +419,7 @@ function renderizarGraficoEstados(datos) {
     nota.textContent = `Total: ${totalGeneral} pedido${totalGeneral !== 1 ? 's' : ''} entre reparaciones y compras.`;
 }
 
-// grafico 2: ventas de los ultimos 6 meses
+// muestra el gr?fico de ventas agrupadas por per?odo.
 function renderizarGraficoVentas(datos) {
     const canvas = document.getElementById('grafico-ventas');
     const nota = document.getElementById('grafico-ventas-nota');
@@ -525,8 +536,8 @@ const pluginValoresEnBarras = {
 };
 
 // grafico 3: top 10 productos mas vendidos
-// en desktop: grafico de barras horizontales
-// en mobile: tabla con la cantidad y el nombre de cada producto
+// EN DESKTOP: GRAFICO DE BARRAS HORIZONTALES
+// muestra el gr?fico de productos m?s vendidos.
 function renderizarGraficoProductos(datos) {
     const canvas = document.getElementById('grafico-productos');
     const wrapperGrafico = document.getElementById('grafico-productos-wrapper');
@@ -536,10 +547,10 @@ function renderizarGraficoProductos(datos) {
 
     if (!canvas || !nota) return;
 
-    // guardar los datos para el resize
+    // GUARDAR LOS DATOS PARA EL RESIZE
     ultimosProductosData = Array.isArray(datos) ? datos : [];
 
-    // sin datos: ocultar todo y mostrar mensaje
+    // SIN DATOS: OCULTAR TODO Y MOSTRAR MENSAJE
     if (!datos || datos.length === 0) {
         nota.textContent = 'Aún no hay ventas registradas para calcular el ranking.';
         if (wrapperGrafico) wrapperGrafico.style.display = 'none';
@@ -551,18 +562,18 @@ function renderizarGraficoProductos(datos) {
 
     const esMobile = window.innerWidth <= 700;
 
-    // calcular el total vendido (para la nota al pie)
+    // CALCULAR EL TOTAL VENDIDO (para la nota al pie)
     const totalVendido = datos.reduce(
         (total, producto) => total + Number(producto.total_vendido),
         0
     );
 
     if (esMobile) {
-        // modo mobile: tabla
+        // MODO MOBILE: TABLA
         if (wrapperGrafico) wrapperGrafico.style.display = 'none';
         if (wrapperTabla) wrapperTabla.style.display = 'block';
 
-        // destruir el grafico si existia (para evitar fugas de memoria)
+        // DESTRUIR EL GRAFICO SI EXISTIA (para evitar fugas de memoria)
         destruirGrafico(graficoProductos);
         graficoProductos = null;
 
@@ -570,7 +581,7 @@ function renderizarGraficoProductos(datos) {
             tablaContenedor.innerHTML = construirTablaProductosHTML(datos);
         }
     } else {
-        // modo desktop: grafico de barras
+        // MODO DESKTOP: GRAFICO DE BARRAS
         if (wrapperGrafico) wrapperGrafico.style.display = 'block';
         if (wrapperTabla) wrapperTabla.style.display = 'none';
 
@@ -654,7 +665,7 @@ function renderizarGraficoProductos(datos) {
     nota.textContent = `${datos.length} producto${datos.length !== 1 ? 's' : ''} con ventas · Total: ${totalVendido} unidad${totalVendido !== 1 ? 'es' : ''} vendida${totalVendido !== 1 ? 's' : ''}.`;
 }
 
-// construye el html de la tabla de productos mas vendidos (version mobile)
+// genera el marcado de la tabla de productos m?s vendidos.
 function construirTablaProductosHTML(datos) {
     const filas = datos
         .map((d, i) => {
@@ -685,6 +696,7 @@ function construirTablaProductosHTML(datos) {
 
 // CARGA DE DATOS
 
+// solicita los datos y actualiza las secciones del panel.
 async function cargarDashboard() {
     const icono = btnRefresh.querySelector('i');
     icono.classList.add('spinning');
@@ -714,11 +726,11 @@ async function cargarDashboard() {
         const reparaciones = pedidosFiltrados.filter((p) => esReparacion(p));
         const compras = pedidosFiltrados.filter((p) => !esReparacion(p));
 
-        // renderizar tarjetas
+        // RENDERIZAR TARJETAS
         renderizarStats(reparaciones, compras, productos, portafolio);
         renderizarUltimosMovimientos(pedidos);
 
-        // renderizar graficos
+        // RENDERIZAR GRAFICOS
         if (resEstadisticas.ok) {
             const stats = await resEstadisticas.json();
 
@@ -781,7 +793,7 @@ if (filtroTiempo) {
 }
 
 // re-renderizar el top de productos cuando cambia el ancho
-// (para alternar entre grafico y tabla)
+//  (para alternar entre grafico y tabla)
 let resizeTimerProductos = null;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimerProductos);

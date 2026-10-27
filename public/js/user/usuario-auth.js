@@ -3,7 +3,7 @@
 
 const API_USUARIOS = '/api/usuarios';
 
-// referencias a los elementos del dom
+// REFERENCIAS A LOS ELEMENTOS DEL DOM
 const tabs = document.querySelectorAll('.usuario-tab');
 const tabsContainer = document.getElementById('usuario-tabs');
 const pasosContainer = document.getElementById('registro-pasos');
@@ -44,12 +44,13 @@ const inputRecuperarPassword = document.getElementById('recuperar-password-nueva
 const inputRecuperarPasswordConfirmar = document.getElementById('recuperar-password-confirmar');
 const textoRecuperarEmailMostrado = document.getElementById('recuperar-email-mostrado');
 
-// estado local
+// ESTADO LOCAL
 let emailEnVerificacion = '';
 let emailEnRecuperacion = '';
 
 // REDIRECCION POST LOGIN
 
+// obtiene la URL de destino permitida despu?s del inicio de sesi?n.
 function obtenerUrlRedireccion() {
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
@@ -62,12 +63,14 @@ function obtenerUrlRedireccion() {
 
 // UTILIDADES DE SESION
 
+// guarda los datos de sesi?n del usuario en el almacenamiento local.
 function guardarSesionUsuario(usuario, token) {
     sessionStorage.setItem('usuarioLogueado', 'true');
     sessionStorage.setItem('usuarioNombre', usuario);
     sessionStorage.setItem('usuarioToken', token);
 }
 
+// indica si hay una sesi?n de usuario activa.
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
@@ -75,6 +78,7 @@ function estaLogueadoUsuario() {
     );
 }
 
+// elimina los datos de sesi?n del usuario.
 function cerrarSesionUsuario() {
     sessionStorage.removeItem('usuarioLogueado');
     sessionStorage.removeItem('usuarioNombre');
@@ -83,6 +87,7 @@ function cerrarSesionUsuario() {
 
 // MENSAJES
 
+// muestra un mensaje de estado en el elemento indicado.
 function mostrarMensaje(texto, tipo) {
     mensajeDiv.textContent = texto;
     mensajeDiv.className = `usuario-mensaje ${tipo}`;
@@ -94,12 +99,14 @@ function mostrarMensaje(texto, tipo) {
     }, 6000);
 }
 
+// borra el mensaje y restablece su presentaci?n.
 function limpiarMensaje() {
     mensajeDiv.textContent = '';
     mensajeDiv.className = 'usuario-mensaje';
 }
 
 // OCULTAR TODAS LAS VISTAS
+// oculta los formularios y las vistas del proceso de acceso.
 function ocultarTodasLasVistas() {
     formLogin.style.display = 'none';
     formRegistro.style.display = 'none';
@@ -112,6 +119,7 @@ function ocultarTodasLasVistas() {
 
 // VISTAS
 
+// muestra la secci?n asociada a la pesta?a seleccionada.
 function activarTab(nombreTab) {
     tabs.forEach((tab) => {
         tab.classList.toggle('active', tab.dataset.tab === nombreTab);
@@ -129,6 +137,7 @@ function activarTab(nombreTab) {
     limpiarMensaje();
 }
 
+// prepara y muestra la vista de verificaci?n del registro.
 function mostrarVistaVerificacion(email) {
     emailEnVerificacion = email;
     textoEmail.textContent = email;
@@ -149,6 +158,7 @@ function mostrarVistaVerificacion(email) {
     limpiarMensaje();
 }
 
+// prepara la vista para solicitar la recuperaci?n de contrase?a.
 function mostrarVistaRecuperacionEmail() {
     ocultarTodasLasVistas();
     pasosContainer.style.display = 'flex';
@@ -166,6 +176,7 @@ function mostrarVistaRecuperacionEmail() {
     limpiarMensaje();
 }
 
+// prepara la vista para verificar el c?digo de recuperaci?n.
 function mostrarVistaRecuperacionCodigo(email) {
     emailEnRecuperacion = email;
     textoRecuperarEmailMostrado.textContent = email;
@@ -188,6 +199,7 @@ function mostrarVistaRecuperacionCodigo(email) {
     limpiarMensaje();
 }
 
+// regresa al formulario inicial de registro.
 function volverAlRegistro() {
     activarTab('registro');
     pasos.forEach((p) => {
@@ -204,6 +216,7 @@ tabs.forEach((tab) => {
 
 // VALIDACIONES EN EL FRONTEND
 
+// valida los datos del usuario antes de enviarlos al servidor.
 function validarUsuarioFrontend(usuario) {
     if (!usuario || usuario.length < 3) {
         return 'El nombre de usuario debe tener al menos 3 caracteres.';
@@ -214,6 +227,7 @@ function validarUsuarioFrontend(usuario) {
     return null;
 }
 
+// valida el formato del correo electr?nico antes de enviarlo.
 function validarEmailFrontend(email) {
     if (!email) return 'El email es obligatorio.';
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -270,7 +284,7 @@ formLogin.addEventListener('submit', async (e) => {
     }
 });
 
-// REGISTRO (PASO 1: iniciar registro y enviar codigo)
+// REGISTRO (paso 1: iniciar registro y enviar codigo)
 
 formRegistro.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -329,7 +343,7 @@ formRegistro.addEventListener('submit', async (e) => {
     }
 });
 
-// VERIFICACION DE CODIGO (PASO 2 DEL REGISTRO)
+// VERIFICACION DE CODIGO (paso 2 del registro)
 
 inputCodigo.addEventListener('input', (e) => {
     let valor = e.target.value.replace(/\D/g, '');
@@ -352,6 +366,7 @@ inputCodigo.addEventListener('keydown', (e) => {
 
 btnVerificar.addEventListener('click', verificarCodigo);
 
+// env?a y valida el c?digo de verificaci?n ingresado.
 async function verificarCodigo() {
     const codigo = inputCodigo.value.trim();
 
@@ -396,7 +411,7 @@ async function verificarCodigo() {
     }
 }
 
-// REENVIAR CODIGO (REGISTRO)
+// REENVIAR CODIGO (registro)
 
 btnReenviar.addEventListener('click', async () => {
     if (!emailEnVerificacion) {
@@ -439,9 +454,9 @@ btnVolver.addEventListener('click', () => {
     volverAlRegistro();
 });
 
-// ============================================================
+
 // RECUPERACION DE CONTRASENIA
-// ============================================================
+
 
 btnOlvide.addEventListener('click', () => {
     mostrarVistaRecuperacionEmail();
@@ -541,7 +556,7 @@ btnRestablecer.addEventListener('click', async () => {
             mostrarMensaje('Contraseña restablecida. Redirigiendo al login...', 'exito');
 
             setTimeout(() => {
-                // volver al login y autocompletar el email
+                // VOLVER AL LOGIN Y AUTOCOMPLETAR EL EMAIL
                 inputLoginEmail.value = emailEnRecuperacion;
                 inputLoginPassword.value = '';
                 activarTab('login');

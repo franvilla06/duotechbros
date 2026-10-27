@@ -5,6 +5,7 @@ const API_CONFIG = '/api/configuracion';
 
 // UTILIDADES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '';
     const div = document.createElement('div');
@@ -13,7 +14,7 @@ function escapar(texto) {
 }
 
 // valida que una url sea valida para mostrar como enlace externo
-// solo acepta http://, https:// o rutas internas (que empiezan con /)
+// indica si la URL usa un protocolo o una ruta permitidos.
 function urlValida(url) {
     if (!url) return false;
     const texto = String(url).trim();
@@ -23,6 +24,7 @@ function urlValida(url) {
 
 // APLICAR CONFIGURACION
 
+// actualiza la p?gina con los valores de configuraci?n recibidos.
 function aplicarConfiguracion(config) {
     // marca: actualizar el nombre en el header y footer
     const marca = config.marca_nombre || 'DuotechBros';
@@ -77,7 +79,7 @@ function aplicarConfiguracion(config) {
         }
     }
 
-    // links legales: construir solo los que tengan URL
+    // LINKS LEGALES: CONSTRUIR SOLO LOS QUE TENGAN URL
     const footerLinks = document.getElementById('footer-links');
     if (footerLinks) {
         const legales = [
@@ -104,7 +106,7 @@ function aplicarConfiguracion(config) {
         }
     }
 
-    // aviso general: mostrar si esta cargado
+    // AVISO GENERAL: MOSTRAR SI ESTA CARGADO
     const avisoBloque = document.getElementById('aviso-general');
     const avisoTexto = document.getElementById('aviso-general-texto');
     if (avisoBloque && avisoTexto) {
@@ -120,6 +122,7 @@ function aplicarConfiguracion(config) {
 
 // CARGA DE DATOS
 
+// solicita la configuraci?n y la muestra en el formulario.
 async function cargarConfiguracion() {
     try {
         const respuesta = await fetch(API_CONFIG);

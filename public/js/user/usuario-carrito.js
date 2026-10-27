@@ -2,7 +2,7 @@
 
 const API_CARRITO = '/api/usuarios/carrito';
 
-// referencias a los elementos del dom
+// REFERENCIAS A LOS ELEMENTOS DEL DOM
 const usuarioSpan = document.getElementById('carrito-usuario');
 const estadoCargando = document.getElementById('estado-cargando');
 const estadoVacio = document.getElementById('estado-vacio');
@@ -18,18 +18,19 @@ const resumenTotal = document.getElementById('resumen-total');
 const btnEnviarPedido = document.getElementById('btn-enviar-pedido');
 const btnVaciarCarrito = document.getElementById('btn-vaciar-carrito');
 
-// modal de exito
+// MODAL DE EXITO
 const modalExito = document.getElementById('modal-exito');
 const modalExitoCerrar = document.getElementById('modal-exito-cerrar');
 const modalPedidoId = document.getElementById('modal-pedido-id');
 const modalPedidoUnidades = document.getElementById('modal-pedido-unidades');
 const modalPedidoTotal = document.getElementById('modal-pedido-total');
 
-// estado local
+// ESTADO LOCAL
 let itemsActuales = [];
 
 // UTILIDADES DE SESION
 
+// indica si hay una sesi?n de usuario activa.
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
@@ -37,14 +38,17 @@ function estaLogueadoUsuario() {
     );
 }
 
+// obtiene los datos del usuario guardados en la sesi?n.
 function obtenerUsuarioActual() {
     return sessionStorage.getItem('usuarioNombre') || '';
 }
 
+// obtiene el token de autenticaci?n del usuario.
 function obtenerTokenUsuario() {
     return sessionStorage.getItem('usuarioToken') || '';
 }
 
+// elimina los datos de sesi?n del usuario.
 function cerrarSesionUsuario() {
     sessionStorage.removeItem('usuarioLogueado');
     sessionStorage.removeItem('usuarioNombre');
@@ -53,6 +57,7 @@ function cerrarSesionUsuario() {
 
 // UTILIDADES GENERALES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '';
     const div = document.createElement('div');
@@ -60,12 +65,14 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// formatea el precio como importe monetario.
 function formatearPrecio(precio) {
     const num = Number(precio);
     if (isNaN(num)) return '$0.00';
     return `$${num.toFixed(2)}`;
 }
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, tipo = 'exito') {
     const anterior = document.getElementById('toast-publico');
     if (anterior) anterior.remove();
@@ -83,12 +90,14 @@ function mostrarToast(mensaje, tipo = 'exito') {
     }, 3000);
 }
 
+// avisa a otras vistas que el contenido del carrito cambi?.
 function notificarCambioCarrito() {
     document.dispatchEvent(new CustomEvent('carritoActualizado'));
 }
 
 // RENDERIZADO
 
+// muestra los productos actuales del carrito.
 function renderizarItems(items) {
     carritoItems.innerHTML = '';
 
@@ -169,6 +178,7 @@ function renderizarItems(items) {
     asignarEventosItems();
 }
 
+// conecta los controles de cada producto con sus acciones.
 function asignarEventosItems() {
     carritoItems.querySelectorAll('[data-accion="restar"]').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -232,6 +242,7 @@ function asignarEventosItems() {
     });
 }
 
+// actualiza los totales y el resumen del carrito.
 function actualizarResumen(resumen) {
     resumenItems.textContent = resumen.total_items;
     resumenUnidades.textContent = resumen.total_unidades;
@@ -243,6 +254,7 @@ function actualizarResumen(resumen) {
 
 // CARGAR CARRITO
 
+// solicita el contenido del carrito y actualiza la vista.
 async function cargarCarrito() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
@@ -285,6 +297,7 @@ async function cargarCarrito() {
 
 // CAMBIAR CANTIDAD
 
+// guarda la nueva cantidad del producto en el carrito.
 async function cambiarCantidad(id, nuevaCantidad, btnElement) {
     if (btnElement) btnElement.disabled = true;
 
@@ -324,6 +337,7 @@ async function cambiarCantidad(id, nuevaCantidad, btnElement) {
 
 // ELIMINAR ITEM
 
+// elimina el producto seleccionado del carrito.
 async function eliminarItem(id) {
     try {
         const respuesta = await fetch(`${API_CARRITO}/${id}`, {
@@ -356,6 +370,7 @@ async function eliminarItem(id) {
 
 // VACIAR CARRITO
 
+// elimina todos los productos del carrito.
 async function vaciarCarrito() {
     if (!confirm('Estas seguro de que queres vaciar todo el carrito?')) return;
 
@@ -397,8 +412,9 @@ async function vaciarCarrito() {
 
 // ENVIAR PEDIDO
 
+// env?a el pedido con los productos actuales del carrito.
 async function enviarPedido() {
-    // confirmar antes de enviar
+    // CONFIRMAR ANTES DE ENVIAR
     const confirmar = confirm(
         'Confirmas el envio de tu pedido?\n\nAl enviarlo, se descontara el stock de los productos.'
     );
@@ -426,23 +442,23 @@ async function enviarPedido() {
         }
 
         if (resultado.success) {
-            // mostrar el modal de exito
+            // MOSTRAR EL MODAL DE EXITO
             modalPedidoId.textContent = `#${String(resultado.pedido_id).padStart(4, '0')}`;
             modalPedidoUnidades.textContent = resultado.unidades;
             modalPedidoTotal.textContent = formatearPrecio(resultado.total);
             modalExito.classList.add('modal-visible');
 
-            // limpiar el carrito y notificar al header
+            // LIMPIAR EL CARRITO Y NOTIFICAR AL HEADER
             itemsActuales = [];
             notificarCambioCarrito();
         } else {
-            // error del backend (ej: falta de stock)
+            // ERROR DEL BACKEND (ej: falta de stock)
             let mensaje = resultado.error || 'No se pudo enviar el pedido.';
             if (resultado.detalle && Array.isArray(resultado.detalle)) {
                 mensaje += '\n\n' + resultado.detalle.join('\n');
             }
             alert(mensaje);
-            // recargar el carrito por si cambio el stock
+            // RECARGAR EL CARRITO POR SI CAMBIO EL STOCK
             await cargarCarrito();
         }
     } catch (error) {
@@ -461,6 +477,7 @@ btnVaciarCarrito.addEventListener('click', vaciarCarrito);
 
 // CERRAR EL MODAL DE EXITO
 
+// cierra el mensaje de confirmaci?n del pedido.
 function cerrarModalExito() {
     modalExito.classList.remove('modal-visible');
 

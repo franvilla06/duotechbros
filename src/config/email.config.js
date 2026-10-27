@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
 
-// lee la configuracion desde .env
-// si SMTP_HOST esta vacio, el servicio queda en modo desarrollo
+// carga desde el entorno la configuración del proveedor de correo
 export const emailConfig = {
     host: process.env.SMTP_HOST || '',
     port: parseInt(process.env.SMTP_PORT) || 587,
@@ -10,11 +9,10 @@ export const emailConfig = {
     from: process.env.SMTP_FROM || 'DuotechBros <no-reply@duotechbros.com>',
 };
 
-// indica si hay credenciales configuradas
+// indica si el transporte SMTP cuenta con los datos necesarios
 export const modoReal = emailConfig.host !== '' && emailConfig.user !== '';
 
-// transporte de nodemailer
-// en modo desarrollo, usamos un "json transport" que no envia nada real
+// crea el transporte SMTP únicamente cuando hay credenciales configuradas
 let transporter = null;
 
 if (modoReal) {

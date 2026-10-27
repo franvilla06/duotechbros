@@ -5,6 +5,7 @@ import * as portafolioModel from '../models/portafolio.model.js';
 import * as pedidosModel from '../models/pedidos.model.js';
 import { generarToken } from '../utils/token.util.js';
 
+// valida y normaliza una lista de imágenes para guardarla como JSON
 const normalizarImagenes = (imagenes) => {
     if (imagenes === null || imagenes === undefined || imagenes === '') return null;
 
@@ -35,6 +36,7 @@ const normalizarImagenes = (imagenes) => {
 
 // PRODUCTOS
 
+// valida los datos y registra un nuevo producto
 export const crearProducto = async (req, res) => {
     const { nombre, descripcion, precio, imagen_url, imagenes, categoria, stock } = req.body;
 
@@ -83,6 +85,7 @@ export const crearProducto = async (req, res) => {
     }
 };
 
+// valida y actualiza los datos de un producto existente
 export const actualizarProducto = async (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, imagen_url, imagenes, categoria, stock } = req.body;
@@ -138,6 +141,7 @@ export const actualizarProducto = async (req, res) => {
     }
 };
 
+// elimina un producto y responde si no existe
 export const eliminarProducto = async (req, res) => {
     const { id } = req.params;
     try {
@@ -153,6 +157,7 @@ export const eliminarProducto = async (req, res) => {
 
 // PORTAFOLIO
 
+// normaliza una fecha de calendario o devuelve null si no es válida
 const normalizarFecha = (valor) => {
     if (valor === undefined || valor === null || valor === '') return null;
     const texto = String(valor).trim();
@@ -161,6 +166,7 @@ const normalizarFecha = (valor) => {
     return texto;
 };
 
+// valida y registra un trabajo nuevo en el portafolio
 export const crearTrabajo = async (req, res) => {
     const { titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin } =
         req.body;
@@ -192,6 +198,7 @@ export const crearTrabajo = async (req, res) => {
     }
 };
 
+// actualiza los datos de un trabajo existente
 export const actualizarTrabajo = async (req, res) => {
     const { id } = req.params;
     const { titulo, descripcion, imagen_url, imagenes, tipo_reparacion, fecha_inicio, fecha_fin } =
@@ -230,6 +237,7 @@ export const actualizarTrabajo = async (req, res) => {
     }
 };
 
+// elimina un trabajo del portafolio y responde si no existe
 export const eliminarTrabajo = async (req, res) => {
     const { id } = req.params;
     try {
@@ -247,6 +255,7 @@ export const eliminarTrabajo = async (req, res) => {
 
 const ESTADOS_VALIDOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 
+// valida y actualiza el estado permitido de un pedido
 export const actualizarEstadoPedido = async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
@@ -275,6 +284,7 @@ export const actualizarEstadoPedido = async (req, res) => {
     }
 };
 
+// normaliza y actualiza las notas de un pedido
 export const actualizarNotasPedido = async (req, res) => {
     const { id } = req.params;
     const { notas } = req.body;
@@ -298,6 +308,7 @@ export const actualizarNotasPedido = async (req, res) => {
     }
 };
 
+// valida y actualiza el presupuesto de un pedido
 export const actualizarPresupuestoPedido = async (req, res) => {
     const { id } = req.params;
     const { presupuesto } = req.body;
@@ -336,6 +347,7 @@ export const actualizarPresupuestoPedido = async (req, res) => {
     }
 };
 
+// cancela un pedido sin eliminar su registro histórico
 export const eliminarPedido = async (req, res) => {
     const { id } = req.params;
     try {
@@ -361,6 +373,7 @@ export const eliminarPedido = async (req, res) => {
 
 // PERFIL DEL ADMIN
 
+// cambia el nombre de usuario tras verificar la contraseña actual
 export const cambiarUsuarioAdmin = async (req, res) => {
     const usuarioNuevo = typeof req.body.usuario_nuevo === 'string'
         ? req.body.usuario_nuevo.trim()
@@ -420,6 +433,7 @@ export const cambiarUsuarioAdmin = async (req, res) => {
     }
 };
 
+// actualiza la contraseña del administrador tras validar la actual
 export const cambiarPasswordAdmin = async (req, res) => {
     const { password_actual, password_nueva, password_confirmar } = req.body;
 
@@ -471,6 +485,7 @@ export const cambiarPasswordAdmin = async (req, res) => {
     }
 };
 
+// devuelve los datos básicos del administrador autenticado
 export const obtenerPerfilAdmin = async (req, res) => {
     try {
         const admin = await adminModel.buscarPorUsuario(req.app.locals.pool, req.usuario);

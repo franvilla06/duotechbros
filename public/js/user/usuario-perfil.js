@@ -2,7 +2,7 @@
 
 const API_PERFIL = '/api/usuarios/perfil';
 
-// referencias a los elementos del dom
+// REFERENCIAS A LOS ELEMENTOS DEL DOM
 const usuarioSpan = document.getElementById('perfil-usuario');
 const tabs = document.querySelectorAll('.perfil-tab');
 const secciones = {
@@ -12,17 +12,17 @@ const secciones = {
     baja: document.getElementById('seccion-baja'),
 };
 
-// info del perfil
+// INFO DEL PERFIL
 const infoUsuario = document.getElementById('info-usuario');
 const infoCreado = document.getElementById('info-creado');
 const infoId = document.getElementById('info-id');
 
-// form de cambio de contrasenia
+// FORM DE CAMBIO DE CONTRASENIA
 const formPassword = document.getElementById('form-password');
 const btnCambiar = document.getElementById('btn-cambiar');
 const mensajePassword = document.getElementById('mensaje-password');
 
-// form de cambio de email
+// FORM DE CAMBIO DE EMAIL
 const formEmail = document.getElementById('form-email');
 const btnCambiarEmail = document.getElementById('btn-cambiar-email');
 const mensajeEmail = document.getElementById('mensaje-email');
@@ -30,13 +30,14 @@ const inputEmailActual = document.getElementById('email-actual');
 const inputEmailNuevo = document.getElementById('email-nuevo');
 const inputEmailPassword = document.getElementById('email-password');
 
-// form de baja
+// FORM DE BAJA
 const formBaja = document.getElementById('form-baja');
 const btnBaja = document.getElementById('btn-baja');
 const mensajeBaja = document.getElementById('mensaje-baja');
 
 // UTILIDADES DE SESION
 
+// indica si hay una sesi?n de usuario activa.
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
@@ -44,14 +45,17 @@ function estaLogueadoUsuario() {
     );
 }
 
+// obtiene los datos del usuario guardados en la sesi?n.
 function obtenerUsuarioActual() {
     return sessionStorage.getItem('usuarioNombre') || '';
 }
 
+// obtiene el token de autenticaci?n del usuario.
 function obtenerTokenUsuario() {
     return sessionStorage.getItem('usuarioToken') || '';
 }
 
+// elimina los datos de sesi?n del usuario.
 function cerrarSesionUsuario() {
     sessionStorage.removeItem('usuarioLogueado');
     sessionStorage.removeItem('usuarioNombre');
@@ -60,6 +64,7 @@ function cerrarSesionUsuario() {
 
 // UTILIDADES GENERALES
 
+// convierte la fecha al formato utilizado en la interfaz.
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -71,16 +76,19 @@ function formatearFecha(fechaISO) {
     return `${dia}/${mes}/${anio}`;
 }
 
+// muestra un mensaje de estado en el elemento indicado.
 function mostrarMensaje(elemento, texto, tipo) {
     elemento.textContent = texto;
     elemento.className = `perfil-mensaje perfil-mensaje-${tipo}`;
 }
 
+// borra el mensaje y restablece su presentaci?n.
 function limpiarMensaje(elemento) {
     elemento.textContent = '';
     elemento.className = 'perfil-mensaje';
 }
 
+// valida el formato del correo electr?nico antes de enviarlo.
 function validarEmailFrontend(email) {
     if (!email) return 'El email es obligatorio.';
     if (email.length > 100) return 'El email es demasiado largo.';
@@ -91,6 +99,7 @@ function validarEmailFrontend(email) {
 
 // TABS
 
+// muestra la secci?n asociada a la pesta?a seleccionada.
 function activarTab(nombreTab) {
     tabs.forEach((tab) => {
         tab.classList.toggle('active', tab.dataset.tab === nombreTab);
@@ -113,6 +122,7 @@ tabs.forEach((tab) => {
 
 // CARGAR PERFIL
 
+// solicita los datos del perfil y los muestra en el formulario.
 async function cargarPerfil() {
     try {
         const respuesta = await fetch(API_PERFIL, {
@@ -135,7 +145,7 @@ async function cargarPerfil() {
         infoCreado.textContent = formatearFecha(data.creado_en);
         infoId.textContent = `#${String(data.id).padStart(4, '0')}`;
 
-        // rellenar el input de email actual
+        // RELLENAR EL INPUT DE EMAIL ACTUAL
         if (inputEmailActual) {
             inputEmailActual.value = data.email || '';
         }

@@ -6,7 +6,7 @@ import * as configuracionModel from '../models/configuracion.model.js';
 import * as authService from '../services/auth.service.js';
 import * as emailService from '../services/email.service.js';
 
-// crear un pedido de reparacion (requiere usuario autenticado)
+// crea una solicitud de reparación para el usuario autenticado
 export const crearPedido = async (req, res) => {
     const { nombre_cliente, telefono, email, modelo_celular, descripcion_problema } = req.body;
     if (
@@ -40,7 +40,7 @@ export const crearPedido = async (req, res) => {
             tipo: 'reparacion',
         });
 
-        // Enviar la confirmacion sin retrasar la respuesta del pedido.
+        // envía la confirmación en segundo plano para no retrasar la respuesta
         enviarConfirmacionReparacionPorEmail(pool, req.usuario, info.insertId, {
             nombre_cliente,
             telefono,
@@ -57,6 +57,7 @@ export const crearPedido = async (req, res) => {
     }
 };
 
+// reúne los destinatarios y envía la confirmación de una solicitud de reparación
 const enviarConfirmacionReparacionPorEmail = async (pool, nombreUsuario, pedidoId, datos) => {
     const destinatarios = new Set();
     if (datos.email && String(datos.email).trim() !== '') {
@@ -96,6 +97,7 @@ const enviarConfirmacionReparacionPorEmail = async (pool, nombreUsuario, pedidoI
     });
 };
 
+// lista los pedidos, opcionalmente filtrados por tipo
 export const listarPedidos = async (req, res) => {
     try {
         const tipo = req.query.tipo || null;
@@ -106,6 +108,7 @@ export const listarPedidos = async (req, res) => {
     }
 };
 
+// devuelve los productos disponibles en la tienda
 export const listarProductos = async (req, res) => {
     try {
         return res.json(await productosModel.listar(req.app.locals.pool));
@@ -114,6 +117,7 @@ export const listarProductos = async (req, res) => {
     }
 };
 
+// devuelve los trabajos publicados en el portafolio
 export const listarPortafolio = async (req, res) => {
     try {
         return res.json(await portafolioModel.listar(req.app.locals.pool));
@@ -122,6 +126,7 @@ export const listarPortafolio = async (req, res) => {
     }
 };
 
+// autentica a un administrador y entrega sus credenciales de sesión
 export const iniciarSesion = async (req, res) => {
     const { usuario, password } = req.body;
     try {
@@ -145,6 +150,7 @@ export const iniciarSesion = async (req, res) => {
     }
 };
 
+// obtiene el detalle completo de un pedido para el panel administrativo
 export const obtenerDetallePedidoAdmin = async (req, res) => {
     const { id } = req.params;
     try {
