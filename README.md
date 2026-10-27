@@ -57,8 +57,16 @@ Las versiones instaladas de las dependencias se declaran en `package.json` y se 
 │   ├── admin/                Vistas del panel administrativo
 │   ├── user/                 Vistas de cuenta, carrito e historial
 │   ├── assets/               Imágenes del sitio
-│   ├── css/                  Estilos públicos, de usuario y administración
-│   ├── js/                   Scripts del frontend y configuración de API
+│   ├── css/
+│   │   ├── admin/            Estilos del panel administrativo
+│   │   ├── site/             Estilos de las páginas públicas
+│   │   ├── user/             Estilos de las páginas de usuario
+│   │   └── shared/           Variables y normalización compartidas
+│   ├── js/
+│   │   ├── admin/            Scripts del panel administrativo
+│   │   ├── site/             Scripts del sitio público
+│   │   ├── user/             Scripts de cuenta y carrito
+│   │   └── shared/           Configuración y scripts compartidos
 │   └── *.html                Inicio, pedidos, tienda y portafolio
 ├── src/
 │   ├── app.js                Configuración Express, CORS, archivos estáticos y rutas
@@ -74,6 +82,8 @@ Las versiones instaladas de las dependencias se declaran en `package.json` y se 
 ```
 
 El árbol muestra los componentes que ejecutan la aplicación: interfaz web, API, acceso a datos y dependencias. No incluye configuración personal del editor, colecciones locales de herramientas ni archivos temporales.
+
+Express sirve `public/` como raíz estática. Los recursos del frontend se solicitan con rutas como `/css/admin/admin.css` y `/js/user/usuario-carrito.js`; al agregar o mover un recurso, actualiza sus referencias en las páginas HTML.
 
 ## Instalación y ejecución local
 
