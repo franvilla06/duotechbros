@@ -82,7 +82,9 @@ El catálogo y el portafolio se administran desde las páginas del panel. El reg
 
 El nombre de marca se administra desde la configuración del sitio y se aplica a los textos marcados en las páginas públicas y de usuario.
 
-El catálogo y el portafolio admiten una imagen principal y hasta cuatro imágenes adicionales. El script reutilizable `public/js/carrusel.js` presenta varias imágenes. El menú público tiene comportamiento adaptable para pantallas pequeñas.
+El catálogo y el portafolio admiten una imagen principal y hasta cuatro imágenes adicionales. El script reutilizable `public/js/site/carrusel.js` presenta varias imágenes. El menú público tiene comportamiento adaptable para pantallas pequeñas.
+
+Los recursos del frontend se agrupan en `public/css/` y `public/js/` por área: `admin/`, `site/`, `user/` y `shared/`. Por ejemplo, los estilos del panel están en `public/css/admin/admin.css`, y las variables de diseño compartidas en `public/css/shared/variables.css`. Express publica estas carpetas bajo las rutas web `/css/` y `/js/`; las páginas HTML usan esas rutas para cargar los recursos.
 
 ### Cuenta del usuario
 
@@ -106,7 +108,7 @@ El bloqueo de acceso dura 15 minutos después de cinco intentos fallidos. Los co
 - `/admin/configuracion.html`: contacto, redes sociales, horarios, avisos y email administrativo.
 - `/admin/perfil.html`: consulta y cambio de usuario y contraseña del administrador.
 
-El nombre de marca configurado se aplica a las etiquetas `.admin-marca` del panel. `public/js/admin.js` comparte la carga de configuración y el helper `filtrarPorRangoTiempo`, utilizado por dashboard, pedidos y compras. El botón “Limpiar” restablece los filtros de búsqueda, estado y fecha en las tablas. Las exportaciones CSV administrativas usan la marca en el nombre del archivo; la exportación PDF de pedidos también la muestra en el documento y en su nombre.
+El nombre de marca configurado se aplica a las etiquetas `.admin-marca` del panel. `public/js/admin/admin.js` comparte la carga de configuración y el helper `filtrarPorRangoTiempo`, utilizado por dashboard, pedidos y compras. El botón “Limpiar” restablece los filtros de búsqueda, estado y fecha en las tablas. Las exportaciones CSV administrativas usan la marca en el nombre del archivo; la exportación PDF de pedidos también la muestra en el documento y en su nombre.
 
 Las exportaciones CSV neutralizan las celdas que empiezan con `=`, `+`, `-`, `@`, tabulador o retorno de carro para evitar que se interpreten como fórmulas. Los controladores validan que el precio sea numérico y no negativo, y que el stock sea un entero no negativo.
 
