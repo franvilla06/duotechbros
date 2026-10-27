@@ -29,6 +29,7 @@ const corsOptions = {
         const patronesPermitidos = [
             /^http:\/\/localhost(:\d+)?$/,
             /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+            /^https:\/\/appfuncional\.onrender\.com$/
         ];
 
         const permitido = patronesPermitidos.some((patron) => patron.test(origin));
