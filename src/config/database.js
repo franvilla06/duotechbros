@@ -19,6 +19,9 @@ export const config = {
     queueLimit: 0,
     charset: 'utf8mb4_unicode_ci',
     timezone: 'local',
+    ssl: process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }
+        : undefined,
 };
 
 let pool = null; 
@@ -30,6 +33,7 @@ const crearBaseDeDatos = async () => {
         port: config.port,
         user: config.user,
         password: config.password,
+        ssl: config.ssl,
     });
 
     try {
