@@ -6,8 +6,8 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #CCEBED;
-    color: #333;
+    background-color: var(--bg-body-public);
+    color: var(--text-main);
     margin: 0;
     padding: 0;
 }
@@ -17,7 +17,7 @@ body {
    ============================================================ */
 
 .hero {
-    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    background: var(--gradient-primary);
     padding: 70px 20px;
     text-align: center;
     color: white;
@@ -73,7 +73,7 @@ body {
     gap: 8px;
     background-color: rgba(255, 255, 255, 0.15);
     padding: 8px 18px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     margin-top: 6px;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -96,22 +96,22 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background-color: #ffffff;
-    color: #0b4a62;
+    background-color: var(--bg-surface);
+    color: var(--color-primary-dark);
     padding: 14px 36px;
     font-size: 1rem;
     text-decoration: none;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.03em;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     margin-top: 12px;
     transition: transform 0.2s, box-shadow 0.3s, background-color 0.2s;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .btn-hero:hover {
-    background-color: #f0f4f8;
+    background-color: var(--bg-body-admin);
     transform: translateY(-2px);
     box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
 }
@@ -139,7 +139,7 @@ body {
 }
 
 .seccion-header h2 {
-    color: #0b4a62;
+    color: var(--color-primary-dark);
     font-size: 2rem;
     margin: 0;
     position: relative;
@@ -150,8 +150,8 @@ body {
     display: block;
     width: 60px;
     height: 4px;
-    background-color: #0a9396;
-    border-radius: 999px;
+    background-color: var(--color-primary-teal);
+    border-radius: var(--radius-pill);
     margin-top: 6px;
 }
 
@@ -169,7 +169,7 @@ body {
 /* SECCION NOSOTROS */
 
 .nosotros {
-    background-color: #ffffff;
+    background-color: var(--bg-surface);
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 6px 25px rgba(11, 74, 98, 0.08);
@@ -195,11 +195,11 @@ body {
 }
 
 .nosotros-texto strong {
-    color: #0b4a62;
+    color: var(--color-primary-dark);
 }
 
 .nosotros-imagen {
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(11, 74, 98, 0.12);
 }
@@ -228,11 +228,11 @@ body {
 }
 
 .servicio {
-    background-color: #ffffff;
+    background-color: var(--bg-surface);
     padding: 34px 24px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     text-align: center;
-    box-shadow: 0 6px 20px rgba(11, 74, 98, 0.08);
+    box-shadow: var(--shadow-md);
     transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
     flex-direction: column;
@@ -249,7 +249,7 @@ body {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    background: var(--gradient-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -258,12 +258,12 @@ body {
 }
 
 .icono-servicio i {
-    color: #ffffff;
+    color: var(--text-light);
     font-size: 1.8rem;
 }
 
 .servicio h3 {
-    color: #0b4a62;
+    color: var(--color-primary-dark);
     font-size: 1.2rem;
     margin: 0;
     font-weight: 700;
@@ -282,7 +282,7 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    background: var(--gradient-primary);
     padding: 40px 30px;
     border-radius: 20px;
     margin-bottom: 40px;
@@ -329,7 +329,7 @@ body {
 /* SECCION POR QUE ELEGIRNOS */
 
 .por-que-elegirnos {
-    background-color: #ffffff;
+    background-color: var(--bg-surface);
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 6px 25px rgba(11, 74, 98, 0.08);
@@ -368,11 +368,11 @@ body {
 
 .icono-beneficio i {
     font-size: 1.8rem;
-    color: #0a9396;
+    color: var(--color-primary-teal);
 }
 
 .beneficio h3 {
-    color: #0b4a62;
+    color: var(--color-primary-dark);
     font-size: 1.15rem;
     margin: 0;
     font-weight: 700;
@@ -388,7 +388,7 @@ body {
 /* SECCION CTA (LLAMADA A LA ACCION) */
 
 .cta {
-    background: linear-gradient(135deg, #0b4a62 0%, #0a9396 100%);
+    background: var(--gradient-primary);
     padding: 50px 30px;
     border-radius: 20px;
     text-align: center;
@@ -432,21 +432,21 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background-color: #ffffff;
-    color: #0b4a62;
+    background-color: var(--bg-surface);
+    color: var(--color-primary-dark);
     padding: 14px 36px;
     font-size: 1rem;
     text-decoration: none;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.03em;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .btn-cta:hover {
-    background-color: #f0f4f8;
+    background-color: var(--bg-body-admin);
     transform: translateY(-2px);
     box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
 }
@@ -506,7 +506,7 @@ body {
     .nosotros,
     .por-que-elegirnos {
         padding: 26px 20px;
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         margin-bottom: 30px;
     }
 
@@ -520,7 +520,7 @@ body {
 
     .estadisticas {
         padding: 30px 20px;
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         margin-bottom: 30px;
     }
 
@@ -534,7 +534,7 @@ body {
 
     .cta {
         padding: 40px 22px;
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
     }
 
     .cta h2 {
