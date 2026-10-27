@@ -11,6 +11,9 @@ export const inicializarEsquema = async (pool) => {
             usuario VARCHAR(30) UNIQUE NOT NULL,
             email VARCHAR(100) UNIQUE,
             password_hash VARCHAR(255) NOT NULL,
+            intentos_fallidos INT DEFAULT 0,
+            bloqueado_hasta DATETIME DEFAULT NULL,
+            token_version INT DEFAULT 0,
             creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -18,7 +21,10 @@ export const inicializarEsquema = async (pool) => {
         `CREATE TABLE IF NOT EXISTS admin (
             id INT AUTO_INCREMENT PRIMARY KEY,
             usuario VARCHAR(30) UNIQUE NOT NULL,
-            password_hash VARCHAR(255) NOT NULL
+            password_hash VARCHAR(255) NOT NULL,
+            intentos_fallidos INT DEFAULT 0,
+            bloqueado_hasta DATETIME DEFAULT NULL,
+            token_version INT DEFAULT 0
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         // productos de la tienda
@@ -26,11 +32,11 @@ export const inicializarEsquema = async (pool) => {
             id INT AUTO_INCREMENT PRIMARY KEY,
             nombre VARCHAR(150) NOT NULL,
             descripcion TEXT,
-            precio DECIMAL(10,2) NOT NULL,
+            precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0),
             imagen_url VARCHAR(500),
             imagenes TEXT,
             categoria VARCHAR(80),
-            stock INT DEFAULT 0
+            stock INT DEFAULT 0 CHECK (stock >= 0)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         // portafolio de trabajos realizados
@@ -122,14 +128,17 @@ export const inicializarEsquema = async (pool) => {
     // agregar las columnas en bases existentes sin afectar los datos actuales
     await agregarColumnaSiNoExiste(pool, 'productos', 'imagenes', 'TEXT');
     await agregarColumnaSiNoExiste(pool, 'portafolio', 'imagenes', 'TEXT');
+    await agregarColumnaSiNoExiste(pool, 'usuarios', 'intentos_fallidos', 'INT DEFAULT 0');
+    await agregarColumnaSiNoExiste(pool, 'usuarios', 'bloqueado_hasta', 'DATETIME DEFAULT NULL');
+    await agregarColumnaSiNoExiste(pool, 'admin', 'intentos_fallidos', 'INT DEFAULT 0');
+    await agregarColumnaSiNoExiste(pool, 'admin', 'bloqueado_hasta', 'DATETIME DEFAULT NULL');
+    await agregarColumnaSiNoExiste(pool, 'usuarios', 'token_version', 'INT DEFAULT 0');
+    await agregarColumnaSiNoExiste(pool, 'admin', 'token_version', 'INT DEFAULT 0');
 
-    // insertar el admin por defecto si no existe
-    const [admins] = await pool.query(
-        'SELECT COUNT(*) as count FROM admin WHERE usuario = ?',
-        ['admin']
-    );
+    // insertar el admin por defecto si no existe ningun administrador
+    const [admins] = await pool.query('SELECT COUNT(*) as count FROM admin');
 
-    if (admins[0].count === 0) {
+    if (Number(admins[0].count) === 0) {
         const bcrypt = await import('bcryptjs');
         const configuredPassword = process.env.ADMIN_PASSWORD?.trim();
         const adminPassword = configuredPassword || crypto.randomBytes(18).toString('hex');

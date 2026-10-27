@@ -200,10 +200,9 @@ export const iniciarSesion = async (req, res) => {
             email.toLowerCase().trim(),
             password
         );
-        if (!user) {
-            return res
-                .status(401)
-                .json({ success: false, error: 'Email o contrasenia incorrectos.' });
+
+        if (user.error) {
+            return res.status(401).json({ success: false, error: user.error });
         }
 
         return res.json({
@@ -290,7 +289,7 @@ export const cambiarEmail = async (req, res) => {
         }
 
         if (!bcrypt.compareSync(password, usuario.password_hash)) {
-            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
+            return res.status(400).json({ success: false, error: 'Contrasenia incorrecta.' });
         }
 
         const emailNormalizado = email_nuevo.toLowerCase().trim();
@@ -331,7 +330,7 @@ export const darDeBajaUsuario = async (req, res) => {
         }
 
         if (!bcrypt.compareSync(password, usuarioReal.password_hash)) {
-            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
+            return res.status(400).json({ success: false, error: 'Contrasenia incorrecta.' });
         }
 
         const resultado = await authService.darDeBaja(req.app.locals.pool, req.usuario);

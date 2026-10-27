@@ -18,6 +18,8 @@ Configura en un archivo `.env` las variables siguientes. No agregues credenciale
 | `DB_USER`                 | Usuario MySQL                              | `root`                                   |
 | `DB_PASSWORD`             | Contraseña MySQL                           | Vacía en la plantilla                    |
 | `DB_NAME`                 | Base utilizada por la aplicación           | `duotechbros`                            |
+| `JWT_SECRET`              | Secreto privado de firma, obligatorio y de al menos 32 caracteres | Valor aleatorio y privado |
+| `ADMIN_PASSWORD`          | Contraseña inicial del administrador (opcional) | Si falta, se genera una aleatoria |
 | `SMTP_HOST`               | Host SMTP; vacío activa modo de desarrollo | Vacío                                    |
 | `SMTP_PORT`               | Puerto SMTP                                | `587`                                    |
 | `SMTP_USER` / `SMTP_PASS` | Credenciales SMTP                          | Vacías en la plantilla                   |
@@ -65,7 +67,7 @@ El esquema se crea desde `src/models/schema.model.js`. Las tablas principales so
 - `codigos_verificacion`: códigos temporales para registro y recuperación de contraseña.
 - `configuracion`: información de contacto, redes, horarios y opciones del sitio.
 
-La inicialización usa `CREATE TABLE IF NOT EXISTS` y agrega las columnas de imágenes si faltan en tablas existentes. En una base nueva también inserta valores de configuración y un administrador inicial.
+La inicialización usa `CREATE TABLE IF NOT EXISTS` y agrega las columnas faltantes para imágenes, intentos fallidos, tiempo de bloqueo y versión de token en tablas existentes. En una base nueva también inserta valores de configuración y un administrador inicial: usa `ADMIN_PASSWORD` si está definida; de lo contrario, genera una contraseña aleatoria y la muestra una sola vez en la consola. La tabla `productos` declara restricciones `CHECK` para impedir precio o stock negativos al crearse. `CREATE TABLE IF NOT EXISTS` no añade esas restricciones a una tabla preexistente.
 
 El catálogo y el portafolio se administran desde las páginas del panel. El registro de usuario se realiza desde `/user/login.html`; en modo SMTP de desarrollo, el código de verificación aparece en la consola del backend.
 
@@ -89,13 +91,15 @@ El catálogo y el portafolio admiten una imagen principal y hasta cuatro imágen
 - `/user/carrito.html`: consulta y edición de cantidades, eliminación de artículos y confirmación de compra.
 - `/user/pedidos.html`: historial de compras y reparaciones, búsqueda, filtros, detalle, acciones disponibles y exportación PDF de pedidos de los últimos seis meses. El nombre de marca configurado se utiliza en el documento.
 
-Al enviar la compra, el sistema comprueba disponibilidad, registra cabecera y detalle, descuenta stock y limpia el carrito en una transacción MySQL. Si una validación falla, la operación no debe dejar una compra parcialmente aplicada.
+Al enviar la compra, el sistema abre una transacción y consulta los artículos del carrito y los productos con `FOR UPDATE`. Esto bloquea las filas utilizadas mientras se comprueban stock y precio y se crea la compra. Luego registra cabecera y detalle, descuenta existencias y vacía el carrito en la misma transacción; si falla una validación, se revierte la operación.
+
+El bloqueo de acceso dura 15 minutos después de cinco intentos fallidos. Los contadores se limpian al expirar el bloqueo, al iniciar sesión correctamente o al restablecer la contraseña.
 
 ### Panel administrativo
 
 - `/admin/login.html`: acceso administrativo.
 - `/admin/dashboard.html`: estadísticas de pedidos, productos más vendidos, ventas y alertas de stock. El filtro temporal permite consultar todo el tiempo, hoy, la última semana o el último mes; los gráficos muestran ventas agrupadas por día en períodos filtrados y por mes en la vista de todo el tiempo. Los gráficos utilizan Chart.js.
-- `/admin/pedidos.html`: pedidos de reparación con búsqueda, filtros por fecha y estado, paginación, ordenamiento, actualización de estado/notas/presupuesto, eliminación y exportación CSV.
+- `/admin/pedidos.html`: pedidos de reparación con búsqueda, filtros por fecha y estado, paginación, ordenamiento, actualización de estado/notas/presupuesto, anulación y exportación CSV. La acción de eliminar marca el pedido como cancelado, conservando el historial; una compra completada no devuelve stock al cancelarse.
 - `/admin/compras.html`: compras realizadas desde el carrito, con búsqueda, filtros por fecha y estado, paginación y visualización del detalle/estado.
 - `/admin/productos.html`: alta, edición y eliminación de productos; gestiona precios, categorías, existencias e imágenes.
 - `/admin/portafolio.html`: alta, edición y eliminación de trabajos e imágenes.
@@ -104,7 +108,11 @@ Al enviar la compra, el sistema comprueba disponibilidad, registra cabecera y de
 
 El nombre de marca configurado se aplica a las etiquetas `.admin-marca` del panel. `public/js/admin.js` comparte la carga de configuración y el helper `filtrarPorRangoTiempo`, utilizado por dashboard, pedidos y compras. El botón “Limpiar” restablece los filtros de búsqueda, estado y fecha en las tablas. Las exportaciones CSV administrativas usan la marca en el nombre del archivo; la exportación PDF de pedidos también la muestra en el documento y en su nombre.
 
-Las vistas protegidas requieren autenticación administrativa. El panel y el sitio público cuentan con diseños adaptables a pantallas pequeñas.
+Las exportaciones CSV neutralizan las celdas que empiezan con `=`, `+`, `-`, `@`, tabulador o retorno de carro para evitar que se interpreten como fórmulas. Los controladores validan que el precio sea numérico y no negativo, y que el stock sea un entero no negativo.
+
+La ruta pública `/api/configuracion` omite `email_admin`; el panel obtiene la configuración completa desde su ruta administrativa protegida. Al dar de baja una cuenta, los pedidos se conservan para historial, estadísticas y facturación, pero se anonimizan nombre, teléfono, email y descripción personal antes de eliminar al usuario.
+
+Las vistas protegidas requieren autenticación administrativa. Los tokens propios expiran en 24 horas e incluyen la versión de credenciales de la cuenta, que los middlewares comparan con la base de datos. Cambiar contraseña o usuario invalida los tokens de la versión anterior; el panel guarda el token nuevo al cambiar las credenciales administrativas. El panel y el sitio público cuentan con diseños adaptables a pantallas pequeñas.
 
 ## 6. Organización del código
 
@@ -159,7 +167,7 @@ Las solicitudes y respuestas usan JSON. Las rutas protegidas reciben `Authorizat
 | `PUT`                   | `/api/admin/pedidos/:id`                              | Cambiar estado.                                  |
 | `PUT`                   | `/api/admin/pedidos/:id/notas`                        | Cambiar notas internas.                          |
 | `PUT`                   | `/api/admin/pedidos/:id/presupuesto`                  | Cambiar presupuesto.                             |
-| `DELETE`                | `/api/admin/pedidos/:id`                              | Eliminar pedido.                                 |
+| `DELETE`                | `/api/admin/pedidos/:id`                              | Anular pedido marcándolo como cancelado; conserva el registro y repone stock solo cuando corresponde. |
 | `PUT`                   | `/api/admin/configuracion`                            | Actualizar configuración permitida del sitio.    |
 | `GET`                   | `/api/admin/estadisticas?rango=todos`                 | Datos agregados para los gráficos; admite `todos`, `hoy`, `semana` y `mes` (por defecto: `todos`). |
 | `GET`                   | `/api/admin/perfil`                                   | Consultar perfil administrativo.                 |
@@ -203,9 +211,9 @@ Los códigos de verificación tienen vencimiento de diez minutos. Mantén las cr
 
 ## 9. Seguridad y cuentas iniciales
 
-En una base nueva se genera el usuario administrativo `admin` con contraseña `admin123`. Cámbiala desde `/admin/perfil.html` inmediatamente y no uses estas credenciales en un entorno compartido.
+Si no hay administradores, se crea el usuario `admin`. Su contraseña se toma de `ADMIN_PASSWORD` o se genera aleatoriamente y se muestra una sola vez en la consola. Configura `JWT_SECRET` en el entorno; es obligatorio, debe tener al menos 32 caracteres y no debe publicarse.
 
-El secreto de firma está codificado actualmente en `src/config/auth.config.js`; no se lee desde `.env`. Antes de cualquier despliegue, debe cambiarse y trasladarse a una configuración privada. `.env` y dependencias instaladas están excluidos del repositorio, pero esto no sustituye la revisión de secretos codificados ni una configuración segura de producción.
+Al cambiar una contraseña se incrementa la versión de credenciales y se invalidan las sesiones anteriores. El restablecimiento de contraseña también limpia el contador y el bloqueo temporal. Si se bloquea una cuenta de usuario, se envía un aviso por correo cuando tiene una dirección asociada.
 
 ## 10. Pruebas y solución de problemas
 

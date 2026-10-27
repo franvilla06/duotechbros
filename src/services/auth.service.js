@@ -63,7 +63,13 @@ export const verificarCodigo = async (pool, email, codigo) => {
     }
 
     if (registro.codigo !== codigo) {
-        await verificacionModel.incrementarIntentos(pool, registro.id);
+        const updateResult = await verificacionModel.incrementarIntentos(pool, registro.id);
+
+        if (updateResult.affectedRows === 0) {
+            await verificacionModel.eliminar(pool, registro.id);
+            return { error: 'Se superaron los intentos permitidos. Solicita un nuevo codigo.' };
+        }
+
         const restantes = 5 - (registro.intentos + 1);
         return { error: `Codigo incorrecto. Intentos restantes: ${restantes}.` };
     }
@@ -84,7 +90,7 @@ export const verificarCodigo = async (pool, email, codigo) => {
 
         await conexion.commit();
 
-        const token = generarToken('usuario', registro.usuario);
+        const token = generarToken('usuario', registro.usuario, 0);
 
         return {
             exito: true,
@@ -173,7 +179,13 @@ export const restablecerPassword = async (pool, email, codigo, passwordNueva) =>
     }
 
     if (registro.codigo !== codigo) {
-        await verificacionModel.incrementarIntentos(pool, registro.id);
+        const updateResult = await verificacionModel.incrementarIntentos(pool, registro.id);
+
+        if (updateResult.affectedRows === 0) {
+            await verificacionModel.eliminar(pool, registro.id);
+            return { error: 'Se superaron los intentos permitidos. Pedi un nuevo codigo.' };
+        }
+
         const restantes = 5 - (registro.intentos + 1);
         return { error: `Codigo incorrecto. Intentos restantes: ${restantes}.` };
     }
@@ -206,6 +218,9 @@ export const restablecerPassword = async (pool, email, codigo, passwordNueva) =>
         conexion.release();
     }
 
+    await usuariosModel.resetearIntentos(pool, registro.usuario);
+    await usuariosModel.incrementarTokenVersion(pool, registro.usuario);
+
     return { exito: true, usuario: registro.usuario };
 }
 
@@ -213,23 +228,86 @@ export const restablecerPassword = async (pool, email, codigo, passwordNueva) =>
 
 export const autenticarUsuario = async (pool, email, password) => {
     const user = await usuariosModel.buscarPorEmail(pool, email);
-    if (!user || !bcrypt.compareSync(password, user.password_hash)) return null;
+
+    if (!user) return { error: 'Email o contrasenia incorrectos.' };
+
+    if (user.bloqueado_hasta) {
+        const ahora = new Date();
+        const bloqueo = new Date(user.bloqueado_hasta);
+        if (ahora < bloqueo) {
+            const minutosRestantes = Math.ceil((bloqueo - ahora) / 60000);
+            return {
+                error: `Cuenta bloqueada por demasiados intentos. Intenta de nuevo en ${minutosRestantes} minutos o recupera tu contrasenia.`,
+            };
+        } else {
+            await usuariosModel.resetearIntentos(pool, user.usuario);
+            user.intentos_fallidos = 0;
+            user.bloqueado_hasta = null;
+        }
+    }
+
+    if (!bcrypt.compareSync(password, user.password_hash)) {
+        await usuariosModel.registrarIntentoFallido(pool, user.usuario);
+
+        if (user.intentos_fallidos + 1 >= 5 && user.email) {
+            const marca = (await configuracionModel.obtener(pool, 'marca_nombre')) || 'DuotechBros';
+            await emailService
+                .enviarEmail({
+                    to: user.email,
+                    subject: `Alerta de seguridad - ${marca}`,
+                    title: 'Cuenta bloqueada temporalmente',
+                    message:
+                        'Hemos detectado multiples intentos fallidos de inicio de sesion en tu cuenta. Tu cuenta ha sido bloqueada por 15 minutos. Si no fuiste vos, te recomendamos recuperar tu contrasenia.',
+                    marca,
+                })
+                .catch((error) =>
+                    console.error('Error enviando email de bloqueo:', error.message)
+                );
+        }
+
+        return { error: 'Email o contrasenia incorrectos.' };
+    }
+
+    await usuariosModel.resetearIntentos(pool, user.usuario);
 
     return {
         usuario: user.usuario,
         email: user.email,
         id: user.id,
-        token: generarToken('usuario', user.usuario),
+        token: generarToken('usuario', user.usuario, user.token_version || 0),
     };
 };
 
 export const autenticarAdministrador = async (pool, usuario, password) => {
     const admin = await adminModel.buscarPorUsuario(pool, usuario);
-    if (!admin || !bcrypt.compareSync(password, admin.password_hash)) return null;
+
+    if (!admin) return { error: 'Usuario o contrasenia incorrectos.' };
+
+    if (admin.bloqueado_hasta) {
+        const ahora = new Date();
+        const bloqueo = new Date(admin.bloqueado_hasta);
+        if (ahora < bloqueo) {
+            const minutosRestantes = Math.ceil((bloqueo - ahora) / 60000);
+            return {
+                error: `Cuenta de administrador bloqueada. Intenta de nuevo en ${minutosRestantes} minutos.`,
+            };
+        } else {
+            await adminModel.resetearIntentos(pool, admin.usuario);
+            admin.intentos_fallidos = 0;
+            admin.bloqueado_hasta = null;
+        }
+    }
+
+    if (!bcrypt.compareSync(password, admin.password_hash)) {
+        await adminModel.registrarIntentoFallido(pool, admin.usuario);
+        return { error: 'Usuario o contrasenia incorrectos.' };
+    }
+
+    await adminModel.resetearIntentos(pool, admin.usuario);
 
     return {
         usuario: admin.usuario,
-        token: generarToken('admin', admin.usuario),
+        token: generarToken('admin', admin.usuario, admin.token_version || 0),
     };
 };
 
@@ -247,6 +325,7 @@ export const cambiarPassword = async (pool, usuario, passwordActual, passwordNue
 
     const nuevoHash = bcrypt.hashSync(passwordNueva, 10);
     await usuariosModel.actualizarPassword(pool, usuario, nuevoHash);
+    await usuariosModel.incrementarTokenVersion(pool, usuario);
 
     return { success: true };
 };
@@ -255,7 +334,17 @@ export const darDeBaja = async (pool, usuario) => {
     const user = await usuariosModel.buscarPorUsuario(pool, usuario);
     if (!user) {
         return { error: 'Usuario no encontrado.' };
-    };
+    }
+
+    await pool.query(
+        `UPDATE pedidos SET
+            nombre_cliente = 'Cuenta eliminada',
+            telefono = '0000000000',
+            email = 'eliminado@anonimo.com',
+            descripcion_problema = 'Datos eliminados por privacidad'
+         WHERE usuario_id = ?`,
+        [user.id]
+    );
 
     await usuariosModel.eliminar(pool, usuario);
 

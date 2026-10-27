@@ -2,17 +2,18 @@ import express from 'express';
 import * as usuariosController from '../controllers/usuarios.controller.js';
 import * as carritoController from '../controllers/carrito.controller.js';
 import { requiereAuthUsuario } from '../middlewares/auth.middleware.js';
+import { limitadorAuth, limitadorEmails } from '../middlewares/rateLimit.middleware.js';
 
 const router = express.Router();
 
 // REGISTRO EN DOS PASOS
-router.post('/registro', usuariosController.iniciarRegistro);
+router.post('/registro', limitadorEmails, usuariosController.iniciarRegistro);
 router.post('/verificar-codigo', usuariosController.verificarCodigo);
-router.post('/reenviar-codigo', usuariosController.reenviarCodigo);
+router.post('/reenviar-codigo', limitadorEmails, usuariosController.reenviarCodigo);
 
 // RECUPERACION DE CONTRASENIA
-router.post('/recuperar-password', usuariosController.recuperarPassword);
-router.post('/restablecer-password', usuariosController.restablecerPassword);
+router.post('/recuperar-password', limitadorEmails, usuariosController.recuperarPassword);
+router.post('/restablecer-password', limitadorAuth, usuariosController.restablecerPassword);
 
 // LOGIN
 router.post('/login', usuariosController.iniciarSesion);

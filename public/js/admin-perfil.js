@@ -86,6 +86,7 @@ formUsuario.addEventListener('submit', async (e) => {
 
     btnCambiarUsuario.disabled = true;
     btnCambiarUsuario.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    if (window.pausarNotificaciones) window.pausarNotificaciones();
 
     try {
         const respuesta = await fetchAdmin(`${API_ADMIN_PERFIL}/usuario`, {
@@ -150,6 +151,7 @@ formPassword.addEventListener('submit', async (e) => {
 
     btnCambiarPassword.disabled = true;
     btnCambiarPassword.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    if (window.pausarNotificaciones) window.pausarNotificaciones();
 
     try {
         const respuesta = await fetchAdmin(`${API_ADMIN_PERFIL}/password`, {
@@ -164,6 +166,9 @@ formPassword.addEventListener('submit', async (e) => {
 
         if (resultado.success) {
             mostrarMensaje(mensajePassword, 'Contraseña actualizada correctamente.', 'exito');
+            if (resultado.token) {
+                sessionStorage.setItem('adminToken', resultado.token);
+            }
             formPassword.reset();
         } else {
             mostrarMensaje(mensajePassword, resultado.error || 'No se pudo actualizar.', 'error');

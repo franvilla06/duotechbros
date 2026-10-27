@@ -83,9 +83,9 @@ export const vaciar = async (pool, usuarioId) => {
     return { affectedRows: result.affectedRows };
 };
 
-export const listarItemsParaPedido = async (pool, usuarioId) => {
-    const [rows] = await pool.query(
-        `SELECT
+export const listarItemsParaPedido = async (conexion, usuarioId, usarBloqueo = false) => {
+    const sql = `
+        SELECT
             c.id,
             c.cantidad,
             p.id AS producto_id,
@@ -94,8 +94,8 @@ export const listarItemsParaPedido = async (pool, usuarioId) => {
             p.stock
          FROM carrito c
          INNER JOIN productos p ON p.id = c.producto_id
-         WHERE c.usuario_id = ?`,
-        [usuarioId]
-    );
+         WHERE c.usuario_id = ? ${usarBloqueo ? 'FOR UPDATE' : ''}
+    `;
+    const [rows] = await conexion.query(sql, [usuarioId]);
     return rows;
 };

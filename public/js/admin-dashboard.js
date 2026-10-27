@@ -694,7 +694,7 @@ async function cargarDashboard() {
 
     try {
         const [resPedidos, resProductos, resPortafolio, resEstadisticas] = await Promise.all([
-            fetch(API_PEDIDOS),
+            fetchAdmin(API_PEDIDOS),
             fetch(API_PRODUCTOS),
             fetch(API_PORTAFOLIO),
             fetchAdmin(`${API_ESTADISTICAS}?rango=${rangoActual}`),

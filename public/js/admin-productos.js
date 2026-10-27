@@ -209,7 +209,12 @@ function aplicarOrdenamiento(array) {
 
 function escaparCSV(valor) {
     if (valor === null || valor === undefined) return '';
-    const texto = String(valor);
+    let texto = String(valor);
+
+    if (/^[=+\-@\t\r]/.test(texto)) {
+        texto = "'" + texto;
+    }
+
     if (texto.includes(',') || texto.includes('"') || texto.includes('\n') || texto.includes('\r')) {
         return `"${texto.replace(/"/g, '""')}"`;
     }
