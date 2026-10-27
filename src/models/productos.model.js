@@ -1,8 +1,10 @@
+// lista los productos ordenados desde el más reciente
 export const listar = async (pool) => {
     const [rows] = await pool.query('SELECT * FROM productos ORDER BY id DESC');
     return rows;
 };
 
+// guarda un producto nuevo en la tienda
 export const crear = async (pool, producto) => {
     const [result] = await pool.query(
         `INSERT INTO productos (nombre, descripcion, precio, imagen_url, imagenes, categoria, stock)
@@ -20,6 +22,7 @@ export const crear = async (pool, producto) => {
     return { insertId: result.insertId };
 };
 
+// actualiza un producto y conserva sus imágenes si el campo no fue enviado
 export const actualizar = async (pool, id, producto) => {
     const camposImagenes = producto.imagenes === undefined ? '' : ', imagenes = ?';
     const valores = [
@@ -40,12 +43,13 @@ export const actualizar = async (pool, id, producto) => {
     return { affectedRows: result.affectedRows };
 };
 
+// elimina un producto por su identificador
 export const eliminar = async (pool, id) => {
     const [result] = await pool.query('DELETE FROM productos WHERE id = ?', [id]);
     return { affectedRows: result.affectedRows };
 };
 
-// descuenta stock de un producto (dentro de una transaccion se pasa la conexion)
+// descuenta unidades del stock usando la conexión proporcionada por quien gestiona la transacción
 export const descontarStock = async (pool, productoId, cantidad) => {
     const [result] = await pool.query(
         'UPDATE productos SET stock = stock - ? WHERE id = ?',
@@ -54,7 +58,7 @@ export const descontarStock = async (pool, productoId, cantidad) => {
     return { affectedRows: result.affectedRows };
 };
 
-// restaura stock (usado al cancelar una compra)
+// devuelve al inventario las unidades de una compra cancelada
 export const restaurarStock = async (pool, productoId, cantidad) => {
     const [result] = await pool.query(
         'UPDATE productos SET stock = stock + ? WHERE id = ?',

@@ -1,6 +1,6 @@
 // LOGICA DE LA PAGINA "COMPRAS DE TIENDA" - DUOTECHBROS ADMIN
-// lista solo los pedidos con tipo='producto'
-// permite ver el detalle en formato factura (read-only) y cambiar el estado
+// LISTA SOLO LOS PEDIDOS CON TIPO='PRODUCTO'
+// permite ver el detalle en formato factura (solo lectura) y cambiar el estado
 
 const API_PEDIDOS = '/api/pedidos';
 const API_ADMIN_PEDIDOS = '/api/admin/pedidos';
@@ -18,7 +18,7 @@ const filtroTiempoTabla = document.getElementById('filtro-tiempo-tabla');
 const filtrosEstado = document.getElementById('filtros-estado');
 const btnLimpiar = document.getElementById('btn-limpiar');
 
-// modal factura
+// MODAL FACTURA
 const modalFactura = document.getElementById('modal-factura');
 const modalClose = document.getElementById('modal-close');
 const facturaContenido = document.getElementById('factura-contenido');
@@ -28,7 +28,7 @@ const btnGuardarEstado = document.getElementById('btn-guardar-estado');
 const ESTADOS = ['pendiente', 'en proceso', 'completado', 'cancelado'];
 const POR_PAGINA = 10;
 
-// estado local
+// ESTADO LOCAL
 let comprasOriginales = [];
 let comprasFiltradas = [];
 let estadoFiltroActivo = 'Todos';
@@ -40,6 +40,7 @@ let pedidoFacturaActual = null;
 
 // UTILIDADES
 
+// convierte la fecha al formato utilizado en la interfaz.
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -53,12 +54,14 @@ function formatearFecha(fechaISO) {
     return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
 }
 
+// formatea el precio como importe monetario.
 function formatearPrecio(precio) {
     const num = Number(precio);
     if (isNaN(num)) return '$0.00';
     return `$${num.toFixed(2)}`;
 }
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '—';
     const div = document.createElement('div');
@@ -66,21 +69,25 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// unifica el formato del estado para facilitar su comparaci?n.
 function normalizarEstado(estado) {
     return (estado || 'pendiente').toLowerCase().trim().replace(/\s+/g, '-');
 }
 
+// elige la clase visual del distintivo seg?n el estado.
 function claseBadgeEstado(estado) {
     const e = normalizarEstado(estado);
     const validos = ['pendiente', 'en-proceso', 'completado', 'cancelado'];
     return validos.includes(e) ? `badge-${e}` : 'badge-pendiente';
 }
 
+// convierte la primera letra del texto a may?scula.
 function capitalizar(texto) {
     if (!texto) return '';
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, esError = false) {
     const anterior = document.getElementById('toast-admin');
     if (anterior) anterior.remove();
@@ -100,6 +107,7 @@ function mostrarToast(mensaje, esError = false) {
 
 // ORDENAMIENTO
 
+// ordena los elementos seg?n los criterios seleccionados.
 function aplicarOrdenamiento(array) {
     if (!ordenActual.campo) return array;
     return [...array].sort((a, b) => {
@@ -110,6 +118,7 @@ function aplicarOrdenamiento(array) {
 
 // FILTROS
 
+// crea los controles para filtrar los elementos por estado.
 function construirFiltrosEstado() {
     const opciones = ['Todos', ...ESTADOS];
     filtrosEstado.innerHTML = '';
@@ -133,6 +142,7 @@ function construirFiltrosEstado() {
     });
 }
 
+// actualiza el bot?n para reflejar si hay filtros activos.
 function actualizarBotonLimpiar() {
     const hayFiltro =
         estadoFiltroActivo !== 'Todos' ||
@@ -143,6 +153,7 @@ function actualizarBotonLimpiar() {
 
 // RENDERIZADO
 
+// muestra las compras en la tabla con sus acciones disponibles.
 function renderizarCompras(compras) {
     tbody.innerHTML = '';
 
@@ -257,6 +268,7 @@ function renderizarCompras(compras) {
     });
 }
 
+// muestra u oculta el detalle de la compra seleccionada.
 function toggleDetalleCompra(id) {
     if (window.innerWidth > 700) return;
 
@@ -281,6 +293,7 @@ function toggleDetalleCompra(id) {
 
 // APLICAR FILTROS
 
+// filtra los elementos seg?n los criterios seleccionados.
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
@@ -315,6 +328,7 @@ function aplicarFiltros() {
 
 // CARGA DE DATOS
 
+// solicita las compras y actualiza la vista.
 async function cargarCompras() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
@@ -383,8 +397,9 @@ async function cargarCompras() {
     }
 }
 
-// MODAL: FACTURA DE COMPRA (READ-ONLY)
+// MODAL: FACTURA DE COMPRA (solo lectura)
 
+// muestra el formulario para editar la factura de la compra.
 async function abrirModalFactura(id) {
     pedidoFacturaActual = null;
     facturaContenido.innerHTML = '<div class="factura-cargando"><i class="fas fa-spinner fa-spin"></i> Cargando factura...</div>';
@@ -410,6 +425,7 @@ async function abrirModalFactura(id) {
     }
 }
 
+// prepara el formulario seg?n el estado actual de la factura.
 function configurarEstadoFactura(estado) {
     const estadoActual = (estado || 'pendiente').toLowerCase().trim();
     const esCancelado = estadoActual === 'cancelado';
@@ -424,6 +440,7 @@ function configurarEstadoFactura(estado) {
     facturaEstado.value = estadoActual;
 }
 
+// muestra los datos de la factura en el formulario.
 function renderizarFactura(pedido) {
     const numero = String(pedido.id).padStart(4, '0');
     const estadoActual = pedido.estado || 'pendiente';
@@ -515,6 +532,7 @@ function renderizarFactura(pedido) {
     `;
 }
 
+// cierra el formulario de la factura y descarta su vista.
 function cerrarModalFactura() {
     modalFactura.classList.remove('modal-visible');
     pedidoFacturaActual = null;
@@ -522,6 +540,7 @@ function cerrarModalFactura() {
 
 // CAMBIO DE ESTADO DE LA FACTURA
 
+// guarda los cambios realizados en la factura.
 async function guardarEstadoFactura() {
     if (!pedidoFacturaActual) return;
 
@@ -549,7 +568,7 @@ async function guardarEstadoFactura() {
             pedidoFacturaActual.estado = nuevoEstado;
             configurarEstadoFactura(nuevoEstado);
 
-            // actualizar el estado en la lista local
+            // ACTUALIZAR EL ESTADO EN LA LISTA LOCAL
             const compra = comprasOriginales.find((c) => String(c.id) === String(pedidoFacturaActual.id));
             if (compra) compra.estado = nuevoEstado;
 

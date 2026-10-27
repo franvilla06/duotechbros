@@ -164,7 +164,7 @@ a {
     display: block;
 }
 
-/* LAYOUT DEL PANEL (DASHBOARD Y PÁGINAS INTERNAS) */
+/* LAYOUT DEL PANEL (dashboard y páginas internas) */
 
 
 .admin-layout {
@@ -529,7 +529,7 @@ a {
     line-height: 1.4;
 }
 
-/* ETIQUETA DE "EN CONSTRUCCIÓN" (PARA SECCIONES FUTURAS) */
+/* ETIQUETA DE "EN CONSTRUCCIÓN" (para secciones futuras) */
 .badge-construccion {
     display: inline-block;
     background-color: var(--status-warning-bg);
@@ -758,7 +758,7 @@ table.admin-table tbody tr:last-child td {
     }
 }
 
-/* FORMULARIO + LISTA (LAYOUT DE DOS COLUMNAS) */
+/* FORMULARIO + LISTA (layout de dos columnas) */
 
 .admin-grid-2col {
     display: grid;
@@ -918,7 +918,7 @@ table.admin-table tbody tr:last-child td {
     color: var(--status-danger-text);
 }
 
-/* BOTÓN DE ELIMINAR (ÍCONO ROJO) */
+/* BOTÓN DE ELIMINAR (ícono rojo) */
 .btn-eliminar {
     background-color: transparent;
     border: none;
@@ -1072,7 +1072,7 @@ table.admin-table tbody tr:hover {
     color: var(--color-primary-dark);
 }
 
-/* IMAGEN MINIATURA PARA PORTAFOLIO (MÁS GRANDE QUE PRODUCTOS) */
+/* IMAGEN MINIATURA PARA PORTAFOLIO (más grande que productos) */
 .cell-imagen-portafolio {
     width: 80px;
     height: 60px;
@@ -1133,7 +1133,7 @@ table.admin-table tbody tr:hover {
     background-color: var(--bg-body-admin);
 }
 
-/* TOAST (NOTIFICACIÓN FLOTANTE) */
+/* TOAST (notificación flotante) */
 
 .toast-admin {
     position: fixed;
@@ -1173,7 +1173,7 @@ table.admin-table tbody tr:hover {
     }
 }
 
-/* BOTÓN DE EDITAR (ÍCONO AZUL) */
+/* BOTÓN DE EDITAR (ícono azul) */
 
 .btn-editar {
     background-color: transparent;
@@ -1285,7 +1285,7 @@ table.admin-table tbody tr:hover {
     color: var(--status-danger-text);
 }
 
-/* BOTONES DEL MODAL (REUTILIZAN ESTILOS EXISTENTES) */
+/* BOTONES DEL MODAL (reutilizan estilos existentes) */
 .modal-card .admin-form-actions {
     display: flex;
     justify-content: flex-end;
@@ -1404,7 +1404,7 @@ table.admin-table tbody tr:hover {
     box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
 }
 
-/* CONTADOR DE RESULTADOS (DENTRO DEL TOOLBAR) */
+/* CONTADOR DE RESULTADOS (dentro del toolbar) */
 .admin-resultados {
     font-size: 0.78rem;
     color: var(--text-muted);
@@ -1607,7 +1607,7 @@ table.admin-table tbody tr:hover {
     opacity: 0.85;
 }
 
-/* COLORES POR ESTADO (COHERENTES CON LOS BADGES) */
+/* COLORES POR ESTADO (coherentes con los badges) */
 .estado-pendiente {
     background-color: var(--status-warning-bg);
     color: var(--status-warning-text);
@@ -1708,7 +1708,7 @@ table.admin-table tbody tr:hover {
     flex-shrink: 0;
 }
 
-/* pulso sutil para llamar la atención */
+/* PULSO SUTIL PARA LLAMAR LA ATENCIÓN */
 @keyframes pulse-badge {
 
     0%,
@@ -1809,7 +1809,7 @@ table.admin-table th.th-ordenable:hover .th-sort-icon {
     font-weight: 900;
 }
 
-/* la columna activa tiene un fondo más marcado */
+/* LA COLUMNA ACTIVA TIENE UN FONDO MÁS MARCADO */
 table.admin-table th.th-ordenable.activo {
     background-color: #e8f4ff;
     color: var(--color-primary-blue);
@@ -1914,7 +1914,7 @@ table.admin-table th.th-ordenable.activo {
     }
 }
 
-/* BOTÓN DE EXPORTAR CSV (REUTILIZABLE EN TODAS LAS TABLAS) */
+/* BOTÓN DE EXPORTAR CSV (reutilizable en todas las tablas) */
 
 .btn-exportar {
     background-color: var(--status-success-bg);
@@ -2294,7 +2294,7 @@ table.admin-table th.th-ordenable.activo {
     line-height: 1.5;
 }
 
-/* ACCIONES DE LA FACTURA (CAMBIAR ESTADO) */
+/* ACCIONES DE LA FACTURA (cambiar estado) */
 
 .factura-acciones {
     display: flex;
@@ -2409,7 +2409,7 @@ table.admin-table th.th-ordenable.activo {
     padding: 14px 20px;
 }
 
-/* el footer de acciones (estado) queda fijo abajo */
+/* EL FOOTER DE ACCIONES (ESTADO) QUEDA FIJO ABAJO */
 .factura-acciones {
     flex-shrink: 0;
     border-top: 1px solid var(--border-light);
@@ -2553,7 +2553,7 @@ table.admin-table th.th-ordenable.activo {
     display: block;
 }
 
-/* scroll personalizado sutil */
+/* SCROLL PERSONALIZADO SUTIL */
 .factura-contenido::-webkit-scrollbar {
     width: 8px;
 }
@@ -2572,7 +2572,7 @@ table.admin-table th.th-ordenable.activo {
     background: var(--color-primary-teal);
 }
 
-/* responsive */
+/* RESPONSIVE */
 @media (max-width: 600px) {
     .factura-modal {
         max-height: 95vh;
@@ -2711,13 +2711,13 @@ table.admin-table th.th-ordenable.activo {
     line-height: 1.5;
 }
 
-/* icono de redes sociales en las etiquetas */
+/* ICONO DE REDES SOCIALES EN LAS ETIQUETAS */
 .config-form .admin-form-group label i {
     margin-right: 6px;
     color: var(--color-primary-teal);
 }
 
-/* acciones del formulario (fijas abajo) */
+/* ACCIONES DEL FORMULARIO (fijas abajo) */
 .config-acciones {
     display: flex;
     justify-content: flex-end;
@@ -2741,7 +2741,7 @@ table.admin-table th.th-ordenable.activo {
     font-size: 0.9rem;
 }
 
-/* responsive */
+/* RESPONSIVE */
 @media (max-width: 600px) {
     .config-acciones {
         flex-direction: column-reverse;
@@ -2823,11 +2823,9 @@ table.admin-table th.th-ordenable.activo {
     }
 }
 
-/* ============================================================
-   AJUSTES DE COMPACIDAD DEL DASHBOARD
-   ============================================================ */
+/* AJUSTES DE COMPACIDAD DEL DASHBOARD */
 
-/* reducir el padding de las cards del dashboard */
+/* REDUCIR EL PADDING DE LAS CARDS DEL DASHBOARD */
 .admin-main .admin-card {
     padding: 18px 22px;
 }
@@ -2838,7 +2836,7 @@ table.admin-table th.th-ordenable.activo {
     padding-bottom: 10px;
 }
 
-/* reducir el espacio entre bloques del dashboard */
+/* REDUCIR EL ESPACIO ENTRE BLOQUES DEL DASHBOARD */
 .admin-main .stats-grid {
     gap: 16px;
 }
@@ -2852,7 +2850,7 @@ table.admin-table th.th-ordenable.activo {
     margin-top: 16px;
 }
 
-/* altura de los graficos mas compacta */
+/* ALTURA DE LOS GRAFICOS MAS COMPACTA */
 .grafico-wrapper {
     height: 220px;
     margin: 8px 0 4px;
@@ -2862,14 +2860,14 @@ table.admin-table th.th-ordenable.activo {
     height: 320px;
 }
 
-/* nota del grafico mas compacta */
+/* NOTA DEL GRAFICO MAS COMPACTA */
 .grafico-nota {
     margin: 8px 0 0;
     padding-top: 8px;
     font-size: 0.75rem;
 }
 
-/* tablas y grids del dashboard mas compactos */
+/* TABLAS Y GRIDS DEL DASHBOARD MAS COMPACTOS */
 .admin-main .stats-grid .stat-card {
     padding: 16px 18px;
 }
@@ -2896,7 +2894,7 @@ table.admin-table th.th-ordenable.activo {
     margin-top: 4px;
 }
 
-/* tabla de movimientos mas compacta */
+/* TABLA DE MOVIMIENTOS MAS COMPACTA */
 .admin-main table.admin-table th {
     padding: 10px 16px;
     font-size: 0.7rem;
@@ -2915,7 +2913,7 @@ table.admin-table th.th-ordenable.activo {
     font-size: 1.05rem;
 }
 
-/* margen general entre secciones mas ajustado */
+/* MARGEN GENERAL ENTRE SECCIONES MAS AJUSTADO */
 .admin-main > .admin-card + .admin-card {
     margin-top: 20px;
 }
@@ -2924,7 +2922,7 @@ table.admin-table th.th-ordenable.activo {
     margin-top: 16px;
 }
 
-/* accesos rapidos mas compactos */
+/* ACCESOS RAPIDOS MAS COMPACTOS */
 .dashboard-grid {
     gap: 14px;
 }
@@ -2948,7 +2946,7 @@ table.admin-table th.th-ordenable.activo {
     line-height: 1.45;
 }
 
-/* responsive */
+/* RESPONSIVE */
 @media (max-width: 1200px) {
     .grafico-wrapper {
         height: 200px;
@@ -3179,18 +3177,16 @@ table.admin-table th.th-ordenable.activo {
     }
 }
 
-/* ============================================================
-   RESPONSIVE DE TABLAS, TOOLBAR Y PAGINACION DEL ADMIN
-   ============================================================ */
+/* RESPONSIVE DE TABLAS, TOOLBAR Y PAGINACION DEL ADMIN */
 
-/* ---------- TABLA: SCROLL CON SOMBRAS ---------- */
+/* TABLA: SCROLL CON SOMBRAS */
 
 /* hacemos obvio que la tabla se puede desplazar lateralmente */
 .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     background:
-        /* sombras laterales que indican que hay mas contenido */
+        /* SOMBRAS LATERALES QUE INDICAN QUE HAY MAS CONTENIDO */
         linear-gradient(to right, var(--bg-surface) 30%, rgba(255, 255, 255, 0)),
         linear-gradient(to right, rgba(255, 255, 255, 0), var(--bg-surface) 70%) 100% 0,
         radial-gradient(farthest-side at 0 50%, rgba(11, 74, 98, 0.15), transparent),
@@ -3200,7 +3196,7 @@ table.admin-table th.th-ordenable.activo {
     background-attachment: local, local, scroll, scroll;
 }
 
-/* scroll bar mas delgada y prolija en webkit */
+/* SCROLL BAR MAS DELGADA Y PROLIJA EN WEBKIT */
 .table-wrapper::-webkit-scrollbar {
     height: 8px;
 }
@@ -3219,7 +3215,7 @@ table.admin-table th.th-ordenable.activo {
     background: var(--color-primary-teal);
 }
 
-/* ---------- TABLA: ANCHO MINIMO ---------- */
+/* TABLA: ANCHO MINIMO */
 
 /* con las columnas fusionadas ya no hace falta forzar un min-width grande */
 /* dejamos uno chico para que en tablets muy angostas aparezca el scroll como respaldo */
@@ -3227,7 +3223,7 @@ table.admin-table {
     min-width: 560px;
 }
 
-/* ---------- TABLA: RESPONSIVE EN MOBILE ---------- */
+/* TABLA: RESPONSIVE EN MOBILE */
 
 @media (max-width: 900px) {
     /* reducir padding de celdas para que entren mas columnas */
@@ -3241,12 +3237,12 @@ table.admin-table {
         font-size: 0.85rem;
     }
 
-    /* descripcion mas angosta para no empujar tanto */
+    /* DESCRIPCION MAS ANGOSTA PARA NO EMPUJAR TANTO */
     .cell-descripcion {
         max-width: 160px;
     }
 
-    /* imagenes mas chicas */
+    /* IMAGENES MAS CHICAS */
     .cell-imagen,
     .cell-imagen-placeholder {
         width: 42px;
@@ -3261,7 +3257,7 @@ table.admin-table {
         font-size: 1rem;
     }
 
-    /* fecha mas compacta */
+    /* FECHA MAS COMPACTA */
     .cell-fecha {
         font-size: 0.75rem;
     }
@@ -3283,9 +3279,9 @@ table.admin-table {
         max-width: 120px;
     }
 
-    /* ---------- BOTONES DE ACCION TACTILES ---------- */
+    /* BOTONES DE ACCION TACTILES */
 
-    /* botones de editar/eliminar/notas con area tactil comoda (minimo 44px) */
+    /* BOTONES DE EDITAR/ELIMINAR/NOTAS CON AREA TACTIL COMODA (minimo 44px) */
     .btn-editar,
     .btn-eliminar,
     .btn-notas {
@@ -3303,7 +3299,7 @@ table.admin-table {
         margin-right: 4px;
     }
 
-    /* boton "ver factura" adaptado */
+    /* BOTON "VER FACTURA" ADAPTADO */
     .btn-ver-factura {
         padding: 9px 12px;
         font-size: 0.75rem;
@@ -3314,14 +3310,14 @@ table.admin-table {
         display: none;
     }
 
-    /* el select de estado mas compacto */
+    /* EL SELECT DE ESTADO MAS COMPACTO */
     .estado-select {
         min-width: 100px;
         font-size: 0.78rem;
         padding: 7px 8px;
     }
 
-    /* ---------- TOOLBAR DEL ADMIN ---------- */
+    /* TOOLBAR DEL ADMIN */
 
     .admin-toolbar {
         flex-direction: column;
@@ -3355,7 +3351,7 @@ table.admin-table {
         padding: 10px 14px;
     }
 
-    /* ---------- CABECERA DE TABLA ---------- */
+    /* CABECERA DE TABLA */
 
     .table-header {
         padding: 14px 14px;
@@ -3371,7 +3367,7 @@ table.admin-table {
         padding: 4px 10px;
     }
 
-    /* ---------- PAGINACION ---------- */
+    /* PAGINACION */
 
     .paginacion {
         padding: 12px 14px;
@@ -3399,7 +3395,7 @@ table.admin-table {
         padding: 0 8px;
     }
 
-    /* ---------- HEADER DE LA PAGINA ---------- */
+    /* HEADER DE LA PAGINA */
 
     .admin-header {
         padding-bottom: 14px;
@@ -3425,7 +3421,7 @@ table.admin-table {
         justify-content: center;
     }
 
-    /* ---------- LAYOUT DE DOS COLUMNAS (FORM + LISTA) ---------- */
+    /* LAYOUT DE DOS COLUMNAS (form + lista) */
 
     .admin-grid-2col {
         gap: 18px;
@@ -3488,7 +3484,7 @@ table.admin-table {
     }
 }
 
-/* ---------- INDICADOR DE SCROLL EN MOBILE ---------- */
+/* INDICADOR DE SCROLL EN MOBILE */
 
 @media (max-width: 900px) {
     .table-container::before {
@@ -3510,9 +3506,7 @@ table.admin-table {
     }
 }
 
-/* ============================================================
-   RESPONSIVE DE PERFIL DEL ADMIN
-   ============================================================ */
+/* RESPONSIVE DE PERFIL DEL ADMIN */
 
 @media (max-width: 700px) {
     .perfil-info-grid {
@@ -3595,9 +3589,7 @@ table.admin-table {
     }
 }
 
-/* ============================================================
-   TABLAS DEL ADMIN COMO CARDS EN MOBILE
-   ============================================================ */
+/* TABLAS DEL ADMIN COMO CARDS EN MOBILE */
 
 @media (max-width: 700px) {
     .table-container::before {
@@ -3729,9 +3721,7 @@ table.admin-table {
     }
 }
 
-/* ============================================================
-   CELDAS FUSIONADAS EN TABLAS DEL ADMIN
-   ============================================================ */
+/* CELDAS FUSIONADAS EN TABLAS DEL ADMIN */
 
 .cell-producto-principal {
     padding: 12px 16px;
@@ -3778,7 +3768,7 @@ table.admin-table {
     line-height: 1.2;
 }
 
-/* ---------- CELDA FECHAS (formato vertical) ---------- */
+/* CELDA FECHAS (formato vertical) */
 
 .cell-fechas {
     padding-top: 12px;
@@ -3832,8 +3822,7 @@ table.admin-table {
 #tabla-productos th:nth-child(4) { width: 20%; }
 #tabla-productos th:nth-child(5) { width: 14%; text-align: right; }
 
-/* PORTAFOLIO: 5 columnas
-   mas ancho para Trabajo y Descripcion, menos para Fechas (ahora es vertical) */
+/* PORTAFOLIO: 5 columnas mas ancho para Trabajo y Descripcion, menos para Fechas (ahora es vertical) */
 #tabla-trabajos th:nth-child(1) { width: 32%; }
 #tabla-trabajos th:nth-child(2) { width: 22%; }
 #tabla-trabajos th:nth-child(3) { width: 16%; }
@@ -4008,9 +3997,7 @@ table.admin-table {
     }
 }
 
-/* ============================================================
-   AJUSTES DE LA CARD DE PEDIDOS EN MOBILE
-   ============================================================ */
+/* AJUSTES DE LA CARD DE PEDIDOS EN MOBILE */
 
 @media (max-width: 700px) {
     table.admin-table td .cell-email,
@@ -4064,9 +4051,7 @@ table.admin-table {
     }
 }
 
-/* ============================================================
-   AJUSTE DEL INDICADOR DE CARRUSEL EN MOBILE
-   ============================================================ */
+/* AJUSTE DEL INDICADOR DE CARRUSEL EN MOBILE */
 
 @media (max-width: 700px) {
     table.admin-table td .cell-imagen-wrapper {
@@ -4087,9 +4072,7 @@ table.admin-table {
     }
 }
 
-/* ============================================================
-   DASHBOARD: TABLA DE MOVIMIENTOS CON ACORDEON EN MOBILE
-   ============================================================ */
+/* DASHBOARD: TABLA DE MOVIMIENTOS CON ACORDEON EN MOBILE */
 
 table.admin-table tbody tr.mov-detalle-fila {
     display: none;
@@ -4219,8 +4202,7 @@ table.admin-table tbody tr.mov-detalle-fila {
     }
 
     /* celda 5: fecha -> oculta en el estado colapsado */
-    /* usamos alta especificidad + !important porque la regla general de la
-       Fase 3 (table.admin-table td) puede pisarla segun el orden de carga */
+    /* usamos alta especificidad + !important porque la regla general de la Fase 3 (table.admin-table td) puede pisarla segun el orden de carga */
     table.admin-table#tabla-movimientos tbody tr.mov-fila td.mov-celda-fecha {
         display: none !important;
     }
@@ -4316,9 +4298,7 @@ table.admin-table tbody tr.mov-detalle-fila {
     }
 }
 
-/* ============================================================
-   TOP 10 PRODUCTOS: TABLA EN MOBILE
-   ============================================================ */
+/* TOP 10 PRODUCTOS: TABLA EN MOBILE */
 
 .grafico-tabla-wrapper {
     margin: 12px 0 4px;
@@ -4441,9 +4421,7 @@ table.admin-table tbody tr.mov-detalle-fila {
     }
 }
 
-/* ============================================================
-FIX DE LA TABLA DE PRODUCTOS Y PORTAFOLIO
-   ============================================================ */
+/* FIX DE LA TABLA DE PRODUCTOS Y PORTAFOLIO */
 
 #tabla-productos,
 #tabla-trabajos {
@@ -4467,9 +4445,7 @@ table.admin-table {
     min-width: 0;
 }
 
-/* ============================================================
-PREVENCION DE DESBORDE EN CELDAS CON CONTENIDO ANCHO
-   ============================================================ */
+/* PREVENCION DE DESBORDE EN CELDAS CON CONTENIDO ANCHO */
 
 #tabla-productos td .badge,
 #tabla-trabajos td .badge {
@@ -4514,9 +4490,7 @@ PREVENCION DE DESBORDE EN CELDAS CON CONTENIDO ANCHO
     overflow: hidden;
 }
 
-/* ============================================================
-FIX DE ALINEACION Y COMPACIDAD EN TABLAS DEL ADMIN
-   ============================================================ */
+/* FIX DE ALINEACION Y COMPACIDAD EN TABLAS DEL ADMIN */
 
 table.admin-table td {
     vertical-align: top;
@@ -4555,9 +4529,7 @@ table.admin-table {
     }
 }
 
-/* ============================================================
-FILAS DE TABLA COMO ACORDEON EN MOBILE (PRODUCTOS Y PORTAFOLIO)
-   ============================================================ */
+/* FILAS DE TABLA COMO ACORDEON EN MOBILE (productos y portafolio) */
 
 table.admin-table tbody tr.prod-detalle-fila,
 table.admin-table tbody tr.trab-detalle-fila {
@@ -4887,7 +4859,7 @@ table.admin-table tbody tr.trab-detalle-fila {
         color: var(--text-light);
     }
 
-    /* ---------- LIMPIEZA: sobrescribir reglas de la Fase 3 en la fila compacta ---------- */
+    /* LIMPIEZA: sobrescribir reglas de la Fase 3 en la fila compacta */
 
     table.admin-table tbody tr.prod-fila td.cell-precio-stock .cell-precio-stock-contenido {
         display: flex !important;
@@ -4931,9 +4903,7 @@ table.admin-table tbody tr.trab-detalle-fila {
     }
 }
 
-/* ============================================================
-   ACORDEON EN COMPRAS Y PEDIDOS (MOBILE)
-   ============================================================ */
+/* ACORDEON EN COMPRAS Y PEDIDOS (mobile) */
 
 table.admin-table tbody tr.compra-detalle-fila,
 table.admin-table tbody tr.pedido-detalle-fila {
@@ -5220,7 +5190,7 @@ table.admin-table tbody tr.pedido-detalle-fila {
         font-size: 0.85rem;
     }
 
-    /* ---------- FIX: el boton de notas en el detalle del pedido ---------- */
+    /* FIX: el boton de notas en el detalle del pedido */
 
     table.admin-table tbody tr.pedido-detalle-fila .fila-detalle-acciones-vertical .btn-notas {
         width: 100% !important;
@@ -5252,7 +5222,7 @@ table.admin-table tbody tr.pedido-detalle-fila {
         flex-shrink: 0;
     }
 
-    /* ---------- FIX FINAL: adaptar al ancho del celular ---------- */
+    /* FIX FINAL: ADAPTAR AL ANCHO DEL CELULAR */
 
     table.admin-table {
         min-width: 0 !important;
@@ -5336,9 +5306,7 @@ table.admin-table tbody tr.pedido-detalle-fila {
     }
 }
 
-/* ============================================================
-   FIX: INPUTS DE FECHA EN EL FORMULARIO (PORTAFOLIO)
-   ============================================================ */
+/* FIX: INPUTS DE FECHA EN EL FORMULARIO (portafolio) */
 
 /* forzar a los hijos del grid a encoger mas alla de su contenido minimo */
 .admin-form-row .admin-form-group {
@@ -5356,7 +5324,7 @@ table.admin-table tbody tr.pedido-detalle-fila {
 .admin-form-group input[type="date"] {
     width: 100%;
     min-width: 0;
-    /* a veces webkit agrega padding extra, lo normalizamos */
+    /* A VECES WEBKIT AGREGA PADDING EXTRA, LO NORMALIZAMOS */
     padding: 10px 12px;
 }
 
@@ -5368,9 +5336,7 @@ table.admin-table tbody tr.pedido-detalle-fila {
     }
 }
 
-/* ============================================================
-   FILTRO DE TIEMPO EN EL DASHBOARD
-   ============================================================ */
+/* FILTRO DE TIEMPO EN EL DASHBOARD */
 
 .admin-filtro-tiempo {
     appearance: none;

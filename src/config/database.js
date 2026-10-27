@@ -7,7 +7,7 @@ if (!process.env.DB_HOST || !process.env.DB_USER || process.env.DB_PASSWORD === 
     throw new Error('No se puede iniciar sin las credenciales requeridas de la base de datos.');
 }
 
-// parametros de conexion leidos desde .env
+// define los parámetros de conexión con los valores del entorno
 export const config = {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT) || 3306,
@@ -21,10 +21,9 @@ export const config = {
     timezone: 'local',
 };
 
-let pool = null;
+let pool = null; 
 
-// crea la base de datos si no existe
-// se conecta sin especificar database para poder crearla
+// crea la base de datos si aún no existe y cierra la conexión temporal
 const crearBaseDeDatos = async () => {
     const conexionTemporal = await mysql.createConnection({
         host: config.host,
@@ -43,14 +42,13 @@ const crearBaseDeDatos = async () => {
     }
 };
 
-// inicializa el pool de conexiones
-// el pool maneja multiples conexiones de forma eficiente
+// crea el pool de conexiones y comprueba que responda correctamente
 const inicializarPool = async () => {
     await crearBaseDeDatos();
 
     pool = mysql.createPool(config);
 
-    // verificar que la conexion funcione
+    // verifica que una conexión del pool responda antes de continuar
     const conexion = await pool.getConnection();
     try {
         await conexion.ping();
@@ -60,14 +58,14 @@ const inicializarPool = async () => {
     }
 };
 
-// inicializa todo: base de datos, pool y esquema
+// prepara la base de datos, el pool y el esquema de tablas
 export const inicializarBaseDatos = async () => {
     await inicializarPool();
     await inicializarEsquema(pool);
     console.log('Base de datos lista');
 };
 
-// devuelve el pool de conexiones
+// devuelve el pool una vez que fue inicializado
 export const obtenerPool = () => {
     if (!pool) {
         throw new Error('El pool de conexiones no esta inicializado');

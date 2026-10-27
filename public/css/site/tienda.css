@@ -45,7 +45,7 @@ main.container {
     padding: 0 20px 60px;
 }
 
-/* BARRA DE HERRAMIENTAS (BUSCADOR + FILTROS) */
+/* BARRA DE HERRAMIENTAS (buscador + filtros) */
 
 .tienda-toolbar {
     background-color: var(--bg-surface);
@@ -268,7 +268,7 @@ main.container {
     overflow: hidden;
 }
 
-/* FOOTER DE LA TARJETA (PRECIO + STOCK) */
+/* FOOTER DE LA TARJETA (precio + stock) */
 .product-footer {
     display: flex;
     justify-content: space-between;
@@ -358,7 +358,7 @@ main.container {
     transform: none;
 }
 
-/* ESTADOS (CARGANDO / VACÍO / ERROR) */
+/* ESTADOS (cargando / vacío / error) */
 
 .tienda-estado {
     text-align: center;
@@ -478,7 +478,7 @@ main.container {
     transform: scale(1.06);
 }
 
-/* flechas: aparecen al hover de la tarjeta */
+/* FLECHAS: APARECEN AL HOVER DE LA TARJETA */
 .carrusel-flecha {
     position: absolute;
     top: 50%;
@@ -526,7 +526,7 @@ main.container {
     right: 10px;
 }
 
-/* puntitos: siempre visibles cuando hay multiples imagenes */
+/* PUNTITOS: SIEMPRE VISIBLES CUANDO HAY MULTIPLES IMAGENES */
 .carrusel-puntos {
     position: absolute;
     bottom: 10px;
@@ -569,13 +569,13 @@ main.container {
     display: none;
 }
 
-/* responsive */
+/* RESPONSIVE */
 @media (max-width: 600px) {
     .carrusel-flecha {
         width: 30px;
         height: 30px;
         font-size: 0.7rem;
-        /* en mobile siempre visibles porque no hay hover */
+        /* EN MOBILE SIEMPRE VISIBLES PORQUE NO HAY HOVER */
         opacity: 1;
         visibility: visible;
     }

@@ -234,7 +234,7 @@ main.container {
     color: var(--color-primary-teal);
 }
 
-/* ESTADOS (CARGANDO / VACÍO / ERROR) */
+/* ESTADOS (cargando / vacío / error) */
 .portafolio-estado {
     text-align: center;
     padding: 60px 20px;
@@ -339,7 +339,7 @@ main.container {
     transform: scale(1.06);
 }
 
-/* flechas: aparecen al hover de la tarjeta */
+/* FLECHAS: APARECEN AL HOVER DE LA TARJETA */
 .carrusel-flecha {
     position: absolute;
     top: 50%;
@@ -387,7 +387,7 @@ main.container {
     right: 10px;
 }
 
-/* puntitos: siempre visibles cuando hay multiples imagenes */
+/* PUNTITOS: SIEMPRE VISIBLES CUANDO HAY MULTIPLES IMAGENES */
 .carrusel-puntos {
     position: absolute;
     bottom: 10px;
@@ -430,7 +430,7 @@ main.container {
     display: none;
 }
 
-/* responsive */
+/* RESPONSIVE */
 @media (max-width: 600px) {
     .carrusel-flecha {
         width: 30px;

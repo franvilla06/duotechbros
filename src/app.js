@@ -8,24 +8,24 @@ import { pedidosRoutes } from './routes/pedidos.routes.js';
 import { adminRoutes } from './routes/admin.routes.js';
 import { usuariosRoutes } from './routes/usuarios.routes.js';
 
-// como en ES Modules __dirname no existe, lo recreamos
+// reconstruye las rutas equivalentes a __filename y __dirname para este módulo
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const app = express();
 
-// exposicion del pool de conexiones a los controllers
+// expone el pool de conexiones para que lo usen los controladores
 app.locals.pool = obtenerPool();
 
-// configuracion de CORS
-// permite peticiones desde localhost y 127.0.0.1 en cualquier puerto
-// esto incluye el puerto 3000 (backend) y 5500 (Live Server)
+// CONFIGURACIÓN DE CORS
+// permite solicitudes locales desde cualquier puerto
 const corsOptions = {
+    // valida el origen de cada solicitud y permite las peticiones sin origen
     origin: (origin, callback) => {
-        // permitir peticiones sin origin (Postman, curl, etc.)
+        // admite clientes que no envían un origen, como Postman o curl
         if (!origin) return callback(null, true);
 
-        // permitir localhost y 127.0.0.1 en cualquier puerto
+        // restringe las solicitudes con origen a los dos hosts locales
         const patronesPermitidos = [
             /^http:\/\/localhost(:\d+)?$/,
             /^http:\/\/127\.0\.0\.1(:\d+)?$/,

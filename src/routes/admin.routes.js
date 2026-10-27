@@ -1,3 +1,4 @@
+// Rutas protegidas para el panel de administración. El * sirve para indicar que todas las rutas de este router requieren autenticación.
 import express from 'express';
 import * as adminController from '../controllers/admin.controller.js';
 import * as configuracionController from '../controllers/configuracion.controller.js';

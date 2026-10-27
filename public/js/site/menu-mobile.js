@@ -10,11 +10,13 @@
 
     const icono = toggle.querySelector('i');
 
+    // actualiza el icono seg?n el estado del men?.
     function actualizarIcono(abierto) {
         if (!icono) return;
         icono.className = abierto ? 'fas fa-times' : 'fas fa-bars';
     }
 
+    // muestra el men? de navegaci?n m?vil.
     function abrirMenu() {
         nav.classList.add('menu-abierto');
         toggle.setAttribute('aria-label', 'Cerrar menú');
@@ -22,6 +24,7 @@
         actualizarIcono(true);
     }
 
+    // oculta el men? de navegaci?n m?vil.
     function cerrarMenu() {
         nav.classList.remove('menu-abierto');
         toggle.setAttribute('aria-label', 'Abrir menú');
@@ -29,6 +32,7 @@
         actualizarIcono(false);
     }
 
+    // alternar la visibilidad del men? de navegaci?n m?vil.
     function toggleMenu() {
         if (nav.classList.contains('menu-abierto')) {
             cerrarMenu();

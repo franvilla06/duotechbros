@@ -1,20 +1,18 @@
-// cargar variables de entorno ANTES de cualquier otro import
+// carga las variables de entorno antes de importar módulos que las necesitan
 import 'dotenv/config';
 import { inicializarBaseDatos } from './src/config/database.js';
 
-// funcion principal para arrancar el servidor
+// inicializa la base de datos y levanta el servidor
 const arrancar = async () => {
     try {
-        // 1. inicializar base de datos (crea db, pool y tablas)
+        // prepara la base de datos y sus tablas antes de cargar la aplicación
         await inicializarBaseDatos();
 
-        // 2. importar la app DESPUES de inicializar el pool
-        // (app.js usa obtenerPool() en su carga)
+        // carga la aplicación después de inicializar el pool que obtiene al importarse
         const { app } = await import('./src/app.js');
 
         const PORT = process.env.PORT || 3000;
 
-        // 3. arrancar el servidor http
         app.listen(PORT, () => {
             console.log(`Servidor corriendo en http://localhost:${PORT}`);
         });

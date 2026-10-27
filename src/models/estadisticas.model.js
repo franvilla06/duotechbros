@@ -1,3 +1,4 @@
+// construye el fragmento SQL que limita las consultas a un período
 const obtenerFiltroFecha = (rango) => {
     if (rango === 'hoy') return ' AND DATE(creado_en) = CURDATE()';
     if (rango === 'semana') return ' AND creado_en >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
@@ -5,6 +6,7 @@ const obtenerFiltroFecha = (rango) => {
     return '';
 };
 
+// agrupa los pedidos por tipo y estado dentro del período indicado
 export const pedidosPorEstado = async (pool, rango = 'todos') => {
     const filtro = obtenerFiltroFecha(rango);
     const [rows] = await pool.query(
@@ -16,6 +18,7 @@ export const pedidosPorEstado = async (pool, rango = 'todos') => {
     return rows;
 };
 
+// calcula los productos más vendidos y su recaudación dentro del período
 export const productosMasVendidos = async (pool, limite = 10, rango = 'todos') => {
     const limiteSeguro = Math.max(1, Math.min(100, parseInt(limite) || 10));
     const filtro = obtenerFiltroFecha(rango);
@@ -36,6 +39,7 @@ export const productosMasVendidos = async (pool, limite = 10, rango = 'todos') =
     return rows;
 };
 
+// devuelve ventas agrupadas por mes o día y completa los meses sin actividad
 export const ventasPorMes = async (pool, meses = 6, rango = 'todos') => {
     const filtro = obtenerFiltroFecha(rango);
     const formatoFecha = rango === 'todos' ? '%Y-%m' : '%Y-%m-%d';

@@ -1,11 +1,12 @@
 // LOGICA DEL ICONO DE USUARIO EN EL HEADER
-// se incluye en todas las paginas publicas
-// tambien maneja el contador del carrito
+// SE INCLUYE EN TODAS LAS PAGINAS PUBLICAS
+// TAMBIEN MANEJA EL CONTADOR DEL CARRITO
 
 const API_CARRITO_HEADER = '/api/usuarios/carrito';
 
 // UTILIDADES DE SESION
 
+// indica si hay una sesi?n de usuario activa.
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
@@ -13,14 +14,17 @@ function estaLogueadoUsuario() {
     );
 }
 
+// obtiene los datos del usuario guardados en la sesi?n.
 function obtenerUsuarioActual() {
     return sessionStorage.getItem('usuarioNombre') || '';
 }
 
+// obtiene el token de autenticaci?n del usuario.
 function obtenerTokenUsuario() {
     return sessionStorage.getItem('usuarioToken') || '';
 }
 
+// elimina los datos de sesi?n del usuario.
 function cerrarSesionUsuario() {
     sessionStorage.removeItem('usuarioLogueado');
     sessionStorage.removeItem('usuarioNombre');
@@ -29,7 +33,7 @@ function cerrarSesionUsuario() {
 
 // CARRITO
 
-// consulta el carrito y actualiza el badge del contador en el boton de usuario
+// actualiza el contador de productos del carrito.
 async function actualizarContadorCarrito() {
     const badge = document.getElementById('cart-count');
     if (!badge) return;
@@ -47,7 +51,7 @@ async function actualizarContadorCarrito() {
         });
 
         if (respuesta.status === 401) {
-            // token invalido, limpiar sesion y ocultar el badge
+            // TOKEN INVALIDO, LIMPIAR SESION Y OCULTAR EL BADGE
             cerrarSesionUsuario();
             badge.style.display = 'none';
             return;
@@ -73,6 +77,7 @@ async function actualizarContadorCarrito() {
 
 // RENDERIZADO DEL HEADER
 
+// muestra en el encabezado las opciones de la sesi?n actual.
 function renderizarUsuarioHeader() {
     const contenedor = document.getElementById('nav-usuario');
     if (!contenedor) return;
@@ -106,7 +111,7 @@ function renderizarUsuarioHeader() {
             </div>
         `;
 
-        // referencias despues de inyectar el html
+        // REFERENCIAS DESPUES DE INYECTAR EL HTML
         const btnMenu = document.getElementById('btn-menu-usuario');
         const menu = document.getElementById('menu-usuario');
         const btnCerrar = document.getElementById('btn-cerrar-sesion');
@@ -117,21 +122,21 @@ function renderizarUsuarioHeader() {
             menu.classList.toggle('visible');
         });
 
-        // cerrar el menu al hacer click fuera
+        // CERRAR EL MENU AL HACER CLICK FUERA
         document.addEventListener('click', (e) => {
             if (!contenedor.contains(e.target)) {
                 menu.classList.remove('visible');
             }
         });
 
-        // cerrar el menu al presionar escape
+        // CERRAR EL MENU AL PRESIONAR ESCAPE
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 menu.classList.remove('visible');
             }
         });
 
-        // cerrar sesion
+        // CERRAR SESION
         btnCerrar.addEventListener('click', () => {
             if (confirm('Estas seguro de que queres cerrar sesion?')) {
                 cerrarSesionUsuario();
@@ -139,10 +144,10 @@ function renderizarUsuarioHeader() {
             }
         });
 
-        // actualizar el contador del carrito
+        // ACTUALIZAR EL CONTADOR DEL CARRITO
         actualizarContadorCarrito();
 
-        // escuchar el evento global de "carrito actualizado"
+        // ESCUCHAR EL EVENTO GLOBAL DE "CARRITO ACTUALIZADO"
         document.addEventListener('carritoActualizado', actualizarContadorCarrito);
 
         // refrescar cada 60 segundos por las dudas

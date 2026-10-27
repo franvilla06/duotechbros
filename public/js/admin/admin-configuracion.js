@@ -10,8 +10,8 @@ const btnRefresh = document.getElementById('btn-refresh');
 const btnCancelar = document.getElementById('btn-cancelar');
 const btnGuardar = document.getElementById('btn-guardar');
 
-// lista de todos los campos del formulario
-// se usan para leer/rellenar de forma generica
+// LISTA DE TODOS LOS CAMPOS DEL FORMULARIO
+// SE USAN PARA LEER/RELLENAR DE FORMA GENERICA
 const CAMPOS = [
     'marca_nombre',
     'contacto_email',
@@ -30,12 +30,13 @@ const CAMPOS = [
     'horario_domingo',
 ];
 
-// configuracion original cargada desde el servidor
-// sirve para detectar cambios sin guardar
+// CONFIGURACION ORIGINAL CARGADA DESDE EL SERVIDOR
+// SIRVE PARA DETECTAR CAMBIOS SIN GUARDAR
 let configOriginal = {};
 
 // UTILIDADES
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, esError = false) {
     const anterior = document.getElementById('toast-admin');
     if (anterior) anterior.remove();
@@ -53,7 +54,7 @@ function mostrarToast(mensaje, esError = false) {
     }, 3000);
 }
 
-// rellena el formulario con los valores de configuracion
+// completa los campos del formulario con los datos recibidos.
 function rellenarFormulario(config) {
     CAMPOS.forEach((campo) => {
         const input = document.getElementById(campo);
@@ -63,7 +64,7 @@ function rellenarFormulario(config) {
     });
 }
 
-// lee los valores actuales del formulario
+// obtiene los valores actuales de los campos del formulario.
 function leerFormulario() {
     const datos = {};
     CAMPOS.forEach((campo) => {
@@ -75,7 +76,7 @@ function leerFormulario() {
     return datos;
 }
 
-// detecta si el formulario tiene cambios respecto a la config original
+// indica si el formulario difiere de la configuraci?n original.
 function hayCambios() {
     const actual = leerFormulario();
     return CAMPOS.some((campo) => {
@@ -87,6 +88,7 @@ function hayCambios() {
 
 // CARGA DE DATOS
 
+// solicita la configuraci?n y la muestra en el formulario.
 async function cargarConfiguracion() {
     estadoCargando.style.display = 'block';
     form.style.display = 'none';
@@ -135,7 +137,7 @@ form.addEventListener('submit', async (e) => {
         if (resultado.success) {
             mostrarToast('Configuración guardada correctamente.');
 
-            // actualizar la referencia original con los nuevos valores
+            // ACTUALIZAR LA REFERENCIA ORIGINAL CON LOS NUEVOS VALORES
             configOriginal = { ...datos };
         } else {
             mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);

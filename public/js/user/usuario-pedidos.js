@@ -21,7 +21,7 @@ const estadoSinResultados = document.getElementById('estado-sin-resultados');
 const estadoError = document.getElementById('estado-error');
 const pedidosLista = document.getElementById('pedidos-lista');
 
-// modal
+// MODAL
 const modalDetalle = document.getElementById('modal-detalle');
 const modalClose = document.getElementById('modal-close');
 const modalPedidoId = document.getElementById('modal-pedido-id');
@@ -41,6 +41,7 @@ let pedidoDetalleActual = null;
 
 // UTILIDADES DE SESION
 
+// indica si hay una sesi?n de usuario activa.
 function estaLogueadoUsuario() {
     return (
         sessionStorage.getItem('usuarioLogueado') === 'true' &&
@@ -48,14 +49,17 @@ function estaLogueadoUsuario() {
     );
 }
 
+// obtiene los datos del usuario guardados en la sesi?n.
 function obtenerUsuarioActual() {
     return sessionStorage.getItem('usuarioNombre') || '';
 }
 
+// obtiene el token de autenticaci?n del usuario.
 function obtenerTokenUsuario() {
     return sessionStorage.getItem('usuarioToken') || '';
 }
 
+// elimina los datos de sesi?n del usuario.
 function cerrarSesionUsuario() {
     sessionStorage.removeItem('usuarioLogueado');
     sessionStorage.removeItem('usuarioNombre');
@@ -64,6 +68,7 @@ function cerrarSesionUsuario() {
 
 // UTILIDADES GENERALES
 
+// escapa el texto para insertarlo de forma segura en HTML.
 function escapar(texto) {
     if (texto === null || texto === undefined) return '';
     const div = document.createElement('div');
@@ -71,12 +76,14 @@ function escapar(texto) {
     return div.innerHTML;
 }
 
+// formatea el precio como importe monetario.
 function formatearPrecio(precio) {
     const num = Number(precio);
     if (isNaN(num)) return '$0.00';
     return `$${num.toFixed(2)}`;
 }
 
+// convierte la fecha al formato utilizado en la interfaz.
 function formatearFecha(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO.replace(' ', 'T'));
@@ -90,25 +97,30 @@ function formatearFecha(fechaISO) {
     return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
 }
 
+// unifica el formato del estado para facilitar su comparaci?n.
 function normalizarEstado(estado) {
     return (estado || 'pendiente').toLowerCase().trim().replace(/\s+/g, '-');
 }
 
+// elige la clase visual del distintivo seg?n el estado.
 function claseBadgeEstado(estado) {
     const e = normalizarEstado(estado);
     const validos = ['pendiente', 'en-proceso', 'completado', 'cancelado'];
     return validos.includes(e) ? `badge-${e}` : 'badge-pendiente';
 }
 
+// convierte la primera letra del texto a may?scula.
 function capitalizar(texto) {
     if (!texto) return '';
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+// indica si el pedido corresponde a una reparaci?n.
 function esReparacion(pedido) {
     return (pedido.tipo || 'reparacion') === 'reparacion';
 }
 
+// muestra una notificaci?n temporal con el mensaje indicado.
 function mostrarToast(mensaje, tipo = 'exito') {
     const anterior = document.getElementById('toast-publico');
     if (anterior) anterior.remove();
@@ -128,6 +140,7 @@ function mostrarToast(mensaje, tipo = 'exito') {
 
 // FILTROS
 
+// crea los controles para filtrar los elementos por tipo.
 function construirFiltrosTipo() {
     filtrosTipo.innerHTML = '';
 
@@ -154,6 +167,7 @@ function construirFiltrosTipo() {
     });
 }
 
+// crea los controles para filtrar los elementos por estado.
 function construirFiltrosEstado() {
     filtrosEstado.innerHTML = '';
 
@@ -176,6 +190,7 @@ function construirFiltrosEstado() {
     });
 }
 
+// actualiza el bot?n para reflejar si hay filtros activos.
 function actualizarBotonLimpiar() {
     const hayFiltro =
         tipoFiltroActivo !== 'Todos' ||
@@ -184,6 +199,7 @@ function actualizarBotonLimpiar() {
     btnLimpiar.disabled = !hayFiltro;
 }
 
+// filtra los elementos seg?n los criterios seleccionados.
 function aplicarFiltros() {
     estadoVacio.style.display = 'none';
     estadoSinResultados.style.display = 'none';
@@ -237,12 +253,14 @@ function aplicarFiltros() {
     actualizarBotonLimpiar();
 }
 
+// actualiza el contador de elementos mostrados.
 function actualizarContador(cantidad) {
     contadorTexto.textContent = `${cantidad} pedido${cantidad !== 1 ? 's' : ''}`;
 }
 
 // RENDERIZADO
 
+// muestra los pedidos con sus datos y acciones disponibles.
 function renderizarPedidos(pedidos) {
     pedidosLista.innerHTML = '';
 
@@ -284,6 +302,7 @@ function renderizarPedidos(pedidos) {
     });
 }
 
+// muestra u oculta el detalle de la tarjeta del pedido.
 function togglePedidoCard(id) {
     if (window.innerWidth > 700) return;
 
@@ -299,6 +318,7 @@ function togglePedidoCard(id) {
     }
 }
 
+// genera la tarjeta de un pedido de reparaci?n.
 function generarCardReparacion(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
     const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
@@ -367,6 +387,7 @@ function generarCardReparacion(pedido) {
     `;
 }
 
+// genera la tarjeta de un pedido de compra.
 function generarCardCompra(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
     const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
@@ -441,11 +462,13 @@ function generarCardCompra(pedido) {
 
 // EXPORTAR A PDF
 
+// calcula la fecha correspondiente a la cantidad de meses indicada.
 function fechaHaceMeses(meses) {
     const hoy = new Date();
     return new Date(hoy.getFullYear(), hoy.getMonth() - meses, hoy.getDate());
 }
 
+// convierte la fecha al formato corto utilizado en la interfaz.
 function formatearFechaCorta(fechaISO) {
     if (!fechaISO) return '—';
     const fecha = new Date(String(fechaISO).replace(' ', 'T'));
@@ -455,6 +478,7 @@ function formatearFechaCorta(fechaISO) {
     return `${pad(fecha.getDate())}/${pad(fecha.getMonth() + 1)}/${fecha.getFullYear()}`;
 }
 
+// construye el detalle del pedido que se incluir? en el PDF.
 function detalleParaPDF(pedido) {
     if (esReparacion(pedido)) {
         const modelo = pedido.modelo_celular || 'Sin modelo';
@@ -467,6 +491,7 @@ function detalleParaPDF(pedido) {
     return `${productos} producto${productos !== 1 ? 's' : ''} (${unidades} unidad${unidades !== 1 ? 'es' : ''})`;
 }
 
+// calcula el importe que se incluir? en el PDF.
 function montoParaPDF(pedido) {
     if (esReparacion(pedido)) {
         if (pedido.presupuesto === null || pedido.presupuesto === undefined) {
@@ -477,6 +502,7 @@ function montoParaPDF(pedido) {
     return formatearPrecio(pedido.total_precio);
 }
 
+// genera un PDF con los pedidos seleccionados.
 async function exportarPedidosPDF() {
     if (!window.jspdf || !window.jspdf.jsPDF) {
         mostrarToast('No se pudo cargar la libreria de PDF. Revisa tu conexion.', 'error');
@@ -668,6 +694,7 @@ async function exportarPedidosPDF() {
 
 // CARGAR PEDIDOS
 
+// solicita los pedidos y actualiza la vista.
 async function cargarPedidos() {
     estadoCargando.style.display = 'block';
     estadoVacio.style.display = 'none';
@@ -715,6 +742,7 @@ async function cargarPedidos() {
 
 // MODAL DE DETALLE
 
+// muestra el detalle del pedido seleccionado.
 async function abrirModalDetalle(pedidoId) {
     modalPedidoId.textContent = `#${String(pedidoId).padStart(4, '0')}`;
     modalInfo.innerHTML = '<p class="pedido-modal-cargando"><i class="fas fa-spinner fa-spin"></i> Cargando...</p>';
@@ -761,14 +789,14 @@ async function abrirModalDetalle(pedidoId) {
     }
 }
 
-// renderiza los botones de accion del modal
+// RENDERIZA LOS BOTONES DE ACCION DEL MODAL
 // "Cancelar" solo si esta pendiente
-// "Volver a pedir" solo si es compra y no esta cancelado
+// muestra las acciones permitidas para el pedido.
 function renderizarAccionesPedido(pedido) {
     const estado = (pedido.estado || 'pendiente').toLowerCase().trim();
     const botones = [];
 
-    // boton repetir (solo compras no canceladas)
+    // BOTON REPETIR (solo compras no canceladas)
     if (!esReparacion(pedido) && estado !== 'cancelado') {
         botones.push(`
             <button type="button" class="pedido-btn-repetir" id="btn-repetir-pedido">
@@ -777,7 +805,7 @@ function renderizarAccionesPedido(pedido) {
         `);
     }
 
-    // boton cancelar (solo si esta pendiente)
+    // BOTON CANCELAR (solo si esta pendiente)
     if (estado === 'pendiente') {
         botones.push(`
             <button type="button" class="pedido-btn-cancelar" id="btn-cancelar-pedido">
@@ -786,7 +814,7 @@ function renderizarAccionesPedido(pedido) {
         `);
     }
 
-    // mensaje explicativo segun el caso
+    // MENSAJE EXPLICATIVO SEGUN EL CASO
     let aclaracion = '';
     if (estado === 'pendiente' && !esReparacion(pedido)) {
         aclaracion = 'Podes cancelar el pedido o volver a pedir los mismos productos.';
@@ -808,7 +836,7 @@ function renderizarAccionesPedido(pedido) {
         ${aclaracion ? `<p class="pedido-modal-aclaracion"><i class="fas fa-info-circle"></i> ${aclaracion}</p>` : ''}
     `;
 
-    // asignar eventos
+    // ASIGNAR EVENTOS
     const btnRepetir = document.getElementById('btn-repetir-pedido');
     if (btnRepetir) {
         btnRepetir.addEventListener('click', () => repetirPedido(pedido.id));
@@ -820,6 +848,7 @@ function renderizarAccionesPedido(pedido) {
     }
 }
 
+// muestra los datos espec?ficos de la reparaci?n.
 function renderizarDetalleReparacion(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
 
@@ -893,6 +922,7 @@ function renderizarDetalleReparacion(pedido) {
     }
 }
 
+// muestra los datos espec?ficos de la compra.
 function renderizarDetalleCompra(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
 
@@ -960,6 +990,7 @@ function renderizarDetalleCompra(pedido) {
     `;
 }
 
+// cierra la ventana con el detalle del pedido.
 function cerrarModalDetalle() {
     modalDetalle.classList.remove('modal-visible');
     pedidoDetalleActual = null;
@@ -967,6 +998,7 @@ function cerrarModalDetalle() {
 
 // CANCELAR PEDIDO
 
+// solicita la cancelaci?n del pedido seleccionado.
 async function cancelarPedido(pedidoId) {
     const confirmar = confirm(
         'Estas seguro de que queres cancelar este pedido?\n\n' +
@@ -1019,8 +1051,9 @@ async function cancelarPedido(pedidoId) {
 
 // REPETIR PEDIDO
 
+// agrega nuevamente al carrito los productos del pedido.
 async function repetirPedido(pedidoId) {
-    // identificar el boton que disparo la accion (puede estar en la tarjeta o en el modal)
+    // IDENTIFICAR EL BOTON QUE DISPARO LA ACCION (puede estar en la tarjeta o en el modal)
     const btnModal = document.getElementById('btn-repetir-pedido');
     const btnCard = document.querySelector(`.pedido-btn-repetir-card[data-id="${pedidoId}"]`);
 
@@ -1054,10 +1087,10 @@ async function repetirPedido(pedidoId) {
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            // cerrar el modal si estaba abierto
+            // CERRAR EL MODAL SI ESTABA ABIERTO
             cerrarModalDetalle();
 
-            // armar mensaje
+            // ARMAR MENSAJE
             const cantidad = resultado.agregados || 0;
             let mensaje = `Se agregaron ${cantidad} producto${cantidad !== 1 ? 's' : ''} al carrito.`;
 

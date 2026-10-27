@@ -1,5 +1,6 @@
 import * as estadisticasModel from '../models/estadisticas.model.js';
 
+// reúne las estadísticas del panel para el período solicitado
 export const obtenerEstadisticas = async (req, res) => {
     try {
         const pool = req.app.locals.pool;

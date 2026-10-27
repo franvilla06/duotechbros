@@ -1,9 +1,9 @@
 // CARRUSEL DE IMAGENES REUTILIZABLE
 // se usa en la tienda y en el portafolio del sitio publico
 // si hay una sola imagen, se muestra sin flechas ni puntitos
-// si hay varias, se muestran flechas (al hover) y puntitos (siempre visibles)
+// SI HAY VARIAS, SE MUESTRAN FLECHAS (al hover)
 
-// escapa un string para usarlo seguro dentro de un atributo html
+// escapa el texto para insertarlo de forma segura en un atributo HTML.
 function escaparAtributo(texto) {
     if (texto === null || texto === undefined) return '';
     return String(texto)
@@ -15,8 +15,8 @@ function escaparAtributo(texto) {
 }
 
 // construye el html de un carrusel a partir de un array de urls
-// imagenes: array de urls (puede venir vacio)
-// alt: texto alternativo base para las imagenes
+// IMAGENES: ARRAY DE URLS (puede venir vacio)
+// genera el marcado del carrusel con las im?genes recibidas.
 function construirCarruselHTML(imagenes, alt = 'Imagen') {
     const urls = (imagenes || [])
         .filter((url) => typeof url === 'string' && url.trim() !== '')
@@ -25,7 +25,7 @@ function construirCarruselHTML(imagenes, alt = 'Imagen') {
     // sin imagenes: devolvemos string vacio para que el llamador use su placeholder
     if (urls.length === 0) return '';
 
-    // una sola imagen: sin flechas ni puntitos
+    // UNA SOLA IMAGEN: SIN FLECHAS NI PUNTITOS
     if (urls.length === 1) {
         return `
             <div class="carrusel carrusel-simple">
@@ -97,9 +97,9 @@ function construirCarruselHTML(imagenes, alt = 'Imagen') {
     `;
 }
 
-// inicializa un carrusel individual (conecta flechas y puntitos)
+// configura los controles y el estado inicial del carrusel.
 function inicializarCarrusel(carrusel) {
-    // evitar doble inicializacion
+    // EVITAR DOBLE INICIALIZACION
     if (carrusel.dataset.carruselInicializado === 'true') return;
     carrusel.dataset.carruselInicializado = 'true';
 
@@ -113,8 +113,9 @@ function inicializarCarrusel(carrusel) {
 
     let indiceActual = 0;
 
+    // actualiza la imagen visible en el carrusel.
     function mostrarImagen(nuevoIndice) {
-        // loop circular
+        // LOOP CIRCULAR
         indiceActual = (nuevoIndice + imagenes.length) % imagenes.length;
 
         imagenes.forEach((img, i) => {
@@ -147,8 +148,8 @@ function inicializarCarrusel(carrusel) {
     });
 }
 
-// inicializa todos los carruseles dentro de un contenedor
-// por defecto busca en todo el documento
+// INICIALIZA TODOS LOS CARRUSELES DENTRO DE UN CONTENEDOR
+// inicializa los carruseles encontrados en la p?gina.
 function inicializarCarruseles(raiz = document) {
     raiz.querySelectorAll('[data-carrusel]').forEach(inicializarCarrusel);
 }

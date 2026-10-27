@@ -1,3 +1,4 @@
+// registra un pedido con los datos del cliente y su tipo
 export const crear = async (pool, pedido) => {
     const [result] = await pool.query(
         `INSERT INTO pedidos (nombre_cliente, telefono, email, modelo_celular, descripcion_problema, usuario_id, tipo)
@@ -15,6 +16,7 @@ export const crear = async (pool, pedido) => {
     return { insertId: result.insertId };
 };
 
+// lista los pedidos, opcionalmente filtrados por tipo
 export const listar = async (pool, tipo = null) => {
     if (tipo) {
         const [rows] = await pool.query(
@@ -27,6 +29,7 @@ export const listar = async (pool, tipo = null) => {
     return rows;
 };
 
+// restaura el stock de los productos incluidos en un pedido
 const restaurarStockPedido = async (conexion, pedidoId) => {
     const [items] = await conexion.query(
         'SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?',
@@ -43,6 +46,7 @@ const restaurarStockPedido = async (conexion, pedidoId) => {
     }
 };
 
+// actualiza el estado del pedido y devuelve el stock si una compra se cancela
 export const actualizarEstado = async (pool, id, nuevoEstado) => {
     const conexion = await pool.getConnection();
     try {
@@ -99,11 +103,13 @@ export const actualizarEstado = async (pool, id, nuevoEstado) => {
     }
 };
 
+// actualiza las notas asociadas a un pedido
 export const actualizarNotas = async (pool, id, notas) => {
     const [result] = await pool.query('UPDATE pedidos SET notas = ? WHERE id = ?', [notas, id]);
     return { affectedRows: result.affectedRows };
 };
 
+// guarda el presupuesto asociado a un pedido
 export const actualizarPresupuesto = async (pool, id, presupuesto) => {
     const [result] = await pool.query(
         'UPDATE pedidos SET presupuesto = ? WHERE id = ?',
@@ -112,11 +118,13 @@ export const actualizarPresupuesto = async (pool, id, presupuesto) => {
     return { affectedRows: result.affectedRows };
 };
 
+// elimina un pedido por su identificador
 export const eliminar = async (pool, id) => {
     const [result] = await pool.query('DELETE FROM pedidos WHERE id = ?', [id]);
     return { affectedRows: result.affectedRows };
 };
 
+// crea un pedido de productos asociado a la cuenta de un usuario
 export const crearPedidoDeUsuario = async (pool, pedido) => {
     const [result] = await pool.query(
         `INSERT INTO pedidos (
@@ -137,6 +145,7 @@ export const crearPedidoDeUsuario = async (pool, pedido) => {
     return { insertId: result.insertId };
 };
 
+// agrega un producto al detalle de un pedido
 export const insertarItem = async (pool, item) => {
     await pool.query(
         `INSERT INTO pedido_items (pedido_id, producto_id, nombre_producto, precio_unitario, cantidad, subtotal)
@@ -154,6 +163,7 @@ export const insertarItem = async (pool, item) => {
 
 // HISTORIAL DEL USUARIO
 
+// lista el historial del usuario con cantidades y totales agregados
 export const listarPorUsuario = async (pool, usuarioId) => {
     const [rows] = await pool.query(
         `SELECT
@@ -172,6 +182,7 @@ export const listarPorUsuario = async (pool, usuarioId) => {
     return rows;
 };
 
+// obtiene un pedido solo si pertenece al usuario indicado
 export const obtenerPedidoDeUsuario = async (pool, pedidoId, usuarioId) => {
     const [rows] = await pool.query(
         `SELECT id, estado, creado_en, notas, tipo, modelo_celular,
@@ -183,6 +194,7 @@ export const obtenerPedidoDeUsuario = async (pool, pedidoId, usuarioId) => {
     return rows[0] || null;
 };
 
+// lista los productos incluidos en un pedido
 export const listarItemsDePedido = async (pool, pedidoId) => {
     const [rows] = await pool.query(
         `SELECT id, producto_id, nombre_producto, precio_unitario, cantidad, subtotal
@@ -196,6 +208,7 @@ export const listarItemsDePedido = async (pool, pedidoId) => {
 
 // DETALLE COMPLETO PARA EL ADMIN
 
+// obtiene el pedido con sus productos, cantidades y total calculado
 export const obtenerPedidoConItems = async (pool, pedidoId) => {
     const [rows] = await pool.query(
         `SELECT
@@ -226,8 +239,9 @@ export const obtenerPedidoConItems = async (pool, pedidoId) => {
     };
 };
 
-// CANCELAR UN PEDIDO DEL USUARIO (con transaccion)
+// CANCELAR UN PEDIDO DEL USUARIO
 
+// cancela un pedido pendiente dentro de una transacción y restaura el stock
 export const cancelarPedidoDeUsuario = async (pool, pedidoId, usuarioId) => {
     const conexion = await pool.getConnection();
     try {
@@ -254,7 +268,7 @@ export const cancelarPedidoDeUsuario = async (pool, pedidoId, usuarioId) => {
             await restaurarStockPedido(conexion, pedidoId);
         }
 
-        // cambiar estado
+        // marca el pedido como cancelado después de restaurar el stock
         await conexion.query("UPDATE pedidos SET estado = 'cancelado' WHERE id = ?", [pedidoId]);
 
         await conexion.commit();

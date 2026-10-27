@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { authConfig } from '../config/auth.config.js';
 
+// genera un token firmado con el rol, el usuario y la versión de sus credenciales
 export const generarToken = (rol, usuario, tokenVersion = 0) => {
     const timestamp = Date.now();
     const version = tokenVersion || 0;
@@ -12,6 +13,7 @@ export const generarToken = (rol, usuario, tokenVersion = 0) => {
     return `${rol}.${usuario}.${timestamp}.${version}.${hash}`;
 };
 
+// valida la estructura, vigencia, rol y firma del token recibido
 export const verificarToken = (token, rolEsperado) => {
     if (!token || typeof token !== 'string') return false;
 
@@ -43,6 +45,7 @@ export const verificarToken = (token, rolEsperado) => {
     return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(hashEsperado));
 };
 
+// extrae los datos de identidad y versión almacenados en un token
 export const extraerDatosToken = (token) => {
     if (!token || typeof token !== 'string') return null;
 

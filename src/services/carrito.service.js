@@ -7,6 +7,7 @@ import * as emailService from './email.service.js';
 
 // ENVIAR PEDIDO
 
+// valida stock y registra la compra junto con sus artículos en una transacción
 export const enviarPedido = async (pool, nombreUsuario) => {
     const usuarioId = await carritoModel.obtenerUsuarioId(pool, nombreUsuario);
     if (!usuarioId) {
@@ -119,6 +120,7 @@ export const enviarPedido = async (pool, nombreUsuario) => {
         const emailDestino = emailCliente || emailAdmin;
 
         if (emailDestino || emailAdmin) {
+            // envía las notificaciones después de confirmar la compra
             setImmediate(async () => {
                 try {
                     await emailService.enviarCompraYNotificacion({
@@ -157,6 +159,7 @@ export const enviarPedido = async (pool, nombreUsuario) => {
 
 // REPETIR PEDIDO
 
+// agrega al carrito los productos disponibles de una compra anterior
 export const repetirPedido = async (pool, nombreUsuario, pedidoId) => {
     const usuarioId = await carritoModel.obtenerUsuarioId(pool, nombreUsuario);
     if (!usuarioId) {

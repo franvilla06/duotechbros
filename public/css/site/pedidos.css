@@ -1,6 +1,4 @@
-/* ============================================================
-   ESTILOS DE LA PAGINA DE PEDIDOS - DUOTECHBROS
-   ============================================================ */
+/* ESTILOS DE LA PAGINA DE PEDIDOS - DUOTECHBROS */
 
 /* BASE */
 
@@ -12,9 +10,7 @@ body {
     padding: 0;
 }
 
-/* ============================================================
-   CONTENEDOR PRINCIPAL
-   ============================================================ */
+/* CONTENEDOR PRINCIPAL */
 
 .pedidos-main {
     max-width: 1200px;
@@ -22,9 +18,7 @@ body {
     padding: 40px 24px 60px;
 }
 
-/* ============================================================
-   TITULO
-   ============================================================ */
+/* TITULO */
 
 .pedidos-titulo {
     margin-bottom: 30px;
@@ -46,9 +40,7 @@ body {
     line-height: 1.6;
 }
 
-/* ============================================================
-   AVISO LOGIN
-   ============================================================ */
+/* AVISO LOGIN */
 
 .aviso-login {
     display: flex;
@@ -99,9 +91,7 @@ body {
     box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
 }
 
-/* ============================================================
-   GRID PRINCIPAL
-   ============================================================ */
+/* GRID PRINCIPAL */
 
 .pedidos-grid {
     display: grid;
@@ -110,9 +100,7 @@ body {
     align-items: start;
 }
 
-/* ============================================================
-   TARJETA DEL FORMULARIO
-   ============================================================ */
+/* TARJETA DEL FORMULARIO */
 
 .pedidos-form-card {
     background-color: var(--bg-surface);
@@ -127,7 +115,7 @@ body {
     gap: 18px;
 }
 
-/* Filas del formulario */
+/* FILAS DEL FORMULARIO */
 
 .form-fila-full {
     display: flex;
@@ -147,7 +135,7 @@ body {
     gap: 8px;
 }
 
-/* Labels */
+/* LABELS */
 
 .pedidos-form-card label {
     font-size: 0.85rem;
@@ -156,7 +144,7 @@ body {
     letter-spacing: 0.01em;
 }
 
-/* Inputs */
+/* INPUTS */
 
 .pedidos-form-card input,
 .pedidos-form-card textarea {
@@ -186,14 +174,14 @@ body {
     line-height: 1.5;
 }
 
-/* Placeholder */
+/* PLACEHOLDER */
 
 .pedidos-form-card input::placeholder,
 .pedidos-form-card textarea::placeholder {
     color: #8aa7b2;
 }
 
-/* Boton */
+/* BOTON */
 
 .pedidos-btn-enviar {
     background: linear-gradient(135deg, var(--color-primary-teal) 0%, var(--color-primary-dark) 100%);
@@ -223,7 +211,7 @@ body {
     cursor: not-allowed;
 }
 
-/* Nota bajo el boton */
+/* NOTA BAJO EL BOTON */
 
 .pedidos-form-nota {
     font-size: 0.75rem;
@@ -242,7 +230,7 @@ body {
     font-size: 0.8rem;
 }
 
-/* Mensaje de exito/error */
+/* MENSAJE DE EXITO/ERROR */
 
 .mensaje {
     margin-top: 8px;
@@ -267,9 +255,7 @@ body {
     border: 1px solid #f5c6cb;
 }
 
-/* ============================================================
-   SIDEBAR
-   ============================================================ */
+/* SIDEBAR */
 
 .pedidos-sidebar {
     display: flex;
@@ -277,7 +263,7 @@ body {
     gap: 20px;
 }
 
-/* Tarjeta de contacto */
+/* TARJETA DE CONTACTO */
 
 .contacto-card {
     background-color: var(--bg-surface);
@@ -361,7 +347,7 @@ body {
     word-break: break-word;
 }
 
-/* Tarjeta de horarios (oscura) */
+/* TARJETA DE HORARIOS (oscura) */
 
 .horario-card {
     background: linear-gradient(135deg, var(--color-primary-dark) 0%, #083b50 100%);
@@ -444,9 +430,7 @@ body {
     opacity: 0.9;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* RESPONSIVE */
 
 @media (max-width: 900px) {
     .pedidos-grid {

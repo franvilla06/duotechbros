@@ -1,12 +1,14 @@
 import * as carritoModel from '../models/carrito.model.js';
 import * as carritoService from '../services/carrito.service.js';
 
+// obtiene el identificador interno del usuario del carrito
 const obtenerUsuarioId = (pool, nombreUsuario) => {
     return carritoModel.obtenerUsuarioId(pool, nombreUsuario);
 };
 
 // AGREGAR AL CARRITO
 
+// valida el producto y agrega su cantidad al carrito del usuario
 export const agregarAlCarrito = async (req, res) => {
     const { producto_id, cantidad } = req.body;
 
@@ -65,6 +67,7 @@ export const agregarAlCarrito = async (req, res) => {
 
 // LISTAR EL CARRITO
 
+// devuelve los artículos del carrito con subtotales y un resumen
 export const listarCarrito = async (req, res) => {
     try {
         const pool = req.app.locals.pool;
@@ -100,6 +103,7 @@ export const listarCarrito = async (req, res) => {
 
 // CAMBIAR CANTIDAD
 
+// actualiza la cantidad de un artículo o lo elimina si recibe cero
 export const cambiarCantidad = async (req, res) => {
     const { id } = req.params;
     const { cantidad } = req.body;
@@ -142,6 +146,7 @@ export const cambiarCantidad = async (req, res) => {
 
 // ELIMINAR ITEM
 
+// elimina un artículo del carrito del usuario autenticado
 export const eliminarItem = async (req, res) => {
     const { id } = req.params;
 
@@ -169,6 +174,7 @@ export const eliminarItem = async (req, res) => {
 
 // VACIAR CARRITO
 
+// elimina todos los artículos del carrito del usuario autenticado
 export const vaciarCarrito = async (req, res) => {
     try {
         const pool = req.app.locals.pool;
@@ -192,6 +198,7 @@ export const vaciarCarrito = async (req, res) => {
 
 // ENVIAR PEDIDO
 
+// procesa el carrito como un pedido y devuelve el resultado del servicio
 export const enviarPedido = async (req, res) => {
     try {
         const resultado = await carritoService.enviarPedido(req.app.locals.pool, req.usuario);
