@@ -14,6 +14,9 @@ const __dirname = path.dirname(__filename);
 
 export const app = express();
 
+// Confiar en el proxy de Render para obtener la IP real del cliente
+app.set('trust proxy', 1);
+
 // expone el pool de conexiones para que lo usen los controladores
 app.locals.pool = obtenerPool();
 
