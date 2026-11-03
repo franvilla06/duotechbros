@@ -5384,3 +5384,74 @@ table.admin-table tbody tr.pedido-detalle-fila {
     text-overflow: ellipsis;
     white-space: normal;
 }
+
+.upload-zone {
+    border: 2px dashed #c0c7cd;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f7feff;
+    transition: all 0.2s ease;
+    color: #0b4a62;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover,
+.upload-zone:focus-visible {
+    border-color: #007bff;
+    background-color: #e8f4ff;
+    outline: none;
+}
+
+.upload-zone i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 8px;
+}
+
+.upload-zone p {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.upload-zone span {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.archivos-preview {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.archivo-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background-color: #f0f4f8;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    border: 1px solid #e0eaf0;
+}
+
+.archivo-item .nombre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.archivo-item .quitar-archivo {
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 4px;
+}

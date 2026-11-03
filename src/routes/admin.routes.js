@@ -4,6 +4,7 @@ import * as adminController from '../controllers/admin.controller.js';
 import * as configuracionController from '../controllers/configuracion.controller.js';
 import * as estadisticasController from '../controllers/estadisticas.controller.js';
 import { requiereAuth } from '../middlewares/auth.middleware.js';
+import { upload } from '../middlewares/upload.middleware.js';
 
 const router = express.Router();
 
@@ -11,13 +12,13 @@ const router = express.Router();
 router.use(requiereAuth);
 
 // PRODUCTOS
-router.post('/productos', adminController.crearProducto);
-router.put('/productos/:id', adminController.actualizarProducto);
+router.post('/productos', upload.array('imagenes_archivos', 5), adminController.crearProducto);
+router.put('/productos/:id', upload.array('imagenes_archivos', 5), adminController.actualizarProducto);
 router.delete('/productos/:id', adminController.eliminarProducto);
 
 // PORTAFOLIO
-router.post('/portafolio', adminController.crearTrabajo);
-router.put('/portafolio/:id', adminController.actualizarTrabajo);
+router.post('/portafolio', upload.array('imagenes_archivos', 5), adminController.crearTrabajo);
+router.put('/portafolio/:id', upload.array('imagenes_archivos', 5), adminController.actualizarTrabajo);
 router.delete('/portafolio/:id', adminController.eliminarTrabajo);
 
 // PEDIDOS

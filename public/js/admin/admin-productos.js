@@ -25,12 +25,110 @@ const btnCancelar = document.getElementById('btn-cancelar');
 const btnActualizar = document.getElementById('btn-actualizar');
 
 const MAX_IMAGENES_ADICIONALES = 4;
+const MAX_ARCHIVOS_SUBIDA = 5;
 const imagenesListaForm = document.getElementById('imagenes-lista-form');
 const btnAgregarImagenForm = document.getElementById('btn-agregar-imagen-form');
 const contadorImagenesForm = document.getElementById('contador-imagenes-form');
 const imagenesListaEdit = document.getElementById('imagenes-lista-edit');
 const btnAgregarImagenEdit = document.getElementById('btn-agregar-imagen-edit');
 const contadorImagenesEdit = document.getElementById('contador-imagenes-edit');
+
+const conectarZonaSubida = (zonaId, inputId, listaId, formId) => {
+    const zona = document.getElementById(zonaId);
+    const input = document.getElementById(inputId);
+    const lista = document.getElementById(listaId);
+    const form = document.getElementById(formId);
+    if (!zona || !input || !lista || !form) return;
+
+    const mostrarArchivos = () => {
+        lista.replaceChildren();
+        Array.from(input.files).forEach((archivo, indice) => {
+            const item = document.createElement('div');
+            item.className = 'archivo-item';
+
+            const nombre = document.createElement('span');
+            nombre.className = 'nombre';
+            nombre.textContent = archivo.name;
+
+            const quitar = document.createElement('button');
+            quitar.type = 'button';
+            quitar.className = 'quitar-archivo';
+            quitar.setAttribute('aria-label', `Quitar ${archivo.name}`);
+            quitar.innerHTML = '<i class="fas fa-times"></i>';
+            quitar.addEventListener('click', () => {
+                const archivos = Array.from(input.files);
+                archivos.splice(indice, 1);
+                const transferencia = new DataTransfer();
+                archivos.forEach((archivoActual) => transferencia.items.add(archivoActual));
+                input.files = transferencia.files;
+                mostrarArchivos();
+            });
+
+            item.append(nombre, quitar);
+            lista.append(item);
+        });
+    };
+
+    const validarArchivos = (archivos) => {
+        if (archivos.length > MAX_ARCHIVOS_SUBIDA) {
+            mostrarToast(`Máximo ${MAX_ARCHIVOS_SUBIDA} imágenes permitidas.`, true);
+            return false;
+        }
+        if (archivos.some((archivo) => archivo.size > 2 * 1024 * 1024)) {
+            mostrarToast('Cada imagen debe pesar como máximo 2MB.', true);
+            return false;
+        }
+        return true;
+    };
+
+    zona.addEventListener('click', (evento) => {
+        if (evento.target !== input) input.click();
+    });
+    zona.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Enter' || evento.key === ' ') {
+            evento.preventDefault();
+            input.click();
+        }
+    });
+    zona.addEventListener('dragover', (evento) => {
+        evento.preventDefault();
+        zona.classList.add('dragover');
+    });
+    zona.addEventListener('dragleave', () => zona.classList.remove('dragover'));
+    zona.addEventListener('drop', (evento) => {
+        evento.preventDefault();
+        zona.classList.remove('dragover');
+        const archivos = [...input.files, ...evento.dataTransfer.files];
+        if (!validarArchivos(archivos)) return;
+        const transferencia = new DataTransfer();
+        archivos.forEach((archivo) => transferencia.items.add(archivo));
+        input.files = transferencia.files;
+        mostrarArchivos();
+    });
+    input.addEventListener('change', () => {
+        if (!validarArchivos(Array.from(input.files))) {
+            input.value = '';
+        }
+        mostrarArchivos();
+    });
+    form.addEventListener('reset', () => {
+        input.value = '';
+        lista.replaceChildren();
+    });
+};
+
+conectarZonaSubida(
+    'upload-zone-productos',
+    'imagenes_archivos',
+    'lista-archivos-seleccionados',
+    'form-producto'
+);
+conectarZonaSubida(
+    'upload-zone-edit-productos',
+    'edit-imagenes_archivos',
+    'lista-archivos-seleccionados-edit',
+    'form-editar'
+);
 
 const POR_PAGINA = 10;
 
@@ -570,21 +668,34 @@ async function cargarProductos() {
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const datos = {
-        nombre: document.getElementById('nombre').value.trim(),
-        descripcion: document.getElementById('descripcion').value.trim() || null,
-        precio: parseFloat(document.getElementById('precio').value),
-        stock: parseInt(document.getElementById('stock').value) || 0,
-        categoria: document.getElementById('categoria').value.trim() || null,
-        imagen_url: document.getElementById('imagen_url').value.trim() || null,
-        imagenes: obtenerImagenesDeLista('imagenes-lista-form'),
-    };
+    const formData = new FormData();
+    formData.append('nombre', document.getElementById('nombre').value.trim());
+    formData.append('descripcion', document.getElementById('descripcion').value.trim());
+    formData.append('precio', document.getElementById('precio').value);
+    formData.append('stock', document.getElementById('stock').value);
+    formData.append('categoria', document.getElementById('categoria').value.trim());
+    formData.append('imagen_url', document.getElementById('imagen_url').value.trim());
+    formData.append('imagenes', JSON.stringify(obtenerImagenesDeLista('imagenes-lista-form')));
 
-    if (!datos.nombre) {
+    const inputArchivos = document.getElementById('imagenes_archivos');
+    Array.from(inputArchivos.files).forEach((archivo) => {
+        formData.append('imagenes_archivos', archivo);
+    });
+
+    const totalImagenes = inputArchivos.files.length
+        + obtenerImagenesDeLista('imagenes-lista-form').length
+        + (formData.get('imagen_url') ? 1 : 0);
+    if (totalImagenes > MAX_ARCHIVOS_SUBIDA) {
+        mostrarToast('La imagen principal y las imágenes adicionales no pueden superar 5 en total.', true);
+        return;
+    }
+
+    if (!formData.get('nombre')) {
         mostrarToast('El nombre del producto es obligatorio.', true);
         return;
     }
-    if (isNaN(datos.precio) || datos.precio < 0) {
+    const precio = Number(formData.get('precio'));
+    if (!Number.isFinite(precio) || precio < 0) {
         mostrarToast('Ingresá un precio válido.', true);
         return;
     }
@@ -595,7 +706,7 @@ formProducto.addEventListener('submit', async (e) => {
     try {
         const respuesta = await fetchAdmin(API_ADMIN_PRODUCTOS, {
             method: 'POST',
-            body: JSON.stringify(datos),
+            body: formData,
         });
 
         const resultado = await respuesta.json();
@@ -666,21 +777,34 @@ formEditar.addEventListener('submit', async (e) => {
 
     const id = document.getElementById('edit-id').value;
 
-    const datos = {
-        nombre: document.getElementById('edit-nombre').value.trim(),
-        descripcion: document.getElementById('edit-descripcion').value.trim() || null,
-        precio: parseFloat(document.getElementById('edit-precio').value),
-        stock: parseInt(document.getElementById('edit-stock').value) || 0,
-        categoria: document.getElementById('edit-categoria').value.trim() || null,
-        imagen_url: document.getElementById('edit-imagen_url').value.trim() || null,
-        imagenes: obtenerImagenesDeLista('imagenes-lista-edit'),
-    };
+    const formData = new FormData();
+    formData.append('nombre', document.getElementById('edit-nombre').value.trim());
+    formData.append('descripcion', document.getElementById('edit-descripcion').value.trim());
+    formData.append('precio', document.getElementById('edit-precio').value);
+    formData.append('stock', document.getElementById('edit-stock').value);
+    formData.append('categoria', document.getElementById('edit-categoria').value.trim());
+    formData.append('imagen_url', document.getElementById('edit-imagen_url').value.trim());
+    formData.append('imagenes', JSON.stringify(obtenerImagenesDeLista('imagenes-lista-edit')));
 
-    if (!datos.nombre) {
+    const inputArchivosEdit = document.getElementById('edit-imagenes_archivos');
+    Array.from(inputArchivosEdit.files).forEach((archivo) => {
+        formData.append('imagenes_archivos', archivo);
+    });
+
+    const totalImagenesEdit = inputArchivosEdit.files.length
+        + obtenerImagenesDeLista('imagenes-lista-edit').length
+        + (formData.get('imagen_url') ? 1 : 0);
+    if (totalImagenesEdit > MAX_ARCHIVOS_SUBIDA) {
+        mostrarToast('La imagen principal y las imágenes adicionales no pueden superar 5 en total.', true);
+        return;
+    }
+
+    if (!formData.get('nombre')) {
         mostrarToast('El nombre del producto es obligatorio.', true);
         return;
     }
-    if (isNaN(datos.precio) || datos.precio < 0) {
+    const precio = Number(formData.get('precio'));
+    if (!Number.isFinite(precio) || precio < 0) {
         mostrarToast('Ingresá un precio válido.', true);
         return;
     }
@@ -691,7 +815,7 @@ formEditar.addEventListener('submit', async (e) => {
     try {
         const respuesta = await fetchAdmin(`${API_ADMIN_PRODUCTOS}/${id}`, {
             method: 'PUT',
-            body: JSON.stringify(datos),
+            body: formData,
         });
 
         const resultado = await respuesta.json();

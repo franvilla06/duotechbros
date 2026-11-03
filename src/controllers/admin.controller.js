@@ -3,6 +3,7 @@ import * as adminModel from '../models/admin.model.js';
 import * as productosModel from '../models/productos.model.js';
 import * as portafolioModel from '../models/portafolio.model.js';
 import * as pedidosModel from '../models/pedidos.model.js';
+import { subirImagenCloudinary } from '../middlewares/upload.middleware.js';
 import { generarToken } from '../utils/token.util.js';
 
 // valida y normaliza una lista de imágenes para guardarla como JSON
@@ -32,6 +33,33 @@ const normalizarImagenes = (imagenes) => {
         .slice(0, 4);
 
     return limpias.length > 0 ? JSON.stringify(limpias) : null;
+};
+
+const combinarImagenesSubidas = async (archivos, imagenUrl, imagenes, carpeta) => {
+    let urlPrincipal = imagenUrl || null;
+    let imagenesFinales = imagenes;
+
+    if (archivos?.length) {
+        const urlsAdicionalesExistentes = imagenes ? JSON.parse(imagenes) : [];
+        const archivosPermitidos = 4 - urlsAdicionalesExistentes.length + (urlPrincipal ? 0 : 1);
+        if (archivos.length > archivosPermitidos) {
+            const error = new Error('La imagen principal y las imágenes adicionales no pueden superar 5 en total.');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const urlsSubidas = await Promise.all(
+            archivos.map((archivo) => subirImagenCloudinary(archivo.buffer, carpeta))
+        );
+
+        if (!urlPrincipal) {
+            urlPrincipal = urlsSubidas.shift() || null;
+        }
+
+        imagenesFinales = normalizarImagenes([...urlsSubidas, ...urlsAdicionalesExistentes]);
+    }
+
+    return { imagen_url: urlPrincipal, imagenes: imagenesFinales };
 };
 
 // PRODUCTOS
@@ -70,18 +98,24 @@ export const crearProducto = async (req, res) => {
     }
 
     try {
+        const imagenesFinales = await combinarImagenesSubidas(
+            req.files,
+            imagen_url,
+            imagenesNormalizadas,
+            'duotechbros/productos'
+        );
         const info = await productosModel.crear(req.app.locals.pool, {
             nombre,
             descripcion: descripcion || null,
             precio: precioNum,
-            imagen_url: imagen_url || null,
-            imagenes: imagenesNormalizadas,
+            imagen_url: imagenesFinales.imagen_url,
+            imagenes: imagenesFinales.imagenes,
             categoria: categoria || null,
             stock: stockNum,
         });
         return res.json({ success: true, id: info.insertId });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(error.statusCode || 500).json({ success: false, error: error.message });
     }
 };
 
@@ -121,12 +155,18 @@ export const actualizarProducto = async (req, res) => {
     }
 
     try {
+        const imagenesFinales = await combinarImagenesSubidas(
+            req.files,
+            imagen_url,
+            imagenesNormalizadas,
+            'duotechbros/productos'
+        );
         const info = await productosModel.actualizar(req.app.locals.pool, id, {
             nombre,
             descripcion: descripcion || null,
             precio: precioNum,
-            imagen_url: imagen_url || null,
-            imagenes: imagenesNormalizadas,
+            imagen_url: imagenesFinales.imagen_url,
+            imagenes: imagenesFinales.imagenes,
             categoria: categoria || null,
             stock: stockNum,
         });
@@ -137,7 +177,7 @@ export const actualizarProducto = async (req, res) => {
 
         return res.json({ success: true, message: 'Producto actualizado' });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(error.statusCode || 500).json({ success: false, error: error.message });
     }
 };
 
@@ -183,18 +223,24 @@ export const crearTrabajo = async (req, res) => {
     }
 
     try {
+        const imagenesFinales = await combinarImagenesSubidas(
+            req.files,
+            imagen_url,
+            imagenesNormalizadas,
+            'duotechbros/portafolio'
+        );
         const info = await portafolioModel.crear(req.app.locals.pool, {
             titulo,
             descripcion: descripcion || null,
-            imagen_url: imagen_url || null,
-            imagenes: imagenesNormalizadas,
+            imagen_url: imagenesFinales.imagen_url,
+            imagenes: imagenesFinales.imagenes,
             tipo_reparacion: tipo_reparacion || null,
             fecha_inicio: normalizarFecha(fecha_inicio),
             fecha_fin: normalizarFecha(fecha_fin),
         });
         return res.json({ success: true, id: info.insertId });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(error.statusCode || 500).json({ success: false, error: error.message });
     }
 };
 
@@ -217,11 +263,17 @@ export const actualizarTrabajo = async (req, res) => {
     }
 
     try {
+        const imagenesFinales = await combinarImagenesSubidas(
+            req.files,
+            imagen_url,
+            imagenesNormalizadas,
+            'duotechbros/portafolio'
+        );
         const info = await portafolioModel.actualizar(req.app.locals.pool, id, {
             titulo,
             descripcion: descripcion || null,
-            imagen_url: imagen_url || null,
-            imagenes: imagenesNormalizadas,
+            imagen_url: imagenesFinales.imagen_url,
+            imagenes: imagenesFinales.imagenes,
             tipo_reparacion: tipo_reparacion || null,
             fecha_inicio: normalizarFecha(fecha_inicio),
             fecha_fin: normalizarFecha(fecha_fin),
@@ -233,7 +285,7 @@ export const actualizarTrabajo = async (req, res) => {
 
         return res.json({ success: true, message: 'Trabajo actualizado' });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(error.statusCode || 500).json({ success: false, error: error.message });
     }
 };
 

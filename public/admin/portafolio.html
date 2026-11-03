@@ -76,7 +76,7 @@
           <section class="admin-card">
             <h2><i class="fas fa-plus-circle"></i> Añadir Nuevo Trabajo</h2>
 
-            <form class="admin-form" id="form-trabajo">
+            <form class="admin-form" id="form-trabajo" enctype="multipart/form-data">
               <div class="admin-form-group">
                 <label for="titulo">Título del trabajo *</label>
                 <input
@@ -130,6 +130,17 @@
                   name="imagen_url"
                   placeholder="https://ejemplo.com/imagen.jpg"
                 />
+              </div>
+
+              <div class="admin-form-group">
+                <label>Imágenes del trabajo</label>
+                <div class="upload-zone" id="upload-zone-portafolio" role="button" tabindex="0">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Hacé clic acá para subir imágenes</p>
+                  <span>(Máximo 5 fotos, 2MB por foto)</span>
+                  <input type="file" id="imagenes_archivos" name="imagenes_archivos" accept="image/*" multiple hidden />
+                </div>
+                <div id="lista-archivos-seleccionados" class="archivos-preview"></div>
               </div>
 
               <div class="admin-form-group">
@@ -241,7 +252,7 @@
           </button>
         </div>
 
-        <form class="admin-form" id="form-editar">
+        <form class="admin-form" id="form-editar" enctype="multipart/form-data">
           <input type="hidden" id="edit-id" />
 
           <div class="admin-form-group">
@@ -282,6 +293,17 @@
           <div class="admin-form-group">
             <label for="edit-imagen_url">URL de la imagen</label>
             <input type="url" id="edit-imagen_url" />
+          </div>
+
+          <div class="admin-form-group">
+            <label>Imágenes del trabajo</label>
+            <div class="upload-zone" id="upload-zone-edit-portafolio" role="button" tabindex="0">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Hacé clic acá para subir imágenes</p>
+              <span>(Máximo 5 fotos, 2MB por foto)</span>
+              <input type="file" id="edit-imagenes_archivos" name="imagenes_archivos" accept="image/*" multiple hidden />
+            </div>
+            <div id="lista-archivos-seleccionados-edit" class="archivos-preview"></div>
           </div>
 
           <div class="admin-form-group">

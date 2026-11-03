@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
+import multer from 'multer';
 import { obtenerPool } from './config/database.js';
 
 import { pedidosRoutes } from './routes/pedidos.routes.js';
@@ -54,3 +55,32 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api', pedidosRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/usuarios', usuariosRoutes);
+
+app.use((error, req, res, next) => {
+    if (res.headersSent) {
+        next(error);
+        return;
+    }
+
+    if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                success: false,
+                error: 'La imagen es demasiado grande. El límite es 2MB.',
+            });
+        }
+        if (error.code === 'LIMIT_FILE_COUNT' || error.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).json({
+                success: false,
+                error: 'Puedes subir un máximo de 5 imágenes a la vez.',
+            });
+        }
+    }
+
+    if (error.message?.startsWith('Formato de archivo')) {
+        return res.status(400).json({ success: false, error: error.message });
+    }
+
+    console.error(error.stack || error);
+    return res.status(500).json({ success: false, error: 'Error interno del servidor' });
+});

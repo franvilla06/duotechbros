@@ -41,10 +41,13 @@ function cerrarSesion() {
 async function fetchAdmin(url, opciones = {}) {
     const token = obtenerToken();
     const headers = {
-        'Content-Type': 'application/json',
         ...(opciones.headers || {}),
         Authorization: `Bearer ${token}`,
     };
+
+    if (!(opciones.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     const respuesta = await fetch(url, { ...opciones, headers });
 
