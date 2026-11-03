@@ -5374,3 +5374,13 @@ table.admin-table tbody tr.pedido-detalle-fila {
         margin-bottom: 8px;
     }
 }
+
+.cell-descripcion {
+    word-break: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
