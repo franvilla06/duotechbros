@@ -195,13 +195,18 @@ main.container {
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    background-color: var(--bg-body-admin);
+    background-color: #e8f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-sizing: border-box;
 }
 
 .product-imagen {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: transform 0.5s ease;
     display: block;
 }
@@ -461,7 +466,7 @@ main.container {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
     opacity: 0;
     transition: opacity 0.4s ease, transform 0.5s ease;
