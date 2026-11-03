@@ -253,8 +253,9 @@ function aplicarFiltros() {
 async function agregarAlCarrito(productoId, btnElement) {
     // SI NO ESTA LOGUEADO, PREGUNTAR SI QUIERE INGRESAR
     if (!estaLogueadoUsuario()) {
-        const quiereIngresar = confirm(
-            'Necesitas iniciar sesion para agregar productos al carrito.\n\nQueres ingresar ahora?'
+        const quiereIngresar = await confirmarAccion(
+            'Necesitas iniciar sesión para agregar productos al carrito. ¿Querés ingresar ahora?',
+            'Iniciar sesión'
         );
         if (quiereIngresar) {
             window.location.href = '/user/login.html';

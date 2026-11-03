@@ -52,7 +52,7 @@ async function fetchAdmin(url, opciones = {}) {
     const respuesta = await fetch(url, { ...opciones, headers });
 
     if (respuesta.status === 401) {
-        alert('Tu sesión expiró. Volvé a iniciar sesión.');
+        await mostrarAlerta('Tu sesión expiró. Volvé a iniciar sesión.', 'Sesión expirada');
         cerrarSesion();
         throw new Error('No autorizado');
     }

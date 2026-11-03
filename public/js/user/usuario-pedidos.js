@@ -1000,9 +1000,9 @@ function cerrarModalDetalle() {
 
 // solicita la cancelaci?n del pedido seleccionado.
 async function cancelarPedido(pedidoId) {
-    const confirmar = confirm(
-        'Estas seguro de que queres cancelar este pedido?\n\n' +
-        'Esta accion no se puede revertir.'
+    const confirmar = await confirmarAccion(
+        '¿Estás seguro de que querés cancelar este pedido? Esta acción no se puede revertir.',
+        'Cancelar pedido'
     );
     if (!confirmar) return;
 
@@ -1098,9 +1098,10 @@ async function repetirPedido(pedidoId) {
                 mensaje += '\n\nProductos omitidos:\n- ' + resultado.omitidos.join('\n- ');
             }
 
-            mensaje += '\n\nQueres ir al carrito ahora?';
-
-            const irAlCarrito = confirm(mensaje);
+            const irAlCarrito = await confirmarAccion(
+                `${mensaje}\n\n¿Querés ir al carrito ahora?`,
+                'Productos agregados'
+            );
             if (irAlCarrito) {
                 window.location.href = '/user/carrito.html';
                 return;
@@ -1113,7 +1114,7 @@ async function repetirPedido(pedidoId) {
             if (resultado.omitidos && resultado.omitidos.length > 0) {
                 mensaje += '\n\n' + resultado.omitidos.join('\n');
             }
-            alert(mensaje);
+            await mostrarAlerta(mensaje, 'No se pudo repetir el pedido');
         }
     } catch (error) {
         console.error('Error al repetir pedido:', error);

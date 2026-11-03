@@ -231,12 +231,12 @@ function asignarEventosItems() {
     });
 
     carritoItems.querySelectorAll('.carrito-item-eliminar').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
             const item = itemsActuales.find((i) => String(i.id) === String(id));
             if (!item) return;
-            if (confirm(`Queres eliminar "${item.nombre}" del carrito?`)) {
-                eliminarItem(id);
+            if (await confirmarAccion(`¿Querés eliminar "${item.nombre}" del carrito?`, 'Quitar producto')) {
+                await eliminarItem(id);
             }
         });
     });
@@ -416,8 +416,9 @@ async function vaciarCarrito() {
 // env?a el pedido con los productos actuales del carrito.
 async function enviarPedido() {
     // CONFIRMAR ANTES DE ENVIAR
-    const confirmar = confirm(
-        'Confirmas el envio de tu pedido?\n\nAl enviarlo, se descontara el stock de los productos.'
+    const confirmar = await confirmarAccion(
+        '¿Confirmás el envío de tu pedido?\n\nAl enviarlo, se descontará el stock de los productos.',
+        'Confirmar pedido'
     );
     if (!confirmar) return;
 
@@ -458,7 +459,7 @@ async function enviarPedido() {
             if (resultado.detalle && Array.isArray(resultado.detalle)) {
                 mensaje += '\n\n' + resultado.detalle.join('\n');
             }
-            alert(mensaje);
+            await mostrarAlerta(mensaje, 'No se pudo enviar el pedido');
             // RECARGAR EL CARRITO POR SI CAMBIO EL STOCK
             await cargarCarrito();
         }

@@ -935,7 +935,10 @@ formEditar.addEventListener('submit', async (e) => {
 
 // solicita la eliminaci?n del trabajo seleccionado.
 async function eliminarTrabajo(id, titulo) {
-    const confirmar = confirm(`¿Estás seguro de que querés eliminar "${titulo}"?`);
+    const confirmar = await confirmarAccion(
+        `¿Estás seguro de que querés eliminar "${titulo}"? Esta acción no se puede deshacer.`,
+        'Eliminar trabajo'
+    );
     if (!confirmar) return;
 
     try {

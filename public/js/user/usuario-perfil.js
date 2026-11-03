@@ -304,11 +304,9 @@ formBaja.addEventListener('submit', async (e) => {
         return;
     }
 
-    const confirmacion = confirm(
-        'ATENCION: Esta accion es irreversible.\n\n' +
-            'Se va a eliminar tu cuenta de forma permanente. No vas a poder ' +
-            'volver a iniciar sesion con este usuario.\n\n' +
-            'Queres continuar?'
+    const confirmacion = await confirmarAccion(
+        'Esta acción es irreversible. Se va a eliminar tu cuenta de forma permanente. No vas a poder volver a iniciar sesión con este usuario. ¿Querés continuar?',
+        'Dar de baja cuenta'
     );
 
     if (!confirmacion) return;

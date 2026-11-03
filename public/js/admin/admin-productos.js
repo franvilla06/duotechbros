@@ -872,7 +872,10 @@ formEditar.addEventListener('submit', async (e) => {
 
 // solicita la eliminaci?n del producto seleccionado.
 async function eliminarProducto(id, nombre) {
-    const confirmar = confirm(`¿Estás seguro de que querés eliminar "${nombre}"?`);
+    const confirmar = await confirmarAccion(
+        `¿Estás seguro de que querés eliminar "${nombre}"? Esta acción no se puede deshacer.`,
+        'Eliminar producto'
+    );
     if (!confirmar) return;
 
     try {
