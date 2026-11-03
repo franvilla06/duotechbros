@@ -374,8 +374,9 @@ function protegerPagina() {
 
     const botonLogout = document.getElementById('logout-btn');
     if (botonLogout) {
-        botonLogout.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de que querés cerrar sesión?')) {
+        botonLogout.addEventListener('click', async () => {
+            const confirmar = await confirmarAccion('¿Estás seguro de que querés cerrar sesión?');
+            if (confirmar) {
                 cerrarSesion();
             }
         });

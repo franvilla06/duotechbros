@@ -1,0 +1,130 @@
+.dialogo-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(11, 74, 98, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.dialogo-overlay.visible {
+    display: flex;
+    animation: dialogo-fade-in 0.2s ease;
+}
+
+@keyframes dialogo-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.dialogo-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 25px 50px rgba(11, 74, 98, 0.3);
+    text-align: center;
+    transform: translateY(20px);
+    animation: dialogo-slide-up 0.3s ease forwards;
+}
+
+@keyframes dialogo-slide-up {
+    to { transform: translateY(0); }
+}
+
+.dialogo-icono {
+    display: inline-flex;
+    width: 60px;
+    height: 60px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+}
+
+.dialogo-icono.info {
+    background-color: #e8f4ff;
+    color: #007bff;
+}
+
+.dialogo-icono.peligro {
+    background-color: #f8d7da;
+    color: #dc3545;
+}
+
+.dialogo-titulo {
+    margin: 0 0 10px;
+    color: #0b4a62;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.dialogo-mensaje {
+    margin: 0 0 24px;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.dialogo-acciones {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.dialogo-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.dialogo-btn:active {
+    transform: scale(0.97);
+}
+
+.dialogo-btn-cancelar {
+    background-color: #f0f4f8;
+    color: #0b4a62;
+}
+
+.dialogo-btn-cancelar:hover {
+    background-color: #e0e8ef;
+}
+
+.dialogo-btn-aceptar {
+    background: linear-gradient(135deg, #007bff 0%, #0a9396 100%);
+    color: #ffffff;
+}
+
+.dialogo-btn-aceptar:hover {
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.3);
+}
+
+.dialogo-btn-peligro {
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    color: #ffffff;
+}
+
+.dialogo-btn-peligro:hover {
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dialogo-overlay.visible,
+    .dialogo-card {
+        animation: none;
+        transform: none;
+    }
+}

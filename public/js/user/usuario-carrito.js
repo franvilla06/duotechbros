@@ -372,7 +372,8 @@ async function eliminarItem(id) {
 
 // elimina todos los productos del carrito.
 async function vaciarCarrito() {
-    if (!confirm('Estas seguro de que queres vaciar todo el carrito?')) return;
+    const confirmar = await confirmarAccion('¿Estás seguro de que querés vaciar todo el carrito?');
+    if (!confirmar) return;
 
     btnVaciarCarrito.disabled = true;
     const contenidoOriginal = btnVaciarCarrito.innerHTML;

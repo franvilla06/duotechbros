@@ -137,8 +137,9 @@ function renderizarUsuarioHeader() {
         });
 
         // CERRAR SESION
-        btnCerrar.addEventListener('click', () => {
-            if (confirm('Estas seguro de que queres cerrar sesion?')) {
+        btnCerrar.addEventListener('click', async () => {
+            const confirmar = await confirmarAccion('¿Estás seguro de que querés cerrar sesión?');
+            if (confirmar) {
                 cerrarSesionUsuario();
                 window.location.href = '/index.html';
             }
