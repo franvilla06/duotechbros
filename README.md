@@ -42,7 +42,7 @@ El servidor carga la configuración desde `.env`, inicializa la base de datos y 
 - **Entorno y servidor:** Node.js, Express 5 y módulos ES (ESM).
 - **Frontend:** HTML5, CSS3 y JavaScript vanilla; no se utiliza un framework de interfaz.
 - **Base de datos:** MySQL, normalmente ejecutado localmente con XAMPP; `mysql2` proporciona el cliente asíncrono con pool de conexiones.
-- **Autenticación y correo:** `bcryptjs` para hashes de contraseñas, tokens Bearer implementados por el proyecto y `nodemailer` para SMTP.
+- **Autenticación y correo:** `bcryptjs` para hashes de contraseñas, tokens Bearer implementados por el proyecto y la API de Brevo para el envío de correos.
 - **Configuración, solicitudes y seguridad:** `dotenv` para cargar `.env`, `cors` para habilitar solicitudes desde el origen local de desarrollo y `express-rate-limit` para limitar solicitudes de envío de códigos y proteger el restablecimiento de contraseña.
 - **Librerías frontend externas:** Font Awesome para iconos, Chart.js para gráficos del dashboard, jsPDF y jsPDF-AutoTable para exportar el historial del usuario a PDF.
 - **Herramientas del proyecto:** npm para instalar dependencias y ejecutar el servidor; Git para el control de versiones.
@@ -91,11 +91,11 @@ Express sirve `public/` como raíz estática. Los recursos del frontend se solic
 
 - Node.js y npm.
 - Un servidor MySQL local. En el flujo documentado se utiliza XAMPP y phpMyAdmin.
-- Para enviar correos reales: acceso a un servidor SMTP. Sin credenciales SMTP, el servicio de correo usa modo de desarrollo y escribe los mensajes/códigos en la consola del backend.
+- Para enviar correos reales: una clave de API de Brevo y un remitente verificado. Sin la clave de API, el servicio de correo usa modo de desarrollo y escribe los mensajes/códigos en la consola del backend.
 
 ### Preparar configuración y dependencias
 
-En la raíz del repositorio, configura las variables de entorno en `.env`: `PORT`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET`, `ADMIN_PASSWORD` (opcional), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` y `SMTP_FROM`. `JWT_SECRET` es obligatorio y debe tener al menos 32 caracteres; aunque el proyecto utiliza tokens propios y no el formato JWT, esa variable se usa para firmarlos. `ADMIN_PASSWORD` permite establecer la contraseña del administrador inicial. Para una instalación MySQL local típica se pueden usar `localhost`, puerto `3306`, usuario `root` y base `duotechbros`; ajusta host, usuario y contraseña a tu instalación. No compartas ni subas `.env` al repositorio.
+En la raíz del repositorio, configura las variables de entorno en `.env`: `PORT`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET`, `ADMIN_PASSWORD` (opcional), `BREVO_API_KEY` (opcional) y `SMTP_FROM_EMAIL` (dirección remitente verificada en Brevo). `JWT_SECRET` es obligatorio y debe tener al menos 32 caracteres; aunque el proyecto utiliza tokens propios y no el formato JWT, esa variable se usa para firmarlos. `ADMIN_PASSWORD` permite establecer la contraseña del administrador inicial. Para una instalación MySQL local típica se pueden usar `localhost`, puerto `3306`, usuario `root` y base `duotechbros`; ajusta host, usuario y contraseña a tu instalación. No compartas ni subas `.env` al repositorio.
 
 Instala dependencias e inicia MySQL desde XAMPP. Luego ejecuta:
 
@@ -112,7 +112,7 @@ Para comprobar las funciones de catálogo y portafolio, inicia sesión en el pan
 
 ## Configuración de correo
 
-En `.env`, configura `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` y `SMTP_FROM` para activar el envío SMTP. El servicio considera que el modo real está habilitado si están definidos el host y el usuario SMTP. Si `SMTP_HOST` está vacío, no se envía correo real: los mensajes de verificación y confirmación se muestran en la consola. El email que recibe notificaciones administrativas se configura desde el panel, en la configuración del sitio.
+Configura `BREVO_API_KEY` y `SMTP_FROM_EMAIL` para activar el envío mediante la API de Brevo. `SMTP_FROM_EMAIL` debe ser un remitente verificado en Brevo; en Render, define ambas variables en la configuración del servicio. Si falta `BREVO_API_KEY`, no se envían correos reales y los mensajes de verificación y confirmación se muestran en la consola. El email que recibe notificaciones administrativas se configura desde el panel, en la configuración del sitio.
 
 ## Credenciales y seguridad
 

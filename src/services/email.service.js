@@ -1,5 +1,3 @@
-import { emailConfig, modoReal, transporter } from '../config/email.config.js';
-
 // escapa caracteres HTML para evitar que los datos se interpreten como marcado
 export const escaparHTML = (valor) => {
     if (valor === null || valor === undefined) return '';
@@ -81,35 +79,51 @@ export const enviarEmail = async ({ to, subject, title, message, htmlContent, te
         return { enviado: false, modoDesarrollo: true, motivo: 'Sin destinatarios' };
     }
 
+    const apiKey = process.env.BREVO_API_KEY;
+
+    if (!apiKey) {
+        console.log('\n========================================');
+        console.log('EMAIL SIMULADO (FALTA BREVO_API_KEY)');
+        console.log(`Para: ${destinatarios.join(', ')}`);
+        console.log(`Asunto: ${subject}`);
+        console.log(textContent || message);
+        console.log('========================================\n');
+        return { enviado: false, modoDesarrollo: true, destinatarios };
+    }
+
     const contenido = htmlContent || `
         <h2 style="margin:0 0 16px;color:#0b4a62;">${escaparHTML(title || marca)}</h2>
         <p style="margin:0 0 18px;color:#4d5f71;line-height:1.7;">${escaparHTML(message || '')}</p>
     `;
 
-    const textoPlano = textContent || `${title || marca}\n\n${message || ''}`;
-
-    if (!modoReal) {
-        console.log('\n========================================');
-        console.log(`EMAIL (MODO DESARROLLO)`);
-        console.log('========================================');
-        console.log(`Para: ${destinatarios.join(', ')}`);
-        console.log(`Asunto: ${subject}`);
-        console.log(textoPlano);
-        console.log('========================================\n');
-        return { enviado: false, modoDesarrollo: true, destinatarios };
-    }
-
     try {
-        await transporter.sendMail({
-            from: emailConfig.from,
-            to: destinatarios.join(', '),
-            subject,
-            text: textoPlano,
-            html: envolverHTML(contenido, marca),
+        const respuesta = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'api-key': apiKey,
+            },
+            body: JSON.stringify({
+                sender: {
+                    name: marca,
+                    email: process.env.SMTP_FROM_EMAIL || 'no-reply@duotechbros.com',
+                },
+                to: destinatarios.map((email) => ({ email })),
+                subject,
+                htmlContent: envolverHTML(contenido, marca),
+                textContent: textContent || message,
+            }),
         });
+
+        if (!respuesta.ok) {
+            const errorData = await respuesta.json();
+            throw new Error(JSON.stringify(errorData));
+        }
+
         return { enviado: true, modoDesarrollo: false, destinatarios };
     } catch (error) {
-        console.error('Error al enviar email:', error.message);
+        console.error('Error al enviar email por API:', error.message);
         throw new Error('No se pudo enviar el email.');
     }
 };

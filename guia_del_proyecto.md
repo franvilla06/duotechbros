@@ -6,7 +6,7 @@ Esta guía describe la estructura y el funcionamiento de la versión actual del 
 
 - Node.js y npm.
 - MySQL disponible localmente. El flujo habitual del proyecto usa XAMPP; también puede usarse otra instalación compatible de MySQL.
-- (Opcional) Credenciales SMTP para enviar correos de forma real.
+- (Opcional) Credenciales de Brevo para enviar correos de forma real.
 
 Configura en un archivo `.env` las variables siguientes. No agregues credenciales reales al repositorio.
 
@@ -20,10 +20,8 @@ Configura en un archivo `.env` las variables siguientes. No agregues credenciale
 | `DB_NAME`                 | Base utilizada por la aplicación           | `duotechbros`                            |
 | `JWT_SECRET`              | Secreto privado de firma, obligatorio y de al menos 32 caracteres | Valor aleatorio y privado |
 | `ADMIN_PASSWORD`          | Contraseña inicial del administrador (opcional) | Si falta, se genera una aleatoria |
-| `SMTP_HOST`               | Host SMTP; vacío activa modo de desarrollo | Vacío                                    |
-| `SMTP_PORT`               | Puerto SMTP                                | `587`                                    |
-| `SMTP_USER` / `SMTP_PASS` | Credenciales SMTP                          | Vacías en la plantilla                   |
-| `SMTP_FROM`               | Remitente mostrado en los mensajes         | `DuotechBros <no-reply@duotechbros.com>` |
+| `BREVO_API_KEY`           | Clave de API de Brevo; si falta, activa el modo de desarrollo | Vacía en la plantilla |
+| `SMTP_FROM_EMAIL`         | Email remitente verificado en Brevo         | Email verificado en Brevo                |
 
 No agregues `.env` al control de versiones ni compartas sus secretos. El `.gitignore` ya lo excluye.
 
@@ -207,9 +205,9 @@ Para `hoy`, `semana` y `mes`, la API limita los agregados al período solicitado
 
 ## 8. Correo electrónico
 
-`src/config/email.config.js` habilita SMTP cuando están configurados `SMTP_HOST` y `SMTP_USER`; `SMTP_PORT`, `SMTP_PASS` y `SMTP_FROM` completan la conexión. Con `SMTP_HOST` vacío, el backend no envía mensajes reales: imprime códigos de verificación y contenidos de correo en la consola, útil para desarrollo. Al configurar `email_admin` desde el panel, el administrador puede recibir avisos de compra y reparación junto con los correos destinados al cliente. El nombre de marca configurado se usa en los asuntos y plantillas de los correos, con `DuotechBros` como valor de respaldo.
+`src/services/email.service.js` envía los correos mediante la API transaccional de Brevo cuando `BREVO_API_KEY` está configurada. Define `SMTP_FROM_EMAIL` con una dirección remitente verificada en Brevo. Si falta la clave de API, el backend no envía mensajes reales e imprime en la consola el contenido de los correos, útil para desarrollo. Al configurar `email_admin` desde el panel, el administrador puede recibir avisos de compra y reparación junto con los correos destinados al cliente. El nombre de marca configurado se usa en los asuntos y plantillas de los correos, con `DuotechBros` como valor de respaldo.
 
-Los códigos de verificación tienen vencimiento de diez minutos. Mantén las credenciales SMTP solo en el `.env` local.
+Los códigos de verificación tienen vencimiento de diez minutos. Mantén la clave de API solo en el entorno local o del servicio de alojamiento; no la publiques.
 
 ## 9. Seguridad y cuentas iniciales
 
