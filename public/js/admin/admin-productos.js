@@ -28,10 +28,10 @@ const MAX_IMAGENES_ADICIONALES = 4;
 const MAX_ARCHIVOS_SUBIDA = 5;
 const imagenesListaForm = document.getElementById('imagenes-lista-form');
 const btnAgregarImagenForm = document.getElementById('btn-agregar-imagen-form');
-const contadorImagenesForm = document.getElementById('contador-imagenes-form');
+const contadorImagenesForm = document.getElementById('contador-total-adicionales-form');
 const imagenesListaEdit = document.getElementById('imagenes-lista-edit');
 const btnAgregarImagenEdit = document.getElementById('btn-agregar-imagen-edit');
-const contadorImagenesEdit = document.getElementById('contador-imagenes-edit');
+const contadorImagenesEdit = document.getElementById('contador-total-adicionales-edit');
 
 const conectarZonaSubida = (zonaId, inputId, listaId, formId) => {
     const zona = document.getElementById(zonaId);
@@ -67,6 +67,7 @@ const conectarZonaSubida = (zonaId, inputId, listaId, formId) => {
             item.append(nombre, quitar);
             lista.append(item);
         });
+        actualizarContadorTotal(formId === 'form-producto' ? 'form' : 'edit');
     };
 
     const validarArchivos = (archivos) => {
@@ -114,6 +115,7 @@ const conectarZonaSubida = (zonaId, inputId, listaId, formId) => {
     form.addEventListener('reset', () => {
         input.value = '';
         lista.replaceChildren();
+        actualizarContadorTotal(formId === 'form-producto' ? 'form' : 'edit');
     });
 };
 
@@ -232,7 +234,10 @@ function crearInputImagen(url, listaId) {
     input.className = 'imagen-input-url';
     input.placeholder = 'https://ejemplo.com/imagen.jpg';
     input.value = url || '';
-    input.addEventListener('input', () => actualizarPreview(input.value));
+    input.addEventListener('input', () => {
+        actualizarPreview(input.value);
+        actualizarContadorTotal(listaId === 'imagenes-lista-form' ? 'form' : 'edit');
+    });
     actualizarPreview(input.value);
 
     const btnEliminar = document.createElement('button');
@@ -264,6 +269,28 @@ function actualizarContadorImagenes(listaId) {
 
     contador.textContent = `${cantidad}/${MAX_IMAGENES_ADICIONALES}`;
     boton.disabled = cantidad >= MAX_IMAGENES_ADICIONALES;
+    actualizarContadorTotal(esFormulario ? 'form' : 'edit');
+}
+
+function actualizarContadorTotal(tipo) {
+    const esForm = tipo === 'form';
+    const lista = document.getElementById(esForm ? 'imagenes-lista-form' : 'imagenes-lista-edit');
+    const inputArchivo = document.getElementById(
+        esForm ? 'imagenes_archivos' : 'edit-imagenes_archivos'
+    );
+    const contador = document.getElementById(
+        esForm ? 'contador-total-adicionales-form' : 'contador-total-adicionales-edit'
+    );
+    if (!lista || !inputArchivo || !contador) return;
+
+    const urls = Array.from(lista.querySelectorAll('.imagen-input-url'))
+        .filter((input) => input.value.trim() !== '').length;
+    const archivos = inputArchivo.files?.length || 0;
+    const total = urls + archivos;
+
+    contador.textContent = `${total}/${MAX_IMAGENES_ADICIONALES} (URLs + Archivos)`;
+    contador.style.backgroundColor = total > MAX_IMAGENES_ADICIONALES ? '#f8d7da' : '#e8f4ff';
+    contador.style.color = total > MAX_IMAGENES_ADICIONALES ? '#842029' : '#007bff';
 }
 
 // agrega un campo de imagen a la lista indicada.
@@ -682,11 +709,14 @@ formProducto.addEventListener('submit', async (e) => {
         formData.append('imagenes_archivos', archivo);
     });
 
-    const totalImagenes = inputArchivos.files.length
-        + obtenerImagenesDeLista('imagenes-lista-form').length
-        + (formData.get('imagen_url') ? 1 : 0);
-    if (totalImagenes > MAX_ARCHIVOS_SUBIDA) {
-        mostrarToast('La imagen principal y las imágenes adicionales no pueden superar 5 en total.', true);
+    const urlsAdicionales = obtenerImagenesDeLista('imagenes-lista-form');
+    const archivosSeleccionados = inputArchivos.files.length;
+    const totalAdicionales = urlsAdicionales.length + archivosSeleccionados;
+    if (totalAdicionales > MAX_IMAGENES_ADICIONALES) {
+        mostrarToast(
+            `❌ Error: Solo podés tener ${MAX_IMAGENES_ADICIONALES} imágenes adicionales en total (Tenés ${urlsAdicionales.length} URLs y ${archivosSeleccionados} archivos).`,
+            true
+        );
         return;
     }
 
@@ -791,11 +821,14 @@ formEditar.addEventListener('submit', async (e) => {
         formData.append('imagenes_archivos', archivo);
     });
 
-    const totalImagenesEdit = inputArchivosEdit.files.length
-        + obtenerImagenesDeLista('imagenes-lista-edit').length
-        + (formData.get('imagen_url') ? 1 : 0);
-    if (totalImagenesEdit > MAX_ARCHIVOS_SUBIDA) {
-        mostrarToast('La imagen principal y las imágenes adicionales no pueden superar 5 en total.', true);
+    const urlsAdicionalesEdit = obtenerImagenesDeLista('imagenes-lista-edit');
+    const archivosSeleccionadosEdit = inputArchivosEdit.files.length;
+    const totalAdicionalesEdit = urlsAdicionalesEdit.length + archivosSeleccionadosEdit;
+    if (totalAdicionalesEdit > MAX_IMAGENES_ADICIONALES) {
+        mostrarToast(
+            `❌ Error: Solo podés tener ${MAX_IMAGENES_ADICIONALES} imágenes adicionales en total (Tenés ${urlsAdicionalesEdit.length} URLs y ${archivosSeleccionadosEdit} archivos).`,
+            true
+        );
         return;
     }
 
