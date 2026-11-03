@@ -79,12 +79,22 @@ function aplicarConfiguracion(config) {
         }
     }
 
-    // LINKS LEGALES: CONSTRUIR SOLO LOS QUE TENGAN URL
+    // LINKS LEGALES: USAR PAGINAS LOCALES CUANDO NO HAYA URL CONFIGURADA
     const footerLinks = document.getElementById('footer-links');
     if (footerLinks) {
+        const terminosUrl =
+            typeof config.footer_terminos_url === 'string' ? config.footer_terminos_url.trim() : '';
+        const privacidadUrl =
+            typeof config.footer_privacidad_url === 'string' ? config.footer_privacidad_url.trim() : '';
         const legales = [
-            { url: config.footer_terminos_url, texto: 'Términos y condiciones' },
-            { url: config.footer_privacidad_url, texto: 'Política de privacidad' },
+            {
+                url: terminosUrl || '/terminos.html',
+                texto: 'Términos y condiciones',
+            },
+            {
+                url: privacidadUrl || '/privacidad.html',
+                texto: 'Política de privacidad',
+            },
         ];
 
         const links = legales
