@@ -770,3 +770,20 @@ footer {
         font-size: 0.78rem;
     }
 }
+
+@media (max-width: 768px) {
+    .usuario-menu {
+        position: static;
+        transform: none;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 10px;
+        box-shadow: none;
+        border: 1px solid #eef3f6;
+    }
+
+    .usuario-menu.visible {
+        display: flex;
+        flex-direction: column;
+    }
+}
