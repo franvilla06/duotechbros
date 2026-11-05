@@ -350,7 +350,9 @@ export const darDeBaja = async (pool, usuario) => {
             nombre_cliente = 'Cuenta eliminada',
             telefono = '0000000000',
             email = 'eliminado@anonimo.com',
-            descripcion_problema = 'Datos eliminados por privacidad'
+            descripcion_problema = 'Datos eliminados por privacidad',
+            modelo_celular = 'Dispositivo eliminado',
+            notas = NULL
          WHERE usuario_id = ?`,
         [user.id]
     );
