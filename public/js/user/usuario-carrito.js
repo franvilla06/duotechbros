@@ -310,10 +310,30 @@ async function cargarCarrito() {
 }
 
 // CAMBIAR CANTIDAD
-
-// guarda la nueva cantidad del producto en el carrito.
+// guarda la nueva cantidad del producto en el carrito sin recargar la pagina
 async function cambiarCantidad(id, nuevaCantidad, btnElement) {
-    if (btnElement) btnElement.disabled = true;
+    const item = itemsActuales.find((i) => String(i.id) === String(id));
+    if (!item) return;
+
+    // Guardar estado anterior por si hay que revertir
+    const cantidadAnterior = item.cantidad;
+    const subtotalAnterior = item.subtotal;
+
+    // Actualización optimista en el estado local
+    item.cantidad = nuevaCantidad;
+    item.subtotal = Number((item.precio * nuevaCantidad).toFixed(2));
+
+    // Actualizar el DOM localmente
+    actualizarItemDOM(item);
+    actualizarResumenLocal();
+
+    // Bloquear controles de este item para evitar requests desordenados
+    const itemElement = carritoItems.querySelector(`.carrito-item[data-id="${id}"]`);
+    if (itemElement) {
+        itemElement.querySelectorAll('button, input').forEach((el) => {
+            el.disabled = true;
+        });
+    }
 
     try {
         const respuesta = await fetch(`${API_CARRITO}/${id}`, {
@@ -325,28 +345,90 @@ async function cambiarCantidad(id, nuevaCantidad, btnElement) {
             body: JSON.stringify({ cantidad: nuevaCantidad }),
         });
 
-        const resultado = await respuesta.json();
-
         if (respuesta.status === 401) {
             cerrarSesionUsuario();
             window.location.href = '/user/login.html';
             return;
         }
 
-        if (resultado.success) {
-            await cargarCarrito();
-            notificarCambioCarrito();
-        } else {
+        const resultado = await respuesta.json();
+
+        if (!resultado.success) {
+            // Revertir si el servidor rechaza
+            item.cantidad = cantidadAnterior;
+            item.subtotal = subtotalAnterior;
+            actualizarItemDOM(item);
+            actualizarResumenLocal();
             mostrarToast(resultado.error || 'No se pudo actualizar la cantidad.', 'error');
-            await cargarCarrito();
+        } else {
+            notificarCambioCarrito();
         }
     } catch (error) {
+        // Revertir si hay error de red
         console.error('Error al cambiar cantidad:', error);
+        item.cantidad = cantidadAnterior;
+        item.subtotal = subtotalAnterior;
+        actualizarItemDOM(item);
+        actualizarResumenLocal();
         mostrarToast('No se pudo conectar con el servidor.', 'error');
-        await cargarCarrito();
     } finally {
-        if (btnElement) btnElement.disabled = false;
+        // Restaurar estado visual de los botones según los valores actuales
+        actualizarBotonesItem(id);
     }
+}
+
+// Actualiza la cantidad y el subtotal en el DOM de un item
+function actualizarItemDOM(item) {
+    const itemElement = carritoItems.querySelector(`.carrito-item[data-id="${item.id}"]`);
+    if (!itemElement) return;
+
+    const input = itemElement.querySelector('.carrito-cantidad-input');
+    if (input) {
+        input.value = item.cantidad;
+    }
+
+    const subtotalEl = itemElement.querySelector('.carrito-item-subtotal');
+    if (subtotalEl) {
+        subtotalEl.textContent = formatearPrecio(item.subtotal);
+    }
+}
+
+// Recalcula y actualiza el resumen y contador del carrito en el DOM
+function actualizarResumenLocal() {
+    const totalItems = itemsActuales.length;
+    const totalUnidades = itemsActuales.reduce((acc, i) => acc + i.cantidad, 0);
+    const totalPrecio = itemsActuales.reduce((acc, i) => acc + i.subtotal, 0);
+
+    const resumen = {
+        total_items: totalItems,
+        total_unidades: totalUnidades,
+        total_precio: Number(totalPrecio.toFixed(2))
+    };
+
+    actualizarResumen(resumen);
+}
+
+// Restaura los estados disabled de los botones + y - según el stock y la cantidad
+function actualizarBotonesItem(id) {
+    const item = itemsActuales.find((i) => String(i.id) === String(id));
+    if (!item) return;
+
+    const itemElement = carritoItems.querySelector(`.carrito-item[data-id="${item.id}"]`);
+    if (!itemElement) return;
+
+    const btnRestar = itemElement.querySelector('[data-accion="restar"]');
+    const btnSumar = itemElement.querySelector('[data-accion="sumar"]');
+    const input = itemElement.querySelector('.carrito-cantidad-input');
+    const btnEliminar = itemElement.querySelector('.carrito-item-eliminar');
+
+    if (btnRestar) btnRestar.disabled = item.cantidad <= 1;
+    if (btnSumar) btnSumar.disabled = item.cantidad >= item.stock;
+    if (input) {
+        input.value = item.cantidad;
+        input.max = item.stock;
+        input.disabled = false;
+    }
+    if (btnEliminar) btnEliminar.disabled = false;
 }
 
 // ELIMINAR ITEM
