@@ -16,7 +16,7 @@ router.post('/recuperar-password', limitadorEmails, usuariosController.recuperar
 router.post('/restablecer-password', limitadorAuth, usuariosController.restablecerPassword);
 
 // LOGIN
-router.post('/login', usuariosController.iniciarSesion);
+router.post('/login', limitadorAuth, usuariosController.iniciarSesion);
 
 // PERFIL
 router.get('/perfil', requiereAuthUsuario, usuariosController.obtenerPerfil);

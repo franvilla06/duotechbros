@@ -9,7 +9,7 @@ export const generarToken = (rol, usuario, tokenVersion = 0) => {
         .createHash('sha256')
         .update(`${rol}-${usuario}-${timestamp}-${version}-${authConfig.secret}`)
         .digest('hex')
-        .substring(0, 16);
+        .substring(0, 64);
     return `${rol}.${usuario}.${timestamp}.${version}.${hash}`;
 };
 
@@ -39,9 +39,9 @@ export const verificarToken = (token, rolEsperado) => {
         .createHash('sha256')
         .update(`${rol}-${usuario}-${timestamp}-${version}-${authConfig.secret}`)
         .digest('hex')
-        .substring(0, 16);
+        .substring(0, 64);
 
-    if (!/^[a-f0-9]{16}$/.test(hash)) return false;
+    if (!/^[a-f0-9]{64}$/.test(hash)) return false;
     return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(hashEsperado));
 };
 

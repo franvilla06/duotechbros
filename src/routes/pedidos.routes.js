@@ -2,6 +2,7 @@ import express from 'express';
 import * as pedidosController from '../controllers/pedidos.controller.js';
 import * as configuracionController from '../controllers/configuracion.controller.js';
 import { requiereAuth, requiereAuthUsuario } from '../middlewares/auth.middleware.js';
+import { limitadorAuth } from '../middlewares/rateLimit.middleware.js';
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router.post('/pedidos', requiereAuthUsuario, pedidosController.crearPedido);
 router.get('/pedidos', requiereAuth, pedidosController.listarPedidos);
 router.get('/productos', pedidosController.listarProductos);
 router.get('/portafolio', pedidosController.listarPortafolio);
-router.post('/login', pedidosController.iniciarSesion);
+router.post('/login', limitadorAuth, pedidosController.iniciarSesion);
 
 // publica la configuración visible en el sitio
 router.get('/configuracion', configuracionController.obtenerConfiguracionPublica);
