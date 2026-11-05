@@ -417,7 +417,7 @@ async function vaciarCarrito() {
 async function enviarPedido() {
     // CONFIRMAR ANTES DE ENVIAR
     const confirmar = await confirmarAccion(
-        '¿Confirmás el envío de tu pedido?\n\nAl enviarlo, se descontará el stock de los productos.',
+        '¿Confirmás el envío de tu pedido?\n',
         'Confirmar pedido'
     );
     if (!confirmar) return;

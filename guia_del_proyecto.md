@@ -6,6 +6,7 @@ Esta guía describe la estructura y el funcionamiento de la versión actual del 
 
 - Node.js y npm.
 - MySQL disponible localmente. El flujo habitual del proyecto usa XAMPP; también puede usarse otra instalación compatible de MySQL.
+- Credenciales de Cloudinary para cargar archivos de imagen desde el panel (opcional si solo se usan URLs de imágenes).
 - (Opcional) Credenciales de Brevo para enviar correos de forma real.
 
 Configura en un archivo `.env` las variables siguientes. No agregues credenciales reales al repositorio.
@@ -20,10 +21,13 @@ Configura en un archivo `.env` las variables siguientes. No agregues credenciale
 | `DB_NAME`                 | Base utilizada por la aplicación           | `duotechbros`                            |
 | `JWT_SECRET`              | Secreto privado de firma, obligatorio y de al menos 32 caracteres | Valor aleatorio y privado |
 | `ADMIN_PASSWORD`          | Contraseña inicial del administrador (opcional) | Si falta, se genera una aleatoria |
+| `CLOUDINARY_CLOUD_NAME`   | Nombre de la cuenta para cargas de imágenes | Vacía si no se cargan archivos |
+| `CLOUDINARY_API_KEY`      | Clave de Cloudinary para cargas de imágenes | Vacía si no se cargan archivos |
+| `CLOUDINARY_API_SECRET`   | Secreto de Cloudinary para cargas de imágenes | Vacía si no se cargan archivos |
 | `BREVO_API_KEY`           | Clave de API de Brevo; si falta, activa el modo de desarrollo | Vacía en la plantilla |
-| `SMTP_FROM_EMAIL`         | Email remitente verificado en Brevo         | Email verificado en Brevo                |
+| `SMTP_FROM_EMAIL`         | Email remitente verificado en Brevo (variable histórica; no se usa SMTP) | Email verificado en Brevo |
 
-No agregues `.env` al control de versiones ni compartas sus secretos. El `.gitignore` ya lo excluye.
+`DB_PASSWORD` debe estar definida aunque sea vacía, si MySQL no tiene contraseña. No agregues `.env` al control de versiones ni compartas sus secretos. El `.gitignore` ya lo excluye.
 
 ## 2. Instalar e iniciar
 
@@ -35,7 +39,7 @@ npm install
 npm run dev
 ```
 
-`npm run dev` ejecuta `node server.js`. No existe un script `npm start` configurado actualmente. El backend usa `PORT` o `3000` por defecto y está disponible en `http://localhost:3000`.
+`npm run dev` y `npm start` ejecutan `node server.js`. El backend usa `PORT` o `3000` por defecto y está disponible en `http://localhost:3000`. XAMPP debe tener activo MySQL; Apache no es necesario porque Express sirve el frontend.
 
 Al arrancar, `server.js` carga `.env`, crea la base MySQL si no existe, establece un pool de conexiones, inicializa las tablas y valores iniciales y luego importa `src/app.js` e inicia Express. El orden es importante porque la aplicación obtiene el pool de conexiones al cargarse. El backend usa `import`/`export` de ESM; los imports locales deben incluir la extensión `.js`. La base de datos no es un archivo del repositorio: queda gestionada por el servidor MySQL configurado.
 
@@ -51,9 +55,9 @@ Con el servidor Node iniciado, abre:
 
 Express publica `public/` como raíz web; por eso las rutas públicas no incluyen el prefijo `/public`.
 
-## 4. Base de datos y datos de demostración
+## 4. Base de datos e inicialización
 
-El esquema se crea desde `src/models/schema.model.js`. Las tablas principales son:
+El esquema se crea desde `src/models/schema.model.js`. La inicialización crea las tablas y los valores de configuración iniciales, pero no carga productos, trabajos, usuarios de prueba ni pedidos de demostración. Las tablas principales son:
 
 - `usuarios`: cuentas del sitio y hashes de contraseña.
 - `admin`: cuentas del panel administrativo.
@@ -67,7 +71,7 @@ El esquema se crea desde `src/models/schema.model.js`. Las tablas principales so
 
 La inicialización usa `CREATE TABLE IF NOT EXISTS` y agrega las columnas faltantes para imágenes, intentos fallidos, tiempo de bloqueo y versión de token en tablas existentes. En una base nueva también inserta valores de configuración y un administrador inicial: usa `ADMIN_PASSWORD` si está definida; de lo contrario, genera una contraseña aleatoria y la muestra una sola vez en la consola. La tabla `productos` declara restricciones `CHECK` para impedir precio o stock negativos al crearse. `CREATE TABLE IF NOT EXISTS` no añade esas restricciones a una tabla preexistente.
 
-El catálogo y el portafolio se administran desde las páginas del panel. El registro de usuario se realiza desde `/user/login.html`; en modo SMTP de desarrollo, el código de verificación aparece en la consola del backend.
+El catálogo y el portafolio se administran desde las páginas del panel. La carga de archivos admite JPEG, PNG, WEBP y GIF, con un máximo de cinco archivos de 2 MB cada uno por operación; para enviarlos a Cloudinary configura las tres variables indicadas arriba. El registro de usuario se realiza desde `/user/login.html`; si falta `BREVO_API_KEY`, el código de verificación se imprime en la consola del backend.
 
 ## 5. Páginas y flujos de la aplicación
 
@@ -77,8 +81,11 @@ El catálogo y el portafolio se administran desde las páginas del panel. El reg
 - `/tienda.html`: catálogo dinámico y acceso a la compra.
 - `/portafolio.html`: trabajos y reparaciones cargados desde la API.
 - `/pedidos.html`: formulario de reparación; requiere una sesión de usuario.
+- `/terminos.html` y `/privacidad.html`: términos y condiciones y política de privacidad.
 
 El nombre de marca se administra desde la configuración del sitio y se aplica a los textos marcados en las páginas públicas y de usuario.
+
+La opción `aviso_general` de la configuración permite mostrar un aviso destacado en las páginas públicas. El sitio y el panel incluyen ajustes de interfaz para pantallas pequeñas e iconografía compartida.
 
 El catálogo y el portafolio admiten una imagen principal y hasta cuatro imágenes adicionales. El script reutilizable `public/js/site/carrusel.js` presenta varias imágenes. El menú público tiene comportamiento adaptable para pantallas pequeñas.
 
@@ -138,6 +145,8 @@ public/
   css/                     Estilos del sitio, usuario y panel
   js/                      Funciones de interfaz e integración con la API
 package.json               Dependencias y comando de ejecución
+README.md                  Resumen del producto y puesta en marcha local
+documentacion-postman.md   Flujos de prueba manual de la API
 ```
 
 El frontend no utiliza un framework SPA. El backend usa ESM, exportaciones nombradas y funciones flecha; sus imports locales incluyen `.js`. `src/app.js` monta tres routers: `pedidos.routes.js` bajo `/api`, `admin.routes.js` bajo `/api/admin` y `usuarios.routes.js` bajo `/api/usuarios`. Las rutas y reglas de negocio se separan en controladores, servicios y modelos.
@@ -205,7 +214,7 @@ Para `hoy`, `semana` y `mes`, la API limita los agregados al período solicitado
 
 ## 8. Correo electrónico
 
-`src/services/email.service.js` envía los correos mediante la API transaccional de Brevo cuando `BREVO_API_KEY` está configurada. Define `SMTP_FROM_EMAIL` con una dirección remitente verificada en Brevo. Si falta la clave de API, el backend no envía mensajes reales e imprime en la consola el contenido de los correos, útil para desarrollo. Al configurar `email_admin` desde el panel, el administrador puede recibir avisos de compra y reparación junto con los correos destinados al cliente. El nombre de marca configurado se usa en los asuntos y plantillas de los correos, con `DuotechBros` como valor de respaldo.
+`src/services/email.service.js` envía los correos mediante la API HTTP transaccional de Brevo cuando `BREVO_API_KEY` está configurada. Define `SMTP_FROM_EMAIL` con una dirección remitente verificada en Brevo; pese al nombre histórico de la variable, no se conecta a un servidor SMTP. Si falta la clave de API, el backend no envía mensajes reales e imprime en la consola el contenido de los correos, útil para desarrollo. Al configurar `email_admin` desde el panel, el administrador puede recibir notificaciones de reparaciones y compras junto con los correos destinados al cliente. El nombre de marca configurado se usa en los asuntos y plantillas de los correos, con `DuotechBros` como valor de respaldo.
 
 Los códigos de verificación tienen vencimiento de diez minutos. Mantén la clave de API solo en el entorno local o del servicio de alojamiento; no la publiques.
 
@@ -219,6 +228,8 @@ Al cambiar una contraseña se incrementa la versión de credenciales y se invali
 
 - `npm test` es un marcador y termina con error; todavía no existe una suite automatizada.
 - **No conecta a MySQL:** verifica que MySQL esté iniciado y que host, puerto, usuario, contraseña y nombre de base coincidan con `.env`.
-- **No llega el código o correo:** sin SMTP configurado, consulta la consola del backend; con SMTP, verifica host, puerto y credenciales.
+- **No llega el código o correo:** sin `BREVO_API_KEY`, consulta la consola del backend; con Brevo configurado, comprueba que la clave sea válida y que `SMTP_FROM_EMAIL` corresponda a un remitente verificado.
+- **No se cargan imágenes desde el panel:** revisa las tres variables de Cloudinary, el formato permitido (JPEG, PNG, WEBP o GIF) y el límite de 2 MB por archivo y cinco archivos por operación.
 - **Cambios del servidor no aparecen:** detén y vuelve a iniciar `npm run dev`; los cambios del navegador requieren recarga.
 - **Catálogo vacío:** crea productos desde la sección de administración y verifica la conexión a MySQL.
+- **Quieres probar sin afectar datos existentes:** configura `DB_NAME` con el nombre de una base de pruebas; la aplicación crea las tablas al iniciar, pero no elimina ni rellena datos de prueba automáticamente. Consulta también [documentacion-postman.md](documentacion-postman.md) para los flujos manuales de API.

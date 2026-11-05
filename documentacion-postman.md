@@ -46,7 +46,15 @@ if (response.success) pm.environment.set("admin_token", response.token);
 
 - **Método:** `POST` -> `{{base_url}}/admin/productos`
 - **Auth:** Bearer Token `{{admin_token}}`
-- **Body (JSON):** `{"nombre": "Producto Test", "precio": 150.50, "stock": 10}`
+- **Body:** selecciona **form-data** (no `raw`/JSON). Agrega estos campos de tipo **Text**:
+  - `nombre`: `Producto Test`
+  - `precio`: `150.50`
+  - `stock`: `10`
+  - `descripcion`, `categoria` e `imagen_url`: opcionales.
+  - `imagenes`: opcional; una cadena JSON con un array de URLs adicionales, por ejemplo `["https://ejemplo.com/imagen.jpg"]`.
+  - `imagenes_archivos`: opcional, tipo **File**; agrega una fila por archivo.
+- Para subir archivos desde Postman, configura las credenciales de Cloudinary. Se aceptan JPEG, PNG, WEBP o GIF y hasta cinco imágenes en total (principal más adicionales), con un máximo de 2 MB por archivo. Para probar solo validaciones puedes omitir los archivos.
+- No configures manualmente el encabezado `Content-Type`: Postman debe generar `multipart/form-data` y su `boundary`.
 - **Script (Tests):**
 
 javascript
@@ -56,6 +64,16 @@ const response = pm.response.json();
 if (response.success) pm.environment.set("producto_id", response.id);
 ```
 - **Prueba de Validación (F-09):** Intentar crear un producto con `"precio": -10` o `"stock": -5`. El sistema debe rechazarlo con `400 Bad Request`.
+
+**3. Crear trabajo de portafolio**
+
+- **Método:** `POST` -> `{{base_url}}/admin/portafolio`
+- **Auth:** ****** `{{admin_token}}`
+- **Body:** selecciona **form-data**. Agrega `titulo` (obligatorio, tipo **Text**); `descripcion`, `tipo_reparacion`, `fecha_inicio`, `fecha_fin` e `imagen_url` son opcionales. Usa fechas con formato `AAAA-MM-DD`.
+- Para imágenes, usa `imagenes` (tipo **Text**) con un array JSON de URLs adicionales y/o agrega archivos tipo **File** bajo la clave `imagenes_archivos`. Para archivos aplican los requisitos de Cloudinary, formatos, cantidad y tamaño indicados en Crear Producto.
+- No configures manualmente `Content-Type`; deja que Postman genere `multipart/form-data` con su `boundary`.
+
+Las rutas `PUT /api/admin/productos/:id` y `PUT /api/admin/portafolio/:id` también esperan **form-data**. Si no se suben archivos, se pueden enviar únicamente los campos de texto en ese mismo formato.
 
 ---
 
