@@ -13,7 +13,7 @@ import { generarToken } from '../utils/token.util.js';
 export const iniciarRegistro = async (pool, usuario, email, password) => {
     const existeUsuario = await usuariosModel.contarPorUsuario(pool, usuario);
     if (existeUsuario.count > 0) {
-        return { error: 'Ese nombre de usuario ya esta en uso.' };
+        return { error: 'Ese nombre de usuario ya está en uso.' };
     }
 
     const emailExistente = await pool.query(
@@ -21,7 +21,7 @@ export const iniciarRegistro = async (pool, usuario, email, password) => {
         [email]
     );
     if (emailExistente[0][0].count > 0) {
-        return { error: 'Ese email ya esta registrado.' };
+        return { error: 'Ese correo electrónico ya está registrado.' };
     }
 
     const hash = bcrypt.hashSync(password, 10);
@@ -49,19 +49,19 @@ export const verificarCodigo = async (pool, email, codigo) => {
     const registro = await verificacionModel.buscarPorEmail(pool, email, 'registro');
 
     if (!registro) {
-        return { error: 'No hay un codigo activo para este email. Solicita uno nuevo.' };
+        return { error: 'No hay un código activo para este correo. Solicitá uno nuevo.' };
     }
 
     const ahora = new Date();
     const expira = new Date(registro.expira_en);
     if (ahora > expira) {
         await verificacionModel.eliminar(pool, registro.id);
-        return { error: 'El codigo expiro. Solicita uno nuevo.' };
+        return { error: 'El código expiró. Solicitá uno nuevo.' };
     }
 
     if (registro.intentos >= 5) {
         await verificacionModel.eliminar(pool, registro.id);
-        return { error: 'Se superaron los intentos permitidos. Solicita un nuevo codigo.' };
+        return { error: 'Se superaron los intentos permitidos. Solicitá un nuevo código.' };
     }
 
     if (registro.codigo !== codigo) {
@@ -69,11 +69,11 @@ export const verificarCodigo = async (pool, email, codigo) => {
 
         if (updateResult.affectedRows === 0) {
             await verificacionModel.eliminar(pool, registro.id);
-            return { error: 'Se superaron los intentos permitidos. Solicita un nuevo codigo.' };
+            return { error: 'Se superaron los intentos permitidos. Solicitá un nuevo código.' };
         }
 
         const restantes = 5 - (registro.intentos + 1);
-        return { error: `Codigo incorrecto. Intentos restantes: ${restantes}.` };
+        return { error: `Código incorrecto. Intentos restantes: ${restantes}.` };
     }
 
     // crea el usuario y marca el código como usado dentro de una transacción
@@ -113,7 +113,7 @@ export const reenviarCodigo = async (pool, email) => {
     const registro = await verificacionModel.buscarPorEmail(pool, email, 'registro');
 
     if (!registro) {
-        return { error: 'No hay un registro pendiente para este email. Volve a registrarte.' };
+        return { error: 'No hay un registro pendiente para este correo. Volvé a registrarte.' };
     };
 
     const nuevoCodigo = crypto.randomInt(100000, 999999).toString();
@@ -168,19 +168,19 @@ export const restablecerPassword = async (pool, email, codigo, passwordNueva) =>
     const registro = await verificacionModel.buscarPorEmail(pool, email, 'recuperacion');
 
     if (!registro) {
-        return { error: 'No hay una solicitud de recuperacion activa. Pedi un nuevo codigo.' };
+        return { error: 'No hay una solicitud de recuperación activa. Pedí un nuevo código.' };
     };
 
     const ahora = new Date();
     const expira = new Date(registro.expira_en);
     if (ahora > expira) {
         await verificacionModel.eliminar(pool, registro.id);
-        return { error: 'El codigo expiro. Pedi uno nuevo.' };
+        return { error: 'El código expiró. Pedí uno nuevo.' };
     }
 
     if (registro.intentos >= 5) {
         await verificacionModel.eliminar(pool, registro.id);
-        return { error: 'Se superaron los intentos permitidos. Pedi un nuevo codigo.' };
+        return { error: 'Se superaron los intentos permitidos. Pedí un nuevo código.' };
     }
 
     if (registro.codigo !== codigo) {
@@ -188,11 +188,11 @@ export const restablecerPassword = async (pool, email, codigo, passwordNueva) =>
 
         if (updateResult.affectedRows === 0) {
             await verificacionModel.eliminar(pool, registro.id);
-            return { error: 'Se superaron los intentos permitidos. Pedi un nuevo codigo.' };
+            return { error: 'Se superaron los intentos permitidos. Pedí un nuevo código.' };
         }
 
         const restantes = 5 - (registro.intentos + 1);
-        return { error: `Codigo incorrecto. Intentos restantes: ${restantes}.` };
+        return { error: `Código incorrecto. Intentos restantes: ${restantes}.` };
     }
 
     const user = await usuariosModel.buscarPorUsuario(pool, registro.usuario);
@@ -235,7 +235,7 @@ export const restablecerPassword = async (pool, email, codigo, passwordNueva) =>
 export const autenticarUsuario = async (pool, email, password) => {
     const user = await usuariosModel.buscarPorEmail(pool, email);
 
-    if (!user) return { error: 'Email o contrasenia incorrectos.' };
+    if (!user) return { error: 'Correo o contraseña incorrectos.' };
 
     if (user.bloqueado_hasta) {
         const ahora = new Date();
@@ -243,7 +243,7 @@ export const autenticarUsuario = async (pool, email, password) => {
         if (ahora < bloqueo) {
             const minutosRestantes = Math.ceil((bloqueo - ahora) / 60000);
             return {
-                error: `Cuenta bloqueada por demasiados intentos. Intenta de nuevo en ${minutosRestantes} minutos o recupera tu contrasenia.`,
+                error: `Cuenta bloqueada por demasiados intentos. Intentá de nuevo en ${minutosRestantes} minutos o recuperá tu contraseña.`,
             };
         } else {
             await usuariosModel.resetearIntentos(pool, user.usuario);
@@ -263,7 +263,7 @@ export const autenticarUsuario = async (pool, email, password) => {
                     subject: `Alerta de seguridad - ${marca}`,
                     title: 'Cuenta bloqueada temporalmente',
                     message:
-                        'Hemos detectado multiples intentos fallidos de inicio de sesion en tu cuenta. Tu cuenta ha sido bloqueada por 15 minutos. Si no fuiste vos, te recomendamos recuperar tu contrasenia.',
+                        'Hemos detectado múltiples intentos fallidos de inicio de sesión en tu cuenta. Tu cuenta ha sido bloqueada por 15 minutos. Si no fuiste vos, te recomendamos recuperar tu contraseña.',
                     marca,
                 })
                 .catch((error) =>
@@ -271,7 +271,7 @@ export const autenticarUsuario = async (pool, email, password) => {
                 );
         }
 
-        return { error: 'Email o contrasenia incorrectos.' };
+        return { error: 'Correo o contraseña incorrectos.' };
     }
 
     await usuariosModel.resetearIntentos(pool, user.usuario);
@@ -288,7 +288,7 @@ export const autenticarUsuario = async (pool, email, password) => {
 export const autenticarAdministrador = async (pool, usuario, password) => {
     const admin = await adminModel.buscarPorUsuario(pool, usuario);
 
-    if (!admin) return { error: 'Usuario o contrasenia incorrectos.' };
+    if (!admin) return { error: 'Usuario o contraseña incorrectos.' };
 
     if (admin.bloqueado_hasta) {
         const ahora = new Date();
@@ -296,7 +296,7 @@ export const autenticarAdministrador = async (pool, usuario, password) => {
         if (ahora < bloqueo) {
             const minutosRestantes = Math.ceil((bloqueo - ahora) / 60000);
             return {
-                error: `Cuenta de administrador bloqueada. Intenta de nuevo en ${minutosRestantes} minutos.`,
+                error: `Cuenta de administrador bloqueada. Intentá de nuevo en ${minutosRestantes} minutos.`,
             };
         } else {
             await adminModel.resetearIntentos(pool, admin.usuario);
@@ -307,7 +307,7 @@ export const autenticarAdministrador = async (pool, usuario, password) => {
 
     if (!bcrypt.compareSync(password, admin.password_hash)) {
         await adminModel.registrarIntentoFallido(pool, admin.usuario);
-        return { error: 'Usuario o contrasenia incorrectos.' };
+        return { error: 'Usuario o contraseña incorrectos.' };
     }
 
     await adminModel.resetearIntentos(pool, admin.usuario);
@@ -328,7 +328,7 @@ export const cambiarPassword = async (pool, usuario, passwordActual, passwordNue
     }
 
     if (!bcrypt.compareSync(passwordActual, user.password_hash)) {
-        return { error: 'La contrasenia actual es incorrecta.' };
+        return { error: 'La contraseña actual es incorrecta.' };
     }
 
     const nuevoHash = bcrypt.hashSync(passwordNueva, 10);

@@ -50,7 +50,7 @@ function mostrarMensaje(texto, tipo) {
 // carga los datos de contacto y horarios desde la configuraci?n del sitio.
 async function cargarDatosContacto() {
     try {
-        console.log('[pedidos] Cargando configuracion del sitio...');
+        console.log('[pedidos] Cargando configuración del sitio...');
         const respuesta = await fetch(API_CONFIG_PEDIDOS);
         if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
 
@@ -95,7 +95,7 @@ async function cargarDatosContacto() {
         document.getElementById('valor-horario-sabado').textContent = horarioSabado;
         document.getElementById('valor-horario-domingo').textContent = horarioDomingo;
     } catch (error) {
-        console.warn('No se pudo cargar la configuracion del sitio:', error.message);
+        console.warn('No se pudo cargar la configuración del sitio:', error.message);
         document.getElementById('valor-whatsapp').textContent = 'No disponible';
         document.getElementById('valor-email').textContent = 'No disponible';
         document.getElementById('valor-horario-semana').textContent = 'No disponible';
@@ -207,7 +207,7 @@ form.addEventListener('submit', async (e) => {
     if (!estaLogueadoUsuario()) {
         guardarBorrador(datos);
 
-        mostrarMensaje('Necesitas iniciar sesión para enviar el pedido. Redirigiendo...', 'error');
+        mostrarMensaje('Necesitás iniciar sesión para enviar el pedido. Redirigiendo...', 'error');
 
         setTimeout(() => {
             window.location.href = '/user/login.html?redirect=/pedidos.html';

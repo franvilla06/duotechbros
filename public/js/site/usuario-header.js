@@ -106,7 +106,7 @@ function renderizarUsuarioHeader() {
                     <i class="fas fa-box"></i> Mis pedidos
                 </a>
                 <button type="button" class="usuario-menu-item cerrar-sesion" id="btn-cerrar-sesion">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar sesion
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                 </button>
             </div>
         `;

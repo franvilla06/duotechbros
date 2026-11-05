@@ -31,7 +31,7 @@ export const enviarPedido = async (pool, nombreUsuario) => {
             await conexion.rollback();
             return {
                 status: 400,
-                body: { success: false, error: 'El carrito esta vacio.' },
+                body: { success: false, error: 'El carrito está vacío.' },
             };
         }
 
@@ -134,7 +134,7 @@ export const enviarPedido = async (pool, nombreUsuario) => {
                         marca,
                     });
                 } catch (error) {
-                    console.error('Error al enviar confirmacion de compra:', error.message);
+                    console.error('Error al enviar confirmación de compra:', error.message);
                 }
             });
         }
@@ -195,7 +195,7 @@ export const repetirPedido = async (pool, nombreUsuario, pedidoId) => {
     if (items.length === 0) {
         return {
             status: 400,
-            body: { success: false, error: 'El pedido no tiene items para repetir.' },
+            body: { success: false, error: 'El pedido no tiene artículos para repetir.' },
         };
     }
 
@@ -230,7 +230,7 @@ export const repetirPedido = async (pool, nombreUsuario, pedidoId) => {
                     ]);
                     agregados.push(`${nuevaCantidad - existente.cantidad}x ${producto.nombre}`);
                 } else {
-                    omitidos.push(`${producto.nombre} (ya tenes el maximo disponible en el carrito)`);
+                    omitidos.push(`${producto.nombre} (ya tenés el máximo disponible en el carrito)`);
                 }
             } else {
                 const cantidadFinal = Math.min(item.cantidad, stockDisponible);
@@ -255,7 +255,7 @@ export const repetirPedido = async (pool, nombreUsuario, pedidoId) => {
             status: 400,
             body: {
                 success: false,
-                error: 'No se pudo agregar ningun producto (sin stock o ya no disponibles).',
+                error: 'No se pudo agregar ningún producto (sin stock o ya no disponibles).',
                 omitidos,
             },
         };

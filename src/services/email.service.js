@@ -124,7 +124,7 @@ export const enviarEmail = async ({ to, subject, title, message, htmlContent, te
         return { enviado: true, modoDesarrollo: false, destinatarios };
     } catch (error) {
         console.error('Error al enviar email por API:', error.message);
-        throw new Error('No se pudo enviar el email.');
+        throw new Error('No se pudo enviar el correo electrónico.');
     }
 };
 
@@ -137,7 +137,7 @@ ${mensaje}
 
     ${codigo}
 
-Este codigo expira en 10 minutos. Si no solicitaste este email, podes ignorarlo.
+Este código expira en 10 minutos. Si no solicitaste este correo, podés ignorarlo.
 
 - Equipo ${marca}
     `.trim();
@@ -148,7 +148,7 @@ Este codigo expira en 10 minutos. Si no solicitaste este email, podes ignorarlo.
         <div style="background:#f0fbfc;border:2px dashed #0a9396;border-radius:12px;padding:20px;text-align:center;margin:18px 0;">
           <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#0b4a62;font-family:'Courier New', monospace;">${escaparHTML(codigo)}</span>
         </div>
-        <p style="margin:0;color:#7a8c9d;font-size:13px;line-height:1.6;">Este codigo expira en 10 minutos. Si no solicitaste este email, podes ignorarlo.</p>
+        <p style="margin:0;color:#7a8c9d;font-size:13px;line-height:1.6;">Este código expira en 10 minutos. Si no solicitaste este correo, podés ignorarlo.</p>
     `;
 
     return enviarEmail({
@@ -168,9 +168,9 @@ export const enviarCodigoVerificacion = async (destinatario, usuario, codigo, ma
         destinatario,
         usuario,
         codigo,
-        asunto: `Codigo de verificacion - ${marca}`,
+        asunto: `Código de verificación - ${marca}`,
         titulo: `Hola ${usuario},`,
-        mensaje: `Gracias por registrarte en ${marca}. Para completar tu registro, ingresa el siguiente codigo en la pagina:`,
+        mensaje: `Gracias por registrarte en ${marca}. Para completar tu registro, ingresá el siguiente código en la página:`,
         tipo: 'registro',
         marca,
     });
@@ -182,9 +182,9 @@ export const enviarCodigoRecuperacion = async (destinatario, usuario, codigo, ma
         destinatario,
         usuario,
         codigo,
-        asunto: `Recuperacion de contrasenia - ${marca}`,
+        asunto: `Recuperación de contraseña - ${marca}`,
         titulo: `Hola ${usuario},`,
-        mensaje: 'Recibimos una solicitud para restablecer tu contrasenia. Usa el siguiente codigo para continuar:',
+        mensaje: 'Recibimos una solicitud para restablecer tu contraseña. Usá el siguiente código para continuar:',
         tipo: 'recuperacion',
         marca,
     });

@@ -65,7 +65,7 @@ function obtenerImagenesProducto(producto) {
             const parseado = JSON.parse(campo);
             if (Array.isArray(parseado)) adicionales = parseado;
         } catch (error) {
-            console.warn('No se pudieron leer las imagenes adicionales:', error.message);
+            console.warn('No se pudieron leer las imágenes adicionales:', error.message);
         }
     }
 
@@ -190,7 +190,7 @@ function renderizarProductos(productos) {
             </div>
             <div class="product-info">
                 <h3 class="product-titulo">${escapar(p.nombre)}</h3>
-                <p class="product-descripcion">${escapar(p.descripcion) || 'Sin descripcion.'}</p>
+                <p class="product-descripcion">${escapar(p.descripcion) || 'Sin descripción.'}</p>
                 <div class="product-footer">
                     <span class="product-precio">${formatearPrecio(p.precio)}</span>
                     ${stockBadge}
@@ -254,7 +254,7 @@ async function agregarAlCarrito(productoId, btnElement) {
     // SI NO ESTA LOGUEADO, PREGUNTAR SI QUIERE INGRESAR
     if (!estaLogueadoUsuario()) {
         const quiereIngresar = await confirmarAccion(
-            'Necesitas iniciar sesión para agregar productos al carrito. ¿Querés ingresar ahora?',
+            'Necesitás iniciar sesión para agregar productos al carrito. ¿Querés ingresar ahora?',
             'Iniciar sesión'
         );
         if (quiereIngresar) {
@@ -285,7 +285,7 @@ async function agregarAlCarrito(productoId, btnElement) {
             sessionStorage.removeItem('usuarioLogueado');
             sessionStorage.removeItem('usuarioNombre');
             sessionStorage.removeItem('usuarioToken');
-            mostrarToast('Tu sesion expiro. Volve a iniciar sesion.', 'error');
+            mostrarToast('Tu sesión expiró. Volvé a iniciar sesión.', 'error');
             setTimeout(() => {
                 window.location.href = '/user/login.html';
             }, 1500);

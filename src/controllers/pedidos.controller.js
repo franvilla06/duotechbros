@@ -48,7 +48,7 @@ export const crearPedido = async (req, res) => {
             modelo_celular,
             descripcion_problema,
         }).catch((error) => {
-            console.error('Error al enviar confirmacion de reparacion:', error.message);
+            console.error('Error al enviar la confirmación de reparación:', error.message);
         });
 
         return res.json({ success: true, id: info.insertId });
@@ -77,7 +77,7 @@ const enviarConfirmacionReparacionPorEmail = async (pool, nombreUsuario, pedidoI
     }
 
     if (destinatarios.size === 0) {
-        console.log('[email] confirmacion_reparacion: sin destinatarios validos.');
+        console.log('[email] confirmación_reparación: sin destinatarios válidos.');
         return;
     }
 
@@ -141,7 +141,7 @@ export const iniciarSesion = async (req, res) => {
         }
         return res.json({
             success: true,
-            message: 'Login exitoso',
+            message: 'Inicio de sesión exitoso',
             usuario: admin.usuario,
             token: admin.token,
         });

@@ -321,7 +321,8 @@ async function actualizarNotificaciones() {
             if (pendientesReparacion > 0) {
                 badgeReparacion.textContent = pendientesReparacion > 99 ? '99+' : String(pendientesReparacion);
                 badgeReparacion.style.display = 'inline-flex';
-                badgeReparacion.title = `${pendientesReparacion} reparacion${pendientesReparacion !== 1 ? 'es' : ''} pendiente${pendientesReparacion !== 1 ? 's' : ''}`;
+                const etiquetaReparacion = pendientesReparacion === 1 ? 'reparación' : 'reparaciones';
+                badgeReparacion.title = `${pendientesReparacion} ${etiquetaReparacion} pendiente${pendientesReparacion !== 1 ? 's' : ''}`;
             } else {
                 badgeReparacion.style.display = 'none';
             }

@@ -142,7 +142,7 @@ async function cargarConfiguracion() {
         aplicarConfiguracion(config);
     } catch (error) {
         // si falla, no rompemos la pagina: se mantienen los valores por defecto del HTML
-        console.warn('No se pudo cargar la configuracion del sitio:', error.message);
+        console.warn('No se pudo cargar la configuración del sitio:', error.message);
     }
 }
 

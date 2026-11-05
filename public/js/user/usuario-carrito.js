@@ -209,7 +209,7 @@ function asignarEventosItems() {
             const item = itemsActuales.find((i) => String(i.id) === String(id));
             if (!item) return;
             if (item.cantidad >= item.stock) {
-                mostrarToast('No hay mas stock disponible para este producto.', 'error');
+                mostrarToast('No hay más stock disponible para este producto.', 'error');
                 return;
             }
             cambiarCantidad(id, item.cantidad + 1, btn);

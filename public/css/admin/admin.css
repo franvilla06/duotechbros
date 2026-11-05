@@ -3488,7 +3488,7 @@ table.admin-table {
 
 @media (max-width: 900px) {
     .table-container::before {
-        content: "Desliza la tabla para ver todas las columnas \2192";
+        content: "Deslizá la tabla para ver todas las columnas \2192";
         display: block;
         background-color: #e8f4ff;
         color: var(--color-primary-blue);

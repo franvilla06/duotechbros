@@ -21,7 +21,7 @@ export const requiereAuth = async (req, res, next) => {
     if (!verificarToken(token, 'admin')) {
         return res.status(401).json({
             success: false,
-            error: 'Token invalido o expirado. Volve a iniciar sesion.',
+            error: 'Token inválido o expirado. Volvé a iniciar sesión.',
         });
     }
     const datos = extraerDatosToken(token);
@@ -30,7 +30,7 @@ export const requiereAuth = async (req, res, next) => {
         if (!admin || Number(admin.token_version) !== datos.version) {
             return res.status(401).json({
                 success: false,
-                error: 'Sesion invalidada por cambio de credenciales. Volve a iniciar sesion.',
+                error: 'Sesión invalidada por cambio de credenciales. Volvé a iniciar sesión.',
             });
         }
 
@@ -38,8 +38,8 @@ export const requiereAuth = async (req, res, next) => {
         req.rol = datos.rol;
         return next();
     } catch (error) {
-        console.error('Error validando sesion de administrador:', error);
-        return res.status(500).json({ success: false, error: 'Error validando sesion.' });
+        console.error('Error al validar la sesión de administrador:', error);
+        return res.status(500).json({ success: false, error: 'Error al validar la sesión.' });
     }
 };
 
@@ -55,7 +55,7 @@ export const requiereAuthUsuario = async (req, res, next) => {
     if (!verificarToken(token, 'usuario')) {
         return res.status(401).json({
             success: false,
-            error: 'Token invalido o expirado. Volve a iniciar sesion.',
+            error: 'Token inválido o expirado. Volvé a iniciar sesión.',
         });
     }
     const datos = extraerDatosToken(token);
@@ -64,7 +64,7 @@ export const requiereAuthUsuario = async (req, res, next) => {
         if (!user || Number(user.token_version) !== datos.version) {
             return res.status(401).json({
                 success: false,
-                error: 'Sesion invalidada por cambio de credenciales. Volve a iniciar sesion.',
+                error: 'Sesión invalidada por cambio de credenciales. Volvé a iniciar sesión.',
             });
         }
 
@@ -72,7 +72,7 @@ export const requiereAuthUsuario = async (req, res, next) => {
         req.rol = datos.rol;
         return next();
     } catch (error) {
-        console.error('Error validando sesion de usuario:', error);
-        return res.status(500).json({ success: false, error: 'Error validando sesion.' });
+        console.error('Error al validar la sesión de usuario:', error);
+        return res.status(500).json({ success: false, error: 'Error al validar la sesión.' });
     }
 };

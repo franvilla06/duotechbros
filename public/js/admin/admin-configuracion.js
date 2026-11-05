@@ -104,7 +104,7 @@ async function cargarConfiguracion() {
         rellenarFormulario(config);
         form.style.display = 'block';
     } catch (error) {
-        console.error('Error al cargar configuracion:', error);
+        console.error('Error al cargar la configuración:', error);
         estadoError.style.display = 'block';
     } finally {
         estadoCargando.style.display = 'none';
@@ -143,7 +143,7 @@ form.addEventListener('submit', async (e) => {
             mostrarToast(`Error: ${resultado.error || 'No se pudo guardar.'}`, true);
         }
     } catch (error) {
-        console.error('Error al guardar configuracion:', error);
+        console.error('Error al guardar la configuración:', error);
         mostrarToast('No se pudo conectar con el servidor.', true);
     } finally {
         btnGuardar.disabled = false;

@@ -6,7 +6,7 @@ export const limitadorAuth = rateLimit({
     max: 10,
     message: {
         success: false,
-        error: 'Demasiados intentos. Por favor, intenta de nuevo en 15 minutos.'
+        error: 'Demasiados intentos. Por favor, intentá de nuevo en 15 minutos.'
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -18,7 +18,7 @@ export const limitadorEmails = rateLimit({
     max: 5,
     message: {
         success: false,
-        error: 'Demasiadas solicitudes de codigo. Por favor, intenta de nuevo en 1 hora.'
+        error: 'Demasiadas solicitudes de código. Por favor, intentá de nuevo en 1 hora.'
     },
     standardHeaders: true,
     legacyHeaders: false,

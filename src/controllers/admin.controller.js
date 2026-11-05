@@ -17,14 +17,14 @@ const normalizarImagenes = (imagenes) => {
         try {
             const parseado = JSON.parse(imagenes);
             if (!Array.isArray(parseado)) {
-                throw new TypeError('Las imagenes deben ser un array.');
+                throw new TypeError('Las imágenes deben ser un arreglo.');
             }
             array = parseado;
         } catch (error) {
-            throw new TypeError('El campo imagenes debe ser un array JSON valido.');
+            throw new TypeError('El campo de imágenes debe ser un arreglo JSON válido.');
         }
     } else {
-        throw new TypeError('El campo imagenes debe ser un array o un JSON array.');
+        throw new TypeError('El campo de imágenes debe ser un arreglo o una cadena JSON con un arreglo.');
     }
 
     const limpias = array
@@ -372,7 +372,7 @@ export const actualizarPresupuestoPedido = async (req, res) => {
         if (isNaN(num) || num < 0) {
             return res.status(400).json({
                 success: false,
-                error: 'El presupuesto debe ser un numero mayor o igual a 0.',
+                error: 'El presupuesto debe ser un número mayor o igual a 0.',
             });
         }
         presupuestoValor = Number(num.toFixed(2));
@@ -416,7 +416,7 @@ export const eliminarPedido = async (req, res) => {
         }
         return res.json({
             success: true,
-            message: 'Pedido anulado/cancelado correctamente (no se borro de la base de datos).',
+            message: 'Pedido anulado/cancelado correctamente (no se borró de la base de datos).',
         });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -445,7 +445,7 @@ export const cambiarUsuarioAdmin = async (req, res) => {
     if (!/^[a-zA-Z0-9_]+$/.test(usuarioNuevo)) {
         return res.status(400).json({
             success: false,
-            error: 'El usuario solo puede contener letras, numeros y guion bajo.',
+            error: 'El usuario solo puede contener letras, números y guion bajo.',
         });
     }
 
@@ -453,7 +453,7 @@ export const cambiarUsuarioAdmin = async (req, res) => {
         const pool = req.app.locals.pool;
         const admin = await adminModel.buscarPorUsuario(pool, req.usuario);
         if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
-            return res.status(400).json({ success: false, error: 'Contrasenia incorrecta.' });
+            return res.status(400).json({ success: false, error: 'Contraseña incorrecta.' });
         }
 
         if (usuarioNuevo !== req.usuario) {
@@ -461,7 +461,7 @@ export const cambiarUsuarioAdmin = async (req, res) => {
             if (existe.count > 0) {
                 return res
                     .status(409)
-                    .json({ success: false, error: 'Ese nombre de usuario ya esta en uso.' });
+                    .json({ success: false, error: 'Ese nombre de usuario ya está en uso.' });
             }
         }
 
@@ -496,19 +496,19 @@ export const cambiarPasswordAdmin = async (req, res) => {
     if (password_nueva.length < 6) {
         return res
             .status(400)
-            .json({ success: false, error: 'La contrasenia debe tener al menos 6 caracteres.' });
+            .json({ success: false, error: 'La contraseña debe tener al menos 6 caracteres.' });
     }
 
     if (password_nueva !== password_confirmar) {
         return res
             .status(400)
-            .json({ success: false, error: 'Las contrasenias nuevas no coinciden.' });
+            .json({ success: false, error: 'Las contraseñas nuevas no coinciden.' });
     }
 
     if (password_nueva === password_actual) {
         return res.status(400).json({
             success: false,
-            error: 'La nueva contrasenia debe ser distinta a la actual.',
+            error: 'La nueva contraseña debe ser distinta a la actual.',
         });
     }
 
@@ -518,7 +518,7 @@ export const cambiarPasswordAdmin = async (req, res) => {
         if (!admin || !bcrypt.compareSync(password_actual, admin.password_hash)) {
             return res
                 .status(400)
-                .json({ success: false, error: 'Contrasenia actual incorrecta.' });
+                .json({ success: false, error: 'Contraseña actual incorrecta.' });
         }
 
         const nuevoHash = bcrypt.hashSync(password_nueva, 10);
@@ -528,7 +528,7 @@ export const cambiarPasswordAdmin = async (req, res) => {
 
         return res.json({
             success: true,
-            message: 'Contrasenia actualizada correctamente.',
+            message: 'Contraseña actualizada correctamente.',
             token: generarToken('admin', req.usuario, adminActualizado.token_version || 0),
         });
     } catch (error) {

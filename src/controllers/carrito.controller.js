@@ -110,7 +110,7 @@ export const cambiarCantidad = async (req, res) => {
 
     const cantidadFinal = parseInt(cantidad);
     if (isNaN(cantidadFinal) || cantidadFinal < 0) {
-        return res.status(400).json({ success: false, error: 'Cantidad invalida.' });
+        return res.status(400).json({ success: false, error: 'Cantidad inválida.' });
     }
 
     try {

@@ -72,7 +72,7 @@ export const inicializarBaseDatos = async () => {
 // devuelve el pool una vez que fue inicializado
 export const obtenerPool = () => {
     if (!pool) {
-        throw new Error('El pool de conexiones no esta inicializado');
+        throw new Error('El pool de conexiones no está inicializado.');
     }
     return pool;
 };

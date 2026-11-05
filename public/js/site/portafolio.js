@@ -75,7 +75,7 @@ function obtenerImagenesTrabajo(trabajo) {
             const parseado = JSON.parse(campo);
             if (Array.isArray(parseado)) adicionales = parseado;
         } catch (error) {
-            console.warn('No se pudieron leer las imagenes adicionales:', error.message);
+            console.warn('No se pudieron leer las imágenes adicionales:', error.message);
         }
     }
 

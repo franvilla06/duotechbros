@@ -214,7 +214,7 @@ function renderizarUltimosMovimientos(pedidos) {
 
         // badges e iconos: el badge se ve en desktop, el icono en mobile
         const tipoBadge = esRep
-            ? `<span class="mov-tipo-badge mov-tipo-reparacion"><i class="fas fa-tools"></i> Reparacion</span>`
+            ? `<span class="mov-tipo-badge mov-tipo-reparacion"><i class="fas fa-tools"></i> Reparación</span>`
             : `<span class="mov-tipo-badge mov-tipo-compra"><i class="fas fa-shopping-bag"></i> Compra</span>`;
 
         const tipoIcono = esRep
@@ -751,7 +751,7 @@ async function cargarDashboard() {
                 renderizarGraficoProductos(stats.productos_mas_vendidos || []);
             }
         } else {
-            console.warn('No se pudieron obtener las estadisticas del servidor.');
+            console.warn('No se pudieron obtener las estadísticas del servidor.');
             const notaEstados = document.getElementById('grafico-estados-nota');
             const notaVentas = document.getElementById('grafico-ventas-nota');
             const notaProductos = document.getElementById('grafico-productos-nota');

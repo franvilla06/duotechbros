@@ -210,7 +210,7 @@ formEmail.addEventListener('submit', async (e) => {
             inputEmailActual.value = resultado.email;
             inputEmailNuevo.value = '';
             inputEmailPassword.value = '';
-            mostrarMensaje(mensajeEmail, 'Email actualizado correctamente.', 'exito');
+            mostrarMensaje(mensajeEmail, 'Correo electrónico actualizado correctamente.', 'exito');
         } else {
             mostrarMensaje(mensajeEmail, resultado.error || 'No se pudo cambiar el email.', 'error');
         }
@@ -238,17 +238,17 @@ formPassword.addEventListener('submit', async (e) => {
     }
 
     if (passwordNueva.length < 6) {
-        mostrarMensaje(mensajePassword, 'La nueva contrasenia debe tener al menos 6 caracteres.', 'error');
+        mostrarMensaje(mensajePassword, 'La nueva contraseña debe tener al menos 6 caracteres.', 'error');
         return;
     }
 
     if (passwordNueva !== passwordConfirmar) {
-        mostrarMensaje(mensajePassword, 'Las contrasenias nuevas no coinciden.', 'error');
+        mostrarMensaje(mensajePassword, 'Las contraseñas nuevas no coinciden.', 'error');
         return;
     }
 
     if (passwordNueva === passwordActual) {
-        mostrarMensaje(mensajePassword, 'La nueva contrasenia debe ser distinta a la actual.', 'error');
+        mostrarMensaje(mensajePassword, 'La nueva contraseña debe ser distinta a la actual.', 'error');
         return;
     }
 
@@ -278,13 +278,13 @@ formPassword.addEventListener('submit', async (e) => {
         }
 
         if (resultado.success) {
-            mostrarMensaje(mensajePassword, 'Contrasenia actualizada correctamente.', 'exito');
+            mostrarMensaje(mensajePassword, 'Contraseña actualizada correctamente.', 'exito');
             formPassword.reset();
         } else {
-            mostrarMensaje(mensajePassword, resultado.error || 'No se pudo cambiar la contrasenia.', 'error');
+            mostrarMensaje(mensajePassword, resultado.error || 'No se pudo cambiar la contraseña.', 'error');
         }
     } catch (error) {
-        console.error('Error al cambiar contrasenia:', error);
+        console.error('Error al cambiar contraseña:', error);
         mostrarMensaje(mensajePassword, 'No se pudo conectar con el servidor.', 'error');
     } finally {
         btnCambiar.disabled = false;
@@ -300,7 +300,7 @@ formBaja.addEventListener('submit', async (e) => {
     const password = document.getElementById('baja-password').value;
 
     if (!password) {
-        mostrarMensaje(mensajeBaja, 'Ingresa tu contrasenia para confirmar.', 'error');
+        mostrarMensaje(mensajeBaja, 'Ingresá tu contraseña para confirmar.', 'error');
         return;
     }
 

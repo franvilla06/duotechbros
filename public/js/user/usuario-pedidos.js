@@ -323,7 +323,7 @@ function generarCardReparacion(pedido) {
     const estadoActual = pedido.estado || 'pendiente';
     const pedidoIdFormateado = `#${String(pedido.id).padStart(4, '0')}`;
     const modelo = pedido.modelo_celular || '—';
-    const descripcion = pedido.descripcion_problema || 'Sin descripcion';
+    const descripcion = pedido.descripcion_problema || 'Sin descripción';
 
     const tienePresupuesto = pedido.presupuesto !== null && pedido.presupuesto !== undefined;
     const presupuestoTexto = tienePresupuesto ? formatearPrecio(pedido.presupuesto) : 'A confirmar';
@@ -505,7 +505,7 @@ function montoParaPDF(pedido) {
 // genera un PDF con los pedidos seleccionados.
 async function exportarPedidosPDF() {
     if (!window.jspdf || !window.jspdf.jsPDF) {
-        mostrarToast('No se pudo cargar la libreria de PDF. Revisa tu conexion.', 'error');
+        mostrarToast('No se pudo cargar la librería de PDF. Revisá tu conexión.', 'error');
         return;
     }
 
@@ -528,14 +528,14 @@ async function exportarPedidosPDF() {
     });
 
     if (pedidosRecientes.length === 0) {
-        mostrarToast('No hay pedidos en los ultimos 6 meses para exportar.', 'error');
+        mostrarToast('No hay pedidos en los últimos 6 meses para exportar.', 'error');
         return;
     }
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     if (typeof doc.autoTable !== 'function') {
-        mostrarToast('No se pudo cargar el complemento de tablas PDF. Revisa tu conexion.', 'error');
+        mostrarToast('No se pudo cargar el complemento de tablas PDF. Revisá tu conexión.', 'error');
         return;
     }
 
@@ -679,7 +679,7 @@ async function exportarPedidosPDF() {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(153, 153, 153);
         doc.text(
-            `${marca} - Pagina ${pagina} de ${totalPaginas}`,
+            `${marca} - Página ${pagina} de ${totalPaginas}`,
             anchoPagina / 2,
             doc.internal.pageSize.getHeight() - 8,
             { align: 'center' }
@@ -889,8 +889,8 @@ function renderizarDetalleReparacion(pedido) {
                 <span class="pedido-reparacion-valor">${escapar(pedido.modelo_celular || '—')}</span>
             </div>
             <div class="pedido-reparacion-linea pedido-reparacion-linea-descripcion">
-                <span class="pedido-reparacion-label">Descripcion del problema</span>
-                <p class="pedido-reparacion-texto">${escapar(pedido.descripcion_problema || 'Sin descripcion')}</p>
+                <span class="pedido-reparacion-label">Descripción del problema</span>
+                <p class="pedido-reparacion-texto">${escapar(pedido.descripcion_problema || 'Sin descripción')}</p>
             </div>
         </div>
     `;
@@ -905,7 +905,7 @@ function renderizarDetalleReparacion(pedido) {
             </div>
             <p class="pedido-modal-aclaracion">
                 <i class="fas fa-info-circle"></i>
-                Este es el monto estimado para la reparacion. Puede variar segun la revision final.
+                Este es el monto estimado para la reparación. Puede variar según la revisión final.
             </p>
         `;
     } else {
@@ -950,7 +950,7 @@ function renderizarDetalleCompra(pedido) {
     `;
 
     if (!pedido.items || pedido.items.length === 0) {
-        modalItems.innerHTML = '<p class="pedido-modal-vacio">Este pedido no tiene items registrados.</p>';
+        modalItems.innerHTML = '<p class="pedido-modal-vacio">Este pedido no tiene ítems registrados.</p>';
     } else {
         modalItems.innerHTML = `
             <h3 class="pedido-modal-items-titulo">

@@ -221,7 +221,7 @@ function renderizarCompras(compras) {
                         <span class="fila-detalle-valor">${nombreUsuario}</span>
                     </div>
                     <div class="fila-detalle-linea">
-                        <span class="fila-detalle-label">Items</span>
+                        <span class="fila-detalle-label">Ítems</span>
                         <span class="fila-detalle-valor">${items}</span>
                     </div>
                     <div class="fila-detalle-linea">
@@ -388,7 +388,7 @@ async function cargarCompras() {
         estadoVacio.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="color:#d9534f"></i>
             <p>No se pudieron cargar las compras</p>
-            <small>Verifica que el servidor este corriendo e intenta de nuevo.</small>
+            <small>Verificá que el servidor esté corriendo e intentá de nuevo.</small>
         `;
     } finally {
         estadoCargando.style.display = 'none';
@@ -486,7 +486,7 @@ function renderizarFactura(pedido) {
                 <strong>${formatearFecha(pedido.creado_en)}</strong>
             </div>
             <div class="factura-datos-bloque">
-                <span class="factura-datos-label">Items</span>
+                <span class="factura-datos-label">Ítems</span>
                 <strong>${pedido.total_items}</strong>
             </div>
             <div class="factura-datos-bloque">
@@ -548,7 +548,7 @@ async function guardarEstadoFactura() {
     const estadoActual = pedidoFacturaActual.estado || 'pendiente';
 
     if (nuevoEstado === estadoActual) {
-        mostrarToast('El estado no cambio.', true);
+        mostrarToast('El estado no cambió.', true);
         return;
     }
 

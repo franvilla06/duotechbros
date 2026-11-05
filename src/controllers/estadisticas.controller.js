@@ -19,7 +19,7 @@ export const obtenerEstadisticas = async (req, res) => {
             ventas_por_mes: ventasPorMes,
         });
     } catch (error) {
-        console.error('Error al obtener estadisticas:', error);
+        console.error('Error al obtener estadísticas:', error);
         return res.status(500).json({ success: false, error: error.message });
     }
 };

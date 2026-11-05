@@ -44,7 +44,7 @@ export const actualizarConfiguracion = async (req, res) => {
     const cambios = req.body;
 
     if (!cambios || typeof cambios !== 'object') {
-        return res.status(400).json({ success: false, error: 'Datos invalidos.' });
+        return res.status(400).json({ success: false, error: 'Datos inválidos.' });
     }
 
     const cambiosFiltrados = {};
@@ -59,14 +59,14 @@ export const actualizarConfiguracion = async (req, res) => {
     if (Object.keys(cambiosFiltrados).length === 0) {
         return res
             .status(400)
-            .json({ success: false, error: 'No se envio ninguna clave valida.' });
+            .json({ success: false, error: 'No se envió ninguna clave válida.' });
     }
 
     try {
         await configuracionModel.actualizarVarias(req.app.locals.pool, cambiosFiltrados);
         return res.json({
             success: true,
-            message: 'Configuracion actualizada correctamente.',
+            message: 'Configuración actualizada correctamente.',
             cambios: Object.keys(cambiosFiltrados).length,
         });
     } catch (error) {

@@ -12,24 +12,24 @@ const validarUsuario = (usuario) => {
     if (usuario.length < 3) return 'El nombre de usuario debe tener al menos 3 caracteres.';
     if (usuario.length > 30) return 'El nombre de usuario no puede superar los 30 caracteres.';
     if (!/^[a-zA-Z0-9_]+$/.test(usuario)) {
-        return 'El nombre de usuario solo puede contener letras, numeros y guion bajo.';
+        return 'El nombre de usuario solo puede contener letras, números y guion bajo.';
     }
     return null;
 };
 
 // valida que el correo tenga un formato aceptable y una longitud permitida
 const validarEmail = (email) => {
-    if (!email) return 'El email es obligatorio.';
+    if (!email) return 'El correo electrónico es obligatorio.';
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!regex.test(email)) return 'El email no es valido.';
-    if (email.length > 100) return 'El email es demasiado largo.';
+    if (!regex.test(email)) return 'El correo electrónico no es válido.';
+    if (email.length > 100) return 'El correo electrónico es demasiado largo.';
     return null;
 };
 
 // comprueba que la contraseña cumpla los requisitos mínimos
 const validarPassword = (password) => {
-    if (!password) return 'La contrasenia es obligatoria.';
-    if (password.length < 6) return 'La contrasenia debe tener al menos 6 caracteres.';
+    if (!password) return 'La contraseña es obligatoria.';
+    if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
     return null;
 };
 
@@ -62,7 +62,7 @@ export const iniciarRegistro = async (req, res) => {
 
         return res.json({
             success: true,
-            message: 'Codigo enviado al email.',
+            message: 'Código enviado al correo electrónico.',
             email: resultado.email,
         });
     } catch (error) {
@@ -76,11 +76,11 @@ export const verificarCodigo = async (req, res) => {
     const { email, codigo } = req.body;
 
     if (!email || !codigo) {
-        return res.status(400).json({ success: false, error: 'Email y codigo son obligatorios.' });
+        return res.status(400).json({ success: false, error: 'El correo electrónico y el código son obligatorios.' });
     }
 
     if (!/^\d{6}$/.test(codigo)) {
-        return res.status(400).json({ success: false, error: 'El codigo debe tener 6 digitos.' });
+        return res.status(400).json({ success: false, error: 'El código debe tener 6 dígitos.' });
     }
 
     try {
@@ -108,7 +108,7 @@ export const reenviarCodigo = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-        return res.status(400).json({ success: false, error: 'El email es obligatorio.' });
+        return res.status(400).json({ success: false, error: 'El correo electrónico es obligatorio.' });
     }
 
     try {
@@ -118,7 +118,7 @@ export const reenviarCodigo = async (req, res) => {
             return res.status(400).json({ success: false, error: resultado.error });
         }
 
-        return res.json({ success: true, message: 'Codigo reenviado correctamente.' });
+        return res.json({ success: true, message: 'Código reenviado correctamente.' });
     } catch (error) {
         console.error('Error en reenviarCodigo:', error);
         return res.status(500).json({ success: false, error: error.message });
@@ -139,7 +139,7 @@ export const recuperarPassword = async (req, res) => {
 
         return res.json({
             success: true,
-            message: 'Si el email esta registrado, vas a recibir un codigo de recuperacion.',
+            message: 'Si el correo electrónico está registrado, vas a recibir un código de recuperación.',
         });
     } catch (error) {
         console.error('Error en recuperarPassword:', error);
@@ -152,15 +152,15 @@ export const restablecerPassword = async (req, res) => {
     const { email, codigo, password_nueva, password_confirmar } = req.body;
 
     if (!email || !codigo || !password_nueva || !password_confirmar) {
-        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
+        return res.status(400).json({ success: false, error: 'Completá todos los campos.' });
     }
 
     if (!/^\d{6}$/.test(codigo)) {
-        return res.status(400).json({ success: false, error: 'El codigo debe tener 6 digitos.' });
+        return res.status(400).json({ success: false, error: 'El código debe tener 6 dígitos.' });
     }
 
     if (password_nueva !== password_confirmar) {
-        return res.status(400).json({ success: false, error: 'Las contrasenias no coinciden.' });
+        return res.status(400).json({ success: false, error: 'Las contraseñas no coinciden.' });
     }
 
     const errorPassword = validarPassword(password_nueva);
@@ -180,7 +180,7 @@ export const restablecerPassword = async (req, res) => {
 
         return res.json({
             success: true,
-            message: 'Contrasenia restablecida correctamente. Ya podes iniciar sesion.',
+            message: 'Contraseña restablecida correctamente. Ya podés iniciar sesión.',
         });
     } catch (error) {
         console.error('Error en restablecerPassword:', error);
@@ -197,7 +197,7 @@ export const iniciarSesion = async (req, res) => {
     if (!email || !password) {
         return res
             .status(400)
-            .json({ success: false, error: 'Email y contrasenia son obligatorios.' });
+            .json({ success: false, error: 'El correo electrónico y la contraseña son obligatorios.' });
     }
 
     const errorEmail = validarEmail(email);
@@ -216,7 +216,7 @@ export const iniciarSesion = async (req, res) => {
 
         return res.json({
             success: true,
-            message: 'Login exitoso',
+            message: 'Inicio de sesión exitoso',
             usuario: user.usuario,
             email: user.email,
             id: user.id,
@@ -245,11 +245,11 @@ export const cambiarPassword = async (req, res) => {
     const { password_actual, password_nueva, password_confirmar } = req.body;
 
     if (!password_actual || !password_nueva || !password_confirmar) {
-        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
+        return res.status(400).json({ success: false, error: 'Completá todos los campos.' });
     }
 
     if (password_nueva !== password_confirmar) {
-        return res.status(400).json({ success: false, error: 'Las contrasenias nuevas no coinciden.' });
+        return res.status(400).json({ success: false, error: 'Las contraseñas nuevas no coinciden.' });
     }
 
     const errorPassword = validarPassword(password_nueva);
@@ -258,7 +258,7 @@ export const cambiarPassword = async (req, res) => {
     if (password_nueva === password_actual) {
         return res
             .status(400)
-            .json({ success: false, error: 'La nueva contrasenia debe ser distinta a la actual.' });
+            .json({ success: false, error: 'La nueva contraseña debe ser distinta a la actual.' });
     }
 
     try {
@@ -273,7 +273,7 @@ export const cambiarPassword = async (req, res) => {
             return res.status(400).json({ success: false, error: resultado.error });
         }
 
-        return res.json({ success: true, message: 'Contrasenia actualizada correctamente.' });
+        return res.json({ success: true, message: 'Contraseña actualizada correctamente.' });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -284,7 +284,7 @@ export const cambiarEmail = async (req, res) => {
     const { email_nuevo, password } = req.body;
 
     if (!email_nuevo || !password) {
-        return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
+        return res.status(400).json({ success: false, error: 'Completá todos los campos.' });
     }
 
     const errorEmail = validarEmail(email_nuevo);
@@ -301,7 +301,7 @@ export const cambiarEmail = async (req, res) => {
         }
 
         if (!bcrypt.compareSync(password, usuario.password_hash)) {
-            return res.status(400).json({ success: false, error: 'Contrasenia incorrecta.' });
+            return res.status(400).json({ success: false, error: 'Contraseña incorrecta.' });
         }
 
         const emailNormalizado = email_nuevo.toLowerCase().trim();
@@ -310,14 +310,14 @@ export const cambiarEmail = async (req, res) => {
         if (existe.count > 0 && emailNormalizado !== emailActualNormalizado) {
             return res
                 .status(409)
-                .json({ success: false, error: 'Ese email ya esta en uso por otra cuenta.' });
+                .json({ success: false, error: 'Ese correo electrónico ya está en uso por otra cuenta.' });
         }
 
         await usuariosModel.actualizarEmail(pool, req.usuario, emailNormalizado);
 
         return res.json({
             success: true,
-            message: 'Email actualizado correctamente.',
+            message: 'Correo electrónico actualizado correctamente.',
             email: emailNormalizado,
         });
     } catch (error) {
@@ -333,17 +333,17 @@ export const darDeBajaUsuario = async (req, res) => {
     if (!password) {
         return res
             .status(400)
-            .json({ success: false, error: 'Ingresa tu contrasenia para confirmar.' });
+            .json({ success: false, error: 'Ingresá tu contraseña para confirmar.' });
     }
 
     try {
         const usuarioReal = await usuariosModel.buscarPorUsuario(req.app.locals.pool, req.usuario);
         if (!usuarioReal) {
-            return res.status(401).json({ success: false, error: 'Contrasenia incorrecta.' });
+            return res.status(401).json({ success: false, error: 'Contraseña incorrecta.' });
         }
 
         if (!bcrypt.compareSync(password, usuarioReal.password_hash)) {
-            return res.status(400).json({ success: false, error: 'Contrasenia incorrecta.' });
+            return res.status(400).json({ success: false, error: 'Contraseña incorrecta.' });
         }
 
         const resultado = await authService.darDeBaja(req.app.locals.pool, req.usuario);
