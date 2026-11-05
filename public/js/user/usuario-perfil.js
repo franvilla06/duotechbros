@@ -237,8 +237,8 @@ formPassword.addEventListener('submit', async (e) => {
         return;
     }
 
-    if (passwordNueva.length < 6) {
-        mostrarMensaje(mensajePassword, 'La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+    if (passwordNueva.length < 8) {
+        mostrarMensaje(mensajePassword, 'La nueva contraseña debe tener al menos 8 caracteres.', 'error');
         return;
     }
 

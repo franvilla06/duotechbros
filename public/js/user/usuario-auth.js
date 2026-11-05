@@ -306,8 +306,8 @@ formRegistro.addEventListener('submit', async (e) => {
         return;
     }
 
-    if (!password || password.length < 6) {
-        mostrarMensaje('La contraseña debe tener al menos 6 caracteres.', 'error');
+    if (!password || password.length < 8) {
+        mostrarMensaje('La contraseña debe tener al menos 8 caracteres.', 'error');
         return;
     }
 
@@ -525,8 +525,8 @@ btnRestablecer.addEventListener('click', async () => {
         return;
     }
 
-    if (!passwordNueva || passwordNueva.length < 6) {
-        mostrarMensaje('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+    if (!passwordNueva || passwordNueva.length < 8) {
+        mostrarMensaje('La nueva contraseña debe tener al menos 8 caracteres.', 'error');
         return;
     }
 

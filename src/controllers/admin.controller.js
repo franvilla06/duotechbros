@@ -493,10 +493,10 @@ export const cambiarPasswordAdmin = async (req, res) => {
         return res.status(400).json({ success: false, error: 'Completa todos los campos.' });
     }
 
-    if (password_nueva.length < 6) {
+    if (password_nueva.length < 8) {
         return res
             .status(400)
-            .json({ success: false, error: 'La contraseña debe tener al menos 6 caracteres.' });
+            .json({ success: false, error: 'La contraseña debe tener al menos 8 caracteres.' });
     }
 
     if (password_nueva !== password_confirmar) {

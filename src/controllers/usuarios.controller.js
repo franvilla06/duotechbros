@@ -29,7 +29,7 @@ const validarEmail = (email) => {
 // comprueba que la contraseña cumpla los requisitos mínimos
 const validarPassword = (password) => {
     if (!password) return 'La contraseña es obligatoria.';
-    if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
     return null;
 };
 
