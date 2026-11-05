@@ -106,9 +106,23 @@ function renderizarItems(items) {
         div.className = 'carrito-item';
         div.dataset.id = item.id;
 
-        const imagenHTML = item.imagen_url
+        let urlImagen = item.imagen_url;
+
+        if (!urlImagen && item.imagenes) {
+            try {
+                const adicionales =
+                    typeof item.imagenes === 'string' ? JSON.parse(item.imagenes) : item.imagenes;
+                if (Array.isArray(adicionales) && adicionales.length > 0) {
+                    urlImagen = adicionales[0];
+                }
+            } catch (error) {
+                console.warn('Error al parsear imágenes del carrito:', error);
+            }
+        }
+
+        const imagenHTML = urlImagen
             ? `<img
-                 src="${escapar(item.imagen_url)}"
+                 src="${escapar(urlImagen)}"
                  alt="${escapar(item.nombre)}"
                  onerror="this.outerHTML='<i class=\\'fas fa-image\\'></i>'"
                />`

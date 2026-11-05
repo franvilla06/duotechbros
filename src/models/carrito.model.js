@@ -54,6 +54,7 @@ export const listarItems = async (pool, usuarioId) => {
             p.descripcion,
             p.precio,
             p.imagen_url,
+            p.imagenes,
             p.categoria,
             p.stock
          FROM carrito c
