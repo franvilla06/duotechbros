@@ -133,6 +133,9 @@ export const inicializarEsquema = async (pool) => {
     await agregarColumnaSiNoExiste(pool, 'usuarios', 'token_version', 'INT DEFAULT 0');
     await agregarColumnaSiNoExiste(pool, 'admin', 'token_version', 'INT DEFAULT 0');
 
+    // agrega el CHECK de stock no negativo a productos si aún no existe
+    await agregarCheckStockSiNoExiste(pool);
+
     // crea una cuenta inicial solo si todavía no hay administradores
     const [admins] = await pool.query('SELECT COUNT(*) as count FROM admin');
 
@@ -193,4 +196,33 @@ const agregarColumnaSiNoExiste = async (pool, tabla, columna, tipo) => {
         await pool.query(`ALTER TABLE \`${tabla}\` ADD COLUMN \`${columna}\` ${tipo}`);
         console.log(`Migracion aplicada: columna ${columna} agregada a ${tabla}`);
     }
+};
+
+// agrega la restricción de stock no negativo a productos si aún no existe
+const agregarCheckStockSiNoExiste = async (pool) => {
+    const [rows] = await pool.query('SHOW CREATE TABLE productos');
+    const ddl = String(rows[0]['Create Table'] || '').toLowerCase();
+
+    // si ya hay un CHECK que menciona stock, no hacemos nada
+    if (/check\s*\([^)]*stock[^)]*>=/.test(ddl)) {
+        return;
+    }
+
+    // no se puede agregar si hay stocks negativos (el ALTER fallaría)
+    const [neg] = await pool.query('SELECT COUNT(*) as c FROM productos WHERE stock < 0');
+    const negativos = Number(neg[0].c);
+    if (negativos > 0) {
+        console.warn(
+            `⚠️  CHECK de stock NO agregado: ${negativos} producto(s) con stock negativo.`
+        );
+        console.warn(
+            '   Corregí esos productos manualmente y volvé a iniciar el servidor.'
+        );
+        return;
+    }
+
+    await pool.query(
+        'ALTER TABLE productos ADD CONSTRAINT chk_productos_stock CHECK (stock >= 0)'
+    );
+    console.log('Migración aplicada: CHECK de stock agregado a productos');
 };
