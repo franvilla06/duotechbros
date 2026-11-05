@@ -323,17 +323,21 @@ async function cambiarCantidad(id, nuevaCantidad, btnElement) {
     item.cantidad = nuevaCantidad;
     item.subtotal = Number((item.precio * nuevaCantidad).toFixed(2));
 
-    // Actualizar el DOM localmente
-    actualizarItemDOM(item);
-    actualizarResumenLocal();
-
-    // Bloquear controles de este item para evitar requests desordenados
+    // Actualizar solo la fila afectada
     const itemElement = carritoItems.querySelector(`.carrito-item[data-id="${id}"]`);
     if (itemElement) {
+        const input = itemElement.querySelector('.carrito-cantidad-input');
+        if (input) input.value = nuevaCantidad;
+
+        const subtotalEl = itemElement.querySelector('.carrito-item-subtotal');
+        if (subtotalEl) subtotalEl.textContent = formatearPrecio(item.subtotal);
+
         itemElement.querySelectorAll('button, input').forEach((el) => {
             el.disabled = true;
         });
     }
+
+    actualizarResumenLocal();
 
     try {
         const respuesta = await fetch(`${API_CARRITO}/${id}`, {
@@ -357,7 +361,13 @@ async function cambiarCantidad(id, nuevaCantidad, btnElement) {
             // Revertir si el servidor rechaza
             item.cantidad = cantidadAnterior;
             item.subtotal = subtotalAnterior;
-            actualizarItemDOM(item);
+            if (itemElement) {
+                const input = itemElement.querySelector('.carrito-cantidad-input');
+                if (input) input.value = cantidadAnterior;
+
+                const subtotalEl = itemElement.querySelector('.carrito-item-subtotal');
+                if (subtotalEl) subtotalEl.textContent = formatearPrecio(subtotalAnterior);
+            }
             actualizarResumenLocal();
             mostrarToast(resultado.error || 'No se pudo actualizar la cantidad.', 'error');
         } else {
@@ -368,28 +378,31 @@ async function cambiarCantidad(id, nuevaCantidad, btnElement) {
         console.error('Error al cambiar cantidad:', error);
         item.cantidad = cantidadAnterior;
         item.subtotal = subtotalAnterior;
-        actualizarItemDOM(item);
+        if (itemElement) {
+            const input = itemElement.querySelector('.carrito-cantidad-input');
+            if (input) input.value = cantidadAnterior;
+
+            const subtotalEl = itemElement.querySelector('.carrito-item-subtotal');
+            if (subtotalEl) subtotalEl.textContent = formatearPrecio(subtotalAnterior);
+        }
         actualizarResumenLocal();
         mostrarToast('No se pudo conectar con el servidor.', 'error');
     } finally {
-        // Restaurar estado visual de los botones según los valores actuales
-        actualizarBotonesItem(id);
-    }
-}
+        // Restaurar el estado de los botones según los valores actuales
+        if (itemElement) {
+            const btnRestar = itemElement.querySelector('[data-accion="restar"]');
+            const btnSumar = itemElement.querySelector('[data-accion="sumar"]');
+            const input = itemElement.querySelector('.carrito-cantidad-input');
+            const btnEliminar = itemElement.querySelector('.carrito-item-eliminar');
 
-// Actualiza la cantidad y el subtotal en el DOM de un item
-function actualizarItemDOM(item) {
-    const itemElement = carritoItems.querySelector(`.carrito-item[data-id="${item.id}"]`);
-    if (!itemElement) return;
-
-    const input = itemElement.querySelector('.carrito-cantidad-input');
-    if (input) {
-        input.value = item.cantidad;
-    }
-
-    const subtotalEl = itemElement.querySelector('.carrito-item-subtotal');
-    if (subtotalEl) {
-        subtotalEl.textContent = formatearPrecio(item.subtotal);
+            if (btnRestar) btnRestar.disabled = item.cantidad <= 1;
+            if (btnSumar) btnSumar.disabled = item.cantidad >= item.stock;
+            if (input) {
+                input.value = item.cantidad;
+                input.disabled = false;
+            }
+            if (btnEliminar) btnEliminar.disabled = false;
+        }
     }
 }
 
@@ -406,29 +419,6 @@ function actualizarResumenLocal() {
     };
 
     actualizarResumen(resumen);
-}
-
-// Restaura los estados disabled de los botones + y - según el stock y la cantidad
-function actualizarBotonesItem(id) {
-    const item = itemsActuales.find((i) => String(i.id) === String(id));
-    if (!item) return;
-
-    const itemElement = carritoItems.querySelector(`.carrito-item[data-id="${item.id}"]`);
-    if (!itemElement) return;
-
-    const btnRestar = itemElement.querySelector('[data-accion="restar"]');
-    const btnSumar = itemElement.querySelector('[data-accion="sumar"]');
-    const input = itemElement.querySelector('.carrito-cantidad-input');
-    const btnEliminar = itemElement.querySelector('.carrito-item-eliminar');
-
-    if (btnRestar) btnRestar.disabled = item.cantidad <= 1;
-    if (btnSumar) btnSumar.disabled = item.cantidad >= item.stock;
-    if (input) {
-        input.value = item.cantidad;
-        input.max = item.stock;
-        input.disabled = false;
-    }
-    if (btnEliminar) btnEliminar.disabled = false;
 }
 
 // ELIMINAR ITEM
